@@ -107,10 +107,6 @@
 		],
     "keybindings": [
       {
-        "command": "PowerShell.Debug.Run",
-        "key": "ctrl+x ctrl+k"
-      },
-      {
         "key": "ctrl+x ctrl+t",
         "command": "groog.toggleQMK"
       },

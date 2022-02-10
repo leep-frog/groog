@@ -97,6 +97,10 @@ export class Emacs {
     let startPos = editor.selection.active;
     let endPos = editor.document.lineAt(startPos.line).range.end;
     let range = new vscode.Range(startPos, endPos);
+    let text = editor.document.getText(range);
+    if (text.trim().length === 0) {
+      range = new vscode.Range(startPos, new vscode.Position(startPos.line + 1, 0));
+    }
     this.yanked = editor.document.getText(range);
     vscode.window.activeTextEditor?.edit(editBuilder => {
       editBuilder.delete(range);
