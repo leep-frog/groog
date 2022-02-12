@@ -1,7 +1,7 @@
 Push-Location .
 Set-Location C:\Users\gleep\OneDrive\Desktop\Coding\vs-code\groog
-vsce package 
+vsce package -o groog.vsix
 Pop-Location
-code --install-extension C:\Users\gleep\OneDrive\Desktop\Coding\vs-code\groog\groog-0.0.1.vsix
+code --install-extension C:\Users\gleep\OneDrive\Desktop\Coding\vs-code\groog\groog.vsix
 Write-Host "Installation complete!"
 Start-Sleep 2

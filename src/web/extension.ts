@@ -2,14 +2,11 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import {Emacs, cursorMoves} from './emacs';
+import {multiCommand} from './multi-command';
 
-function getCurrentPos(): vscode.Position | undefined {
-  return vscode.window.activeTextEditor?.selection.active;
-}
-
-function register(context: vscode.ExtensionContext, commandName: string, callback: () => any) {
-  context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName, () => {
-    callback();
+function register(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => any) {
+  context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName, (...args: any) => {
+    callback(...args);
   }));
 }
 
@@ -31,6 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
   register(context, 'paste', () => groogery.paste());
   register(context, 'kill', () => groogery.kill());
   register(context, 'ctrlG', () => groogery.ctrlG());
+  register(context, "multiCommand.execute", multiCommand);
 }
 
 // this method is called when your extension is deactivated
