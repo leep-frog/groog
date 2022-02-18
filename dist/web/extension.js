@@ -266,10 +266,30 @@ function register(context, commandName, callback) {
 }
 const groogery = new emacs_1.Emacs();
 const recorder = new record_1.Recorder();
+let bet = "qwertyuiopasdfghjklzxcvbnm";
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 function activate(context) {
     vscode.window.showInformationMessage("yupo");
+    for (var b of bet) {
+        const lb = b;
+        const ub = b.toUpperCase();
+        register(context, lb, () => {
+            vscode.commands.executeCommand("type", { "text": lb });
+        });
+        register(context, ub, () => {
+            vscode.commands.executeCommand("type", { "text": ub });
+        });
+    }
+    /*register(context, "a", () => {
+      vscode.window.showInformationMessage("lower a");
+    });
+    register(context, "A", () => {
+      vscode.window.showInformationMessage("upper a");
+    });*/
+    /*register(context, "A", () => {
+      vscode.window.showInformationMessage("upper a");
+    });*/
     for (var move of emacs_1.cursorMoves) {
         const m = move;
         register(context, move, () => groogery.move(m));
