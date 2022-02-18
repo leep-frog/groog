@@ -33,7 +33,10 @@
     "onCommand:groog.cursorBottom",
     "onCommand:groog.toggleMarkMode",
     "onCommand:groog.ctrlG",
-    "onCommand:groog.multiCommand.execute"
+    "onCommand:groog.multiCommand.execute",
+    "onCommand:groog.record.startRecording",
+    "onCommand:groog.record.endRecording",
+    "onCommand:groog.record.playRecording"
   ],
   "browser": "./dist/web/extension.js",
   "contributes": {
@@ -109,6 +112,18 @@
       {
         "command": "groog.multiCommand.execute",
         "title": "Groog MultiCommand"
+      },
+      {
+        "command": "groog.record.startRecording",
+        "title": "Groog Start Recording"
+      },
+      {
+        "command": "groog.record.endRecording",
+        "title": "Groog End Recording"
+      },
+      {
+        "command": "groog.record.playRecording",
+        "title": "Groog Play Recording"
       }
     ],
     "keybindings": [
@@ -446,6 +461,20 @@
             "workbench.action.focusPreviousGroup"
           ]
         }
+      },
+      {
+        "key": "ctrl+x ctrl+x",
+        "command": "groog.record.startRecording"
+      },
+      {
+        "key": "alt+e",
+        "command": "groog.record.endRecording",
+        "when": "groog.recording"
+      },
+      {
+        "key": "alt+e",
+        "command": "groog.record.playRecording",
+        "when": "!groog.recording"
       }
     ]
   },
