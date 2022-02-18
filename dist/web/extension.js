@@ -1,1 +1,314 @@
-(()=>{"use strict";var e={392:(e,o,t)=>{Object.defineProperty(o,"__esModule",{value:!0}),o.Emacs=o.cursorMoves=void 0;const r=t(496);o.cursorMoves=["cursorUp","cursorDown","cursorLeft","cursorRight","cursorHome","cursorEnd","cursorWordLeft","cursorWordRight","cursorTop","cursorBottom"],o.Emacs=class{constructor(){this.yanked="",this.qmk=!1,this.markMode=!1}toggleQMK(){this?console.log("qmk yes"):console.log("qmk no"),this.qmk?r.window.showInformationMessage("Basic keyboard mode activated"):r.window.showInformationMessage("QMK keyboard mode activated"),this.qmk=!this.qmk,r.commands.executeCommand("setContext","groog.qmk",this.qmk)}toggleMarkMode(){this.markMode&&r.commands.executeCommand("cancelSelection"),this.markMode=!this.markMode,r.commands.executeCommand("setContext","groog.markMode",!0)}yank(){var e,o,t;this.markMode=!1;let n=null===(e=r.window.activeTextEditor)||void 0===e?void 0:e.selection,i=null===(o=r.window.activeTextEditor)||void 0===o?void 0:o.document.getText(n);i&&(this.yanked=i,null===(t=r.window.activeTextEditor)||void 0===t||t.edit((e=>{n&&e.delete(n)}))),this.yanked=i||""}paste(){var e;this.markMode=!1,null===(e=r.window.activeTextEditor)||void 0===e||e.edit((e=>{let o=r.window.activeTextEditor;o&&e.insert(o.selection.active,this.yanked)}))}ctrlG(){this.markMode?this.toggleMarkMode():r.commands.executeCommand("cancelSelection"),r.commands.executeCommand("closeFindWidget"),r.commands.executeCommand("removeSecondaryCursors")}kill(){var e;this.markMode=!1;let o=r.window.activeTextEditor;if(!o)return;let t=o.selection.active,n=o.document.lineAt(t.line).range.end,i=new r.Range(t,n);0===o.document.getText(i).trim().length&&(i=new r.Range(t,new r.Position(t.line+1,0))),this.yanked=o.document.getText(i),null===(e=r.window.activeTextEditor)||void 0===e||e.edit((e=>{e.delete(i)}))}jump(){this.move("cursorMove",{to:"up",by:"line",value:10})}fall(){this.move("cursorMove",{to:"down",by:"line",value:10})}move(e,...o){this.markMode?r.commands.executeCommand(e+"Select",...o):r.commands.executeCommand(e,...o)}}},96:(e,o,t)=>{Object.defineProperty(o,"__esModule",{value:!0}),o.multiCommand=void 0;const r=t(496);o.multiCommand=function(e){for(var o of e.sequence)r.commands.executeCommand(o)}},35:(e,o,t)=>{Object.defineProperty(o,"__esModule",{value:!0}),o.Recorder=void 0;const r=t(496);o.Recorder=class{constructor(){this.baseCommand=!0,this.recording=!1,this.setRecording(!1),this.recordBook=[]}setRecording(e){r.commands.executeCommand("setContext","groog.recording",e),r.window.showInformationMessage(`Setting context: ${e}`),this.recording=e}Execute(e,o,t){if(e.includes("groog.record")||!this.recording||!this.baseCommand)return t(...o);this.recordBook=this.recordBook.concat(new n(e,o)),this.baseCommand=!1;let r=t(...o);return this.baseCommand=!0,r}StartRecording(){this.recording?r.window.showInformationMessage("Already recording!"):(this.setRecording(!0),this.recordBook=[],r.window.showInformationMessage("Recording started!"))}EndRecording(){this.recording?(this.setRecording(!1),r.window.showInformationMessage("Recording ended!")):r.window.showInformationMessage("Not recording!")}Playback(){if(this.recording)r.window.showInformationMessage("Still recording!");else for(var e of(r.window.showInformationMessage("Playing recording!"),this.recordBook))r.commands.executeCommand(e.command,...e.args)}};class n{constructor(e,o){this.command=e,this.args=o}}},496:e=>{e.exports=require("vscode")}},o={};function t(r){var n=o[r];if(void 0!==n)return n.exports;var i=o[r]={exports:{}};return e[r](i,i.exports,t),i.exports}var r={};(()=>{var e=r;Object.defineProperty(e,"__esModule",{value:!0}),e.deactivate=e.activate=void 0;const o=t(496),n=t(392),i=t(35),s=t(96);function d(e,t,r){e.subscriptions.push(o.commands.registerCommand("groog."+t,((...e)=>{c.Execute("groog."+t,e,r)})))}const a=new n.Emacs,c=new i.Recorder;e.activate=function(e){for(var o of n.cursorMoves){const t=o;d(e,o,(()=>a.move(t)))}d(e,"jump",(()=>a.jump())),d(e,"fall",(()=>a.fall())),d(e,"toggleQMK",(()=>a.toggleQMK())),d(e,"toggleMarkMode",(()=>a.toggleMarkMode())),d(e,"yank",(()=>a.yank())),d(e,"paste",(()=>a.paste())),d(e,"kill",(()=>a.kill())),d(e,"ctrlG",(()=>a.ctrlG())),d(e,"multiCommand.execute",s.multiCommand),d(e,"record.startRecording",(()=>c.StartRecording())),d(e,"record.endRecording",(()=>c.EndRecording())),d(e,"record.playRecording",(()=>c.Playback()))},e.deactivate=function(){}})();var n=exports;for(var i in r)n[i]=r[i];r.__esModule&&Object.defineProperty(n,"__esModule",{value:!0})})();
+/******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
+/******/ 	var __webpack_modules__ = ([
+/* 0 */,
+/* 1 */
+/***/ ((module) => {
+
+module.exports = require("vscode");
+
+/***/ }),
+/* 2 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Emacs = exports.cursorMoves = void 0;
+const vscode = __webpack_require__(1);
+const jumpDist = 10;
+exports.cursorMoves = [
+    "cursorUp", "cursorDown", "cursorLeft", "cursorRight",
+    "cursorHome", "cursorEnd",
+    "cursorWordLeft", "cursorWordRight",
+    "cursorTop", "cursorBottom"
+];
+class Emacs {
+    constructor() {
+        this.yanked = "";
+        // TODO: store this in persistent storage somewhere
+        this.qmk = false;
+        this.markMode = false;
+    }
+    toggleQMK() {
+        if (this) {
+            console.log("qmk yes");
+        }
+        else {
+            console.log("qmk no");
+        }
+        if (this.qmk) {
+            vscode.window.showInformationMessage('Basic keyboard mode activated');
+        }
+        else {
+            vscode.window.showInformationMessage('QMK keyboard mode activated');
+        }
+        this.qmk = !this.qmk;
+        vscode.commands.executeCommand('setContext', 'groog.qmk', this.qmk);
+    }
+    toggleMarkMode() {
+        if (this.markMode) {
+            // Deselect
+            vscode.commands.executeCommand("cancelSelection");
+        }
+        this.markMode = !this.markMode;
+        vscode.commands.executeCommand('setContext', 'groog.markMode', true);
+    }
+    yank() {
+        var _a, _b, _c;
+        this.markMode = false;
+        let range = (_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.selection;
+        let maybe = (_b = vscode.window.activeTextEditor) === null || _b === void 0 ? void 0 : _b.document.getText(range);
+        if (maybe) {
+            this.yanked = maybe;
+            (_c = vscode.window.activeTextEditor) === null || _c === void 0 ? void 0 : _c.edit(editBuilder => {
+                if (range) {
+                    editBuilder.delete(range);
+                }
+            });
+        }
+        maybe ? this.yanked = maybe : this.yanked = "";
+    }
+    paste() {
+        var _a;
+        this.markMode = false;
+        // Overwrite selection if relevant.
+        (_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.edit(editBuilder => {
+            let editor = vscode.window.activeTextEditor;
+            if (!editor) {
+                return;
+            }
+            editBuilder.insert(editor.selection.active, this.yanked);
+        });
+    }
+    ctrlG() {
+        if (this.markMode) {
+            this.toggleMarkMode();
+        }
+        else {
+            // This is done in toggle mark mode so don't need to do it twice
+            // if not in that mode.
+            vscode.commands.executeCommand("cancelSelection");
+        }
+        vscode.commands.executeCommand("closeFindWidget");
+        vscode.commands.executeCommand("removeSecondaryCursors");
+    }
+    kill() {
+        var _a;
+        this.markMode = false;
+        let editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            return;
+        }
+        let startPos = editor.selection.active;
+        let endPos = editor.document.lineAt(startPos.line).range.end;
+        let range = new vscode.Range(startPos, endPos);
+        let text = editor.document.getText(range);
+        if (text.trim().length === 0) {
+            range = new vscode.Range(startPos, new vscode.Position(startPos.line + 1, 0));
+        }
+        this.yanked = editor.document.getText(range);
+        (_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.edit(editBuilder => {
+            editBuilder.delete(range);
+        });
+    }
+    // C-l
+    jump() {
+        this.move("cursorMove", { "to": "up", "by": "line", "value": jumpDist });
+    }
+    // C-v
+    fall() {
+        this.move("cursorMove", { "to": "down", "by": "line", "value": jumpDist });
+    }
+    move(vsCommand, ...rest) {
+        if (this.markMode) {
+            vscode.commands.executeCommand(vsCommand + "Select", ...rest);
+        }
+        else {
+            vscode.commands.executeCommand(vsCommand, ...rest);
+        }
+    }
+}
+exports.Emacs = Emacs;
+
+
+/***/ }),
+/* 3 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Recorder = void 0;
+const vscode = __webpack_require__(1);
+class Recorder {
+    constructor() {
+        this.baseCommand = true;
+        this.recording = false;
+        this.setRecording(false);
+        this.recordBook = [];
+    }
+    setRecording(b) {
+        vscode.commands.executeCommand('setContext', 'groog.recording', b);
+        this.recording = b;
+    }
+    Execute(command, args, callback) {
+        if (command.includes("groog.record") || !this.recording || !this.baseCommand) {
+            return callback(...args);
+        }
+        this.recordBook = this.recordBook.concat(new record(command, args));
+        this.baseCommand = false;
+        let r = callback(...args);
+        this.baseCommand = true;
+        return r;
+    }
+    StartRecording() {
+        if (this.recording) {
+            vscode.window.showInformationMessage("Already recording!");
+        }
+        else {
+            this.setRecording(true);
+            this.recordBook = [];
+            vscode.window.showInformationMessage("Recording started!");
+        }
+    }
+    EndRecording() {
+        if (!this.recording) {
+            vscode.window.showInformationMessage("Not recording!");
+        }
+        else {
+            this.setRecording(false);
+            vscode.window.showInformationMessage("Recording ended!");
+        }
+    }
+    Playback() {
+        if (this.recording) {
+            vscode.window.showInformationMessage("Still recording!");
+            return;
+        }
+        vscode.window.showInformationMessage("Playing recording!");
+        let sl = [];
+        for (var record of this.recordBook) {
+            vscode.commands.executeCommand(record.command, ...record.args);
+        }
+    }
+}
+exports.Recorder = Recorder;
+class record {
+    constructor(command, args) {
+        this.command = command;
+        this.args = args;
+    }
+}
+
+
+/***/ }),
+/* 4 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.multiCommand = void 0;
+const vscode = __webpack_require__(1);
+function multiCommand(mc) {
+    for (var command of mc.sequence) {
+        vscode.commands.executeCommand(command);
+    }
+}
+exports.multiCommand = multiCommand;
+
+
+/***/ })
+/******/ 	]);
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+var exports = __webpack_exports__;
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.deactivate = exports.activate = void 0;
+// The module 'vscode' contains the VS Code extensibility API
+// Import the module and reference it with the alias vscode in your code below
+const vscode = __webpack_require__(1);
+const emacs_1 = __webpack_require__(2);
+const record_1 = __webpack_require__(3);
+const multi_command_1 = __webpack_require__(4);
+let baseCommand = true;
+let recording = false;
+function register(context, commandName, callback) {
+    context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName, (...args) => {
+        recorder.Execute("groog." + commandName, args, callback);
+    }));
+}
+const groogery = new emacs_1.Emacs();
+const recorder = new record_1.Recorder();
+// this method is called when your extension is activated
+// your extension is activated the very first time the command is executed
+function activate(context) {
+    vscode.window.showInformationMessage("yupo");
+    for (var move of emacs_1.cursorMoves) {
+        const m = move;
+        register(context, move, () => groogery.move(m));
+    }
+    register(context, 'jump', () => groogery.jump());
+    register(context, 'fall', () => groogery.fall());
+    register(context, 'toggleQMK', () => groogery.toggleQMK());
+    register(context, 'toggleMarkMode', () => groogery.toggleMarkMode());
+    register(context, 'yank', () => groogery.yank());
+    register(context, 'paste', () => groogery.paste());
+    register(context, 'kill', () => groogery.kill());
+    register(context, 'ctrlG', () => groogery.ctrlG());
+    register(context, "multiCommand.execute", multi_command_1.multiCommand);
+    register(context, "record.startRecording", () => recorder.StartRecording());
+    register(context, "record.endRecording", () => recorder.EndRecording());
+    register(context, "record.playRecording", () => recorder.Playback());
+    // Use the console to output diagnostic information (console.log) and errors (console.error)
+    // This line of code will only be executed once when your extension is activated
+    console.log('Congratulations, your extension "groog" is now active in the web extension host!');
+    // The command has been defined in the package.json file
+    // Now provide the implementation of the command with registerCommand
+    // The commandId parameter must match the command field in package.json
+    let disposable = vscode.commands.registerCommand('groog.helloWorld', () => {
+        // The code you place here will be executed every time your command is executed
+        // Display a message box to the user
+        vscode.window.showInformationMessage('Hello World from groog in a web extension host!');
+    });
+    context.subscriptions.push(disposable);
+}
+exports.activate = activate;
+// this method is called when your extension is deactivated
+function deactivate() { }
+exports.deactivate = deactivate;
+
+})();
+
+var __webpack_export_target__ = exports;
+for(var i in __webpack_exports__) __webpack_export_target__[i] = __webpack_exports__[i];
+if(__webpack_exports__.__esModule) Object.defineProperty(__webpack_export_target__, "__esModule", { value: true });
+/******/ })()
+;
+//# sourceMappingURL=extension.js.map
