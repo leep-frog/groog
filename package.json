@@ -83,7 +83,13 @@
     "onCommand:groog.y",
     "onCommand:groog.Y",
     "onCommand:groog.z",
-    "onCommand:groog.Z"
+    "onCommand:groog.Z",
+    "onCommand:groog.showStuff",
+    "onCommand:groog.find",
+    "onCommand:groog.deleteLeft",
+    "onCommand:groog.deleteRight",
+    "onCommand:groog.deleteWordLeft",
+    "onCommand:groog.deleteWordRight"
 	],
 	"browser": "./dist/web/extension.js",
   "contributes": {
@@ -297,6 +303,10 @@
         "title": "Groog shift z"
       },
       {
+        "command": "groog.find",
+        "title": "Groog find"
+      },
+      {
         "command": "groog.toggleQMK",
         "title": "Emacs Toggle QMK"
       },
@@ -383,6 +393,26 @@
       {
 				"command": "groog.helloWorld",
 				"title": "Hello World"
+			},
+      {
+				"command": "groog.deleteLeft",
+				"title": "Groog delete left"
+			},
+      {
+				"command": "groog.deleteRight",
+				"title": "Groog delete right"
+			},
+      {
+				"command": "groog.deleteWordLeft",
+				"title": "Groog delete left"
+			},
+      {
+				"command": "groog.deleteWordRight",
+				"title": "Groog delete right"
+			},
+      {
+				"command": "groog.showStuff",
+				"title": "Show Stuff"
 			}
     ],
     "keybindings": [
@@ -534,7 +564,10 @@
       },
       {
         "key": "ctrl+s",
-        "command": "actions.find",
+        "command": "groog.find",
+        "args": {
+          "searchString": "editorr"
+        },
         "when": "!groog.qmk && !findWidgetVisible"
       },
       {
@@ -544,7 +577,7 @@
       },
       {
         "key": "ctrl+f",
-        "command": "actions.find",
+        "command": "groog.find",
         "when": "groog.qmk && !findWidgetVisible"
       },
       {
@@ -594,23 +627,43 @@
       },
       {
         "key": "ctrl+h",
-        "command": "deleteLeft"
+        "command": "groog.deleteLeft"
+      },
+      {
+        "key": "backspace",
+        "command": "groog.deleteLeft"
       },
       {
         "key": "ctrl+d",
-        "command": "deleteRight"
+        "command": "groog.deleteRight"
+      },
+      {
+        "key": "delete",
+        "command": "groog.deleteRight"
       },
       {
         "key": "alt+h",
-        "command": "deleteWordLeft"
+        "command": "groog.deleteWordLeft"
       },
       {
         "key": "alt+backspace",
-        "command": "deleteWordLeft"
+        "command": "groog.deleteWordLeft"
+      },
+      {
+        "key": "ctrl+backspace",
+        "command": "groog.deleteWordLeft"
       },
       {
         "key": "alt+d",
-        "command": "deleteWordRight"
+        "command": "groog.deleteWordRight"
+      },
+      {
+        "key": "alt+delete",
+        "command": "groog.deleteWordRight"
+      },
+      {
+        "key": "ctrl+delete",
+        "command": "groog.deleteWordRight"
       },
       {
         "key": "ctrl+x ctrl+f",
@@ -736,20 +789,17 @@
         "when": "!groog.recording"
       },
       {
-        "key": "a",
-        "command": "groog.a"
-      },
-      {
-        "key": "shift+a",
-        "command": "groog.A"
-      },
-      {
-        "key": "b",
-        "command": "groog.b"
-      },
-      {
-        "key": "shift+b",
-        "command": "groog.B"
+        "key": "ctrl+m",
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            "groog.showStuff",
+            "cancelSelection",
+            "actions.find",
+            "actions.find",
+            "groog.showStuff"
+          ]
+        }
       }
 		]
 	},

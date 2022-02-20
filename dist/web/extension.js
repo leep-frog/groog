@@ -13,7 +13,7 @@ module.exports = require("vscode");
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Emacs = exports.cursorMoves = void 0;
+exports.deleteCommands = exports.Emacs = exports.cursorMoves = void 0;
 const vscode = __webpack_require__(1);
 const jumpDist = 10;
 exports.cursorMoves = [
@@ -23,19 +23,47 @@ exports.cursorMoves = [
     "cursorTop", "cursorBottom"
 ];
 class Emacs {
-    constructor() {
-        this.yanked = "";
+    constructor(r) {
         // TODO: store this in persistent storage somewhere
         this.qmk = false;
-        this.markMode = false;
+        this.typeHandlers = [
+            //new FindHandler(),
+            new MarkHandler(),
+            r,
+        ];
+    }
+    register(context, recorder) {
+        for (var th of this.typeHandlers) {
+            th.register(context, recorder);
+        }
+    }
+    type(...args) {
+        if (!vscode.window.activeTextEditor) {
+            vscode.window.showInformationMessage("NOT TEXT EDITOR?!?!");
+        }
+        let apply = true;
+        let s = args[0].text;
+        for (var th of this.typeHandlers) {
+            if (th.active) {
+                apply && (apply = th.textHandler(s));
+            }
+        }
+        if (apply) {
+            vscode.commands.executeCommand("default:type", ...args);
+        }
+    }
+    delCommand(d) {
+        let apply = true;
+        for (var th of this.typeHandlers) {
+            if (th.active) {
+                apply && (apply = th.textHandler(d));
+            }
+        }
+        if (apply) {
+            vscode.commands.executeCommand(d);
+        }
     }
     toggleQMK() {
-        if (this) {
-            console.log("qmk yes");
-        }
-        else {
-            console.log("qmk no");
-        }
         if (this.qmk) {
             vscode.window.showInformationMessage('Basic keyboard mode activated');
         }
@@ -45,56 +73,35 @@ class Emacs {
         this.qmk = !this.qmk;
         vscode.commands.executeCommand('setContext', 'groog.qmk', this.qmk);
     }
-    toggleMarkMode() {
-        if (this.markMode) {
-            // Deselect
-            vscode.commands.executeCommand("cancelSelection");
-        }
-        this.markMode = !this.markMode;
-        vscode.commands.executeCommand('setContext', 'groog.markMode', true);
-    }
     yank() {
         var _a, _b, _c;
-        this.markMode = false;
         let range = (_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.selection;
         let maybe = (_b = vscode.window.activeTextEditor) === null || _b === void 0 ? void 0 : _b.document.getText(range);
         if (maybe) {
-            this.yanked = maybe;
             (_c = vscode.window.activeTextEditor) === null || _c === void 0 ? void 0 : _c.edit(editBuilder => {
                 if (range) {
                     editBuilder.delete(range);
                 }
             });
         }
-        maybe ? this.yanked = maybe : this.yanked = "";
-    }
-    paste() {
-        var _a;
-        this.markMode = false;
-        // Overwrite selection if relevant.
-        (_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.edit(editBuilder => {
-            let editor = vscode.window.activeTextEditor;
-            if (!editor) {
-                return;
+        for (var th of this.typeHandlers) {
+            if (th.active) {
+                th.onYank(maybe);
             }
-            editBuilder.insert(editor.selection.active, this.yanked);
-        });
+        }
     }
     ctrlG() {
-        if (this.markMode) {
-            this.toggleMarkMode();
+        for (var th of this.typeHandlers) {
+            if (th.active) {
+                th.ctrlG();
+            }
         }
-        else {
-            // This is done in toggle mark mode so don't need to do it twice
-            // if not in that mode.
-            vscode.commands.executeCommand("cancelSelection");
-        }
+        vscode.commands.executeCommand("cancelSelection");
         vscode.commands.executeCommand("closeFindWidget");
         vscode.commands.executeCommand("removeSecondaryCursors");
     }
     kill() {
         var _a;
-        this.markMode = false;
         let editor = vscode.window.activeTextEditor;
         if (!editor) {
             return;
@@ -106,7 +113,9 @@ class Emacs {
         if (text.trim().length === 0) {
             range = new vscode.Range(startPos, new vscode.Position(startPos.line + 1, 0));
         }
-        this.yanked = editor.document.getText(range);
+        for (var th of this.typeHandlers) {
+            th.onKill(text);
+        }
         (_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.edit(editBuilder => {
             editBuilder.delete(range);
         });
@@ -120,15 +129,151 @@ class Emacs {
         this.move("cursorMove", { "to": "down", "by": "line", "value": jumpDist });
     }
     move(vsCommand, ...rest) {
-        if (this.markMode) {
-            vscode.commands.executeCommand(vsCommand + "Select", ...rest);
+        let apply = true;
+        for (var th of this.typeHandlers) {
+            if (th.active) {
+                apply && (apply = th.moveHandler(vsCommand, ...rest));
+            }
         }
-        else {
+        if (apply) {
             vscode.commands.executeCommand(vsCommand, ...rest);
         }
     }
 }
 exports.Emacs = Emacs;
+const deleteLeft = "deleteLeft";
+const deleteRight = "deleteRight";
+const deleteWordLeft = "deleteWordLeft";
+const deleteWordRight = "deleteWordRight";
+exports.deleteCommands = [
+    deleteLeft,
+    deleteRight,
+    deleteWordLeft,
+    deleteWordRight,
+];
+class FindHandler {
+    constructor() {
+        this.active = false;
+        this.findText = "";
+    }
+    register(context, recorder) {
+        recorder.registerCommand(context, 'find', () => {
+            if (this.active) {
+                // Go to next find
+                vscode.commands.executeCommand("editor.action.moveSelectionToNextFindMatch");
+            }
+            else {
+                this.activate();
+            }
+        });
+    }
+    activate() {
+        this.active = true;
+        this.findWithArgs();
+    }
+    deactivate() {
+        this.active = false;
+        this.findText = "";
+    }
+    findWithArgs() {
+        if (this.findText.length === 0) {
+            vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": "ENTER_TEXT" });
+        }
+        else {
+            vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": this.findText });
+        }
+        vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
+    }
+    ctrlG() {
+        this.deactivate();
+    }
+    textHandler(s) {
+        this.findText = this.findText.concat(s);
+        this.findWithArgs();
+        return false;
+    }
+    moveHandler(s) {
+        this.deactivate();
+        return true;
+    }
+    delHandler(s) {
+        switch (s) {
+            case "deleteLeft":
+                this.findText = this.findText.slice(0, this.findText.length - 1);
+                this.findWithArgs();
+            default:
+                vscode.window.showInformationMessage("Unsupported find command: " + s);
+        }
+        return false;
+    }
+    onYank(s) { }
+    onKill(s) { }
+}
+class MarkHandler {
+    constructor() {
+        this.active = false;
+        this.yanked = "";
+    }
+    register(context, recorder) {
+        recorder.registerCommand(context, 'toggleMarkMode', () => {
+            if (this.active) {
+                this.deactivate();
+            }
+            else {
+                this.activate();
+            }
+        });
+        recorder.registerCommand(context, 'paste', () => {
+            var _a;
+            if (this.active) {
+                this.deactivate();
+            }
+            (_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.edit(editBuilder => {
+                let editor = vscode.window.activeTextEditor;
+                if (!editor) {
+                    return;
+                }
+                editBuilder.insert(editor.selection.active, this.yanked);
+            });
+        });
+    }
+    activate() {
+        this.active = true;
+        vscode.commands.executeCommand('setContext', 'groog.markMode', true);
+    }
+    deactivate() {
+        this.active = false;
+        vscode.commands.executeCommand('setContext', 'groog.markMode', false);
+    }
+    ctrlG() {
+        this.deactivate();
+    }
+    textHandler(s) {
+        this.deactivate();
+        return true;
+    }
+    moveHandler(vsCommand, ...rest) {
+        vscode.commands.executeCommand(vsCommand + "Select", ...rest);
+        return false;
+    }
+    delHandler(s) {
+        this.deactivate();
+        return true;
+    }
+    onYank(s) {
+        this.deactivate();
+        s ? this.yanked = s : this.yanked = "";
+    }
+    onKill(s) {
+        this.deactivate();
+        s ? this.yanked = s : this.yanked = "";
+    }
+}
+class TypeArg {
+    constructor(text) {
+        this.text = "";
+    }
+}
 
 
 /***/ }),
@@ -142,53 +287,86 @@ const vscode = __webpack_require__(1);
 class Recorder {
     constructor() {
         this.baseCommand = true;
-        this.recording = false;
-        this.setRecording(false);
+        this.active = false;
         this.recordBook = [];
     }
-    setRecording(b) {
-        vscode.commands.executeCommand('setContext', 'groog.recording', b);
-        this.recording = b;
+    register(context, recorder) {
+        recorder.registerCommand(context, "record.startRecording", () => recorder.startRecording());
+        recorder.registerCommand(context, "record.endRecording", () => recorder.endRecording());
+        recorder.registerCommand(context, "record.playRecording", () => recorder.playback());
     }
-    Execute(command, args, callback) {
-        if (command.includes("groog.record") || !this.recording || !this.baseCommand) {
+    registerCommand(context, commandName, callback) {
+        context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName, (...args) => {
+            this.execute("groog." + commandName, args, callback);
+        }));
+    }
+    execute(command, args, callback) {
+        if (command.includes("groog.record") || !this.active || !this.baseCommand) {
             return callback(...args);
         }
-        this.recordBook = this.recordBook.concat(new record(command, args));
+        this.addRecord(new record(command, args));
         this.baseCommand = false;
         let r = callback(...args);
         this.baseCommand = true;
         return r;
     }
-    StartRecording() {
-        if (this.recording) {
+    startRecording() {
+        if (this.active) {
             vscode.window.showInformationMessage("Already recording!");
         }
         else {
-            this.setRecording(true);
+            this.activate();
             this.recordBook = [];
             vscode.window.showInformationMessage("Recording started!");
         }
     }
-    EndRecording() {
-        if (!this.recording) {
+    endRecording() {
+        if (!this.active) {
             vscode.window.showInformationMessage("Not recording!");
         }
         else {
-            this.setRecording(false);
+            this.deactivate();
             vscode.window.showInformationMessage("Recording ended!");
         }
     }
-    Playback() {
-        if (this.recording) {
+    playback() {
+        if (this.active) {
             vscode.window.showInformationMessage("Still recording!");
             return;
         }
         vscode.window.showInformationMessage("Playing recording!");
         let sl = [];
         for (var record of this.recordBook) {
+            vscode.window.showInformationMessage("playing " + record.command + "(" + record.args + ")");
             vscode.commands.executeCommand(record.command, ...record.args);
         }
+    }
+    activate() {
+        this.active = true;
+        vscode.commands.executeCommand('setContext', 'groog.recording', true);
+    }
+    deactivate() {
+        this.active = false;
+        vscode.commands.executeCommand('setContext', 'groog.recording', false);
+    }
+    addRecord(r) {
+        this.recordBook = this.recordBook.concat(r);
+    }
+    textHandler(s) {
+        this.addRecord(new record("default:type", [{ "text": s }]));
+        return true;
+    }
+    // Make this implement type interface:
+    // All these functions are associated with a "groog.*" command so these are
+    // already added to the record book via the "type" command handling
+    onKill(s) { }
+    ctrlG() { }
+    onYank(s) { }
+    delHandler(s) {
+        return true;
+    }
+    moveHandler(vsCommand, ...rest) {
+        return true;
     }
 }
 exports.Recorder = Recorder;
@@ -259,53 +437,33 @@ const record_1 = __webpack_require__(3);
 const multi_command_1 = __webpack_require__(4);
 let baseCommand = true;
 let recording = false;
-function register(context, commandName, callback) {
-    context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName, (...args) => {
-        recorder.Execute("groog." + commandName, args, callback);
-    }));
-}
-const groogery = new emacs_1.Emacs();
 const recorder = new record_1.Recorder();
-let bet = "qwertyuiopasdfghjklzxcvbnm";
+const groogery = new emacs_1.Emacs(recorder);
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 function activate(context) {
     vscode.window.showInformationMessage("yupo");
-    for (var b of bet) {
-        const lb = b;
-        const ub = b.toUpperCase();
-        register(context, lb, () => {
-            vscode.commands.executeCommand("type", { "text": lb });
-        });
-        register(context, ub, () => {
-            vscode.commands.executeCommand("type", { "text": ub });
-        });
-    }
-    /*register(context, "a", () => {
-      vscode.window.showInformationMessage("lower a");
-    });
-    register(context, "A", () => {
-      vscode.window.showInformationMessage("upper a");
-    });*/
-    /*register(context, "A", () => {
-      vscode.window.showInformationMessage("upper a");
-    });*/
     for (var move of emacs_1.cursorMoves) {
         const m = move;
-        register(context, move, () => groogery.move(m));
+        recorder.registerCommand(context, move, () => groogery.move(m));
     }
-    register(context, 'jump', () => groogery.jump());
-    register(context, 'fall', () => groogery.fall());
-    register(context, 'toggleQMK', () => groogery.toggleQMK());
-    register(context, 'toggleMarkMode', () => groogery.toggleMarkMode());
-    register(context, 'yank', () => groogery.yank());
-    register(context, 'paste', () => groogery.paste());
-    register(context, 'kill', () => groogery.kill());
-    register(context, 'ctrlG', () => groogery.ctrlG());
-    register(context, "multiCommand.execute", multi_command_1.multiCommand);
-    register(context, "record.startRecording", () => recorder.StartRecording());
-    register(context, "record.endRecording", () => recorder.EndRecording());
-    register(context, "record.playRecording", () => recorder.Playback());
+    for (var dc of emacs_1.deleteCommands) {
+        const d = dc;
+        recorder.registerCommand(context, d, () => groogery.delCommand(d));
+    }
+    context.subscriptions.push(vscode.commands.registerCommand('type', (...args) => {
+        groogery.type(...args);
+    }));
+    recorder.registerCommand(context, 'jump', () => groogery.jump());
+    recorder.registerCommand(context, 'fall', () => groogery.fall());
+    recorder.registerCommand(context, 'toggleQMK', () => groogery.toggleQMK());
+    recorder.registerCommand(context, 'yank', () => groogery.yank());
+    recorder.registerCommand(context, 'kill', () => groogery.kill());
+    recorder.registerCommand(context, 'ctrlG', () => groogery.ctrlG());
+    recorder.registerCommand(context, "multiCommand.execute", multi_command_1.multiCommand);
+    for (var th of groogery.typeHandlers) {
+        th.register(context, recorder);
+    }
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "groog" is now active in the web extension host!');

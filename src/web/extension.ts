@@ -1,64 +1,43 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import {Emacs, cursorMoves} from './emacs';
+import {Emacs, cursorMoves, deleteCommands} from './emacs';
 import {Recorder} from './record';
 import {multiCommand} from './multi-command';
 
 let baseCommand = true;
 let recording = false;
 
-function register(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => any) {
-  context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName, (...args: any) => {
-    recorder.Execute("groog." + commandName, args, callback);
-  }));
-}
-
-const groogery = new Emacs();
 const recorder = new Recorder();
-
-let bet = "qwertyuiopasdfghjklzxcvbnm";
+const groogery = new Emacs(recorder);
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
   vscode.window.showInformationMessage("yupo");
-  for (var b of bet) {
-    const lb = b;
-    const ub = b.toUpperCase();
-    register(context, lb, () => {
-      vscode.commands.executeCommand("type", { "text": lb});
-    });
-    register(context, ub, () => {
-      vscode.commands.executeCommand("type", { "text": ub});
-    });
-  }
-  /*register(context, "a", () => {
-    vscode.window.showInformationMessage("lower a");
-  });
-  register(context, "A", () => {
-    vscode.window.showInformationMessage("upper a");
-  });*/
-  /*register(context, "A", () => {
-    vscode.window.showInformationMessage("upper a");
-  });*/
   for (var move of cursorMoves) {
     const m = move;
-    register(context, move, () => groogery.move(m));
+    recorder.registerCommand(context, move, () => groogery.move(m));
   }
-  register(context, 'jump', () => groogery.jump());
-  register(context, 'fall', () => groogery.fall());
+  for (var dc of deleteCommands) {
+    const d = dc;
+    recorder.registerCommand(context, d, () => groogery.delCommand(d));
+  }
+  context.subscriptions.push(vscode.commands.registerCommand('type', (...args: any[]) => {
+    groogery.type(...args);
+  }));
+  recorder.registerCommand(context, 'jump', () => groogery.jump());
+  recorder.registerCommand(context, 'fall', () => groogery.fall());
 
-  register(context, 'toggleQMK', () => groogery.toggleQMK());
-  register(context, 'toggleMarkMode', () => groogery.toggleMarkMode());
-  register(context, 'yank', () => groogery.yank());
-  register(context, 'paste', () => groogery.paste());
-  register(context, 'kill', () => groogery.kill());
-  register(context, 'ctrlG', () => groogery.ctrlG());
-  register(context, "multiCommand.execute", multiCommand);
-  register(context, "record.startRecording", () => recorder.StartRecording());
-  register(context, "record.endRecording", () => recorder.EndRecording());
-  register(context, "record.playRecording", () => recorder.Playback());
+  recorder.registerCommand(context, 'toggleQMK', () => groogery.toggleQMK());
+  recorder.registerCommand(context, 'yank', () => groogery.yank());
+  recorder.registerCommand(context, 'kill', () => groogery.kill());
+  recorder.registerCommand(context, 'ctrlG', () => groogery.ctrlG());
+  recorder.registerCommand(context, "multiCommand.execute", multiCommand);
+
+  for (var th of groogery.typeHandlers) {
+    th.register(context, recorder);
+  }
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "groog" is now active in the web extension host!');

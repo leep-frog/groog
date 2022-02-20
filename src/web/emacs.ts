@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import {Recorder} from './record';
 
 const jumpDist = 10;
 export const cursorMoves: string[] = [
@@ -9,23 +10,57 @@ export const cursorMoves: string[] = [
 ];
 
 export class Emacs {
-  private yanked: string;
   private qmk: boolean;
-  private markMode: boolean;
+  // TODO: Move these to Finder type
 
-  constructor() {
-    this.yanked = "";
+  typeHandlers: TypeHandler[];
+
+  constructor(r: Recorder) {
     // TODO: store this in persistent storage somewhere
     this.qmk = false;
-    this.markMode = false;
+    this.typeHandlers = [
+      //new FindHandler(),
+      new MarkHandler(),
+      r,
+    ];
+  }
+
+  register(context: vscode.ExtensionContext, recorder: Recorder) {
+    for (var th of this.typeHandlers) {
+      th.register(context, recorder);
+    }
+  }
+
+  type(...args: any[]) {
+    if (!vscode.window.activeTextEditor) {
+      vscode.window.showInformationMessage("NOT TEXT EDITOR?!?!");
+		}
+
+    let apply = true;
+    let s = (args[0] as TypeArg).text;
+    for (var th of this.typeHandlers) {
+      if (th.active) {
+        apply &&= th.textHandler(s);
+      }
+    }
+    if (apply) {
+      vscode.commands.executeCommand("default:type", ...args);
+    }
+  }
+
+  delCommand(d: string) {
+    let apply = true;
+    for (var th of this.typeHandlers) {
+      if (th.active) {
+        apply &&= th.textHandler(d);
+      }
+    }
+    if (apply) {
+      vscode.commands.executeCommand(d);
+    }
   }
 
   toggleQMK() {
-    if (this) {
-      console.log("qmk yes");
-    } else {
-      console.log("qmk no");
-    }
     if (this.qmk) {
       vscode.window.showInformationMessage('Basic keyboard mode activated');
     } else {
@@ -35,60 +70,36 @@ export class Emacs {
     vscode.commands.executeCommand('setContext', 'groog.qmk', this.qmk);
   }
 
-  toggleMarkMode() {
-    if (this.markMode) {
-      // Deselect
-      vscode.commands.executeCommand("cancelSelection");
-    }
-    this.markMode = !this.markMode;
-    vscode.commands.executeCommand('setContext', 'groog.markMode', true);
-  }
-
   yank() {
-    this.markMode = false;
-
     let range = vscode.window.activeTextEditor?.selection;
     let maybe = vscode.window.activeTextEditor?.document.getText(range);
     if (maybe) {
-      this.yanked = maybe;
       vscode.window.activeTextEditor?.edit(editBuilder => {
         if (range) {
           editBuilder.delete(range);
         }
       });
     }
-    maybe ? this.yanked = maybe : this.yanked = "";
-  }
 
-  paste() {
-    this.markMode = false;
-
-    // Overwrite selection if relevant.
-
-    vscode.window.activeTextEditor?.edit(editBuilder => {
-      let editor = vscode.window.activeTextEditor;
-      if (!editor) {
-        return;
+    for (var th of this.typeHandlers) {
+      if (th.active) {
+        th.onYank(maybe);
       }
-      editBuilder.insert(editor.selection.active, this.yanked);
-    });
+    }
   }
 
   ctrlG() {
-    if (this.markMode) {
-      this.toggleMarkMode();
-    } else {
-      // This is done in toggle mark mode so don't need to do it twice
-      // if not in that mode.
-      vscode.commands.executeCommand("cancelSelection");
+    for (var th of this.typeHandlers) {
+      if (th.active) {
+        th.ctrlG();
+      }
     }
+    vscode.commands.executeCommand("cancelSelection");
     vscode.commands.executeCommand("closeFindWidget");
     vscode.commands.executeCommand("removeSecondaryCursors");
   }
 
   kill() {
-    this.markMode = false;    
-
     let editor = vscode.window.activeTextEditor;
     if (!editor) {
       return;
@@ -101,7 +112,9 @@ export class Emacs {
     if (text.trim().length === 0) {
       range = new vscode.Range(startPos, new vscode.Position(startPos.line + 1, 0));
     }
-    this.yanked = editor.document.getText(range);
+    for (var th of this.typeHandlers) {
+      th.onKill(text);
+    }
     vscode.window.activeTextEditor?.edit(editBuilder => {
       editBuilder.delete(range);
     });
@@ -118,10 +131,195 @@ export class Emacs {
   }
 
   move(vsCommand: string, ...rest: any[]) {
-    if (this.markMode) {
-      vscode.commands.executeCommand(vsCommand + "Select", ...rest);
-    } else {
+    let apply = true;
+    for (var th of this.typeHandlers) {
+      if (th.active) {
+        apply &&= th.moveHandler(vsCommand, ...rest);
+      }
+    }
+    if (apply) {
       vscode.commands.executeCommand(vsCommand, ...rest);
     }
+  }
+}
+
+const deleteLeft = "deleteLeft";
+const deleteRight = "deleteRight";
+const deleteWordLeft = "deleteWordLeft";
+const deleteWordRight = "deleteWordRight";
+
+
+export const deleteCommands: string[] = [
+  deleteLeft,
+  deleteRight,
+  deleteWordLeft,
+  deleteWordRight,
+];
+
+interface TypeHandler {
+  register(context: vscode.ExtensionContext, recorder: Recorder): void;
+  active: boolean;
+  activate(): void;
+  deactivate(): void;
+  // Returns whether or not to still send the code
+  textHandler(s: string): boolean;
+  delHandler(cmd: string): boolean;
+  moveHandler(cmd: string, ...rest: any[]): boolean;
+  
+  ctrlG(): void;
+
+  onYank(text: string | undefined): void
+  onKill(text: string | undefined): void
+  // pasteHandler
+  // escape handler
+}
+
+class FindHandler {
+  active: boolean;
+  findText: string;
+
+  constructor() {
+    this.active = false;
+    this.findText = "";
+  }
+
+  register(context: vscode.ExtensionContext, recorder: Recorder) {
+    recorder.registerCommand(context, 'find', () => {
+      if (this.active) {
+        // Go to next find
+        vscode.commands.executeCommand("editor.action.moveSelectionToNextFindMatch");
+      } else {
+        this.activate();
+      }
+    });
+  }
+
+  activate() {
+    this.active = true;
+    this.findWithArgs();
+  }
+
+  deactivate() {
+    this.active = false;
+    this.findText = "";
+  }
+
+  findWithArgs() {
+    if (this.findText.length === 0) {
+      vscode.commands.executeCommand("editor.actions.findWithArgs", {"searchString": "ENTER_TEXT"});
+    } else {
+      vscode.commands.executeCommand("editor.actions.findWithArgs", {"searchString": this.findText});
+    }
+    vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
+  }
+
+  ctrlG() {
+    this.deactivate();
+  }
+
+  textHandler(s: string): boolean {
+    this.findText = this.findText.concat(s);
+    this.findWithArgs();
+    return false;
+  }
+
+  moveHandler(s: string): boolean {
+    this.deactivate();
+    return true;
+  }
+
+  delHandler(s: string): boolean {
+    switch (s) {
+      case "deleteLeft":
+        this.findText = this.findText.slice(0, this.findText.length-1);
+        this.findWithArgs();
+      default:
+        vscode.window.showInformationMessage("Unsupported find command: " + s);
+      }
+    return false;
+  }
+
+  onYank(s: string | undefined) {}
+  onKill(s: string | undefined) {}
+}
+
+class MarkHandler {
+  active: boolean;
+  yanked: string;
+
+  constructor() {
+    this.active = false;
+    this.yanked = "";
+  }
+
+  register(context: vscode.ExtensionContext, recorder: Recorder) {
+    recorder.registerCommand(context, 'toggleMarkMode', () => {
+      if (this.active) {
+        this.deactivate();
+      } else {
+        this.activate();
+      }
+    });
+    recorder.registerCommand(context, 'paste', () => {
+      if (this.active) {
+        this.deactivate();
+      }
+
+      vscode.window.activeTextEditor?.edit(editBuilder => {
+        let editor = vscode.window.activeTextEditor;
+        if (!editor) {
+          return;
+        }
+        editBuilder.insert(editor.selection.active, this.yanked);
+      });
+    });
+  }
+
+  activate() {
+    this.active = true;
+    vscode.commands.executeCommand('setContext', 'groog.markMode', true);
+  }
+
+  deactivate() {
+    this.active = false;
+    vscode.commands.executeCommand('setContext', 'groog.markMode', false);
+  }
+
+  ctrlG() {
+    this.deactivate();
+  }
+
+  textHandler(s: string): boolean {
+    this.deactivate();
+    return true;
+  }
+
+  moveHandler(vsCommand: string, ...rest: any[]): boolean {
+    vscode.commands.executeCommand(vsCommand + "Select", ...rest);
+    return false;
+  }
+
+  delHandler(s: string): boolean {
+    this.deactivate();
+    return true;
+  }
+
+  
+  onYank(s: string | undefined) {
+    this.deactivate();
+    s ? this.yanked = s : this.yanked = "";
+  }
+
+  onKill(s: string | undefined) {
+    this.deactivate();
+    s ? this.yanked = s : this.yanked = "";
+  }
+}
+
+class TypeArg {
+  text: string;
+
+  constructor(text: string) {
+    this.text = "";
   }
 }

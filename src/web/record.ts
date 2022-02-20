@@ -2,61 +2,101 @@ import * as vscode from 'vscode';
 
 export class Recorder {
   private baseCommand: boolean;
-  private recording: boolean;
+  active: boolean; // aka "recording"
   private recordBook: record[];
 
   constructor() {
     this.baseCommand = true;
-    this.recording = false;
-    this.setRecording(false);
+    this.active = false;
     this.recordBook = [];
   }
 
-  setRecording(b: boolean) {
-    vscode.commands.executeCommand('setContext', 'groog.recording', b);
-    this.recording = b;
+  register(context: vscode.ExtensionContext, recorder: Recorder) {
+    recorder.registerCommand(context, "record.startRecording", () => recorder.startRecording());
+    recorder.registerCommand(context, "record.endRecording", () => recorder.endRecording());
+    recorder.registerCommand(context, "record.playRecording", () => recorder.playback());
   }
 
-  Execute(command: string, args: any[], callback: (...args: any[]) => any): any {
-    if (command.includes("groog.record") || !this.recording || !this.baseCommand) {
+  registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => any) {
+    context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName, (...args: any) => {
+      this.execute("groog." + commandName, args, callback);
+    }));
+  }
+
+  execute(command: string, args: any[], callback: (...args: any[]) => any): any {
+    if (command.includes("groog.record") || !this.active || !this.baseCommand) {
       return callback(...args);
     }
-    this.recordBook = this.recordBook.concat(new record(command, args));
+    this.addRecord(new record(command, args));
     this.baseCommand = false;
     let r = callback(...args);
     this.baseCommand = true;
     return r;
   }
 
-  StartRecording() {
-    if (this.recording) {
+  startRecording() {
+    if (this.active) {
       vscode.window.showInformationMessage("Already recording!");
     } else {
-      this.setRecording(true);
+      this.activate();
       this.recordBook = [];
       vscode.window.showInformationMessage("Recording started!");
     }
   }
 
-  EndRecording() {
-    if (!this.recording) {
+  endRecording() {
+    if (!this.active) {
       vscode.window.showInformationMessage("Not recording!");
     } else {
-      this.setRecording(false);
+      this.deactivate();
       vscode.window.showInformationMessage("Recording ended!");
     }
   }
 
-  Playback() {
-    if (this.recording) {
+  playback() {
+    if (this.active) {
       vscode.window.showInformationMessage("Still recording!");
       return;
     }
     vscode.window.showInformationMessage("Playing recording!");
     let sl: string[] = [];
     for (var record of this.recordBook) {
+      vscode.window.showInformationMessage("playing " + record.command + "(" + record.args + ")");
       vscode.commands.executeCommand(record.command, ...record.args);
     }
+  }
+
+  activate() {
+    this.active = true;
+    vscode.commands.executeCommand('setContext', 'groog.recording', true);
+  }
+
+  deactivate() {
+    this.active = false;
+    vscode.commands.executeCommand('setContext', 'groog.recording', false);
+
+  }
+
+  addRecord(r: record) {
+    this.recordBook = this.recordBook.concat(r);
+  }
+
+  textHandler(s: string): boolean {
+    this.addRecord(new record("default:type", [{ "text": s}]));
+    return true;
+  }
+  
+  // Make this implement type interface:
+  // All these functions are associated with a "groog.*" command so these are
+  // already added to the record book via the "type" command handling
+  onKill(s: string | undefined) {}
+  ctrlG() {}
+  onYank(s: string | undefined) {}
+  delHandler(s: string): boolean {
+    return true;
+  }
+  moveHandler(vsCommand: string, ...rest: any[]): boolean {
+    return true;
   }
 }
 
