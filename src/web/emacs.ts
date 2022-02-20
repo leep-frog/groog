@@ -161,17 +161,17 @@ interface TypeHandler {
   active: boolean;
   activate(): void;
   deactivate(): void;
+    ctrlG(): void;
+
+  onYank(text: string | undefined): void
+  onKill(text: string | undefined): void
+  // TODO pasteHandler
+  // TODO escape handler (or just same ctrl g?)
+  // TODO: enterHandler
   // Returns whether or not to still send the code
   textHandler(s: string): boolean;
   delHandler(cmd: string): boolean;
   moveHandler(cmd: string, ...rest: any[]): boolean;
-  
-  ctrlG(): void;
-
-  onYank(text: string | undefined): void
-  onKill(text: string | undefined): void
-  // pasteHandler
-  // escape handler
 }
 
 class FindHandler {
