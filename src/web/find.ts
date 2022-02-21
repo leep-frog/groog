@@ -68,6 +68,7 @@ export class FindHandler {
       case "deleteLeft":
         this.findText = this.findText.slice(0, this.findText.length-1);
         this.findWithArgs();
+        break;
       default:
         vscode.window.showInformationMessage("Unsupported find command: " + s);
       }
