@@ -565,9 +565,6 @@
       {
         "key": "ctrl+s",
         "command": "groog.find",
-        "args": {
-          "searchString": "editorr"
-        },
         "when": "!groog.qmk && !findWidgetVisible"
       },
       {

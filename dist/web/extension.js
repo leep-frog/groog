@@ -27,7 +27,7 @@ class Emacs {
         // TODO: store this in persistent storage somewhere
         this.qmk = false;
         this.typeHandlers = [
-            //new FindHandler(),
+            new FindHandler(),
             new MarkHandler(),
             r,
         ];
@@ -56,7 +56,7 @@ class Emacs {
         let apply = true;
         for (var th of this.typeHandlers) {
             if (th.active) {
-                apply && (apply = th.textHandler(d));
+                apply && (apply = th.delHandler(d));
             }
         }
         if (apply) {
@@ -156,11 +156,16 @@ class FindHandler {
         this.active = false;
         this.findText = "";
     }
+    nextMatch() {
+        vscode.commands.executeCommand("editor.action.moveSelectionToNextFindMatch");
+    }
+    prevMatch() {
+        vscode.commands.executeCommand("editor.action.moveSelectionToPreviousFindMatch");
+    }
     register(context, recorder) {
         recorder.registerCommand(context, 'find', () => {
             if (this.active) {
-                // Go to next find
-                vscode.commands.executeCommand("editor.action.moveSelectionToNextFindMatch");
+                this.nextMatch();
             }
             else {
                 this.activate();
@@ -193,6 +198,7 @@ class FindHandler {
         return false;
     }
     moveHandler(s) {
+        // TODO: ctrl+p previous match? Or ctrl+shift+p (and ctrl+n for next)
         this.deactivate();
         return true;
     }

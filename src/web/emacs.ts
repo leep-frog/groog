@@ -19,7 +19,7 @@ export class Emacs {
     // TODO: store this in persistent storage somewhere
     this.qmk = false;
     this.typeHandlers = [
-      //new FindHandler(),
+      new FindHandler(),
       new MarkHandler(),
       r,
     ];
@@ -52,7 +52,7 @@ export class Emacs {
     let apply = true;
     for (var th of this.typeHandlers) {
       if (th.active) {
-        apply &&= th.textHandler(d);
+        apply &&= th.delHandler(d);
       }
     }
     if (apply) {
@@ -168,6 +168,7 @@ interface TypeHandler {
   // TODO pasteHandler
   // TODO escape handler (or just same ctrl g?)
   // TODO: enterHandler
+
   // Returns whether or not to still send the code
   textHandler(s: string): boolean;
   delHandler(cmd: string): boolean;
@@ -183,11 +184,18 @@ class FindHandler {
     this.findText = "";
   }
 
+  nextMatch() {
+    vscode.commands.executeCommand("editor.action.moveSelectionToNextFindMatch");
+  }
+
+  prevMatch() {
+    vscode.commands.executeCommand("editor.action.moveSelectionToPreviousFindMatch");
+  }
+
   register(context: vscode.ExtensionContext, recorder: Recorder) {
     recorder.registerCommand(context, 'find', () => {
       if (this.active) {
-        // Go to next find
-        vscode.commands.executeCommand("editor.action.moveSelectionToNextFindMatch");
+        this.nextMatch();
       } else {
         this.activate();
       }
@@ -224,6 +232,7 @@ class FindHandler {
   }
 
   moveHandler(s: string): boolean {
+    // TODO: ctrl+p previous match? Or ctrl+shift+p (and ctrl+n for next)
     this.deactivate();
     return true;
   }
