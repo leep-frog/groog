@@ -311,7 +311,15 @@ class MarkHandler {
         return true;
     }
     moveHandler(vsCommand, ...rest) {
-        vscode.commands.executeCommand(vsCommand + "Select", ...rest);
+        // See below link for cusorMove args (including "select" keyword)
+        // https://code.visualstudio.com/api/references/commands
+        if (vsCommand === "cursorMove") {
+            rest[0].select = true;
+            vscode.commands.executeCommand(vsCommand, ...rest);
+        }
+        else {
+            vscode.commands.executeCommand(vsCommand + "Select", ...rest);
+        }
         return false;
     }
     delHandler(s) {
