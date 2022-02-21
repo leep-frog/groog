@@ -12,6 +12,7 @@ const vscode = __webpack_require__(1);
 const record_1 = __webpack_require__(3);
 const mark_1 = __webpack_require__(47);
 const find_1 = __webpack_require__(48);
+const multi_command_1 = __webpack_require__(4);
 const jumpDist = 10;
 exports.cursorMoves = [
     "cursorUp",
@@ -36,7 +37,7 @@ exports.deleteCommands = [
     deleteWordRight,
 ];
 class Emacs {
-    constructor(r) {
+    constructor() {
         // TODO: store this in persistent storage somewhere
         this.qmk = false;
         this.recorder = new record_1.Recorder();
@@ -46,27 +47,28 @@ class Emacs {
             this.recorder,
         ];
     }
-    register(context, recorder) {
+    register(context) {
         for (var move of exports.cursorMoves) {
             const m = move;
-            recorder.registerCommand(context, move, () => this.move(m));
+            this.recorder.registerCommand(context, move, () => this.move(m));
         }
         for (var dc of exports.deleteCommands) {
             const d = dc;
-            recorder.registerCommand(context, d, () => this.delCommand(d));
+            this.recorder.registerCommand(context, d, () => this.delCommand(d));
         }
         context.subscriptions.push(vscode.commands.registerCommand('type', (...args) => {
             this.type(...args);
         }));
-        recorder.registerCommand(context, 'jump', () => this.jump());
-        recorder.registerCommand(context, 'fall', () => this.fall());
-        recorder.registerCommand(context, 'toggleQMK', () => this.toggleQMK());
-        recorder.registerCommand(context, 'yank', () => this.yank());
-        recorder.registerCommand(context, 'kill', () => this.kill());
-        recorder.registerCommand(context, 'ctrlG', () => this.ctrlG());
+        this.recorder.registerCommand(context, 'jump', () => this.jump());
+        this.recorder.registerCommand(context, 'fall', () => this.fall());
+        this.recorder.registerCommand(context, 'toggleQMK', () => this.toggleQMK());
+        this.recorder.registerCommand(context, 'yank', () => this.yank());
+        this.recorder.registerCommand(context, 'kill', () => this.kill());
+        this.recorder.registerCommand(context, 'ctrlG', () => this.ctrlG());
         for (var th of this.typeHandlers) {
-            th.register(context, recorder);
+            th.register(context, this.recorder);
         }
+        this.recorder.registerCommand(context, "multiCommand.execute", multi_command_1.multiCommand);
     }
     type(...args) {
         if (!vscode.window.activeTextEditor) {
@@ -491,15 +493,11 @@ var exports = __webpack_exports__;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.deactivate = exports.activate = void 0;
 const emacs_1 = __webpack_require__(2);
-const record_1 = __webpack_require__(3);
-const multi_command_1 = __webpack_require__(4);
-const recorder = new record_1.Recorder();
-const groogery = new emacs_1.Emacs(recorder);
+const groogery = new emacs_1.Emacs();
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 function activate(context) {
-    groogery.register(context, recorder);
-    recorder.registerCommand(context, "multiCommand.execute", multi_command_1.multiCommand);
+    groogery.register(context);
 }
 exports.activate = activate;
 // this method is called when your extension is deactivated

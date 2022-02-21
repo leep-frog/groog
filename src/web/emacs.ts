@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import {Recorder} from './record';
 import {MarkHandler} from './mark';
 import {FindHandler} from './find';
+import {multiCommand} from './multi-command';
 
 const jumpDist = 10;
 export const cursorMoves: string[] = [
@@ -59,7 +60,7 @@ export class Emacs {
   recorder: Recorder;
   typeHandlers: TypeHandler[];
 
-  constructor(r: Recorder) {
+  constructor() {
     // TODO: store this in persistent storage somewhere
     this.qmk = false;
     this.recorder = new Recorder();
@@ -70,31 +71,33 @@ export class Emacs {
     ];
   }
 
-  register(context: vscode.ExtensionContext, recorder: Recorder) {
+  register(context: vscode.ExtensionContext) {
     for (var move of cursorMoves) {
       const m = move;
-      recorder.registerCommand(context, move, () => this.move(m));
+      this.recorder.registerCommand(context, move, () => this.move(m));
     }
     for (var dc of deleteCommands) {
       const d = dc;
-      recorder.registerCommand(context, d, () => this.delCommand(d));
+      this.recorder.registerCommand(context, d, () => this.delCommand(d));
     }
 
     context.subscriptions.push(vscode.commands.registerCommand('type', (...args: any[]) => {
       this.type(...args);
     }));
 
-    recorder.registerCommand(context, 'jump', () => this.jump());
-    recorder.registerCommand(context, 'fall', () => this.fall());
+    this.recorder.registerCommand(context, 'jump', () => this.jump());
+    this.recorder.registerCommand(context, 'fall', () => this.fall());
 
-    recorder.registerCommand(context, 'toggleQMK', () => this.toggleQMK());
-    recorder.registerCommand(context, 'yank', () => this.yank());
-    recorder.registerCommand(context, 'kill', () => this.kill());
-    recorder.registerCommand(context, 'ctrlG', () => this.ctrlG());
+    this.recorder.registerCommand(context, 'toggleQMK', () => this.toggleQMK());
+    this.recorder.registerCommand(context, 'yank', () => this.yank());
+    this.recorder.registerCommand(context, 'kill', () => this.kill());
+    this.recorder.registerCommand(context, 'ctrlG', () => this.ctrlG());
 
     for (var th of this.typeHandlers) {
-      th.register(context, recorder);
+      th.register(context, this.recorder);
     }
+
+    this.recorder.registerCommand(context, "multiCommand.execute", multiCommand);
   }
 
   type(...args: any[]) {
