@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 export class Recorder {
   private baseCommand: boolean;
   active: boolean; // aka "recording"
-  private recordBook: record[];
+  private recordBook: Record[];
 
   constructor() {
     this.baseCommand = true;
@@ -27,7 +27,7 @@ export class Recorder {
     if (command.includes("groog.record") || !this.active || !this.baseCommand) {
       return callback(...args);
     }
-    this.addRecord(new record(command, args));
+    this.addRecord(new Record(command, args));
     this.baseCommand = false;
     let r = callback(...args);
     this.baseCommand = true;
@@ -77,12 +77,12 @@ export class Recorder {
 
   }
 
-  addRecord(r: record) {
+  addRecord(r: Record) {
     this.recordBook = this.recordBook.concat(r);
   }
 
   textHandler(s: string): boolean {
-    this.addRecord(new record("default:type", [{ "text": s}]));
+    this.addRecord(new Record("default:type", [{ "text": s}]));
     return true;
   }
   
@@ -100,7 +100,7 @@ export class Recorder {
   }
 }
 
-class record {
+class Record {
   command: string;
   args: any[];
 

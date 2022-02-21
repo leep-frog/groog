@@ -1,31 +1,97 @@
 import * as vscode from 'vscode';
 import {Recorder} from './record';
+import {MarkHandler} from './mark';
+import {FindHandler} from './find';
 
 const jumpDist = 10;
 export const cursorMoves: string[] = [
-  "cursorUp", "cursorDown", "cursorLeft", "cursorRight",
-  "cursorHome", "cursorEnd",
-  "cursorWordLeft", "cursorWordRight",
-  "cursorTop", "cursorBottom"
+  "cursorUp", 
+  "cursorDown",
+  "cursorLeft",
+  "cursorRight",
+  "cursorHome",
+  "cursorEnd",
+  "cursorWordLeft",
+  "cursorWordRight",
+  "cursorTop",
+  "cursorBottom"
 ];
+
+const deleteLeft = "deleteLeft";
+const deleteRight = "deleteRight";
+const deleteWordLeft = "deleteWordLeft";
+const deleteWordRight = "deleteWordRight";
+
+export const deleteCommands: string[] = [
+  deleteLeft,
+  deleteRight,
+  deleteWordLeft,
+  deleteWordRight,
+];
+
+interface Registerable {
+  register(context: vscode.ExtensionContext, recorder: Recorder): void;
+}
+
+interface TypeHandler extends Registerable {  
+  active: boolean;
+  activate(): void;
+  deactivate(): void;
+  ctrlG(): void;
+
+  onYank(text: string | undefined): void
+  onKill(text: string | undefined): void
+
+  // Returns whether or not to still send the code
+  textHandler(s: string): boolean;
+  delHandler(cmd: string): boolean;
+  moveHandler(cmd: string, ...rest: any[]): boolean;
+
+  // TODO pasteHandler
+  // TODO escape handler (or just same ctrl g?)
+  // TODO: enterHandler (or just defer to type handlers?)
+}
 
 export class Emacs {
   private qmk: boolean;
   // TODO: Move these to Finder type
 
+  recorder: Recorder;
   typeHandlers: TypeHandler[];
 
   constructor(r: Recorder) {
     // TODO: store this in persistent storage somewhere
     this.qmk = false;
+    this.recorder = new Recorder();
     this.typeHandlers = [
       new FindHandler(),
       new MarkHandler(),
-      r,
+      this.recorder,
     ];
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
+    for (var move of cursorMoves) {
+      const m = move;
+      recorder.registerCommand(context, move, () => this.move(m));
+    }
+    for (var dc of deleteCommands) {
+      const d = dc;
+      recorder.registerCommand(context, d, () => this.delCommand(d));
+    }
+
+    context.subscriptions.push(vscode.commands.registerCommand('type', (...args: any[]) => {
+      this.type(...args);
+    }));
+
+    recorder.registerCommand(context, 'jump', () => this.jump());
+    recorder.registerCommand(context, 'fall', () => this.fall());
+
+    recorder.registerCommand(context, 'toggleQMK', () => this.toggleQMK());
+    recorder.registerCommand(context, 'yank', () => this.yank());
+    recorder.registerCommand(context, 'kill', () => this.kill());
+    recorder.registerCommand(context, 'ctrlG', () => this.ctrlG());
+
     for (var th of this.typeHandlers) {
       th.register(context, recorder);
     }
@@ -140,188 +206,6 @@ export class Emacs {
     if (apply) {
       vscode.commands.executeCommand(vsCommand, ...rest);
     }
-  }
-}
-
-const deleteLeft = "deleteLeft";
-const deleteRight = "deleteRight";
-const deleteWordLeft = "deleteWordLeft";
-const deleteWordRight = "deleteWordRight";
-
-
-export const deleteCommands: string[] = [
-  deleteLeft,
-  deleteRight,
-  deleteWordLeft,
-  deleteWordRight,
-];
-
-interface TypeHandler {
-  register(context: vscode.ExtensionContext, recorder: Recorder): void;
-  active: boolean;
-  activate(): void;
-  deactivate(): void;
-    ctrlG(): void;
-
-  onYank(text: string | undefined): void
-  onKill(text: string | undefined): void
-  // TODO pasteHandler
-  // TODO escape handler (or just same ctrl g?)
-  // TODO: enterHandler
-
-  // Returns whether or not to still send the code
-  textHandler(s: string): boolean;
-  delHandler(cmd: string): boolean;
-  moveHandler(cmd: string, ...rest: any[]): boolean;
-}
-
-class FindHandler {
-  active: boolean;
-  findText: string;
-
-  constructor() {
-    this.active = false;
-    this.findText = "";
-  }
-
-  nextMatch() {
-    vscode.commands.executeCommand("editor.action.moveSelectionToNextFindMatch");
-  }
-
-  prevMatch() {
-    vscode.commands.executeCommand("editor.action.moveSelectionToPreviousFindMatch");
-  }
-
-  register(context: vscode.ExtensionContext, recorder: Recorder) {
-    recorder.registerCommand(context, 'find', () => {
-      if (this.active) {
-        this.nextMatch();
-      } else {
-        this.activate();
-      }
-    });
-  }
-
-  activate() {
-    this.active = true;
-    this.findWithArgs();
-  }
-
-  deactivate() {
-    this.active = false;
-    this.findText = "";
-  }
-
-  findWithArgs() {
-    if (this.findText.length === 0) {
-      vscode.commands.executeCommand("editor.actions.findWithArgs", {"searchString": "ENTER_TEXT"});
-    } else {
-      vscode.commands.executeCommand("editor.actions.findWithArgs", {"searchString": this.findText});
-    }
-    vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
-  }
-
-  ctrlG() {
-    this.deactivate();
-  }
-
-  textHandler(s: string): boolean {
-    this.findText = this.findText.concat(s);
-    this.findWithArgs();
-    return false;
-  }
-
-  moveHandler(s: string): boolean {
-    // TODO: ctrl+p previous match? Or ctrl+shift+p (and ctrl+n for next)
-    this.deactivate();
-    return true;
-  }
-
-  delHandler(s: string): boolean {
-    switch (s) {
-      case "deleteLeft":
-        this.findText = this.findText.slice(0, this.findText.length-1);
-        this.findWithArgs();
-      default:
-        vscode.window.showInformationMessage("Unsupported find command: " + s);
-      }
-    return false;
-  }
-
-  onYank(s: string | undefined) {}
-  onKill(s: string | undefined) {}
-}
-
-class MarkHandler {
-  active: boolean;
-  yanked: string;
-
-  constructor() {
-    this.active = false;
-    this.yanked = "";
-  }
-
-  register(context: vscode.ExtensionContext, recorder: Recorder) {
-    recorder.registerCommand(context, 'toggleMarkMode', () => {
-      if (this.active) {
-        this.deactivate();
-      } else {
-        this.activate();
-      }
-    });
-    recorder.registerCommand(context, 'paste', () => {
-      if (this.active) {
-        this.deactivate();
-      }
-
-      vscode.window.activeTextEditor?.edit(editBuilder => {
-        let editor = vscode.window.activeTextEditor;
-        if (!editor) {
-          return;
-        }
-        editBuilder.insert(editor.selection.active, this.yanked);
-      });
-    });
-  }
-
-  activate() {
-    this.active = true;
-    vscode.commands.executeCommand('setContext', 'groog.markMode', true);
-  }
-
-  deactivate() {
-    this.active = false;
-    vscode.commands.executeCommand('setContext', 'groog.markMode', false);
-  }
-
-  ctrlG() {
-    this.deactivate();
-  }
-
-  textHandler(s: string): boolean {
-    this.deactivate();
-    return true;
-  }
-
-  moveHandler(vsCommand: string, ...rest: any[]): boolean {
-    vscode.commands.executeCommand(vsCommand + "Select", ...rest);
-    return false;
-  }
-
-  delHandler(s: string): boolean {
-    this.deactivate();
-    return true;
-  }
-
-  
-  onYank(s: string | undefined) {
-    this.deactivate();
-    s ? this.yanked = s : this.yanked = "";
-  }
-
-  onKill(s: string | undefined) {
-    this.deactivate();
-    s ? this.yanked = s : this.yanked = "";
   }
 }
 

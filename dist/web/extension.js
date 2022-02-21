@@ -1,38 +1,69 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
-/******/ 	var __webpack_modules__ = ([
-/* 0 */,
-/* 1 */
-/***/ ((module) => {
+/******/ 	var __webpack_modules__ = ({
 
-module.exports = require("vscode");
-
-/***/ }),
-/* 2 */
+/***/ 2:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.deleteCommands = exports.Emacs = exports.cursorMoves = void 0;
+exports.Emacs = exports.deleteCommands = exports.cursorMoves = void 0;
 const vscode = __webpack_require__(1);
+const record_1 = __webpack_require__(3);
+const mark_1 = __webpack_require__(47);
+const find_1 = __webpack_require__(48);
 const jumpDist = 10;
 exports.cursorMoves = [
-    "cursorUp", "cursorDown", "cursorLeft", "cursorRight",
-    "cursorHome", "cursorEnd",
-    "cursorWordLeft", "cursorWordRight",
-    "cursorTop", "cursorBottom"
+    "cursorUp",
+    "cursorDown",
+    "cursorLeft",
+    "cursorRight",
+    "cursorHome",
+    "cursorEnd",
+    "cursorWordLeft",
+    "cursorWordRight",
+    "cursorTop",
+    "cursorBottom"
+];
+const deleteLeft = "deleteLeft";
+const deleteRight = "deleteRight";
+const deleteWordLeft = "deleteWordLeft";
+const deleteWordRight = "deleteWordRight";
+exports.deleteCommands = [
+    deleteLeft,
+    deleteRight,
+    deleteWordLeft,
+    deleteWordRight,
 ];
 class Emacs {
     constructor(r) {
         // TODO: store this in persistent storage somewhere
         this.qmk = false;
+        this.recorder = new record_1.Recorder();
         this.typeHandlers = [
-            new FindHandler(),
-            new MarkHandler(),
-            r,
+            new find_1.FindHandler(),
+            new mark_1.MarkHandler(),
+            this.recorder,
         ];
     }
     register(context, recorder) {
+        for (var move of exports.cursorMoves) {
+            const m = move;
+            recorder.registerCommand(context, move, () => this.move(m));
+        }
+        for (var dc of exports.deleteCommands) {
+            const d = dc;
+            recorder.registerCommand(context, d, () => this.delCommand(d));
+        }
+        context.subscriptions.push(vscode.commands.registerCommand('type', (...args) => {
+            this.type(...args);
+        }));
+        recorder.registerCommand(context, 'jump', () => this.jump());
+        recorder.registerCommand(context, 'fall', () => this.fall());
+        recorder.registerCommand(context, 'toggleQMK', () => this.toggleQMK());
+        recorder.registerCommand(context, 'yank', () => this.yank());
+        recorder.registerCommand(context, 'kill', () => this.kill());
+        recorder.registerCommand(context, 'ctrlG', () => this.ctrlG());
         for (var th of this.typeHandlers) {
             th.register(context, recorder);
         }
@@ -141,16 +172,22 @@ class Emacs {
     }
 }
 exports.Emacs = Emacs;
-const deleteLeft = "deleteLeft";
-const deleteRight = "deleteRight";
-const deleteWordLeft = "deleteWordLeft";
-const deleteWordRight = "deleteWordRight";
-exports.deleteCommands = [
-    deleteLeft,
-    deleteRight,
-    deleteWordLeft,
-    deleteWordRight,
-];
+class TypeArg {
+    constructor(text) {
+        this.text = "";
+    }
+}
+
+
+/***/ }),
+
+/***/ 48:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FindHandler = void 0;
+const vscode = __webpack_require__(1);
 class FindHandler {
     constructor() {
         this.active = false;
@@ -215,6 +252,18 @@ class FindHandler {
     onYank(s) { }
     onKill(s) { }
 }
+exports.FindHandler = FindHandler;
+
+
+/***/ }),
+
+/***/ 47:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MarkHandler = void 0;
+const vscode = __webpack_require__(1);
 class MarkHandler {
     constructor() {
         this.active = false;
@@ -275,15 +324,29 @@ class MarkHandler {
         s ? this.yanked = s : this.yanked = "";
     }
 }
-class TypeArg {
-    constructor(text) {
-        this.text = "";
-    }
-}
+exports.MarkHandler = MarkHandler;
 
 
 /***/ }),
-/* 3 */
+
+/***/ 4:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.multiCommand = void 0;
+const vscode = __webpack_require__(1);
+function multiCommand(mc) {
+    for (var command of mc.sequence) {
+        vscode.commands.executeCommand(command);
+    }
+}
+exports.multiCommand = multiCommand;
+
+
+/***/ }),
+
+/***/ 3:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -310,7 +373,7 @@ class Recorder {
         if (command.includes("groog.record") || !this.active || !this.baseCommand) {
             return callback(...args);
         }
-        this.addRecord(new record(command, args));
+        this.addRecord(new Record(command, args));
         this.baseCommand = false;
         let r = callback(...args);
         this.baseCommand = true;
@@ -359,7 +422,7 @@ class Recorder {
         this.recordBook = this.recordBook.concat(r);
     }
     textHandler(s) {
-        this.addRecord(new record("default:type", [{ "text": s }]));
+        this.addRecord(new Record("default:type", [{ "text": s }]));
         return true;
     }
     // Make this implement type interface:
@@ -376,7 +439,7 @@ class Recorder {
     }
 }
 exports.Recorder = Recorder;
-class record {
+class Record {
     constructor(command, args) {
         this.command = command;
         this.args = args;
@@ -385,23 +448,15 @@ class record {
 
 
 /***/ }),
-/* 4 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
+/***/ 1:
+/***/ ((module) => {
 
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.multiCommand = void 0;
-const vscode = __webpack_require__(1);
-function multiCommand(mc) {
-    for (var command of mc.sequence) {
-        vscode.commands.executeCommand(command);
-    }
-}
-exports.multiCommand = multiCommand;
-
+module.exports = require("vscode");
 
 /***/ })
-/******/ 	]);
+
+/******/ 	});
 /************************************************************************/
 /******/ 	// The module cache
 /******/ 	var __webpack_module_cache__ = {};
@@ -435,53 +490,16 @@ var exports = __webpack_exports__;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.deactivate = exports.activate = void 0;
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-const vscode = __webpack_require__(1);
 const emacs_1 = __webpack_require__(2);
 const record_1 = __webpack_require__(3);
 const multi_command_1 = __webpack_require__(4);
-let baseCommand = true;
-let recording = false;
 const recorder = new record_1.Recorder();
 const groogery = new emacs_1.Emacs(recorder);
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 function activate(context) {
-    vscode.window.showInformationMessage("yupo");
-    for (var move of emacs_1.cursorMoves) {
-        const m = move;
-        recorder.registerCommand(context, move, () => groogery.move(m));
-    }
-    for (var dc of emacs_1.deleteCommands) {
-        const d = dc;
-        recorder.registerCommand(context, d, () => groogery.delCommand(d));
-    }
-    context.subscriptions.push(vscode.commands.registerCommand('type', (...args) => {
-        groogery.type(...args);
-    }));
-    recorder.registerCommand(context, 'jump', () => groogery.jump());
-    recorder.registerCommand(context, 'fall', () => groogery.fall());
-    recorder.registerCommand(context, 'toggleQMK', () => groogery.toggleQMK());
-    recorder.registerCommand(context, 'yank', () => groogery.yank());
-    recorder.registerCommand(context, 'kill', () => groogery.kill());
-    recorder.registerCommand(context, 'ctrlG', () => groogery.ctrlG());
+    groogery.register(context, recorder);
     recorder.registerCommand(context, "multiCommand.execute", multi_command_1.multiCommand);
-    for (var th of groogery.typeHandlers) {
-        th.register(context, recorder);
-    }
-    // Use the console to output diagnostic information (console.log) and errors (console.error)
-    // This line of code will only be executed once when your extension is activated
-    console.log('Congratulations, your extension "groog" is now active in the web extension host!');
-    // The command has been defined in the package.json file
-    // Now provide the implementation of the command with registerCommand
-    // The commandId parameter must match the command field in package.json
-    let disposable = vscode.commands.registerCommand('groog.helloWorld', () => {
-        // The code you place here will be executed every time your command is executed
-        // Display a message box to the user
-        vscode.window.showInformationMessage('Hello World from groog in a web extension host!');
-    });
-    context.subscriptions.push(disposable);
 }
 exports.activate = activate;
 // this method is called when your extension is deactivated
