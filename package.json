@@ -294,13 +294,8 @@
       },
       {
         "key": "ctrl+s",
-        "command": "editor.action.nextMatchFindAction",
-        "when": "!groog.qmk && findWidgetVisible"
-      },
-      {
-        "key": "ctrl+s",
         "command": "groog.find",
-        "when": "!groog.qmk && !findWidgetVisible"
+        "when": "!groog.qmk"
       },
       {
         "key": "ctrl+s",
@@ -310,12 +305,7 @@
       {
         "key": "ctrl+f",
         "command": "groog.find",
-        "when": "groog.qmk && !findWidgetVisible"
-      },
-      {
-        "key": "ctrl+f",
-        "command": "editor.action.nextMatchFindAction",
-        "when": "groog.qmk && findWidgetVisible"
+        "when": "groog.qmk"
       },
       {
         "key": "ctrl+r",

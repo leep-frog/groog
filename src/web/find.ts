@@ -12,13 +12,16 @@ export class FindHandler {
     this.cursorStack = new CursorStack();
   }
 
-  nextMatch() {
+  cursorToFront() {
     // Move cursor to beginning of selection
     let editor = vscode.window.activeTextEditor;
     if (editor) {
       let startPos = editor.selection.start;
       editor.selection = new vscode.Selection(startPos, startPos);
     }
+  }
+
+  nextMatch() {
     // Then find next match
     vscode.commands.executeCommand("editor.action.nextMatchFindAction");
   }
@@ -55,6 +58,7 @@ export class FindHandler {
       vscode.commands.executeCommand("editor.actions.findWithArgs", {"searchString": this.findText});
     }
     vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
+    this.cursorToFront();
     this.nextMatch();
   }
 
@@ -63,10 +67,14 @@ export class FindHandler {
   }
 
   textHandler(s: string): boolean {
+    if (s === "\n") {
+      // TODO: shift enter
+      this.nextMatch();
+      return false;
+    }
     this.findText = this.findText.concat(s);
     this.cursorStack.push();
     this.findWithArgs();
-    // TODO: enter key == ctrl+s (aka find next)
     return false;
   }
 
