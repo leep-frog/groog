@@ -409,10 +409,12 @@ class FindHandler {
     }
     activate() {
         this.active = true;
+        vscode.commands.executeCommand('setContext', 'groog.findMode', true);
         this.findWithArgs();
     }
     deactivate() {
         this.active = false;
+        vscode.commands.executeCommand('setContext', 'groog.findMode', false);
         this.findText = "";
         this.cursorStack.clear();
     }

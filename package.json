@@ -312,6 +312,16 @@
         "command": "editor.action.previousMatchFindAction"
       },
       {
+        "key": "ctrl+p",
+        "command": "editor.action.previousMatchFindAction",
+        "when": "groog.findMode"
+      },
+      {
+        "key": "ctrl+n",
+        "command": "editor.action.nextMatchFindAction",
+        "when": "groog.findMode"
+      },
+      {
         "key": "alt+b",
         "command": "groog.cursorWordLeft"
       },
