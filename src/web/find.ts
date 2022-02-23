@@ -4,18 +4,27 @@ import {Recorder} from './record';
 export class FindHandler {
   active: boolean;
   findText: string;
+  cursorStack: CursorStack;
 
   constructor() {
     this.active = false;
     this.findText = "";
+    this.cursorStack = new CursorStack();
   }
 
   nextMatch() {
-    vscode.commands.executeCommand("editor.action.moveSelectionToNextFindMatch");
+    // Move cursor to beginning of selection
+    let editor = vscode.window.activeTextEditor;
+    if (editor) {
+      let startPos = editor.selection.start;
+      editor.selection = new vscode.Selection(startPos, startPos);
+    }
+    // Then find next match
+    vscode.commands.executeCommand("editor.action.nextMatchFindAction");
   }
 
   prevMatch() {
-    vscode.commands.executeCommand("editor.action.moveSelectionToPreviousFindMatch");
+    vscode.commands.executeCommand("editor.action.previousMatchFindAction");
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
@@ -36,15 +45,17 @@ export class FindHandler {
   deactivate() {
     this.active = false;
     this.findText = "";
+    this.cursorStack.clear();
   }
 
   findWithArgs() {
     if (this.findText.length === 0) {
-      vscode.commands.executeCommand("editor.actions.findWithArgs", {"searchString": "ENTER_TEXT"});
+      vscode.commands.executeCommand("editor.actions.findWithArgs", {"searchString": "ENTER" + "_TEXT"});
     } else {
       vscode.commands.executeCommand("editor.actions.findWithArgs", {"searchString": this.findText});
     }
     vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
+    this.nextMatch();
   }
 
   ctrlG() {
@@ -53,7 +64,9 @@ export class FindHandler {
 
   textHandler(s: string): boolean {
     this.findText = this.findText.concat(s);
+    this.cursorStack.push();
     this.findWithArgs();
+    // TODO: enter key == ctrl+s (aka find next)
     return false;
   }
 
@@ -67,6 +80,7 @@ export class FindHandler {
     switch (s) {
       case "deleteLeft":
         this.findText = this.findText.slice(0, this.findText.length-1);
+        this.cursorStack.popAndSet();
         this.findWithArgs();
         break;
       default:
@@ -75,6 +89,44 @@ export class FindHandler {
     return false;
   }
 
+  // TODO: do something like error message or deactivate
   onYank(s: string | undefined) {}
   onKill(s: string | undefined) {}
+}
+
+class CursorStack {
+  selections: vscode.Position[];
+
+  constructor() {
+    this.selections = [];
+  }
+
+  push() {
+    let editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showErrorMessage("Couldn't find active editor");
+      this.selections.push(new vscode.Position(0, 0));
+      return;
+    }
+    this.selections.push(new vscode.Position(editor.selection.start.line, editor.selection.start.character));
+  }
+
+  popAndSet() {
+    let p = this.selections.pop();
+    if (!p) {
+      vscode.window.showErrorMessage("Ran out of cursor positions");
+      return;
+    }
+    let editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showErrorMessage("Undefined editor");
+      return;
+    }
+    // https://github.com/microsoft/vscode/issues/111#issuecomment-157998910
+    editor.selection = new vscode.Selection(p, p);
+  }
+
+  clear() {
+    this.selections = [];
+  }
 }

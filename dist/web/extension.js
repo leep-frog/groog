@@ -1,18 +1,18 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
-/******/ 	var __webpack_modules__ = ({
-
-/***/ 2:
+/******/ 	var __webpack_modules__ = ([
+/* 0 */,
+/* 1 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Emacs = exports.deleteCommands = exports.cursorMoves = void 0;
-const vscode = __webpack_require__(1);
+const vscode = __webpack_require__(2);
 const record_1 = __webpack_require__(3);
-const mark_1 = __webpack_require__(47);
-const find_1 = __webpack_require__(48);
-const multi_command_1 = __webpack_require__(4);
+const mark_1 = __webpack_require__(4);
+const find_1 = __webpack_require__(5);
+const multi_command_1 = __webpack_require__(6);
 const jumpDist = 10;
 exports.cursorMoves = [
     "cursorUp",
@@ -182,188 +182,19 @@ class TypeArg {
 
 
 /***/ }),
+/* 2 */
+/***/ ((module) => {
 
-/***/ 48:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FindHandler = void 0;
-const vscode = __webpack_require__(1);
-class FindHandler {
-    constructor() {
-        this.active = false;
-        this.findText = "";
-    }
-    nextMatch() {
-        vscode.commands.executeCommand("editor.action.moveSelectionToNextFindMatch");
-    }
-    prevMatch() {
-        vscode.commands.executeCommand("editor.action.moveSelectionToPreviousFindMatch");
-    }
-    register(context, recorder) {
-        recorder.registerCommand(context, 'find', () => {
-            if (this.active) {
-                this.nextMatch();
-            }
-            else {
-                this.activate();
-            }
-        });
-    }
-    activate() {
-        this.active = true;
-        this.findWithArgs();
-    }
-    deactivate() {
-        this.active = false;
-        this.findText = "";
-    }
-    findWithArgs() {
-        if (this.findText.length === 0) {
-            vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": "ENTER_TEXT" });
-        }
-        else {
-            vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": this.findText });
-        }
-        vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
-    }
-    ctrlG() {
-        this.deactivate();
-    }
-    textHandler(s) {
-        this.findText = this.findText.concat(s);
-        this.findWithArgs();
-        return false;
-    }
-    moveHandler(s) {
-        // TODO: ctrl+p previous match? Or ctrl+shift+p (and ctrl+n for next)
-        this.deactivate();
-        return true;
-    }
-    delHandler(s) {
-        switch (s) {
-            case "deleteLeft":
-                this.findText = this.findText.slice(0, this.findText.length - 1);
-                this.findWithArgs();
-                break;
-            default:
-                vscode.window.showInformationMessage("Unsupported find command: " + s);
-        }
-        return false;
-    }
-    onYank(s) { }
-    onKill(s) { }
-}
-exports.FindHandler = FindHandler;
-
+module.exports = require("vscode");
 
 /***/ }),
-
-/***/ 47:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MarkHandler = void 0;
-const vscode = __webpack_require__(1);
-class MarkHandler {
-    constructor() {
-        this.active = false;
-        this.yanked = "";
-    }
-    register(context, recorder) {
-        recorder.registerCommand(context, 'toggleMarkMode', () => {
-            if (this.active) {
-                this.deactivate();
-            }
-            else {
-                this.activate();
-            }
-        });
-        recorder.registerCommand(context, 'paste', () => {
-            var _a;
-            if (this.active) {
-                this.deactivate();
-            }
-            (_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.edit(editBuilder => {
-                let editor = vscode.window.activeTextEditor;
-                if (!editor) {
-                    return;
-                }
-                editBuilder.insert(editor.selection.active, this.yanked);
-            });
-        });
-    }
-    activate() {
-        this.active = true;
-        vscode.commands.executeCommand('setContext', 'groog.markMode', true);
-    }
-    deactivate() {
-        this.active = false;
-        vscode.commands.executeCommand('setContext', 'groog.markMode', false);
-    }
-    ctrlG() {
-        this.deactivate();
-    }
-    textHandler(s) {
-        this.deactivate();
-        return true;
-    }
-    moveHandler(vsCommand, ...rest) {
-        // See below link for cusorMove args (including "select" keyword)
-        // https://code.visualstudio.com/api/references/commands
-        if (vsCommand === "cursorMove") {
-            rest[0].select = true;
-            vscode.commands.executeCommand(vsCommand, ...rest);
-        }
-        else {
-            vscode.commands.executeCommand(vsCommand + "Select", ...rest);
-        }
-        return false;
-    }
-    delHandler(s) {
-        this.deactivate();
-        return true;
-    }
-    onYank(s) {
-        this.deactivate();
-        s ? this.yanked = s : this.yanked = "";
-    }
-    onKill(s) {
-        this.deactivate();
-        s ? this.yanked = s : this.yanked = "";
-    }
-}
-exports.MarkHandler = MarkHandler;
-
-
-/***/ }),
-
-/***/ 4:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.multiCommand = void 0;
-const vscode = __webpack_require__(1);
-function multiCommand(mc) {
-    for (var command of mc.sequence) {
-        vscode.commands.executeCommand(command);
-    }
-}
-exports.multiCommand = multiCommand;
-
-
-/***/ }),
-
-/***/ 3:
+/* 3 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Recorder = void 0;
-const vscode = __webpack_require__(1);
+const vscode = __webpack_require__(2);
 class Recorder {
     constructor() {
         this.baseCommand = true;
@@ -459,15 +290,223 @@ class Record {
 
 
 /***/ }),
+/* 4 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
-/***/ 1:
-/***/ ((module) => {
 
-module.exports = require("vscode");
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MarkHandler = void 0;
+const vscode = __webpack_require__(2);
+class MarkHandler {
+    constructor() {
+        this.active = false;
+        this.yanked = "";
+    }
+    register(context, recorder) {
+        recorder.registerCommand(context, 'toggleMarkMode', () => {
+            if (this.active) {
+                this.deactivate();
+            }
+            else {
+                this.activate();
+            }
+        });
+        recorder.registerCommand(context, 'paste', () => {
+            var _a;
+            if (this.active) {
+                this.deactivate();
+            }
+            (_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.edit(editBuilder => {
+                let editor = vscode.window.activeTextEditor;
+                if (!editor) {
+                    return;
+                }
+                editBuilder.insert(editor.selection.active, this.yanked);
+            });
+        });
+    }
+    activate() {
+        this.active = true;
+        vscode.commands.executeCommand('setContext', 'groog.markMode', true);
+    }
+    deactivate() {
+        this.active = false;
+        vscode.commands.executeCommand('setContext', 'groog.markMode', false);
+    }
+    ctrlG() {
+        this.deactivate();
+    }
+    textHandler(s) {
+        this.deactivate();
+        return true;
+    }
+    moveHandler(vsCommand, ...rest) {
+        // See below link for cusorMove args (including "select" keyword)
+        // https://code.visualstudio.com/api/references/commands
+        if (vsCommand === "cursorMove") {
+            rest[0].select = true;
+            vscode.commands.executeCommand(vsCommand, ...rest);
+        }
+        else {
+            vscode.commands.executeCommand(vsCommand + "Select", ...rest);
+        }
+        return false;
+    }
+    delHandler(s) {
+        this.deactivate();
+        return true;
+    }
+    onYank(s) {
+        this.deactivate();
+        s ? this.yanked = s : this.yanked = "";
+    }
+    onKill(s) {
+        this.deactivate();
+        s ? this.yanked = s : this.yanked = "";
+    }
+}
+exports.MarkHandler = MarkHandler;
+
+
+/***/ }),
+/* 5 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FindHandler = void 0;
+const vscode = __webpack_require__(2);
+class FindHandler {
+    constructor() {
+        this.active = false;
+        this.findText = "";
+        this.cursorStack = new CursorStack();
+    }
+    nextMatch() {
+        // Move cursor to beginning of selection
+        let editor = vscode.window.activeTextEditor;
+        if (editor) {
+            let startPos = editor.selection.start;
+            editor.selection = new vscode.Selection(startPos, startPos);
+        }
+        // Then find next match
+        vscode.commands.executeCommand("editor.action.nextMatchFindAction");
+    }
+    prevMatch() {
+        vscode.commands.executeCommand("editor.action.previousMatchFindAction");
+    }
+    register(context, recorder) {
+        recorder.registerCommand(context, 'find', () => {
+            if (this.active) {
+                this.nextMatch();
+            }
+            else {
+                this.activate();
+            }
+        });
+    }
+    activate() {
+        this.active = true;
+        this.findWithArgs();
+    }
+    deactivate() {
+        this.active = false;
+        this.findText = "";
+        this.cursorStack.clear();
+    }
+    findWithArgs() {
+        if (this.findText.length === 0) {
+            vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": "ENTER" + "_TEXT" });
+        }
+        else {
+            vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": this.findText });
+        }
+        vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
+        this.nextMatch();
+    }
+    ctrlG() {
+        this.deactivate();
+    }
+    textHandler(s) {
+        this.findText = this.findText.concat(s);
+        this.cursorStack.push();
+        this.findWithArgs();
+        // TODO: enter key == ctrl+s (aka find next)
+        return false;
+    }
+    moveHandler(s) {
+        // TODO: ctrl+p previous match? Or ctrl+shift+p (and ctrl+n for next)
+        this.deactivate();
+        return true;
+    }
+    delHandler(s) {
+        switch (s) {
+            case "deleteLeft":
+                this.findText = this.findText.slice(0, this.findText.length - 1);
+                this.cursorStack.popAndSet();
+                this.findWithArgs();
+                break;
+            default:
+                vscode.window.showInformationMessage("Unsupported find command: " + s);
+        }
+        return false;
+    }
+    // TODO: do something like error message or deactivate
+    onYank(s) { }
+    onKill(s) { }
+}
+exports.FindHandler = FindHandler;
+class CursorStack {
+    constructor() {
+        this.selections = [];
+    }
+    push() {
+        let editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showErrorMessage("Couldn't find active editor");
+            this.selections.push(new vscode.Position(0, 0));
+            return;
+        }
+        this.selections.push(new vscode.Position(editor.selection.start.line, editor.selection.start.character));
+    }
+    popAndSet() {
+        let p = this.selections.pop();
+        if (!p) {
+            vscode.window.showErrorMessage("Ran out of cursor positions");
+            return;
+        }
+        let editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showErrorMessage("Undefined editor");
+            return;
+        }
+        // https://github.com/microsoft/vscode/issues/111#issuecomment-157998910
+        editor.selection = new vscode.Selection(p, p);
+    }
+    clear() {
+        this.selections = [];
+    }
+}
+
+
+/***/ }),
+/* 6 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.multiCommand = void 0;
+const vscode = __webpack_require__(2);
+function multiCommand(mc) {
+    for (var command of mc.sequence) {
+        vscode.commands.executeCommand(command);
+    }
+}
+exports.multiCommand = multiCommand;
+
 
 /***/ })
-
-/******/ 	});
+/******/ 	]);
 /************************************************************************/
 /******/ 	// The module cache
 /******/ 	var __webpack_module_cache__ = {};
@@ -501,7 +540,7 @@ var exports = __webpack_exports__;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.deactivate = exports.activate = void 0;
-const emacs_1 = __webpack_require__(2);
+const emacs_1 = __webpack_require__(1);
 const groogery = new emacs_1.Emacs();
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
