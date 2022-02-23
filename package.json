@@ -33,6 +33,7 @@
     "onCommand:groog.record.endRecording",
     "onCommand:groog.record.playRecording",
     "onCommand:groog.find",
+    "onCommand:groog.reverseFind",
     "onCommand:groog.deleteLeft",
     "onCommand:groog.deleteRight",
     "onCommand:groog.deleteWordLeft",
@@ -44,6 +45,10 @@
       {
         "command": "groog.find",
         "title": "Groog find"
+      },
+      {
+        "command": "groog.reverseFind",
+        "title": "Groog reverse find"
       },
       {
         "command": "groog.toggleQMK",
@@ -309,7 +314,7 @@
       },
       {
         "key": "ctrl+r",
-        "command": "editor.action.previousMatchFindAction"
+        "command": "groog.reverseFind"
       },
       {
         "key": "shift+enter",

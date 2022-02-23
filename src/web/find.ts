@@ -31,9 +31,17 @@ export class FindHandler {
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
+    // TODO: cache previous find
     recorder.registerCommand(context, 'find', () => {
       if (this.active) {
         this.nextMatch();
+      } else {
+        this.activate();
+      }
+    });
+    recorder.registerCommand(context, 'reverseFind', () => {
+      if (this.active) {
+        this.prevMatch();
       } else {
         this.activate();
       }
