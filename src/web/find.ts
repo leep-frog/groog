@@ -69,11 +69,7 @@ export class FindHandler {
   }
 
   textHandler(s: string): boolean {
-    if (s === "\n") {
-      // TODO: shift enter
-      this.nextMatch();
-      return false;
-    }
+    // Enter, shift+enter, ctrl+n, ctrl+p taken care of in package.json
     this.findText = this.findText.concat(s);
     this.cursorStack.push();
     this.findWithArgs();
