@@ -77,7 +77,6 @@ export class FindHandler {
   }
 
   moveHandler(s: string): boolean {
-    // TODO: ctrl+p previous match? Or ctrl+shift+p (and ctrl+n for next)
     this.deactivate();
     return true;
   }
@@ -101,6 +100,7 @@ export class FindHandler {
 }
 
 class CursorStack {
+  // TODO: mutex find stuff if performance is still finicky.
   selections: vscode.Position[];
 
   constructor() {

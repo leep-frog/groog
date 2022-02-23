@@ -440,7 +440,6 @@ class FindHandler {
         return false;
     }
     moveHandler(s) {
-        // TODO: ctrl+p previous match? Or ctrl+shift+p (and ctrl+n for next)
         this.deactivate();
         return true;
     }
