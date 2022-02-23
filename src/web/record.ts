@@ -61,9 +61,10 @@ export class Recorder {
     vscode.window.showInformationMessage("Playing recording!");
     let sl: string[] = [];
     for (var record of this.recordBook) {
-      vscode.window.showInformationMessage("playing " + record.command + "(" + record.args + ")");
+      sl.push(record.command);
       vscode.commands.executeCommand(record.command, ...record.args);
     }
+    vscode.window.showInformationMessage("playing: " + sl.join("\n"));
   }
 
   activate() {
@@ -82,7 +83,8 @@ export class Recorder {
   }
 
   textHandler(s: string): boolean {
-    this.addRecord(new Record("default:type", [{ "text": s}]));
+    vscode.window.showInformationMessage("rec text " + s);
+    this.addRecord(new Record("type", [{ "text": s}]));
     return true;
   }
   

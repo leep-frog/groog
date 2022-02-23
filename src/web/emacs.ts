@@ -100,33 +100,40 @@ export class Emacs {
     this.recorder.registerCommand(context, "multiCommand.execute", multiCommand);
   }
 
+  runHandlers(thCallback: (th: TypeHandler) => boolean, applyCallback: () => void) {
+    let apply = true;
+    for (var th of this.typeHandlers) {
+      if (th.active) {
+        if (!thCallback(th)) {
+          // Note, we can't do "apply &&= th.textHandler" because
+          // if apply is set to false at some point, then later
+          // handlers won't run
+          apply = false;
+        }
+      }
+    }
+    if (apply) {
+      applyCallback();
+    }
+  }
+
   type(...args: any[]) {
     if (!vscode.window.activeTextEditor) {
       vscode.window.showInformationMessage("NOT TEXT EDITOR?!?!");
 		}
 
-    let apply = true;
     let s = (args[0] as TypeArg).text;
-    for (var th of this.typeHandlers) {
-      if (th.active) {
-        apply &&= th.textHandler(s);
-      }
-    }
-    if (apply) {
-      vscode.commands.executeCommand("default:type", ...args);
-    }
+    this.runHandlers(
+      (th: TypeHandler): boolean => { return th.textHandler(s); },
+      () => {vscode.commands.executeCommand("default:type", ...args);},
+    );
   }
 
   delCommand(d: string) {
-    let apply = true;
-    for (var th of this.typeHandlers) {
-      if (th.active) {
-        apply &&= th.delHandler(d);
-      }
-    }
-    if (apply) {
-      vscode.commands.executeCommand(d);
-    }
+    this.runHandlers(
+      (th: TypeHandler): boolean => { return th.delHandler(d); },
+      () => {vscode.commands.executeCommand(d);},
+    );
   }
 
   toggleQMK() {
@@ -200,15 +207,10 @@ export class Emacs {
   }
 
   move(vsCommand: string, ...rest: any[]) {
-    let apply = true;
-    for (var th of this.typeHandlers) {
-      if (th.active) {
-        apply &&= th.moveHandler(vsCommand, ...rest);
-      }
-    }
-    if (apply) {
-      vscode.commands.executeCommand(vsCommand, ...rest);
-    }
+    this.runHandlers(
+      (th: TypeHandler): boolean => { return th.moveHandler(vsCommand, ...rest); },
+      () => {vscode.commands.executeCommand(vsCommand, ...rest);},
+    );
   }
 }
 

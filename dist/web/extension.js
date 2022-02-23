@@ -70,31 +70,31 @@ class Emacs {
         }
         this.recorder.registerCommand(context, "multiCommand.execute", multi_command_1.multiCommand);
     }
+    runHandlers(thCallback, applyCallback) {
+        let apply = true;
+        for (var th of this.typeHandlers) {
+            if (th.active) {
+                if (!thCallback(th)) {
+                    // Note, we can't do "apply &&= th.textHandler" because
+                    // if apply is set to false at some point, then later
+                    // handlers won't run
+                    apply = false;
+                }
+            }
+        }
+        if (apply) {
+            applyCallback();
+        }
+    }
     type(...args) {
         if (!vscode.window.activeTextEditor) {
             vscode.window.showInformationMessage("NOT TEXT EDITOR?!?!");
         }
-        let apply = true;
         let s = args[0].text;
-        for (var th of this.typeHandlers) {
-            if (th.active) {
-                apply && (apply = th.textHandler(s));
-            }
-        }
-        if (apply) {
-            vscode.commands.executeCommand("default:type", ...args);
-        }
+        this.runHandlers((th) => { return th.textHandler(s); }, () => { vscode.commands.executeCommand("default:type", ...args); });
     }
     delCommand(d) {
-        let apply = true;
-        for (var th of this.typeHandlers) {
-            if (th.active) {
-                apply && (apply = th.delHandler(d));
-            }
-        }
-        if (apply) {
-            vscode.commands.executeCommand(d);
-        }
+        this.runHandlers((th) => { return th.delHandler(d); }, () => { vscode.commands.executeCommand(d); });
     }
     toggleQMK() {
         if (this.qmk) {
@@ -162,15 +162,7 @@ class Emacs {
         this.move("cursorMove", { "to": "down", "by": "line", "value": jumpDist });
     }
     move(vsCommand, ...rest) {
-        let apply = true;
-        for (var th of this.typeHandlers) {
-            if (th.active) {
-                apply && (apply = th.moveHandler(vsCommand, ...rest));
-            }
-        }
-        if (apply) {
-            vscode.commands.executeCommand(vsCommand, ...rest);
-        }
+        this.runHandlers((th) => { return th.moveHandler(vsCommand, ...rest); }, () => { vscode.commands.executeCommand(vsCommand, ...rest); });
     }
 }
 exports.Emacs = Emacs;
@@ -248,9 +240,10 @@ class Recorder {
         vscode.window.showInformationMessage("Playing recording!");
         let sl = [];
         for (var record of this.recordBook) {
-            vscode.window.showInformationMessage("playing " + record.command + "(" + record.args + ")");
+            sl.push(record.command);
             vscode.commands.executeCommand(record.command, ...record.args);
         }
+        vscode.window.showInformationMessage("playing: " + sl.join("\n"));
     }
     activate() {
         this.active = true;
@@ -264,7 +257,8 @@ class Recorder {
         this.recordBook = this.recordBook.concat(r);
     }
     textHandler(s) {
-        this.addRecord(new Record("default:type", [{ "text": s }]));
+        vscode.window.showInformationMessage("rec text " + s);
+        this.addRecord(new Record("type", [{ "text": s }]));
         return true;
     }
     // Make this implement type interface:
