@@ -110,7 +110,6 @@ export class FindHandler {
 }
 
 class CursorStack {
-  // TODO: mutex find stuff if performance is still finicky.
   selections: vscode.Position[];
 
   constructor() {

@@ -50,13 +50,10 @@ interface TypeHandler extends Registerable {
 
   // TODO pasteHandler
   // TODO escape handler (or just same ctrl g?)
-  // TODO: enterHandler (or just defer to type handlers?)
 }
 
 export class Emacs {
   private qmk: boolean;
-  // TODO: Move these to Finder type
-
   recorder: Recorder;
   typeHandlers: TypeHandler[];
 
