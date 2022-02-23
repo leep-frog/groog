@@ -88,7 +88,6 @@ export class Recorder {
     return true;
   }
   
-  // Make this implement type interface:
   // All these functions are associated with a "groog.*" command so these are
   // already added to the record book via the "type" command handling
   onKill(s: string | undefined) {}

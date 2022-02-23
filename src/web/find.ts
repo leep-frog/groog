@@ -51,6 +51,8 @@ export class FindHandler {
     vscode.commands.executeCommand('setContext', 'groog.findMode', false);
     this.findText = "";
     this.cursorStack.clear();
+    vscode.commands.executeCommand("cancelSelection");
+    vscode.commands.executeCommand("closeFindWidget");
   }
 
   findWithArgs() {

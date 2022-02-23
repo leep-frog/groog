@@ -261,7 +261,6 @@ class Recorder {
         this.addRecord(new Record("type", [{ "text": s }]));
         return true;
     }
-    // Make this implement type interface:
     // All these functions are associated with a "groog.*" command so these are
     // already added to the record book via the "type" command handling
     onKill(s) { }
@@ -411,6 +410,8 @@ class FindHandler {
         vscode.commands.executeCommand('setContext', 'groog.findMode', false);
         this.findText = "";
         this.cursorStack.clear();
+        vscode.commands.executeCommand("cancelSelection");
+        vscode.commands.executeCommand("closeFindWidget");
     }
     findWithArgs() {
         if (this.findText.length === 0) {
