@@ -6,6 +6,10 @@
 	"engines": {
 		"vscode": "^1.64.0"
 	},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leep-frog/vs-code"
+  },
 	"categories": [
 		"Other"
 	],
@@ -134,10 +138,6 @@
         "command": "groog.record.playRecording",
         "title": "Groog Play Recording"
       },
-      {
-				"command": "groog.helloWorld",
-				"title": "Hello World"
-			},
       {
 				"command": "groog.deleteLeft",
 				"title": "Groog delete left"
@@ -377,40 +377,98 @@
         "command": "groog.deleteLeft"
       },
       {
+        "key": "ctrl+h",
+        "command": "deleteLeft",
+        "when": "inQuickOpen"
+      },
+      {
         "key": "backspace",
         "command": "groog.deleteLeft"
       },
       {
+        "key": "backspace",
+        "command": "deleteLeft",
+        "when": "inQuickOpen"
+      },
+      {
         "key": "ctrl+d",
-        "command": "groog.deleteRight"
+        "command": "groog.deleteRight",
+        "when": "!inQuickOpen"
+      },
+      {
+        "key": "ctrl+d",
+        "command": "deleteRight",
+        "when": "inQuickOpen"
       },
       {
         "key": "delete",
-        "command": "groog.deleteRight"
+        "command": "groog.deleteRight",
+        "when": "!inQuickOpen"
+      },
+      {
+        "key": "delete",
+        "command": "deleteRight",
+        "when": "inQuickOpen"
       },
       {
         "key": "alt+h",
-        "command": "groog.deleteWordLeft"
+        "command": "groog.deleteWordLeft",
+        "when": "!inQuickOpen"
+      },
+      {
+        "key": "alt+h",
+        "command": "deleteWordLeft",
+        "when": "inQuickOpen"
       },
       {
         "key": "alt+backspace",
-        "command": "groog.deleteWordLeft"
+        "command": "groog.deleteWordLeft",
+        "when": "!inQuickOpen"
+      },
+      {
+        "key": "alt+backspace",
+        "command": "deleteWordLeft",
+        "when": "inQuickOpen"
       },
       {
         "key": "ctrl+backspace",
-        "command": "groog.deleteWordLeft"
+        "command": "groog.deleteWordLeft",
+        "when": "!inQuickOpen"
+      },
+      {
+        "key": "ctrl+backspace",
+        "command": "deleteWordLeft",
+        "when": "inQuickOpen"
       },
       {
         "key": "alt+d",
-        "command": "groog.deleteWordRight"
+        "command": "groog.deleteWordRight",
+        "when": "!inQuickOpen"
+      },
+      {
+        "key": "alt+d",
+        "command": "deleteWordRight",
+        "when": "inQuickOpen"
       },
       {
         "key": "alt+delete",
-        "command": "groog.deleteWordRight"
+        "command": "groog.deleteWordRight",
+        "when": "!inQuickOpen"
+      },
+      {
+        "key": "alt+delete",
+        "command": "deleteWordRight",
+        "when": "inQuickOpen"
       },
       {
         "key": "ctrl+delete",
-        "command": "groog.deleteWordRight"
+        "command": "groog.deleteWordRight",
+        "when": "!inQuickOpen"
+      },
+      {
+        "key": "ctrl+delete",
+        "command": "deleteWordRight",
+        "when": "inQuickOpen"
       },
       {
         "key": "ctrl+x ctrl+f",

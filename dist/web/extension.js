@@ -243,7 +243,6 @@ class Recorder {
             sl.push(record.command);
             vscode.commands.executeCommand(record.command, ...record.args);
         }
-        vscode.window.showInformationMessage("playing: " + sl.join("\n"));
     }
     activate() {
         this.active = true;
@@ -257,7 +256,6 @@ class Recorder {
         this.recordBook = this.recordBook.concat(r);
     }
     textHandler(s) {
-        vscode.window.showInformationMessage("rec text " + s);
         this.addRecord(new Record("type", [{ "text": s }]));
         return true;
     }

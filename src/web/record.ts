@@ -64,7 +64,6 @@ export class Recorder {
       sl.push(record.command);
       vscode.commands.executeCommand(record.command, ...record.args);
     }
-    vscode.window.showInformationMessage("playing: " + sl.join("\n"));
   }
 
   activate() {
@@ -83,7 +82,6 @@ export class Recorder {
   }
 
   textHandler(s: string): boolean {
-    vscode.window.showInformationMessage("rec text " + s);
     this.addRecord(new Record("type", [{ "text": s}]));
     return true;
   }
