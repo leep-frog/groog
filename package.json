@@ -345,6 +345,14 @@
         "command": "groog.cursorWordRight"
       },
       {
+        "key": "ctrl+right",
+        "command": "groog.cursorWordRight"
+      },
+      {
+        "key": "ctrl+left",
+        "command": "groog.cursorWordLeft"
+      },
+      {
         "key": "ctrl+a",
         "command": "groog.cursorHome"
       },
