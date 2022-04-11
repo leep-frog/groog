@@ -64,12 +64,16 @@ export class FindHandler {
   }
 
   findWithArgs() {
+    let txt = this.findText;
     if (this.findText.length === 0) {
-      vscode.commands.executeCommand("editor.actions.findWithArgs", {"searchString": "ENTER" + "_TEXT"});
-    } else {
-      vscode.commands.executeCommand("editor.actions.findWithArgs", {"searchString": this.findText});
+      txt = "ENTER" + "_TEXT";
     }
-    vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
+    vscode.commands.executeCommand("editor.actions.findWithArgs", {"searchString": txt}).then(() => {
+      vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
+    }, () => {
+      vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
+    }
+    );
     this.cursorToFront();
     this.nextMatch();
   }
