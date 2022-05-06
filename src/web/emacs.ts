@@ -41,7 +41,9 @@ interface TypeHandler extends Registerable {
   ctrlG(): void;
 
   onYank(text: string | undefined): void
+  alwaysOnYank(): boolean
   onKill(text: string | undefined): void
+  alwaysOnKill(): boolean
 
   // Returns whether or not to still send the code
   textHandler(s: string): boolean;
@@ -155,7 +157,7 @@ export class Emacs {
     }
 
     for (var th of this.typeHandlers) {
-      if (th.active) {
+      if (th.active || th.alwaysOnYank()) {
         th.onYank(maybe);
       }
     }
@@ -186,7 +188,9 @@ export class Emacs {
       range = new vscode.Range(startPos, new vscode.Position(startPos.line + 1, 0));
     }
     for (var th of this.typeHandlers) {
-      th.onKill(text);
+      if (th.active || th.alwaysOnKill()) {
+        th.onKill(text);
+      }
     }
     vscode.window.activeTextEditor?.edit(editBuilder => {
       editBuilder.delete(range);

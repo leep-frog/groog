@@ -69,14 +69,21 @@ export class MarkHandler {
     return true;
   }
 
-  
   onYank(s: string | undefined) {
     this.deactivate();
     s ? this.yanked = s : this.yanked = "";
   }
 
+  alwaysOnYank(): boolean {
+    return true;
+  }
+
   onKill(s: string | undefined) {
     this.deactivate();
     s ? this.yanked = s : this.yanked = "";
+  }
+
+  alwaysOnKill(): boolean {
+    return true;
   }
 }

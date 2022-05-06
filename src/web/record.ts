@@ -89,8 +89,10 @@ export class Recorder {
   // All these functions are associated with a "groog.*" command so these are
   // already added to the record book via the "type" command handling
   onKill(s: string | undefined) {}
+  alwaysOnKill(): boolean {return false;}
   ctrlG() {}
   onYank(s: string | undefined) {}
+  alwaysOnYank(): boolean {return false;}
   delHandler(s: string): boolean {
     return true;
   }

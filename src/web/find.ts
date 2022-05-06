@@ -110,7 +110,9 @@ export class FindHandler {
 
   // TODO: do something like error message or deactivate
   onYank(s: string | undefined) {}
+  alwaysOnYank(): boolean {return false;}
   onKill(s: string | undefined) {}
+  alwaysOnKill(): boolean {return false;}
 }
 
 class CursorStack {

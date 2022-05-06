@@ -600,6 +600,10 @@
         "key": "alt+e",
         "command": "groog.record.playRecording",
         "when": "!groog.recording"
+      },
+      {
+        "key": "alt+p",
+        "command": "workbench.action.showCommands"
       }
 		]
 	},

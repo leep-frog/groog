@@ -118,7 +118,7 @@ class Emacs {
             });
         }
         for (var th of this.typeHandlers) {
-            if (th.active) {
+            if (th.active || th.alwaysOnYank()) {
                 th.onYank(maybe);
             }
         }
@@ -147,7 +147,9 @@ class Emacs {
             range = new vscode.Range(startPos, new vscode.Position(startPos.line + 1, 0));
         }
         for (var th of this.typeHandlers) {
-            th.onKill(text);
+            if (th.active || th.alwaysOnKill()) {
+                th.onKill(text);
+            }
         }
         (_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.edit(editBuilder => {
             editBuilder.delete(range);
@@ -262,8 +264,10 @@ class Recorder {
     // All these functions are associated with a "groog.*" command so these are
     // already added to the record book via the "type" command handling
     onKill(s) { }
+    alwaysOnKill() { return false; }
     ctrlG() { }
     onYank(s) { }
+    alwaysOnYank() { return false; }
     delHandler(s) {
         return true;
     }
@@ -351,9 +355,15 @@ class MarkHandler {
         this.deactivate();
         s ? this.yanked = s : this.yanked = "";
     }
+    alwaysOnYank() {
+        return true;
+    }
     onKill(s) {
         this.deactivate();
         s ? this.yanked = s : this.yanked = "";
+    }
+    alwaysOnKill() {
+        return true;
     }
 }
 exports.MarkHandler = MarkHandler;
@@ -461,7 +471,9 @@ class FindHandler {
     }
     // TODO: do something like error message or deactivate
     onYank(s) { }
+    alwaysOnYank() { return false; }
     onKill(s) { }
+    alwaysOnKill() { return false; }
 }
 exports.FindHandler = FindHandler;
 class CursorStack {
