@@ -46,6 +46,9 @@ export class FindHandler {
         this.activate();
       }
     });
+    vscode.window.onDidChangeActiveTextEditor(() => {
+      this.deactivate();
+    });
   }
 
   activate() {

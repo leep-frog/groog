@@ -416,6 +416,9 @@ class FindHandler {
                 this.activate();
             }
         });
+        vscode.window.onDidChangeActiveTextEditor(() => {
+            this.deactivate();
+        });
     }
     activate() {
         this.active = true;
