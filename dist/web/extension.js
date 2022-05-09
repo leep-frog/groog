@@ -131,6 +131,7 @@ class Emacs {
         }
         vscode.commands.executeCommand("cancelSelection");
         vscode.commands.executeCommand("closeFindWidget");
+        vscode.commands.executeCommand("closeParameterHints");
         vscode.commands.executeCommand("removeSecondaryCursors");
     }
     kill() {
