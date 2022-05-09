@@ -26,6 +26,12 @@ exports.cursorMoves = [
     "cursorTop",
     "cursorBottom"
 ];
+const ctrlGCommands = [
+    "cancelSelection",
+    "closeFindWidget",
+    "closeParameterHints",
+    "removeSecondaryCursors",
+];
 const deleteLeft = "deleteLeft";
 const deleteRight = "deleteRight";
 const deleteWordLeft = "deleteWordLeft";
@@ -129,10 +135,9 @@ class Emacs {
                 th.ctrlG();
             }
         }
-        vscode.commands.executeCommand("cancelSelection");
-        vscode.commands.executeCommand("closeFindWidget");
-        vscode.commands.executeCommand("closeParameterHints");
-        vscode.commands.executeCommand("removeSecondaryCursors");
+        for (var cmd of ctrlGCommands) {
+            vscode.commands.executeCommand(cmd);
+        }
     }
     kill() {
         var _a;
