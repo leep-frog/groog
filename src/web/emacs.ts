@@ -1,12 +1,17 @@
 import * as vscode from 'vscode';
-import {Recorder} from './record';
-import {MarkHandler} from './mark';
-import {FindHandler} from './find';
-import {multiCommand} from './multi-command';
+import { Recorder } from './record';
+import { MarkHandler } from './mark';
+import { FindHandler } from './find';
+import { multiCommand } from './multi-command';
 
 const jumpDist = 10;
 export const cursorMoves: string[] = [
-  "cursorUp", 
+  // Note: if you are receiving an error of the form
+  // `command "groog.cursorUp" already exists`, it is probably
+  // because this extension is installed twice. Once as a regular
+  // extension and once as the development extension. Disable
+  // the regular extension to get the correct behavior.
+  "cursorUp",
   "cursorDown",
   "cursorLeft",
   "cursorRight",
@@ -41,7 +46,7 @@ interface Registerable {
   register(context: vscode.ExtensionContext, recorder: Recorder): void;
 }
 
-interface TypeHandler extends Registerable {  
+interface TypeHandler extends Registerable {
   active: boolean;
   activate(): void;
   deactivate(): void;
@@ -61,14 +66,31 @@ interface TypeHandler extends Registerable {
   // TODO escape handler (or just same ctrl g?)
 }
 
+const qmkKey = "groog.keys.qmkState";
+
+class GlobalStateTracker<ValueType> {
+  private key: string;
+
+  constructor(key: string) {
+    this.key = key;
+  }
+
+  get(context: vscode.ExtensionContext): ValueType | undefined {
+    return context.globalState.get<ValueType>(this.key);
+  }
+
+  update(context: vscode.ExtensionContext, vt: ValueType) {
+    context.globalState.update(this.key, vt);
+  }
+}
+
 export class Emacs {
-  private qmk: boolean;
+  private qmk: GlobalStateTracker<boolean>;
   recorder: Recorder;
   typeHandlers: TypeHandler[];
 
   constructor() {
-    // TODO: store this in persistent storage somewhere
-    this.qmk = false;
+    this.qmk = new GlobalStateTracker<boolean>(qmkKey);
     this.recorder = new Recorder();
     this.typeHandlers = [
       new FindHandler(),
@@ -94,7 +116,7 @@ export class Emacs {
     this.recorder.registerCommand(context, 'jump', () => this.jump());
     this.recorder.registerCommand(context, 'fall', () => this.fall());
 
-    this.recorder.registerCommand(context, 'toggleQMK', () => this.toggleQMK());
+    this.recorder.registerCommand(context, 'toggleQMK', () => this.toggleQMK(context));
     this.recorder.registerCommand(context, 'yank', () => this.yank());
     this.recorder.registerCommand(context, 'kill', () => this.kill());
     this.recorder.registerCommand(context, 'ctrlG', () => this.ctrlG());
@@ -104,6 +126,9 @@ export class Emacs {
     }
 
     this.recorder.registerCommand(context, "multiCommand.execute", multiCommand);
+
+    // After all commands have been registered, check persistent data for qmk setting.
+    this.setQMK(context, this.qmk.get(context));
   }
 
   runHandlers(thCallback: (th: TypeHandler) => boolean, applyCallback: () => void) {
@@ -126,30 +151,35 @@ export class Emacs {
   type(...args: any[]) {
     if (!vscode.window.activeTextEditor) {
       vscode.window.showInformationMessage("NOT TEXT EDITOR?!?!");
-		}
+    }
 
     let s = (args[0] as TypeArg).text;
     this.runHandlers(
       (th: TypeHandler): boolean => { return th.textHandler(s); },
-      () => {vscode.commands.executeCommand("default:type", ...args);},
+      () => { vscode.commands.executeCommand("default:type", ...args); },
     );
   }
 
   delCommand(d: string) {
     this.runHandlers(
       (th: TypeHandler): boolean => { return th.delHandler(d); },
-      () => {vscode.commands.executeCommand(d);},
+      () => { vscode.commands.executeCommand(d); },
     );
   }
 
-  toggleQMK() {
-    if (this.qmk) {
-      vscode.window.showInformationMessage('Basic keyboard mode activated');
-    } else {
+  toggleQMK(context: vscode.ExtensionContext) {
+    this.setQMK(context, !this.qmk.get(context));
+  }
+
+  setQMK(context: vscode.ExtensionContext, bu: boolean | undefined) {
+    let b = bu || false;
+    if (b) {
       vscode.window.showInformationMessage('QMK keyboard mode activated');
+    } else {
+      vscode.window.showInformationMessage('Basic keyboard mode activated');
     }
-		this.qmk = !this.qmk;
-    vscode.commands.executeCommand('setContext', 'groog.qmk', this.qmk);
+    this.qmk.update(context, b);
+    vscode.commands.executeCommand('setContext', 'groog.qmk', b);
   }
 
   yank() {
@@ -206,18 +236,18 @@ export class Emacs {
 
   // C-l
   jump() {
-    this.move("cursorMove", {"to": "up", "by": "line", "value": jumpDist});
+    this.move("cursorMove", { "to": "up", "by": "line", "value": jumpDist });
   }
 
   // C-v
   fall() {
-    this.move("cursorMove", {"to": "down", "by": "line", "value": jumpDist});
+    this.move("cursorMove", { "to": "down", "by": "line", "value": jumpDist });
   }
 
   move(vsCommand: string, ...rest: any[]) {
     this.runHandlers(
       (th: TypeHandler): boolean => { return th.moveHandler(vsCommand, ...rest); },
-      () => {vscode.commands.executeCommand(vsCommand, ...rest);},
+      () => { vscode.commands.executeCommand(vsCommand, ...rest); },
     );
   }
 }

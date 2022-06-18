@@ -532,6 +532,14 @@
         "command": "editor.action.formatSelection"
       },
       {
+        "key": "ctrl+x ctrl+tab",
+        "command": "editor.action.formatDocument"
+      },
+      {
+        "key": "ctrl+x tab",
+        "command": "editor.action.formatDocument"
+      },
+      {
         "key": "ctrl+/",
         "command": "undo"
       },
