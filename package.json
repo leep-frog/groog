@@ -504,11 +504,11 @@
         "command": "workbench.action.focusPreviousGroup"
       },
       {
-        "key": "ctrl+pageup",
+        "key": "ctrl+pagedown",
         "command": "workbench.action.focusNextGroup"
       },
       {
-        "key": "ctrl+pagedown",
+        "key": "ctrl+pageup",
         "command": "workbench.action.focusPreviousGroup"
       },
       {
