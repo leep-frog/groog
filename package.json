@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -617,6 +617,11 @@
       {
         "key": "tab",
         "command": "editor.action.format"
+      },
+      {
+        "key": "shift+pageup",
+        "command": "editor.action.selectHighlights",
+        "when": "editorFocus"
       }
     ]
   },
