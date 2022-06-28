@@ -85,7 +85,7 @@ export class Recorder {
     this.addRecord(new Record("type", [{ "text": s}]));
     return true;
   }
-  
+
   // All these functions are associated with a "groog.*" command so these are
   // already added to the record book via the "type" command handling
   onKill(s: string | undefined) {}

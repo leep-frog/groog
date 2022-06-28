@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -294,6 +294,10 @@
         "command": "groog.cursorRight"
       },
       {
+        "key": "alt+s",
+        "command": "editor.action.startFindReplaceAction"
+      },
+      {
         "key": "ctrl+f",
         "command": "groog.cursorRight",
         "when": "!groog.qmk"
@@ -533,11 +537,23 @@
       },
       {
         "key": "ctrl+x ctrl+tab",
-        "command": "editor.action.formatDocument"
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            "editor.action.formatDocument",
+            "editor.action.trimTrailingWhitespace"
+          ]
+        }
       },
       {
         "key": "ctrl+x tab",
-        "command": "editor.action.formatDocument"
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            "editor.action.formatDocument",
+            "editor.action.trimTrailingWhitespace"
+          ]
+        }
       },
       {
         "key": "ctrl+/",
@@ -613,6 +629,10 @@
       {
         "key": "alt+p",
         "command": "workbench.action.showCommands"
+      },
+      {
+        "key": "alt+o",
+        "command": "workbench.action.openRecent"
       },
       {
         "key": "tab",
