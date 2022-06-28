@@ -635,6 +635,10 @@
         "command": "workbench.action.openRecent"
       },
       {
+        "key": "ctrl+shift+o",
+        "command": "workbench.action.openRecent"
+      },
+      {
         "key": "tab",
         "command": "editor.action.format"
       },
