@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -631,11 +631,7 @@
         "command": "workbench.action.showCommands"
       },
       {
-        "key": "alt+o",
-        "command": "workbench.action.openRecent"
-      },
-      {
-        "key": "ctrl+shift+o",
+        "key": "ctrl+x ctrl+o",
         "command": "workbench.action.openRecent"
       },
       {
