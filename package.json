@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -164,6 +164,10 @@
       {
         "key": "ctrl+j",
         "command": "groog.toggleMarkMode"
+      },
+      {
+        "key": "alt+g",
+        "command": "noop"
       },
       {
         "key": "ctrl+g",
@@ -528,6 +532,10 @@
         "command": "workbench.action.toggleSidebarVisibility"
       },
       {
+        "key": "ctrl+x ctrl+z",
+        "command": "workbench.action.togglePanel"
+      },
+      {
         "key": "ctrl+shift+n",
         "command": "workbench.action.files.newUntitledFile"
       },
@@ -565,6 +573,10 @@
       },
       {
         "key": "ctrl+shift+a",
+        "command": "editor.action.selectAll"
+      },
+      {
+        "key": "ctrl+shift+home",
         "command": "editor.action.selectAll"
       },
       {
