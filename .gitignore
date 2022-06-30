@@ -1,3 +1,4 @@
 *.vsix
 out/*
 .vscode-test-web/
+dist/
