@@ -312,6 +312,11 @@
         "when": "!groog.qmk"
       },
       {
+        "key": "ctrl+shift+s",
+        "command": "workbench.action.findInFiles",
+        "when": "!groog.qmk"
+      },
+      {
         "key": "ctrl+s",
         "command": "groog.cursorRight",
         "when": "groog.qmk"
