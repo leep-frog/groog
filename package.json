@@ -659,6 +659,16 @@
         "key": "shift+pageup",
         "command": "editor.action.selectHighlights",
         "when": "editorFocus"
+      },
+      {
+        "key": "ctrl+x ctrl+m",
+        "command": "markdown.showPreviewToSide",
+        "when": "editorLangId == 'markdown'"
+      },
+      {
+        "key": "ctrl+x m",
+        "command": "markdown.showPreviewToSide",
+        "when": "editorLangId == 'markdown'"
       }
     ]
   },
