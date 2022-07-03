@@ -82,17 +82,17 @@ export class Recorder {
   }
 
   textHandler(s: string): boolean {
-    this.addRecord(new Record("type", [{ "text": s}]));
+    this.addRecord(new Record("type", [{ "text": s }]));
     return true;
   }
 
   // All these functions are associated with a "groog.*" command so these are
   // already added to the record book via the "type" command handling
-  onKill(s: string | undefined) {}
-  alwaysOnKill(): boolean {return false;}
-  ctrlG() {}
-  onYank(s: string | undefined) {}
-  alwaysOnYank(): boolean {return false;}
+  onKill(s: string | undefined) { }
+  alwaysOnKill(): boolean { return false; }
+  ctrlG() { }
+  onYank(s: string | undefined) { }
+  alwaysOnYank(): boolean { return false; }
   delHandler(s: string): boolean {
     return true;
   }

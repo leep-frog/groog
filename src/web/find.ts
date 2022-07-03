@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import {Recorder} from './record';
+import { Recorder } from './record';
 
 export class FindHandler {
   active: boolean;
@@ -71,7 +71,7 @@ export class FindHandler {
     if (this.findText.length === 0) {
       txt = "ENTER" + "_TEXT";
     }
-    vscode.commands.executeCommand("editor.actions.findWithArgs", {"searchString": txt}).then(() => {
+    vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": txt }).then(() => {
       vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
     }, () => {
       vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
@@ -101,21 +101,21 @@ export class FindHandler {
   delHandler(s: string): boolean {
     switch (s) {
       case "deleteLeft":
-        this.findText = this.findText.slice(0, this.findText.length-1);
+        this.findText = this.findText.slice(0, this.findText.length - 1);
         this.cursorStack.popAndSet();
         this.findWithArgs();
         break;
       default:
         vscode.window.showInformationMessage("Unsupported find command: " + s);
-      }
+    }
     return false;
   }
 
   // TODO: do something like error message or deactivate
-  onYank(s: string | undefined) {}
-  alwaysOnYank(): boolean {return false;}
-  onKill(s: string | undefined) {}
-  alwaysOnKill(): boolean {return false;}
+  onYank(s: string | undefined) { }
+  alwaysOnYank(): boolean { return false; }
+  onKill(s: string | undefined) { }
+  alwaysOnKill(): boolean { return false; }
 }
 
 class CursorStack {

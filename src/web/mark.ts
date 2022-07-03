@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import {Recorder} from './record';
+import { Recorder } from './record';
 
 export class MarkHandler {
   active: boolean;
