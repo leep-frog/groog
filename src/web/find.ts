@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import { Recorder } from './record';
+import { TypeHandler } from './interfaces';
 
-export class FindHandler {
+export class FindHandler implements TypeHandler {
   active: boolean;
   findText: string;
   cursorStack: CursorStack;
@@ -31,7 +32,6 @@ export class FindHandler {
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
-    // TODO: cache previous find
     recorder.registerCommand(context, 'find', () => {
       if (this.active) {
         this.nextMatch();
@@ -60,7 +60,6 @@ export class FindHandler {
   deactivate() {
     this.active = false;
     vscode.commands.executeCommand('setContext', 'groog.findMode', false);
-    this.findText = "";
     this.cursorStack.clear();
     vscode.commands.executeCommand("cancelSelection");
     vscode.commands.executeCommand("closeFindWidget");
@@ -101,9 +100,11 @@ export class FindHandler {
   delHandler(s: string): boolean {
     switch (s) {
       case "deleteLeft":
-        this.findText = this.findText.slice(0, this.findText.length - 1);
-        this.cursorStack.popAndSet();
-        this.findWithArgs();
+        if (this.findText.length > 0) {
+          this.findText = this.findText.slice(0, this.findText.length - 1);
+          this.cursorStack.popAndSet();
+          this.findWithArgs();
+        }
         break;
       default:
         vscode.window.showInformationMessage("Unsupported find command: " + s);
@@ -138,7 +139,9 @@ class CursorStack {
   popAndSet() {
     let p = this.selections.pop();
     if (!p) {
-      vscode.window.showErrorMessage("Ran out of cursor positions");
+      // No longer error here since we can run out of cursor positions if
+      // we start a search with a non-empty findText.
+      // vscode.window.showErrorMessage("Ran out of cursor positions");
       return;
     }
     let editor = vscode.window.activeTextEditor;

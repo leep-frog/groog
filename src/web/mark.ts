@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import { Recorder } from './record';
+import { TypeHandler } from './interfaces';
 
-export class MarkHandler {
+export class MarkHandler implements TypeHandler {
   active: boolean;
   yanked: string;
 

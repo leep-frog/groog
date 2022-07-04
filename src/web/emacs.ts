@@ -3,6 +3,7 @@ import { Recorder } from './record';
 import { MarkHandler } from './mark';
 import { FindHandler } from './find';
 import { multiCommand } from './multi-command';
+import { TypeHandler } from './interfaces';
 
 const jumpDist = 10;
 export const cursorMoves: string[] = [
@@ -41,30 +42,6 @@ export const deleteCommands: string[] = [
   deleteWordLeft,
   deleteWordRight,
 ];
-
-interface Registerable {
-  register(context: vscode.ExtensionContext, recorder: Recorder): void;
-}
-
-interface TypeHandler extends Registerable {
-  active: boolean;
-  activate(): void;
-  deactivate(): void;
-  ctrlG(): void;
-
-  onYank(text: string | undefined): void
-  alwaysOnYank(): boolean
-  onKill(text: string | undefined): void
-  alwaysOnKill(): boolean
-
-  // Returns whether or not to still send the code
-  textHandler(s: string): boolean;
-  delHandler(cmd: string): boolean;
-  moveHandler(cmd: string, ...rest: any[]): boolean;
-
-  // TODO pasteHandler
-  // TODO escape handler (or just same ctrl g?)
-}
 
 const qmkKey = "groog.keys.qmkState";
 

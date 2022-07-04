@@ -1,20 +1,30 @@
 import * as vscode from 'vscode';
+import { TypeHandler } from './interfaces';
 
-export class Recorder {
+export class Recorder implements TypeHandler {
+  // baseCommand ensures we don't infinite loop a command. For example,
+  // if groog.CommandOne calls groog.CommandTwo, then we would record
+  // both of them. But in the replay we would call groog.CommandOne (which would
+  // call groog.CommandTwo) and then call groog.CommandTwo ourselves. Therefore,
+  // groog.CommandTwo would be executed twice in the replay even though it only
+  // happened once during recording.
   private baseCommand: boolean;
   active: boolean; // aka "recording"
   private recordBook: Record[];
+  //private findMode: boolean;
 
   constructor() {
     this.baseCommand = true;
     this.active = false;
     this.recordBook = [];
+    //this.findMode = false;
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
     recorder.registerCommand(context, "record.startRecording", () => recorder.startRecording());
     recorder.registerCommand(context, "record.endRecording", () => recorder.endRecording());
     recorder.registerCommand(context, "record.playRecording", () => recorder.playback());
+    recorder.registerCommand(context, "record.find", () => recorder.find());
   }
 
   registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => any) {
@@ -32,6 +42,17 @@ export class Recorder {
     let r = callback(...args);
     this.baseCommand = true;
     return r;
+  }
+
+  async find() {
+    /*const searchQuery = await vscode.window.showInputBox({
+      placeHolder: "Search query",
+      prompt: "Search my snippets on Codever",
+      //value: selectedText
+    });
+    if (searchQuery) {
+      vscode.window.showInformationMessage("heyo: " + searchQuery);  
+    }*/
   }
 
   startRecording() {
@@ -73,6 +94,10 @@ export class Recorder {
 
   deactivate() {
     this.active = false;
+    //this.findMode = false;
+    // TODO: Stop record-find prompt
+    // TODO: find and replace? maybe not needed since we can just do find and replace through
+    // existing find widget.
     vscode.commands.executeCommand('setContext', 'groog.recording', false);
 
   }

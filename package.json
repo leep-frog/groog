@@ -37,6 +37,7 @@
     "onCommand:groog.record.startRecording",
     "onCommand:groog.record.endRecording",
     "onCommand:groog.record.playRecording",
+    "onCommand:groog.record.find",
     "onCommand:groog.find",
     "onCommand:groog.reverseFind",
     "onCommand:groog.deleteLeft",
@@ -138,6 +139,10 @@
       {
         "command": "groog.record.playRecording",
         "title": "Groog Play Recording"
+      },
+      {
+        "command": "groog.record.find",
+        "title": "Find selection during recording"
       },
       {
         "command": "groog.deleteLeft",
@@ -642,6 +647,11 @@
         "key": "alt+e",
         "command": "groog.record.playRecording",
         "when": "!groog.recording"
+      },
+      {
+        "key": "alt+n",
+        "command": "groog.record.find",
+        "when": "groog.recording"
       },
       {
         "key": "alt+p",
