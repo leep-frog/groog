@@ -37,7 +37,7 @@ export class Recorder implements TypeHandler {
     if (command.includes("groog.record") || !this.active || !this.baseCommand) {
       return callback(...args);
     }
-    this.addRecord(new Record(command, args));
+    this.addRecord(new CommandRecord(command, args));
     this.baseCommand = false;
     let r = callback(...args);
     this.baseCommand = true;
@@ -51,7 +51,7 @@ export class Recorder implements TypeHandler {
       //value: selectedText
     });
     if (searchQuery) {
-      vscode.window.showInformationMessage("heyo: " + searchQuery);  
+      vscode.window.showInformationMessage("heyo: " + searchQuery);
     }*/
   }
 
@@ -80,11 +80,7 @@ export class Recorder implements TypeHandler {
       return;
     }
     vscode.window.showInformationMessage("Playing recording!");
-    let sl: string[] = [];
-    for (var record of this.recordBook) {
-      sl.push(record.command);
-      vscode.commands.executeCommand(record.command, ...record.args);
-    }
+    this.recordBook.map((r) => r.playback());
   }
 
   activate() {
@@ -107,7 +103,7 @@ export class Recorder implements TypeHandler {
   }
 
   textHandler(s: string): boolean {
-    this.addRecord(new Record("type", [{ "text": s }]));
+    this.addRecord(new TypeRecord(s));
     return true;
   }
 
@@ -126,12 +122,32 @@ export class Recorder implements TypeHandler {
   }
 }
 
-class Record {
+interface Record {
+  playback(): void;
+}
+
+class TypeRecord implements Record {
+  text: string;
+
+  constructor(text: string) {
+    this.text = text;
+  }
+
+  playback(): void {
+    vscode.commands.executeCommand("type", { "text": this.text });
+  }
+}
+
+class CommandRecord implements Record {
   command: string;
   args: any[];
 
   constructor(command: string, args: any[]) {
     this.command = command;
     this.args = args;
+  }
+
+  playback(): void {
+    vscode.commands.executeCommand(this.command, ...this.args);
   }
 }
