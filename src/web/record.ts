@@ -45,9 +45,23 @@ export class Recorder implements TypeHandler {
   }
 
   async find() {
+    /*if (!this.findMode) {
+      // Find mode is being activated
+      await vscode.commands.executeCommand("editor.actions.findWithArgs");
+      this.findMode = true;
+    } else {
+      // Otherwise, moving to the next one
+      await vscode.commands.executeCommand("editor.action.nextMatchFindAction");
+      // TODO: Record this action.
+    }
+    /*
+      ctrl+s enter find mode
+      ctrl+g end find mode
+      record number of next matches
+    */
     /*const searchQuery = await vscode.window.showInputBox({
       placeHolder: "Search query",
-      prompt: "Search my snippets on Codever",
+      prompt: "Search text",
       //value: selectedText
     });
     if (searchQuery) {
@@ -74,13 +88,17 @@ export class Recorder implements TypeHandler {
     }
   }
 
-  playback() {
+  async playback() {
     if (this.active) {
       vscode.window.showInformationMessage("Still recording!");
       return;
     }
     vscode.window.showInformationMessage("Playing recording!");
-    this.recordBook.map((r) => r.playback());
+    for (var r of this.recordBook) {
+      await r.playback();
+    }
+    // TODO: not sure if this is identical
+    // this.recordBook.map(async (r) => await r.playback());
   }
 
   activate() {
@@ -123,7 +141,7 @@ export class Recorder implements TypeHandler {
 }
 
 interface Record {
-  playback(): void;
+  playback(): Promise<void>;
 }
 
 class TypeRecord implements Record {
@@ -133,8 +151,8 @@ class TypeRecord implements Record {
     this.text = text;
   }
 
-  playback(): void {
-    vscode.commands.executeCommand("type", { "text": this.text });
+  async playback(): Promise<void> {
+    await vscode.commands.executeCommand("type", { "text": this.text });
   }
 }
 
@@ -147,7 +165,7 @@ class CommandRecord implements Record {
     this.args = args;
   }
 
-  playback(): void {
-    vscode.commands.executeCommand(this.command, ...this.args);
+  async playback(): Promise<void> {
+    await vscode.commands.executeCommand(this.command, ...this.args);
   }
 }
