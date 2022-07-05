@@ -60,6 +60,7 @@ export class FindHandler implements TypeHandler {
   deactivate() {
     this.active = false;
     vscode.commands.executeCommand('setContext', 'groog.findMode', false);
+    this.findText = "";
     this.cursorStack.clear();
     vscode.commands.executeCommand("cancelSelection");
     vscode.commands.executeCommand("closeFindWidget");
