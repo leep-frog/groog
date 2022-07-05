@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -38,6 +38,7 @@
     "onCommand:groog.record.endRecording",
     "onCommand:groog.record.playRecording",
     "onCommand:groog.record.find",
+    "onCommand:groog.record.findNext",
     "onCommand:groog.find",
     "onCommand:groog.reverseFind",
     "onCommand:groog.deleteLeft",
@@ -143,6 +144,10 @@
       {
         "command": "groog.record.find",
         "title": "Find selection during recording"
+      },
+      {
+        "command": "groog.record.findNext",
+        "title": "Find the next selection during recording"
       },
       {
         "command": "groog.deleteLeft",
@@ -314,12 +319,22 @@
       {
         "key": "ctrl+s",
         "command": "groog.find",
-        "when": "!groog.qmk"
+        "when": "!groog.qmk && !groog.recording"
+      },
+      {
+        "key": "ctrl+s",
+        "command": "groog.record.findNext",
+        "when": "!groog.qmk && groog.recording"
       },
       {
         "key": "ctrl+shift+s",
         "command": "workbench.action.findInFiles",
-        "when": "!groog.qmk"
+        "when": "!groog.qmk && !groog.recording"
+      },
+      {
+        "key": "ctrl+shift+s",
+        "command": "groog.record.find",
+        "when": "!groog.qmk && groog.recording"
       },
       {
         "key": "ctrl+s",
@@ -329,7 +344,22 @@
       {
         "key": "ctrl+f",
         "command": "groog.find",
-        "when": "groog.qmk"
+        "when": "groog.qmk && !groog.recording"
+      },
+      {
+        "key": "ctrl+f",
+        "command": "groog.record.findNext",
+        "when": "groog.qmk && groog.recording"
+      },
+      {
+        "key": "ctrl+shift+f",
+        "command": "workbench.action.findInFiles",
+        "when": "groog.qmk && !groog.recording"
+      },
+      {
+        "key": "ctrl+shift+f",
+        "command": "groog.record.find",
+        "when": "groog.qmk && groog.recording"
       },
       {
         "key": "ctrl+r",
