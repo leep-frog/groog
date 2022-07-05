@@ -13,15 +13,6 @@ export class FindHandler implements TypeHandler {
     this.cursorStack = new CursorStack();
   }
 
-  cursorToFront() {
-    // Move cursor to beginning of selection
-    let editor = vscode.window.activeTextEditor;
-    if (editor) {
-      let startPos = editor.selection.start;
-      editor.selection = new vscode.Selection(startPos, startPos);
-    }
-  }
-
   nextMatch() {
     // Then find next match
     vscode.commands.executeCommand("editor.action.nextMatchFindAction");
@@ -60,6 +51,7 @@ export class FindHandler implements TypeHandler {
   deactivate() {
     this.active = false;
     vscode.commands.executeCommand('setContext', 'groog.findMode', false);
+    // TODO: make text clearing optional? Differentiate in activate maybe?
     this.findText = "";
     this.cursorStack.clear();
     vscode.commands.executeCommand("cancelSelection");
@@ -77,7 +69,7 @@ export class FindHandler implements TypeHandler {
       vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
     }
     );
-    this.cursorToFront();
+    cursorToFront();
     this.nextMatch();
   }
 
@@ -158,3 +150,12 @@ class CursorStack {
     this.selections = [];
   }
 }
+
+export function cursorToFront() {
+    // Move cursor to beginning of selection
+    let editor = vscode.window.activeTextEditor;
+    if (editor) {
+      let startPos = editor.selection.start;
+      editor.selection = new vscode.Selection(startPos, startPos);
+    }
+  }

@@ -11,6 +11,7 @@ export class Recorder implements TypeHandler {
   private baseCommand: boolean;
   active: boolean; // aka "recording"
   private recordBook: Record[];
+  private lastFind: FindNextRecord | undefined;
   //private findMode: boolean;
 
   constructor() {
@@ -25,6 +26,7 @@ export class Recorder implements TypeHandler {
     recorder.registerCommand(context, "record.endRecording", () => recorder.endRecording());
     recorder.registerCommand(context, "record.playRecording", () => recorder.playback());
     recorder.registerCommand(context, "record.find", () => recorder.find());
+    recorder.registerCommand(context, "record.findNext", () => recorder.findNext());
   }
 
   registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => any) {
@@ -44,29 +46,28 @@ export class Recorder implements TypeHandler {
     return r;
   }
 
-  async find() {
-    /*if (!this.findMode) {
-      // Find mode is being activated
-      await vscode.commands.executeCommand("editor.actions.findWithArgs");
-      this.findMode = true;
-    } else {
-      // Otherwise, moving to the next one
-      await vscode.commands.executeCommand("editor.action.nextMatchFindAction");
-      // TODO: Record this action.
+  // TODO: findPrev
+  async findNext() {
+    if (!this.lastFind) {
+      vscode.window.showErrorMessage("No find text has been set yet");
+      return;
     }
-    /*
-      ctrl+s enter find mode
-      ctrl+g end find mode
-      record number of next matches
-    */
-    /*const searchQuery = await vscode.window.showInputBox({
+    this.lastFind.playback();
+    this.addRecord(this.lastFind);
+  }
+
+  async find() {
+    vscode.window.showInformationMessage("inputting");
+    const searchQuery = await vscode.window.showInputBox({
       placeHolder: "Search query",
       prompt: "Search text",
       //value: selectedText
     });
+    vscode.window.showInformationMessage("got: " + searchQuery);
     if (searchQuery) {
-      vscode.window.showInformationMessage("heyo: " + searchQuery);
-    }*/
+      this.lastFind = new FindNextRecord(searchQuery);
+      await this.findNext();
+    }
   }
 
   startRecording() {
@@ -108,12 +109,13 @@ export class Recorder implements TypeHandler {
 
   deactivate() {
     this.active = false;
+    this.lastFind = undefined;
     //this.findMode = false;
     // TODO: Stop record-find prompt
     // TODO: find and replace? maybe not needed since we can just do find and replace through
     // existing find widget.
     vscode.commands.executeCommand('setContext', 'groog.recording', false);
-
+    vscode.commands.executeCommand("closeFindWidget");
   }
 
   addRecord(r: Record) {
@@ -167,5 +169,19 @@ class CommandRecord implements Record {
 
   async playback(): Promise<void> {
     await vscode.commands.executeCommand(this.command, ...this.args);
+  }
+}
+
+class FindNextRecord implements Record {
+  findText: string;
+
+  constructor(findText: string) {
+    this.findText = findText;
+  }
+
+  async playback(): Promise<void> {
+    await vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": this.findText });
+    await vscode.commands.executeCommand("editor.action.nextMatchFindAction");
+    await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
   }
 }
