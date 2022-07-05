@@ -33,6 +33,7 @@
     "onCommand:groog.cursorBottom",
     "onCommand:groog.toggleMarkMode",
     "onCommand:groog.ctrlG",
+    "onCommand:groog.undo",
     "onCommand:groog.multiCommand.execute",
     "onCommand:groog.record.startRecording",
     "onCommand:groog.record.endRecording",
@@ -124,6 +125,10 @@
       {
         "command": "groog.ctrlG",
         "title": "Emacs Ctrl-G"
+      },
+      {
+        "command": "groog.undo",
+        "title": "Undo"
       },
       {
         "command": "groog.multiCommand.execute",
@@ -605,7 +610,7 @@
       },
       {
         "key": "ctrl+/",
-        "command": "undo"
+        "command": "groog.undo"
       },
       {
         "key": "ctrl+;",

@@ -98,6 +98,9 @@ export class Emacs {
     this.recorder.registerCommand(context, 'kill', () => this.kill());
     this.recorder.registerCommand(context, 'ctrlG', () => this.ctrlG());
 
+    // This needs to be a groog command so it can be recorded.
+    this.recorder.registerCommand(context, 'undo', () => vscode.commands.executeCommand("undo"));
+
     for (var th of this.typeHandlers) {
       th.register(context, this.recorder);
     }
