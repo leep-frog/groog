@@ -684,10 +684,6 @@
         "when": "groog.recording"
       },
       {
-        "key": "alt+p",
-        "command": "workbench.action.showCommands"
-      },
-      {
         "key": "ctrl+x ctrl+o",
         "command": "workbench.action.openRecent"
       },
