@@ -45,19 +45,19 @@ export const deleteCommands: string[] = [
 
 const qmkKey = "groog.keys.qmkState";
 
-class GlobalStateTracker<ValueType> {
+class GlobalStateTracker<T> {
   private key: string;
 
   constructor(key: string) {
     this.key = key;
   }
 
-  get(context: vscode.ExtensionContext): ValueType | undefined {
-    return context.globalState.get<ValueType>(this.key);
+  get(context: vscode.ExtensionContext): T | undefined {
+    return context.globalState.get<T>(this.key);
   }
 
-  update(context: vscode.ExtensionContext, vt: ValueType) {
-    context.globalState.update(this.key, vt);
+  update(context: vscode.ExtensionContext, t: T) {
+    context.globalState.update(this.key, t);
   }
 }
 
