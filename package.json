@@ -37,7 +37,9 @@
     "onCommand:groog.multiCommand.execute",
     "onCommand:groog.record.startRecording",
     "onCommand:groog.record.endRecording",
+    "onCommand:groog.record.saveRecordingAs",
     "onCommand:groog.record.playRecording",
+    "onCommand:groog.record.playNamedRecording",
     "onCommand:groog.record.find",
     "onCommand:groog.record.findNext",
     "onCommand:groog.find",
@@ -143,8 +145,16 @@
         "title": "Groog End Recording"
       },
       {
+        "command": "groog.record.saveRecordingAs",
+        "title": "Groog Save Recording As..."
+      },
+      {
         "command": "groog.record.playRecording",
         "title": "Groog Play Recording"
+      },
+      {
+        "command": "groog.record.playNamedRecording",
+        "title": "Groog Play Named Recording..."
       },
       {
         "command": "groog.record.find",
@@ -679,8 +689,18 @@
         "when": "groog.recording"
       },
       {
+        "key": "alt+shift+e",
+        "command": "groog.record.saveRecordingAs",
+        "when": "groog.recording"
+      },
+      {
         "key": "alt+e",
         "command": "groog.record.playRecording",
+        "when": "!groog.recording"
+      },
+      {
+        "key": "alt+shift+e",
+        "command": "groog.record.playNamedRecording",
         "when": "!groog.recording"
       },
       {

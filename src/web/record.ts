@@ -12,19 +12,21 @@ export class Recorder implements TypeHandler {
   active: boolean; // aka "recording"
   private recordBook: Record[];
   private lastFind: FindNextRecord | undefined;
-  //private findMode: boolean;
+  private namedRecordings: Map<string, Record[]>;
 
   constructor() {
     this.baseCommand = true;
     this.active = false;
     this.recordBook = [];
-    //this.findMode = false;
+    this.namedRecordings = new Map<string, Record[]>();
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
     recorder.registerCommand(context, "record.startRecording", () => recorder.startRecording());
     recorder.registerCommand(context, "record.endRecording", () => recorder.endRecording());
+    recorder.registerCommand(context, "record.saveRecordingAs", () => recorder.saveRecordingAs());
     recorder.registerCommand(context, "record.playRecording", () => recorder.playback());
+    recorder.registerCommand(context, "record.playNamedRecording", () => recorder.playbackNamedRecording());
     recorder.registerCommand(context, "record.find", () => recorder.find());
     recorder.registerCommand(context, "record.findNext", () => recorder.findNext());
   }
@@ -80,12 +82,64 @@ export class Recorder implements TypeHandler {
     }
   }
 
+  async saveRecordingAs() {
+    if (!this.active) {
+      vscode.window.showInformationMessage("Not recording!");
+      return;
+    }
+
+    const searchQuery = await vscode.window.showInputBox({
+      placeHolder: "Recording name",
+      prompt: "Save recording as...",
+      title: "Save recording as:",
+    });
+
+    // Save recording as if a name was provided.
+    if (searchQuery) {
+      this.namedRecordings.set(searchQuery, this.recordBook);
+      vscode.window.showInformationMessage(`Recording saved as "${searchQuery}"!`);
+    } else {
+      vscode.window.showErrorMessage("No recording name provided");
+    }
+    this.deactivate();
+    vscode.window.showInformationMessage("Recording ended!");
+  }
+
   endRecording() {
     if (!this.active) {
       vscode.window.showInformationMessage("Not recording!");
     } else {
       this.deactivate();
       vscode.window.showInformationMessage("Recording ended!");
+    }
+  }
+
+  async playbackNamedRecording() {
+    if (this.active) {
+      vscode.window.showInformationMessage("Still recording!");
+      return;
+    }
+    const result = await vscode.window.showQuickPick(
+      [...this.namedRecordings.keys()].sort((a: string, b: string): number => {
+        return a < b ? -1 : 1;
+      }),
+      {
+        placeHolder: "Recording name",
+        title: "Choose Recording to play",
+      },
+    );
+    if (!result) {
+      vscode.window.showErrorMessage("No recording chosen");
+      return;
+    }
+    let nr = this.namedRecordings.get(result);
+    if (!nr) {
+      vscode.window.showErrorMessage(`Unknown recording "${result}"`);
+      return;
+    }
+    vscode.window.showInformationMessage(`Playing back "${result}"`);
+    for (var r of nr) {
+      await r.playback();
     }
   }
 
@@ -110,10 +164,6 @@ export class Recorder implements TypeHandler {
   deactivate() {
     this.active = false;
     this.lastFind = undefined;
-    //this.findMode = false;
-    // TODO: Stop record-find prompt
-    // TODO: find and replace? maybe not needed since we can just do find and replace through
-    // existing find widget.
     vscode.commands.executeCommand('setContext', 'groog.recording', false);
     vscode.commands.executeCommand("closeFindWidget");
   }
