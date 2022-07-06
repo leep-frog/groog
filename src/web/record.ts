@@ -12,6 +12,10 @@ export class Recorder implements TypeHandler {
   active: boolean; // aka "recording"
   private recordBook: Record[];
   private lastFind: FindNextRecord | undefined;
+  // TODO: Would we ever want these in persistent memory?
+  //       Don't think so unless we made package public.
+  //       Otherwise, any recording I'd want public I could
+  //       just create an equivalent vscode function.
   private namedRecordings: Map<string, Record[]>;
 
   constructor() {
