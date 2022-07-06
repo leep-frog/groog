@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -704,11 +704,6 @@
         "when": "!groog.recording"
       },
       {
-        "key": "alt+n",
-        "command": "groog.record.find",
-        "when": "groog.recording"
-      },
-      {
         "key": "ctrl+x ctrl+o",
         "command": "workbench.action.openRecent"
       },
@@ -732,12 +727,16 @@
         "when": "editorLangId == 'markdown'"
       },
       {
-        "key": "ctrl+x u",
+        "key": "alt+z",
         "command": "git.revertSelectedRanges"
       },
       {
-        "key": "ctrl+x ctrl+u",
-        "command": "git.revertSelectedRanges"
+        "key": "alt+p",
+        "command": "workbench.action.editor.previousChange"
+      },
+      {
+        "key": "alt+n",
+        "command": "workbench.action.editor.nextChange"
       }
     ]
   },
