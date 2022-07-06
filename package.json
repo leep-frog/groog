@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -730,6 +730,14 @@
         "key": "ctrl+x m",
         "command": "markdown.showPreviewToSide",
         "when": "editorLangId == 'markdown'"
+      },
+      {
+        "key": "ctrl+x u",
+        "command": "git.revertSelectedRanges"
+      },
+      {
+        "key": "ctrl+x ctrl+u",
+        "command": "git.revertSelectedRanges"
       }
     ]
   },
