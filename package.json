@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
