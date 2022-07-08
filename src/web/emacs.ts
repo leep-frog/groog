@@ -92,6 +92,7 @@ export class Emacs {
 
     this.recorder.registerCommand(context, 'jump', () => this.jump());
     this.recorder.registerCommand(context, 'fall', () => this.fall());
+    this.recorder.registerCommand(context, 'format', () => this.format());
 
     this.recorder.registerCommand(context, 'toggleQMK', () => this.toggleQMK(context));
     this.recorder.registerCommand(context, 'yank', () => this.yank());
@@ -229,6 +230,20 @@ export class Emacs {
       (th: TypeHandler): boolean => { return th.moveHandler(vsCommand, ...rest); },
       () => { vscode.commands.executeCommand(vsCommand, ...rest); },
     );
+  }
+
+  format() {
+    let editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      return;
+    }
+
+    if (editor.selection.isEmpty) {
+      vscode.commands.executeCommand("editor.action.formatDocument");
+      vscode.commands.executeCommand("editor.action.trimTrailingWhitespace");
+    } else {
+      vscode.commands.executeCommand("editor.action.formatSelection");
+    }
   }
 }
 

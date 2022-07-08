@@ -47,7 +47,8 @@
     "onCommand:groog.deleteLeft",
     "onCommand:groog.deleteRight",
     "onCommand:groog.deleteWordLeft",
-    "onCommand:groog.deleteWordRight"
+    "onCommand:groog.deleteWordRight",
+    "onCommand:groog.format"
   ],
   "browser": "./dist/web/extension.js",
   "contributes": {
@@ -179,6 +180,10 @@
       {
         "command": "groog.deleteWordRight",
         "title": "Groog delete right"
+      },
+      {
+        "command": "groog.format",
+        "title": "Groog format"
       }
     ],
     "keybindings": [
@@ -600,23 +605,11 @@
       },
       {
         "key": "ctrl+x ctrl+tab",
-        "command": "groog.multiCommand.execute",
-        "args": {
-          "sequence": [
-            "editor.action.formatDocument",
-            "editor.action.trimTrailingWhitespace"
-          ]
-        }
+        "command": "groog.format"
       },
       {
         "key": "ctrl+x tab",
-        "command": "groog.multiCommand.execute",
-        "args": {
-          "sequence": [
-            "editor.action.formatDocument",
-            "editor.action.trimTrailingWhitespace"
-          ]
-        }
+        "command": "groog.format"
       },
       {
         "key": "ctrl+/",
@@ -706,10 +699,6 @@
       {
         "key": "ctrl+x ctrl+o",
         "command": "workbench.action.openRecent"
-      },
-      {
-        "key": "tab",
-        "command": "editor.action.format"
       },
       {
         "key": "shift+pageup",
