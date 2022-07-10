@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -604,6 +604,14 @@
         "command": "editor.action.formatSelection"
       },
       {
+        "key": "ctrl+x ctrl+d",
+        "command": "editor.action.goToTypeDefinition"
+      },
+      {
+        "key": "ctrl+x d",
+        "command": "editor.action.goToTypeDefinition"
+      },
+      {
         "key": "ctrl+x ctrl+tab",
         "command": "groog.format"
       },
@@ -625,6 +633,10 @@
       },
       {
         "key": "ctrl+shift+home",
+        "command": "editor.action.selectAll"
+      },
+      {
+        "key": "shift+home",
         "command": "editor.action.selectAll"
       },
       {
