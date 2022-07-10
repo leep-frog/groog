@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -222,6 +222,18 @@
       {
         "key": "ctrl+y",
         "command": "groog.paste"
+      },
+      {
+        "key": "ctrl+x ctrl+y",
+        "command": "editor.action.clipboardPasteAction"
+      },
+      {
+        "key": "ctrl+x y",
+        "command": "editor.action.clipboardPasteAction"
+      },
+      {
+        "key": "alt+y",
+        "command": "editor.action.clipboardPasteAction"
       },
       {
         "key": "ctrl+w",
