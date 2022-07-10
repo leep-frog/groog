@@ -241,6 +241,7 @@ export class Emacs {
     if (editor.selection.isEmpty) {
       vscode.commands.executeCommand("editor.action.formatDocument");
       vscode.commands.executeCommand("editor.action.trimTrailingWhitespace");
+      vscode.commands.executeCommand("editor.action.organizeImports");
     } else {
       vscode.commands.executeCommand("editor.action.formatSelection");
     }
