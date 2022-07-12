@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -48,6 +48,7 @@
     "onCommand:groog.deleteRight",
     "onCommand:groog.deleteWordLeft",
     "onCommand:groog.deleteWordRight",
+    "onCommand:groog.updateSettings",
     "onCommand:groog.format"
   ],
   "browser": "./dist/web/extension.js",
@@ -180,6 +181,10 @@
       {
         "command": "groog.deleteWordRight",
         "title": "Groog delete right"
+      },
+      {
+        "command": "groog.updateSettings",
+        "title": "Groog update settings"
       },
       {
         "command": "groog.format",
@@ -617,11 +622,11 @@
       },
       {
         "key": "ctrl+x ctrl+d",
-        "command": "editor.action.goToTypeDefinition"
+        "command": "editor.action.revealDefinition"
       },
       {
         "key": "ctrl+x d",
-        "command": "editor.action.goToTypeDefinition"
+        "command": "editor.action.revealDefinition"
       },
       {
         "key": "ctrl+x ctrl+tab",

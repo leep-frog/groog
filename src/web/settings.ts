@@ -1,0 +1,74 @@
+import * as vscode from 'vscode';
+import { Registerable } from './interfaces';
+import { Recorder } from './record';
+
+export class Settings implements Registerable {
+
+  private static settings(): Setting[] {
+    return [
+      new GlobalSetting("editor", "autoClosingQuotes", "never"),
+      new GlobalSetting("editor", "detectIndentation", false),
+      new GlobalSetting("editor", "insertSpaces", true),
+      new GlobalSetting("editor", "rulers", [80, 200]),
+      new GlobalSetting("editor", "tabSize", 2),
+      new GlobalSetting("files", "eol", "\n"),
+      new GlobalSetting("files", "insertFinalNewline", true),
+      new GlobalSetting("files", "trimFinalNewlines", true),
+      new GlobalSetting("workbench", "editor.limit.enabled", true),
+      new GlobalSetting("workbench", "editor.limit.perEditorGroup", true),
+      new GlobalSetting("workbench", "editor.limit.value", 1),
+      new GlobalSetting("workbench", "startupEditor", "none"),
+      new LanguageSetting("typescript", "editor", "defaultFormatter", "vscode.typescript-language-features"),
+    ];
+  }
+
+  private static updateSettings(): void {
+    for (let s of this.settings()) {
+      s.update();
+    }
+  }
+
+  register(context: vscode.ExtensionContext, recorder: Recorder): void {
+    recorder.registerUnrecordableCommand(context, "updateSettings", () => Settings.updateSettings());
+  }
+}
+
+interface Setting {
+  update(): void;
+}
+
+class GlobalSetting implements Setting {
+
+  private configSection: string;
+  private subsection: string;
+  private value: string;
+
+  constructor(configSection: string, subsection: string, value: any) {
+    this.configSection = configSection;
+    this.subsection = subsection;
+    this.value = value;
+  }
+
+  update(): void {
+    vscode.workspace.getConfiguration(this.configSection).update(this.subsection, this.value, true);
+  }
+}
+
+class LanguageSetting implements Setting {
+
+  private languageId: string;
+  private configSection: string;
+  private subsection: string;
+  private value: string;
+
+  constructor(languageId: string, configSection: string, subsection: string, value: any) {
+    this.languageId = languageId;
+    this.configSection = configSection;
+    this.subsection = subsection;
+    this.value = value;
+  }
+
+  update(): void {
+    vscode.workspace.getConfiguration(this.configSection, { "languageId": this.languageId }).update(this.subsection, this.value, true, true);
+  }
+}

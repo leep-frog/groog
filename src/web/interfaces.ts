@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { Recorder } from './record';
 
-interface Registerable {
+export interface Registerable {
   register(context: vscode.ExtensionContext, recorder: Recorder): void;
 }
 

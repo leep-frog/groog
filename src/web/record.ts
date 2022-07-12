@@ -41,6 +41,10 @@ export class Recorder implements TypeHandler {
     }));
   }
 
+  registerUnrecordableCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => any) {
+    context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName, callback));
+  }
+
   execute(command: string, args: any[], callback: (...args: any[]) => any): any {
     if (command.includes("groog.record") || !this.active || !this.baseCommand) {
       return callback(...args);

@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
-import { Recorder } from './record';
-import { MarkHandler } from './mark';
 import { FindHandler } from './find';
+import { Registerable, TypeHandler } from './interfaces';
+import { MarkHandler } from './mark';
 import { multiCommand } from './multi-command';
-import { TypeHandler } from './interfaces';
+import { Recorder } from './record';
+import { Settings } from './settings';
 
 const jumpDist = 10;
 export const cursorMoves: string[] = [
@@ -76,6 +77,12 @@ export class Emacs {
     ];
   }
 
+  private static registerables(): Registerable[] {
+    return [
+      new Settings(),
+    ];
+  }
+
   register(context: vscode.ExtensionContext) {
     for (var move of cursorMoves) {
       const m = move;
@@ -104,6 +111,10 @@ export class Emacs {
 
     for (var th of this.typeHandlers) {
       th.register(context, this.recorder);
+    }
+
+    for (var r of Emacs.registerables()) {
+      r.register(context, this.recorder);
     }
 
     this.recorder.registerCommand(context, "multiCommand.execute", multiCommand);
