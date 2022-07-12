@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -670,12 +670,23 @@
       },
       {
         "key": "alt+w",
-        "command": "toggleSearchEditorWholeWord"
+        "command": "toggleFindWholeWord",
+        "when": "editorFocus"
+      },
+      {
+        "key": "alt+w",
+        "command": "toggleSearchEditorWholeWord",
+        "when": "!editorFocus"
+      },
+      {
+        "key": "alt+f4",
+        "command": "toggleFindWholeWord",
+        "when": "groog.qmk && editorFocus"
       },
       {
         "key": "alt+f4",
         "command": "toggleSearchEditorWholeWord",
-        "when": "groog.qmk"
+        "when": "groog.qmk && !editorFocus"
       },
       {
         "key": "alt+x",
