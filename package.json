@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -651,6 +651,11 @@
       {
         "key": "ctrl+shift+a",
         "command": "editor.action.selectAll"
+      },
+      {
+        "key": "ctrl+a",
+        "command": "editor.action.selectAll",
+        "when": "groog.qmk"
       },
       {
         "key": "ctrl+shift+home",
