@@ -26,6 +26,8 @@ export class Settings implements Registerable {
       new GlobalSetting("workbench", "startupEditor", "none"),
       new LanguageSetting("typescript", "editor", "defaultFormatter", "vscode.typescript-language-features"),
       // MinGW terminal
+      // https://dev.to/yumetodo/make-the-integrated-shell-of-visual-studio-code-to-bash-of-msys2-5eao
+      // https://code.visualstudio.com/docs/terminal/basics#_terminal-profiles
       new GlobalSetting("terminal", "integrated.profiles.windows", {
         mingw: {
           "path": "C:\\msys64\\usr\\bin\\bash.exe",

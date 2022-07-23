@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.28",
+  "version": "0.0.30",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -23,6 +23,8 @@
     "onCommand:groog.fall",
     "onCommand:groog.cursorUp",
     "onCommand:groog.cursorDown",
+    "onCommand:groog.terminalCursorUp",
+    "onCommand:groog.terminalCursorDown",
     "onCommand:groog.cursorLeft",
     "onCommand:groog.cursorRight",
     "onCommand:groog.cursorHome",
@@ -95,8 +97,16 @@
         "title": "Emacs Cursor Up"
       },
       {
+        "command": "groog.terminalCursorUp",
+        "title": "[Terminal] Emacs Cursor Up"
+      },
+      {
         "command": "groog.cursorDown",
         "title": "Emacs Cursor Down"
+      },
+      {
+        "command": "groog.terminalCursorDown",
+        "title": "[Terminal] Emacs Cursor Down"
       },
       {
         "command": "groog.cursorRight",
@@ -279,8 +289,18 @@
       },
       {
         "key": "ctrl+p",
+        "command": "groog.terminalCursorUp",
+        "when": "terminalFocus && !suggestWidgetVisible"
+      },
+      {
+        "key": "ctrl+p",
         "command": "selectPrevSuggestion",
         "when": "editorTextFocus && suggestWidgetVisible"
+      },
+      {
+        "key": "ctrl+p",
+        "command": "selectPrevSuggestion",
+        "when": "terminalFocus && suggestWidgetVisible"
       },
       {
         "key": "ctrl+p",
@@ -294,8 +314,18 @@
       },
       {
         "key": "up",
+        "command": "groog.terminalCursorUp",
+        "when": "terminalFocus && !suggestWidgetVisible"
+      },
+      {
+        "key": "up",
         "command": "selectPrevSuggestion",
         "when": "editorTextFocus && suggestWidgetVisible"
+      },
+      {
+        "key": "up",
+        "command": "selectPrevSuggestion",
+        "when": "terminalFocus && suggestWidgetVisible"
       },
       {
         "key": "up",
@@ -309,8 +339,18 @@
       },
       {
         "key": "ctrl+n",
+        "command": "groog.terminalCursorDown",
+        "when": "terminalFocus && !suggestWidgetVisible"
+      },
+      {
+        "key": "ctrl+n",
         "command": "selectNextSuggestion",
         "when": "editorTextFocus && suggestWidgetVisible"
+      },
+      {
+        "key": "ctrl+n",
+        "command": "selectNextSuggestion",
+        "when": "terminalFocus && suggestWidgetVisible"
       },
       {
         "key": "ctrl+n",
@@ -328,8 +368,18 @@
       },
       {
         "key": "down",
+        "command": "groog.terminalCursorDown",
+        "when": "terminalFocus && !suggestWidgetVisible"
+      },
+      {
+        "key": "down",
         "command": "selectNextSuggestion",
         "when": "editorTextFocus && suggestWidgetVisible"
+      },
+      {
+        "key": "down",
+        "command": "selectNextSuggestion",
+        "when": "terminalFocus && suggestWidgetVisible"
       },
       {
         "key": "down",
@@ -775,6 +825,18 @@
       {
         "key": "alt+n",
         "command": "workbench.action.editor.nextChange"
+      },
+      {
+        "key": "alt+t",
+        "command": "workbench.action.terminal.toggleTerminal"
+      },
+      {
+        "key": "ctrl+x u",
+        "command": "workbench.action.terminal.toggleTerminal"
+      },
+      {
+        "key": "ctrl+x ctrl+u",
+        "command": "workbench.action.terminal.toggleTerminal"
       }
     ]
   },
