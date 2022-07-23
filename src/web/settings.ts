@@ -1,11 +1,17 @@
 import * as vscode from 'vscode';
+import { commands } from './commands';
 import { Registerable } from './interfaces';
 import { Recorder } from './record';
 
 export class Settings implements Registerable {
 
   private static settings(): Setting[] {
+    let ics = [];
+    for (let v of commands.keys()) {
+      ics.push("groog." + v);
+    }
     return [
+      new GlobalSetting("terminal", "integrated.commandsToSkipShell", ics),
       new GlobalSetting("editor", "autoClosingQuotes", "never"),
       new GlobalSetting("editor", "detectIndentation", false),
       new GlobalSetting("editor", "insertSpaces", true),
@@ -19,6 +25,16 @@ export class Settings implements Registerable {
       new GlobalSetting("workbench", "editor.limit.value", 1),
       new GlobalSetting("workbench", "startupEditor", "none"),
       new LanguageSetting("typescript", "editor", "defaultFormatter", "vscode.typescript-language-features"),
+      // MinGW terminal
+      new GlobalSetting("terminal", "integrated.profiles.windows", {
+        mingw: {
+          "path": "C:\\msys64\\usr\\bin\\bash.exe",
+          "args": [
+            "--login",
+            "-i",
+          ]
+        }
+      }),
     ];
   }
 

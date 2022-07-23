@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { commands } from './commands';
 import { FindHandler } from './find';
 import { Registerable, TypeHandler } from './interfaces';
 import { MarkHandler } from './mark';
@@ -118,6 +119,11 @@ export class Emacs {
     }
 
     this.recorder.registerCommand(context, "multiCommand.execute", multiCommand);
+
+    // Register one-off commands.
+    commands.forEach((value: () => void, key: string) => {
+      this.recorder.registerCommand(context, key, value);
+    });
 
     // After all commands have been registered, check persistent data for qmk setting.
     this.setQMK(context, this.qmk.get(context));
