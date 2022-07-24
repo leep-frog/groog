@@ -29,7 +29,9 @@ export class Settings implements Registerable {
       // https://dev.to/yumetodo/make-the-integrated-shell-of-visual-studio-code-to-bash-of-msys2-5eao
       // https://code.visualstudio.com/docs/terminal/basics#_terminal-profiles
       new GlobalSetting("terminal", "integrated.profiles.windows", {
-        mingw: {
+        // Add the following to settings to make this the default terminal
+        // "terminal.integrated.defaultProfile.windows": "MinGW",
+        "MinGW": {
           "path": "C:\\msys64\\usr\\bin\\bash.exe",
           "args": [
             "--login",

@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.31",
+  "version": "0.0.32",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -194,6 +194,10 @@
     "keybindings": [
       {
         "key": "ctrl+x ctrl+t",
+        "command": "groog.toggleQMK"
+      },
+      {
+        "key": "ctrl+x t",
         "command": "groog.toggleQMK"
       },
       {
@@ -574,7 +578,13 @@
       },
       {
         "key": "ctrl+q",
+        "when": "!terminalFocus",
         "command": "workbench.action.closeEditorsAndGroup"
+      },
+      {
+        "key": "ctrl+q",
+        "when": "terminalFocus",
+        "command": "workbench.action.terminal.kill"
       },
       {
         "key": "ctrl+o",
@@ -601,8 +611,20 @@
         "command": "workbench.action.focusPreviousGroup"
       },
       {
-        "key": "ctrl+x ctrl+b",
+        "key": "ctrl+.",
+        "command": "workbench.action.openGlobalKeybindings"
+      },
+      {
+        "key": "ctrl+x ctrl+.",
         "command": "workbench.action.openGlobalKeybindingsFile"
+      },
+      {
+        "key": "ctrl+,",
+        "command": "workbench.action.openSettings"
+      },
+      {
+        "key": "ctrl+x ctrl+,",
+        "command": "workbench.action.openSettingsJson"
       },
       {
         "key": "ctrl+x ctrl+l",
@@ -666,7 +688,7 @@
         "command": "editor.action.selectAll"
       },
       {
-        "key": "ctrl+t",
+        "key": "alt+t",
         "command": "go.test.package"
       },
       {
@@ -777,16 +799,22 @@
         "command": "workbench.action.editor.nextChange"
       },
       {
-        "key": "alt+t",
+        "key": "ctrl+t",
         "command": "workbench.action.terminal.toggleTerminal"
       },
       {
-        "key": "ctrl+x u",
-        "command": "workbench.action.terminal.toggleTerminal"
+        "key": "ctrl+j",
+        "command": "workbench.action.terminal.focusPrevious",
+        "when": "terminalFocus"
       },
       {
-        "key": "ctrl+x ctrl+u",
-        "command": "workbench.action.terminal.toggleTerminal"
+        "key": "ctrl+l",
+        "command": "workbench.action.terminal.focusNext",
+        "when": "terminalFocus"
+      },
+      {
+        "key": "ctrl+shift+t",
+        "command": "workbench.action.terminal.new"
       }
     ]
   },
