@@ -33,6 +33,11 @@ export class Settings implements Registerable {
         // "terminal.integrated.defaultProfile.windows": "MinGW",
         "MinGW": {
           "path": "C:\\msys64\\usr\\bin\\bash.exe",
+          "overrideName": true,
+          "color": "terminal.ansiGreen",
+          // See below link for a list of icons
+          // https://code.visualstudio.com/api/references/icons-in-labels
+          "icon": "hubot",
           "args": [
             "--login",
             "-i",

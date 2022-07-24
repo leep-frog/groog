@@ -813,6 +813,16 @@
         "when": "terminalFocus"
       },
       {
+        "key": "ctrl+x n",
+        "command": "workbench.action.terminal.rename",
+        "when": "terminalFocus"
+      },
+      {
+        "key": "ctrl+x ctrl+n",
+        "command": "workbench.action.terminal.rename",
+        "when": "terminalFocus"
+      },
+      {
         "key": "ctrl+shift+t",
         "command": "workbench.action.terminal.new"
       }
