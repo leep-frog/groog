@@ -6,7 +6,9 @@ import { Recorder } from './record';
 export class Settings implements Registerable {
 
   private static settings(): Setting[] {
-    let ics = [];
+    let ics = [
+      "workbench.action.closePanel",
+    ];
     for (let v of commands.keys()) {
       ics.push("groog." + v);
     }

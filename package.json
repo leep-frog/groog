@@ -801,12 +801,12 @@
       {
         "key": "ctrl+t",
         "command": "workbench.action.toggleMaximizedPanel",
-        "when": "!terminalFocus"
+        "when": "!activePanel"
       },
       {
         "key": "ctrl+t",
         "command": "workbench.action.closePanel",
-        "when": "terminalFocus"
+        "when": "activePanel"
       },
       {
         "key": "ctrl+u",
