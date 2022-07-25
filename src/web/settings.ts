@@ -8,6 +8,8 @@ export class Settings implements Registerable {
   private static settings(): Setting[] {
     let ics = [
       "workbench.action.closePanel",
+      "workbench.action.terminal.focusNext",
+      "workbench.action.terminal.focusPrevious",
     ];
     for (let v of commands.keys()) {
       ics.push("groog." + v);

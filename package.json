@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.35",
+  "version": "0.0.36",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -587,20 +587,20 @@
         "command": "workbench.action.terminal.kill"
       },
       {
-        "key": "ctrl+o",
-        "command": "workbench.action.focusNextGroup"
-      },
-      {
         "key": "ctrl+u",
         "command": "workbench.action.focusPreviousGroup"
       },
       {
-        "key": "ctrl+tab",
+        "key": "ctrl+o",
         "command": "workbench.action.focusNextGroup"
       },
       {
         "key": "ctrl+shift+tab",
         "command": "workbench.action.focusPreviousGroup"
+      },
+      {
+        "key": "ctrl+tab",
+        "command": "workbench.action.focusNextGroup"
       },
       {
         "key": "ctrl+pagedown",
@@ -817,6 +817,14 @@
         "key": "ctrl+o",
         "command": "workbench.action.terminal.focusNext",
         "when": "terminalFocus"
+      },
+      {
+        "key": "ctrl+shift+tab",
+        "command": "workbench.action.terminal.focusPrevious"
+      },
+      {
+        "key": "ctrl+tab",
+        "command": "workbench.action.terminal.focusNext"
       },
       {
         "key": "ctrl+x n",
