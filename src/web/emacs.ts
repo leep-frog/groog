@@ -31,6 +31,7 @@ const ctrlGCommands: string[] = [
   "closeFindWidget",
   "closeParameterHints",
   "removeSecondaryCursors",
+  "notifications.clearAll",
 ];
 
 const deleteLeft = "deleteLeft";
