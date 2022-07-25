@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.32",
+  "version": "0.0.33",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -800,15 +800,21 @@
       },
       {
         "key": "ctrl+t",
-        "command": "workbench.action.terminal.toggleTerminal"
+        "command": "workbench.action.toggleMaximizedPanel",
+        "when": "!terminalFocus"
       },
       {
-        "key": "ctrl+j",
+        "key": "ctrl+t",
+        "command": "workbench.action.closePanel",
+        "when": "terminalFocus"
+      },
+      {
+        "key": "ctrl+u",
         "command": "workbench.action.terminal.focusPrevious",
         "when": "terminalFocus"
       },
       {
-        "key": "ctrl+l",
+        "key": "ctrl+o",
         "command": "workbench.action.terminal.focusNext",
         "when": "terminalFocus"
       },
