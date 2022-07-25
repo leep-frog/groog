@@ -13,7 +13,6 @@ export class Settings implements Registerable {
       ics.push("groog." + v);
     }
     return [
-      new GlobalSetting("terminal", "integrated.commandsToSkipShell", ics),
       new GlobalSetting("editor", "autoClosingQuotes", "never"),
       new GlobalSetting("editor", "detectIndentation", false),
       new GlobalSetting("editor", "insertSpaces", true),
@@ -22,6 +21,8 @@ export class Settings implements Registerable {
       new GlobalSetting("files", "eol", "\n"),
       new GlobalSetting("files", "insertFinalNewline", true),
       new GlobalSetting("files", "trimFinalNewlines", true),
+      new GlobalSetting("terminal", "integrated.commandsToSkipShell", ics),
+      new GlobalSetting("terminal", "integrated.copyOnSelection", true),
       new GlobalSetting("workbench", "editor.limit.enabled", true),
       new GlobalSetting("workbench", "editor.limit.perEditorGroup", true),
       new GlobalSetting("workbench", "editor.limit.value", 1),
