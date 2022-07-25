@@ -10,6 +10,7 @@ export class Settings implements Registerable {
       "workbench.action.closePanel",
       "workbench.action.terminal.focusNext",
       "workbench.action.terminal.focusPrevious",
+      "groog.message.info",
     ];
     for (let v of commands.keys()) {
       ics.push("groog." + v);

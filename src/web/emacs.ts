@@ -3,7 +3,7 @@ import { commands } from './commands';
 import { FindHandler } from './find';
 import { Registerable, TypeHandler } from './interfaces';
 import { MarkHandler } from './mark';
-import { multiCommand } from './multi-command';
+import { infoMessage, multiCommand } from './misc-command';
 import { Recorder } from './record';
 import { Settings } from './settings';
 
@@ -119,6 +119,7 @@ export class Emacs {
     }
 
     this.recorder.registerCommand(context, "multiCommand.execute", multiCommand);
+    this.recorder.registerCommand(context, "message.info", infoMessage);
 
     // Register one-off commands.
     commands.forEach((value: () => void, key: string) => {

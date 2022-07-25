@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.37",
+  "version": "0.0.38",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -34,6 +34,7 @@
     "onCommand:groog.toggleMarkMode",
     "onCommand:groog.ctrlG",
     "onCommand:groog.undo",
+    "onCommand:groog.message.info",
     "onCommand:groog.multiCommand.execute",
     "onCommand:groog.record.startRecording",
     "onCommand:groog.record.endRecording",
@@ -137,6 +138,10 @@
       {
         "command": "groog.multiCommand.execute",
         "title": "Groog MultiCommand"
+      },
+      {
+        "command": "groog.message.info",
+        "title": "Groog Info Message"
       },
       {
         "command": "groog.record.startRecording",
@@ -595,6 +600,14 @@
       },
       {
         "key": "ctrl+q",
+        "when": "terminalFocus",
+        "command": "groog.message.info",
+        "args": {
+          "message": "Run ctrl+shift+q to kill the terminal"
+        }
+      },
+      {
+        "key": "ctrl+shift+q",
         "when": "terminalFocus",
         "command": "workbench.action.terminal.kill"
       },
