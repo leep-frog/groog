@@ -7,10 +7,11 @@ export class Settings implements Registerable {
 
   private static settings(): Setting[] {
     let ics = [
+      "groog.message.info",
       "workbench.action.closePanel",
       "workbench.action.terminal.focusNext",
       "workbench.action.terminal.focusPrevious",
-      "groog.message.info",
+      "workbench.action.terminal.newWithProfile",
     ];
     for (let v of commands.keys()) {
       ics.push("groog." + v);

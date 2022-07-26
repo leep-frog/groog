@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.39",
+  "version": "0.0.40",
   "publisher": "groogle",
   "engines": {
     "vscode": "^1.64.0"
@@ -329,6 +329,10 @@
       {
         "key": "ctrl+n",
         "command": "-workbench.action.files.newUntitledFile"
+      },
+      {
+        "key": "ctrl+p",
+        "command": "-workbench.action.quickOpen"
       },
       {
         "key": "down",
@@ -912,6 +916,10 @@
       {
         "key": "ctrl+shift+t",
         "command": "workbench.action.terminal.new"
+      },
+      {
+        "key": "alt+shift+t",
+        "command": "workbench.action.terminal.newWithProfile"
       }
     ]
   },
