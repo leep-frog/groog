@@ -741,7 +741,8 @@
       },
       {
         "key": "ctrl+/",
-        "command": "groog.undo"
+        "command": "groog.undo",
+        "when": "!terminalFocus"
       },
       {
         "key": "ctrl+;",
@@ -920,6 +921,14 @@
       {
         "key": "alt+shift+t",
         "command": "workbench.action.terminal.newWithProfile"
+      },
+      {
+        "key": "ctrl+x ctrl+c",
+        "when": "terminalFocus",
+        "command": "workbench.action.terminal.sendSequence",
+        "args": {
+          "text": "\u0018\u0003"
+        }
       }
     ]
   },

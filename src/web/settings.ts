@@ -25,6 +25,8 @@ export class Settings implements Registerable {
       new GlobalSetting("files", "eol", "\n"),
       new GlobalSetting("files", "insertFinalNewline", true),
       new GlobalSetting("files", "trimFinalNewlines", true),
+      // true is the default, but explicilty set it here to avoid potential issues.
+      new GlobalSetting("terminal", "integrated.allowChords", true),
       new GlobalSetting("terminal", "integrated.commandsToSkipShell", ics),
       new GlobalSetting("terminal", "integrated.copyOnSelection", true),
       new GlobalSetting("workbench", "editor.limit.enabled", true),
