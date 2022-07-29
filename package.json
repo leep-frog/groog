@@ -396,7 +396,16 @@
       },
       {
         "key": "ctrl+backspace",
-        "command": "groog.deleteWordLeft"
+        "command": "groog.deleteWordLeft",
+        "when": "!groog.qmk || !panelFocus"
+      },
+      {
+        "key": "ctrl+backspace",
+        "command": "workbench.action.terminal.sendSequence",
+        "when": "groog.qmk \u0026\u0026 panelFocus",
+        "args": {
+          "text": "\u0008"
+        }
       },
       {
         "key": "ctrl+d",
@@ -529,11 +538,23 @@
       },
       {
         "key": "ctrl+pagedown",
-        "command": "workbench.action.focusNextGroup"
+        "command": "workbench.action.focusNextGroup",
+        "when": "!terminalFocus"
+      },
+      {
+        "key": "ctrl+pagedown",
+        "command": "workbench.action.terminal.focusNext",
+        "when": "terminalFocus"
       },
       {
         "key": "ctrl+pageup",
-        "command": "workbench.action.focusPreviousGroup"
+        "command": "workbench.action.focusPreviousGroup",
+        "when": "!terminalFocus"
+      },
+      {
+        "key": "ctrl+pageup",
+        "command": "workbench.action.terminal.focusPrevious",
+        "when": "terminalFocus"
       },
       {
         "key": "ctrl+q",
