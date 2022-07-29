@@ -4,6 +4,7 @@
   "description": "",
   "version": "0.0.41",
   "publisher": "groogle",
+  "browser": "./dist/web/extension.js",
   "engines": {
     "vscode": "^1.64.0"
   },
@@ -14,45 +15,70 @@
   "categories": [
     "Other"
   ],
+  "scripts": {
+    "compile-web": "webpack",
+    "lint": "eslint src --ext ts",
+    "package-web": "webpack --mode production --devtool hidden-source-map",
+    "pretest": "npm run compile-web",
+    "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. .",
+    "test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",
+    "vscode:prepublish": "npm run package-web",
+    "watch-web": "webpack --watch"
+  },
+  "devDependencies": {
+    "@types/mocha": "^9.0.0",
+    "@types/vscode": "^1.64.0",
+    "@types/webpack-env": "^1.16.3",
+    "@typescript-eslint/eslint-plugin": "^5.9.1",
+    "@typescript-eslint/parser": "^5.9.1",
+    "@vscode/test-web": "^0.0.15",
+    "assert": "^2.0.0",
+    "eslint": "^8.6.0",
+    "mocha": "^9.1.3",
+    "process": "^0.11.10",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.5.4",
+    "webpack": "^5.66.0",
+    "webpack-cli": "^4.9.1"
+  },
   "activationEvents": [
-    "onCommand:groog.toggleQMK",
-    "onCommand:groog.yank",
-    "onCommand:groog.paste",
-    "onCommand:groog.kill",
-    "onCommand:groog.jump",
-    "onCommand:groog.fall",
-    "onCommand:groog.cursorUp",
+    "onCommand:groog.ctrlG",
+    "onCommand:groog.cursorBottom",
     "onCommand:groog.cursorDown",
+    "onCommand:groog.cursorEnd",
+    "onCommand:groog.cursorHome",
     "onCommand:groog.cursorLeft",
     "onCommand:groog.cursorRight",
-    "onCommand:groog.cursorHome",
-    "onCommand:groog.cursorEnd",
+    "onCommand:groog.cursorTop",
+    "onCommand:groog.cursorUp",
     "onCommand:groog.cursorWordLeft",
     "onCommand:groog.cursorWordRight",
-    "onCommand:groog.cursorTop",
-    "onCommand:groog.cursorBottom",
-    "onCommand:groog.toggleMarkMode",
-    "onCommand:groog.ctrlG",
-    "onCommand:groog.undo",
-    "onCommand:groog.message.info",
-    "onCommand:groog.multiCommand.execute",
-    "onCommand:groog.record.startRecording",
-    "onCommand:groog.record.endRecording",
-    "onCommand:groog.record.saveRecordingAs",
-    "onCommand:groog.record.playRecording",
-    "onCommand:groog.record.playNamedRecording",
-    "onCommand:groog.record.find",
-    "onCommand:groog.record.findNext",
-    "onCommand:groog.find",
-    "onCommand:groog.reverseFind",
     "onCommand:groog.deleteLeft",
     "onCommand:groog.deleteRight",
     "onCommand:groog.deleteWordLeft",
     "onCommand:groog.deleteWordRight",
+    "onCommand:groog.fall",
+    "onCommand:groog.find",
+    "onCommand:groog.format",
+    "onCommand:groog.jump",
+    "onCommand:groog.kill",
+    "onCommand:groog.message.info",
+    "onCommand:groog.multiCommand.execute",
+    "onCommand:groog.paste",
+    "onCommand:groog.record.endRecording",
+    "onCommand:groog.record.find",
+    "onCommand:groog.record.findNext",
+    "onCommand:groog.record.playNamedRecording",
+    "onCommand:groog.record.playRecording",
+    "onCommand:groog.record.saveRecordingAs",
+    "onCommand:groog.record.startRecording",
+    "onCommand:groog.reverseFind",
+    "onCommand:groog.toggleMarkMode",
+    "onCommand:groog.toggleQMK",
+    "onCommand:groog.undo",
     "onCommand:groog.updateSettings",
-    "onCommand:groog.format"
+    "onCommand:groog.yank"
   ],
-  "browser": "./dist/web/extension.js",
   "contributes": {
     "commands": [
       {
@@ -98,6 +124,10 @@
       {
         "command": "groog.cursorDown",
         "title": "Emacs Cursor Down"
+      },
+      {
+        "command": "groog.cursorLeft",
+        "title": "Emacs Cursor Left"
       },
       {
         "command": "groog.cursorRight",
@@ -198,446 +228,132 @@
     ],
     "keybindings": [
       {
-        "key": "ctrl+x ctrl+t",
-        "command": "groog.toggleQMK"
-      },
-      {
-        "key": "ctrl+x t",
-        "command": "groog.toggleQMK"
-      },
-      {
-        "key": "ctrl+j",
-        "command": "groog.toggleMarkMode"
-      },
-      {
-        "key": "alt+g",
-        "command": "noop"
-      },
-      {
-        "key": "ctrl+g",
-        "command": "groog.ctrlG",
-        "when": "!sideBarFocus && !inQuickOpen && !suggestWidgetVisible"
-      },
-      {
-        "key": "ctrl+g",
-        "command": "workbench.action.focusActiveEditorGroup",
-        "when": "sideBarFocus && !inQuickOpen && !suggestWidgetVisible"
-      },
-      {
-        "key": "ctrl+g",
-        "command": "workbench.action.closeQuickOpen",
-        "when": "inQuickOpen && !suggestWidgetVisible"
-      },
-      {
-        "key": "ctrl+g",
-        "command": "hideSuggestWidget",
-        "when": "suggestWidgetVisible"
-      },
-      {
-        "key": "ctrl+y",
-        "command": "groog.paste"
-      },
-      {
-        "key": "ctrl+x ctrl+y",
-        "command": "editor.action.clipboardPasteAction"
-      },
-      {
-        "key": "ctrl+x shift+insert",
-        "command": "editor.action.clipboardPasteAction"
-      },
-      {
-        "key": "ctrl+x y",
-        "command": "editor.action.clipboardPasteAction"
-      },
-      {
-        "key": "alt+y",
-        "command": "editor.action.clipboardPasteAction"
-      },
-      {
-        "key": "ctrl+w",
-        "command": "groog.yank"
-      },
-      {
-        "key": "ctrl+k",
-        "command": "groog.kill"
-      },
-      {
-        "key": "ctrl+x ctrl+r",
-        "command": "workbench.action.reloadWindow"
-      },
-      {
-        "key": "ctrl+v",
-        "command": "groog.fall"
-      },
-      {
-        "key": "pagedown",
-        "command": "groog.fall"
-      },
-      {
-        "key": "pageup",
-        "command": "groog.jump"
-      },
-      {
-        "key": "ctrl+l",
-        "command": "groog.jump"
-      },
-      {
-        "key": "ctrl+p",
-        "command": "groog.cursorUp",
-        "when": "editorTextFocus && !suggestWidgetVisible"
-      },
-      {
-        "key": "ctrl+p",
-        "command": "selectPrevSuggestion",
-        "when": "editorTextFocus && suggestWidgetVisible"
-      },
-      {
-        "key": "ctrl+p",
-        "command": "workbench.action.quickOpenNavigatePreviousInFilePicker",
-        "when": "inQuickOpen"
-      },
-      {
-        "key": "up",
-        "command": "groog.cursorUp",
-        "when": "editorTextFocus && !suggestWidgetVisible"
-      },
-      {
-        "key": "up",
-        "command": "selectPrevSuggestion",
-        "when": "editorTextFocus && suggestWidgetVisible"
-      },
-      {
-        "key": "up",
-        "command": "workbench.action.quickOpenNavigatePreviousInFilePicker",
-        "when": "inQuickOpen"
-      },
-      {
-        "key": "ctrl+n",
-        "command": "groog.cursorDown",
-        "when": "editorTextFocus && !suggestWidgetVisible"
-      },
-      {
-        "key": "ctrl+n",
-        "command": "selectNextSuggestion",
-        "when": "editorTextFocus && suggestWidgetVisible"
-      },
-      {
-        "key": "ctrl+n",
-        "command": "workbench.action.quickOpenNavigateNextInFilePicker",
-        "when": "inQuickOpen"
-      },
-      {
-        "key": "ctrl+n",
-        "command": "-workbench.action.files.newUntitledFile"
-      },
-      {
-        "key": "ctrl+p",
-        "command": "-workbench.action.quickOpen"
-      },
-      {
-        "key": "down",
-        "command": "groog.cursorDown",
-        "when": "editorTextFocus && !suggestWidgetVisible"
-      },
-      {
-        "key": "down",
-        "command": "selectNextSuggestion",
-        "when": "editorTextFocus && suggestWidgetVisible"
-      },
-      {
-        "key": "down",
-        "command": "workbench.action.quickOpenNavigateNextInFilePicker",
-        "when": "inQuickOpen"
-      },
-      {
-        "key": "left",
-        "command": "groog.cursorLeft"
-      },
-      {
-        "key": "ctrl+b",
-        "command": "groog.cursorLeft"
-      },
-      {
-        "key": "right",
-        "command": "groog.cursorRight"
-      },
-      {
-        "key": "alt+s",
-        "command": "editor.action.startFindReplaceAction"
-      },
-      {
-        "key": "ctrl+f",
-        "command": "groog.cursorRight",
-        "when": "!groog.qmk"
-      },
-      {
-        "key": "ctrl+s",
-        "command": "groog.find",
-        "when": "!groog.qmk && !groog.recording"
-      },
-      {
-        "key": "ctrl+s",
-        "command": "groog.record.findNext",
-        "when": "!groog.qmk && groog.recording"
-      },
-      {
-        "key": "ctrl+shift+s",
-        "command": "workbench.action.findInFiles",
-        "when": "!groog.qmk && !groog.recording"
-      },
-      {
-        "key": "ctrl+shift+s",
-        "command": "groog.record.find",
-        "when": "!groog.qmk && groog.recording"
-      },
-      {
-        "key": "ctrl+s",
-        "command": "groog.cursorRight",
-        "when": "groog.qmk"
-      },
-      {
-        "key": "ctrl+f",
-        "command": "groog.find",
-        "when": "groog.qmk && !groog.recording"
-      },
-      {
-        "key": "ctrl+f",
-        "command": "groog.record.findNext",
-        "when": "groog.qmk && groog.recording"
-      },
-      {
-        "key": "ctrl+shift+f",
-        "command": "workbench.action.findInFiles",
-        "when": "groog.qmk && !groog.recording"
-      },
-      {
-        "key": "ctrl+shift+f",
-        "command": "groog.record.find",
-        "when": "groog.qmk && groog.recording"
-      },
-      {
-        "key": "ctrl+r",
-        "command": "groog.reverseFind"
-      },
-      {
-        "key": "shift+enter",
-        "command": "editor.action.previousMatchFindAction",
-        "when": "groog.findMode"
-      },
-      {
-        "key": "enter",
-        "command": "editor.action.nextMatchFindAction",
-        "when": "groog.findMode"
-      },
-      {
-        "key": "ctrl+p",
-        "command": "editor.action.previousMatchFindAction",
-        "when": "groog.findMode"
-      },
-      {
-        "key": "ctrl+n",
-        "command": "editor.action.nextMatchFindAction",
-        "when": "groog.findMode"
-      },
-      {
         "key": "alt+b",
         "command": "groog.cursorWordLeft"
+      },
+      {
+        "key": "alt+backspace",
+        "command": "groog.deleteWordLeft"
+      },
+      {
+        "key": "alt+c",
+        "command": "toggleSearchEditorCaseSensitive"
+      },
+      {
+        "key": "alt+d",
+        "command": "groog.deleteWordRight"
+      },
+      {
+        "key": "alt+delete",
+        "command": "groog.deleteWordRight"
+      },
+      {
+        "key": "alt+e",
+        "command": "groog.record.playRecording",
+        "when": "!groog.recording"
+      },
+      {
+        "key": "alt+e",
+        "command": "groog.record.endRecording",
+        "when": "groog.recording"
       },
       {
         "key": "alt+f",
         "command": "groog.cursorWordRight"
       },
       {
-        "key": "ctrl+right",
-        "command": "groog.cursorWordRight"
+        "key": "alt+f4",
+        "command": "toggleSearchWholeWord",
+        "when": "groog.qmk \u0026\u0026 !editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus"
       },
       {
-        "key": "ctrl+left",
-        "command": "groog.cursorWordLeft"
+        "key": "alt+f4",
+        "command": "toggleFindWholeWord",
+        "when": "groog.qmk \u0026\u0026 editorFocus"
       },
       {
-        "key": "ctrl+a",
-        "command": "groog.cursorHome"
+        "key": "alt+f4",
+        "command": "toggleSearchEditorWholeWord",
+        "when": "groog.qmk \u0026\u0026 inSearchEditor"
       },
       {
-        "key": "home",
-        "command": "groog.cursorHome"
+        "key": "alt+f4",
+        "command": "toggleSearchWholeWord",
+        "when": "groog.qmk \u0026\u0026 searchViewletFocus"
       },
       {
-        "key": "ctrl+e",
-        "command": "groog.cursorEnd"
+        "key": "alt+g",
+        "command": "noop"
       },
       {
-        "key": "end",
-        "command": "groog.cursorEnd"
+        "key": "alt+h",
+        "command": "groog.deleteWordLeft"
       },
       {
-        "key": "ctrl+x ctrl+p",
-        "command": "groog.cursorTop"
+        "key": "alt+n",
+        "command": "workbench.action.editor.nextChange"
       },
       {
-        "key": "ctrl+x ctrl+n",
-        "command": "groog.cursorBottom"
+        "key": "alt+p",
+        "command": "workbench.action.editor.previousChange"
       },
       {
-        "key": "ctrl+x ctrl+s",
-        "command": "workbench.action.files.save"
+        "key": "alt+r",
+        "command": "toggleSearchEditorRegex"
       },
       {
-        "key": "ctrl+h",
-        "command": "groog.deleteLeft"
+        "key": "alt+s",
+        "command": "editor.action.startFindReplaceAction"
       },
       {
-        "key": "ctrl+h",
-        "command": "deleteLeft",
-        "when": "inQuickOpen"
+        "key": "alt+shift+e",
+        "command": "groog.record.playNamedRecording",
+        "when": "!groog.recording"
+      },
+      {
+        "key": "alt+shift+e",
+        "command": "groog.record.saveRecordingAs",
+        "when": "groog.recording"
+      },
+      {
+        "key": "alt+shift+t",
+        "command": "workbench.action.terminal.newWithProfile"
+      },
+      {
+        "key": "alt+t",
+        "command": "go.test.package"
+      },
+      {
+        "key": "alt+x",
+        "command": "workbench.action.showCommands"
+      },
+      {
+        "key": "alt+y",
+        "command": "editor.action.clipboardPasteAction"
+      },
+      {
+        "key": "alt+z",
+        "command": "git.revertSelectedRanges"
       },
       {
         "key": "backspace",
         "command": "groog.deleteLeft"
       },
       {
-        "key": "backspace",
-        "command": "deleteLeft",
-        "when": "inQuickOpen"
-      },
-      {
-        "key": "ctrl+d",
-        "command": "groog.deleteRight",
-        "when": "!inQuickOpen"
-      },
-      {
-        "key": "ctrl+d",
-        "command": "deleteRight",
-        "when": "inQuickOpen"
-      },
-      {
-        "key": "delete",
-        "command": "groog.deleteRight",
-        "when": "!inQuickOpen"
-      },
-      {
-        "key": "delete",
-        "command": "deleteRight",
-        "when": "inQuickOpen"
-      },
-      {
-        "key": "alt+h",
-        "command": "groog.deleteWordLeft",
-        "when": "!inQuickOpen"
-      },
-      {
-        "key": "alt+h",
-        "command": "deleteWordLeft",
-        "when": "inQuickOpen"
-      },
-      {
-        "key": "alt+backspace",
-        "command": "groog.deleteWordLeft",
-        "when": "!inQuickOpen"
-      },
-      {
-        "key": "alt+backspace",
-        "command": "deleteWordLeft",
-        "when": "inQuickOpen"
-      },
-      {
-        "key": "ctrl+backspace",
-        "command": "groog.deleteWordLeft",
-        "when": "!inQuickOpen"
-      },
-      {
-        "key": "ctrl+backspace",
-        "command": "deleteWordLeft",
-        "when": "inQuickOpen"
-      },
-      {
-        "key": "alt+d",
-        "command": "groog.deleteWordRight",
-        "when": "!inQuickOpen"
-      },
-      {
-        "key": "alt+d",
-        "command": "deleteWordRight",
-        "when": "inQuickOpen"
-      },
-      {
-        "key": "alt+delete",
-        "command": "groog.deleteWordRight",
-        "when": "!inQuickOpen"
-      },
-      {
-        "key": "alt+delete",
-        "command": "deleteWordRight",
-        "when": "inQuickOpen"
-      },
-      {
-        "key": "ctrl+delete",
-        "command": "groog.deleteWordRight",
-        "when": "!inQuickOpen"
-      },
-      {
-        "key": "ctrl+delete",
-        "command": "deleteWordRight",
-        "when": "inQuickOpen"
-      },
-      {
-        "key": "ctrl+x ctrl+f",
-        "command": "workbench.action.quickOpen",
+        "key": "ctrl+,",
+        "command": "workbench.action.openSettings",
         "when": "!activePanel"
       },
       {
-        "key": "ctrl+x ctrl+f",
+        "key": "ctrl+,",
         "command": "groog.multiCommand.execute",
         "when": "activePanel",
         "args": {
           "sequence": [
             "workbench.action.closePanel",
-            "workbench.action.quickOpen"
+            "workbench.action.openSettings"
           ]
         }
-      },
-      {
-        "key": "ctrl+q",
-        "when": "!terminalFocus",
-        "command": "workbench.action.closeEditorsAndGroup"
-      },
-      {
-        "key": "ctrl+q",
-        "when": "terminalFocus",
-        "command": "groog.message.info",
-        "args": {
-          "message": "Run ctrl+shift+q to kill the terminal"
-        }
-      },
-      {
-        "key": "ctrl+shift+q",
-        "when": "terminalFocus",
-        "command": "workbench.action.terminal.kill"
-      },
-      {
-        "key": "ctrl+u",
-        "command": "workbench.action.focusPreviousGroup"
-      },
-      {
-        "key": "ctrl+o",
-        "command": "workbench.action.focusNextGroup"
-      },
-      {
-        "key": "ctrl+shift+tab",
-        "command": "workbench.action.focusPreviousGroup"
-      },
-      {
-        "key": "ctrl+tab",
-        "command": "workbench.action.focusNextGroup"
-      },
-      {
-        "key": "ctrl+pagedown",
-        "command": "workbench.action.focusNextGroup"
-      },
-      {
-        "key": "ctrl+pageup",
-        "command": "workbench.action.focusPreviousGroup"
       },
       {
         "key": "ctrl+.",
@@ -652,6 +368,311 @@
           "sequence": [
             "workbench.action.closePanel",
             "workbench.action.openGlobalKeybindings"
+          ]
+        }
+      },
+      {
+        "key": "ctrl+/",
+        "command": "groog.undo",
+        "when": "!terminalFocus"
+      },
+      {
+        "key": "ctrl+;",
+        "command": "editor.action.commentLine"
+      },
+      {
+        "key": "ctrl+a",
+        "command": "groog.cursorHome",
+        "when": "!groog.qmk"
+      },
+      {
+        "key": "ctrl+a",
+        "command": "editor.action.selectAll",
+        "when": "groog.qmk"
+      },
+      {
+        "key": "ctrl+b",
+        "command": "groog.cursorLeft"
+      },
+      {
+        "key": "ctrl+backspace",
+        "command": "groog.deleteWordLeft"
+      },
+      {
+        "key": "ctrl+d",
+        "command": "groog.deleteRight"
+      },
+      {
+        "key": "ctrl+delete",
+        "command": "groog.deleteWordRight"
+      },
+      {
+        "key": "ctrl+e",
+        "command": "groog.cursorEnd"
+      },
+      {
+        "key": "ctrl+f",
+        "command": "groog.cursorRight",
+        "when": "!groog.qmk"
+      },
+      {
+        "key": "ctrl+f",
+        "command": "groog.find",
+        "when": "groog.qmk \u0026\u0026 !groog.recording"
+      },
+      {
+        "key": "ctrl+f",
+        "command": "groog.record.findNext",
+        "when": "groog.qmk \u0026\u0026 groog.recording"
+      },
+      {
+        "key": "ctrl+g",
+        "command": "groog.ctrlG",
+        "when": "!sideBarFocus \u0026\u0026 !inQuickOpen \u0026\u0026 !suggestWidgetVisible"
+      },
+      {
+        "key": "ctrl+g",
+        "command": "workbench.action.closeQuickOpen",
+        "when": "inQuickOpen \u0026\u0026 !suggestWidgetVisible"
+      },
+      {
+        "key": "ctrl+g",
+        "command": "workbench.action.focusActiveEditorGroup",
+        "when": "sideBarFocus \u0026\u0026 !inQuickOpen \u0026\u0026 !suggestWidgetVisible"
+      },
+      {
+        "key": "ctrl+g",
+        "command": "hideSuggestWidget",
+        "when": "suggestWidgetVisible"
+      },
+      {
+        "key": "ctrl+h",
+        "command": "groog.deleteLeft"
+      },
+      {
+        "key": "ctrl+i",
+        "command": "editor.action.formatSelection"
+      },
+      {
+        "key": "ctrl+j",
+        "command": "groog.toggleMarkMode"
+      },
+      {
+        "key": "ctrl+k",
+        "command": "groog.kill"
+      },
+      {
+        "key": "ctrl+l",
+        "command": "groog.jump"
+      },
+      {
+        "key": "ctrl+left",
+        "command": "groog.cursorWordLeft"
+      },
+      {
+        "key": "ctrl+n",
+        "command": "-workbench.action.files.newUntitledFile"
+      },
+      {
+        "key": "ctrl+n",
+        "command": "groog.cursorDown",
+        "when": "editorTextFocus \u0026\u0026 !suggestWidgetVisible"
+      },
+      {
+        "key": "ctrl+n",
+        "command": "selectNextSuggestion",
+        "when": "editorTextFocus \u0026\u0026 suggestWidgetVisible"
+      },
+      {
+        "key": "ctrl+n",
+        "command": "editor.action.nextMatchFindAction",
+        "when": "groog.findMode"
+      },
+      {
+        "key": "ctrl+n",
+        "command": "workbench.action.quickOpenNavigateNextInFilePicker",
+        "when": "inQuickOpen"
+      },
+      {
+        "key": "ctrl+o",
+        "command": "workbench.action.focusNextGroup",
+        "when": "!terminalFocus"
+      },
+      {
+        "key": "ctrl+o",
+        "command": "workbench.action.terminal.focusNext",
+        "when": "terminalFocus"
+      },
+      {
+        "key": "ctrl+p",
+        "command": "-workbench.action.quickOpen"
+      },
+      {
+        "key": "ctrl+p",
+        "command": "groog.cursorUp",
+        "when": "editorTextFocus \u0026\u0026 !suggestWidgetVisible"
+      },
+      {
+        "key": "ctrl+p",
+        "command": "selectPrevSuggestion",
+        "when": "editorTextFocus \u0026\u0026 suggestWidgetVisible"
+      },
+      {
+        "key": "ctrl+p",
+        "command": "editor.action.previousMatchFindAction",
+        "when": "groog.findMode"
+      },
+      {
+        "key": "ctrl+p",
+        "command": "workbench.action.quickOpenNavigatePreviousInFilePicker",
+        "when": "inQuickOpen"
+      },
+      {
+        "key": "ctrl+pagedown",
+        "command": "workbench.action.focusNextGroup"
+      },
+      {
+        "key": "ctrl+pageup",
+        "command": "workbench.action.focusPreviousGroup"
+      },
+      {
+        "key": "ctrl+q",
+        "command": "workbench.action.closeEditorsAndGroup",
+        "when": "!terminalFocus"
+      },
+      {
+        "key": "ctrl+q",
+        "command": "groog.message.info",
+        "when": "terminalFocus",
+        "args": {
+          "message": "Run ctrl+shift+q to kill the terminal"
+        }
+      },
+      {
+        "key": "ctrl+r",
+        "command": "groog.reverseFind"
+      },
+      {
+        "key": "ctrl+right",
+        "command": "groog.cursorWordRight"
+      },
+      {
+        "key": "ctrl+s",
+        "command": "groog.find",
+        "when": "!groog.qmk \u0026\u0026 !groog.recording"
+      },
+      {
+        "key": "ctrl+s",
+        "command": "groog.record.findNext",
+        "when": "!groog.qmk \u0026\u0026 groog.recording"
+      },
+      {
+        "key": "ctrl+s",
+        "command": "groog.cursorRight",
+        "when": "groog.qmk"
+      },
+      {
+        "key": "ctrl+shift+a",
+        "command": "editor.action.selectAll"
+      },
+      {
+        "key": "ctrl+shift+f",
+        "command": "workbench.action.findInFiles",
+        "when": "groog.qmk \u0026\u0026 !groog.recording"
+      },
+      {
+        "key": "ctrl+shift+f",
+        "command": "groog.record.find",
+        "when": "groog.qmk \u0026\u0026 groog.recording"
+      },
+      {
+        "key": "ctrl+shift+home",
+        "command": "editor.action.selectAll"
+      },
+      {
+        "key": "ctrl+shift+n",
+        "command": "workbench.action.files.newUntitledFile"
+      },
+      {
+        "key": "ctrl+shift+q",
+        "command": "workbench.action.terminal.kill",
+        "when": "terminalFocus"
+      },
+      {
+        "key": "ctrl+shift+s",
+        "command": "workbench.action.findInFiles",
+        "when": "!groog.qmk \u0026\u0026 !groog.recording"
+      },
+      {
+        "key": "ctrl+shift+s",
+        "command": "groog.record.find",
+        "when": "!groog.qmk \u0026\u0026 groog.recording"
+      },
+      {
+        "key": "ctrl+shift+t",
+        "command": "workbench.action.terminal.new"
+      },
+      {
+        "key": "ctrl+shift+tab",
+        "command": "workbench.action.focusPreviousGroup",
+        "when": "!terminalFocus"
+      },
+      {
+        "key": "ctrl+shift+tab",
+        "command": "workbench.action.terminal.focusPrevious",
+        "when": "terminalFocus"
+      },
+      {
+        "key": "ctrl+t",
+        "command": "workbench.action.toggleMaximizedPanel",
+        "when": "!activePanel"
+      },
+      {
+        "key": "ctrl+t",
+        "command": "workbench.action.closePanel",
+        "when": "activePanel"
+      },
+      {
+        "key": "ctrl+tab",
+        "command": "workbench.action.focusNextGroup",
+        "when": "!terminalFocus"
+      },
+      {
+        "key": "ctrl+tab",
+        "command": "workbench.action.terminal.focusNext",
+        "when": "terminalFocus"
+      },
+      {
+        "key": "ctrl+u",
+        "command": "workbench.action.focusPreviousGroup",
+        "when": "!terminalFocus"
+      },
+      {
+        "key": "ctrl+u",
+        "command": "workbench.action.terminal.focusPrevious",
+        "when": "terminalFocus"
+      },
+      {
+        "key": "ctrl+v",
+        "command": "groog.fall"
+      },
+      {
+        "key": "ctrl+w",
+        "command": "groog.yank"
+      },
+      {
+        "key": "ctrl+x ctrl+,",
+        "command": "workbench.action.openSettingsJson",
+        "when": "!activePanel"
+      },
+      {
+        "key": "ctrl+x ctrl+,",
+        "command": "groog.multiCommand.execute",
+        "when": "activePanel",
+        "args": {
+          "sequence": [
+            "workbench.action.closePanel",
+            "workbench.action.openSettingsJson"
           ]
         }
       },
@@ -672,142 +693,30 @@
         }
       },
       {
-        "key": "ctrl+,",
-        "command": "workbench.action.openSettings",
-        "when": "!activePanel"
-      },
-      {
-        "key": "ctrl+,",
-        "command": "groog.multiCommand.execute",
-        "when": "activePanel",
+        "key": "ctrl+x ctrl+c",
+        "command": "workbench.action.terminal.sendSequence",
+        "when": "terminalFocus",
         "args": {
-          "sequence": [
-            "workbench.action.closePanel",
-            "workbench.action.openSettings"
-          ]
+          "text": "\u0018\u0003"
         }
-      },
-      {
-        "key": "ctrl+x ctrl+,",
-        "command": "workbench.action.openSettingsJson",
-        "when": "!activePanel"
-      },
-      {
-        "key": "ctrl+x ctrl+,",
-        "command": "groog.multiCommand.execute",
-        "when": "activePanel",
-        "args": {
-          "sequence": [
-            "workbench.action.closePanel",
-            "workbench.action.openSettingsJson"
-          ]
-        }
-      },
-      {
-        "key": "ctrl+x ctrl+l",
-        "command": "workbench.action.gotoLine"
-      },
-      {
-        "key": "ctrl+x ctrl+q",
-        "command": "workbench.action.toggleSidebarVisibility"
-      },
-      {
-        "key": "ctrl+x ctrl+z",
-        "command": "workbench.action.togglePanel"
-      },
-      {
-        "key": "ctrl+shift+n",
-        "command": "workbench.action.files.newUntitledFile"
-      },
-      {
-        "key": "ctrl+i",
-        "command": "editor.action.formatSelection"
       },
       {
         "key": "ctrl+x ctrl+d",
         "command": "editor.action.revealDefinition"
       },
       {
-        "key": "ctrl+x d",
-        "command": "editor.action.revealDefinition"
+        "key": "ctrl+x ctrl+f",
+        "command": "workbench.action.quickOpen",
+        "when": "!activePanel"
       },
       {
-        "key": "ctrl+x ctrl+tab",
-        "command": "groog.format"
-      },
-      {
-        "key": "ctrl+x tab",
-        "command": "groog.format"
-      },
-      {
-        "key": "ctrl+/",
-        "command": "groog.undo",
-        "when": "!terminalFocus"
-      },
-      {
-        "key": "ctrl+;",
-        "command": "editor.action.commentLine"
-      },
-      {
-        "key": "ctrl+shift+a",
-        "command": "editor.action.selectAll"
-      },
-      {
-        "key": "ctrl+a",
-        "command": "editor.action.selectAll",
-        "when": "groog.qmk"
-      },
-      {
-        "key": "ctrl+shift+home",
-        "command": "editor.action.selectAll"
-      },
-      {
-        "key": "shift+home",
-        "command": "editor.action.selectAll"
-      },
-      {
-        "key": "alt+t",
-        "command": "go.test.package"
-      },
-      {
-        "key": "alt+r",
-        "command": "toggleSearchEditorRegex"
-      },
-      {
-        "key": "alt+c",
-        "command": "toggleSearchEditorCaseSensitive"
-      },
-      {
-        "key": "alt+f4",
-        "command": "toggleFindWholeWord",
-        "when": "groog.qmk && editorFocus"
-      },
-      {
-        "key": "alt+f4",
-        "command": "toggleSearchEditorWholeWord",
-        "when": "groog.qmk && inSearchEditor"
-      },
-      {
-        "key": "alt+f4",
-        "command": "toggleSearchWholeWord",
-        "when": "groog.qmk && searchViewletFocus"
-      },
-      {
-        "key": "alt+f4",
-        "command": "toggleSearchWholeWord",
-        "when": "groog.qmk && !editorFocus && !inSearchEditor && !searchViewletFocus"
-      },
-      {
-        "key": "alt+x",
-        "command": "workbench.action.showCommands"
-      },
-      {
-        "key": "ctrl+x ctrl+v",
+        "key": "ctrl+x ctrl+f",
         "command": "groog.multiCommand.execute",
+        "when": "activePanel",
         "args": {
           "sequence": [
-            "workbench.action.splitEditorDown",
-            "workbench.action.focusPreviousGroup"
+            "workbench.action.closePanel",
+            "workbench.action.quickOpen"
           ]
         }
       },
@@ -822,37 +731,12 @@
         }
       },
       {
-        "key": "ctrl+x ctrl+x",
-        "command": "groog.record.startRecording"
+        "key": "ctrl+x ctrl+insert",
+        "command": "editor.action.clipboardPasteAction"
       },
       {
-        "key": "alt+e",
-        "command": "groog.record.endRecording",
-        "when": "groog.recording"
-      },
-      {
-        "key": "alt+shift+e",
-        "command": "groog.record.saveRecordingAs",
-        "when": "groog.recording"
-      },
-      {
-        "key": "alt+e",
-        "command": "groog.record.playRecording",
-        "when": "!groog.recording"
-      },
-      {
-        "key": "alt+shift+e",
-        "command": "groog.record.playNamedRecording",
-        "when": "!groog.recording"
-      },
-      {
-        "key": "ctrl+x ctrl+o",
-        "command": "workbench.action.openRecent"
-      },
-      {
-        "key": "shift+pageup",
-        "command": "editor.action.selectHighlights",
-        "when": "editorFocus"
+        "key": "ctrl+x ctrl+l",
+        "command": "workbench.action.gotoLine"
       },
       {
         "key": "ctrl+x ctrl+m",
@@ -860,54 +744,9 @@
         "when": "editorLangId == 'markdown'"
       },
       {
-        "key": "ctrl+x m",
-        "command": "markdown.showPreviewToSide",
-        "when": "editorLangId == 'markdown'"
-      },
-      {
-        "key": "alt+z",
-        "command": "git.revertSelectedRanges"
-      },
-      {
-        "key": "alt+p",
-        "command": "workbench.action.editor.previousChange"
-      },
-      {
-        "key": "alt+n",
-        "command": "workbench.action.editor.nextChange"
-      },
-      {
-        "key": "ctrl+t",
-        "command": "workbench.action.toggleMaximizedPanel",
-        "when": "!activePanel"
-      },
-      {
-        "key": "ctrl+t",
-        "command": "workbench.action.closePanel",
-        "when": "activePanel"
-      },
-      {
-        "key": "ctrl+u",
-        "command": "workbench.action.terminal.focusPrevious",
-        "when": "terminalFocus"
-      },
-      {
-        "key": "ctrl+o",
-        "command": "workbench.action.terminal.focusNext",
-        "when": "terminalFocus"
-      },
-      {
-        "key": "ctrl+shift+tab",
-        "command": "workbench.action.terminal.focusPrevious"
-      },
-      {
-        "key": "ctrl+tab",
-        "command": "workbench.action.terminal.focusNext"
-      },
-      {
-        "key": "ctrl+x n",
-        "command": "workbench.action.terminal.rename",
-        "when": "terminalFocus"
+        "key": "ctrl+x ctrl+n",
+        "command": "groog.cursorBottom",
+        "when": "!terminalFocus"
       },
       {
         "key": "ctrl+x ctrl+n",
@@ -915,47 +754,140 @@
         "when": "terminalFocus"
       },
       {
-        "key": "ctrl+shift+t",
-        "command": "workbench.action.terminal.new"
+        "key": "ctrl+x ctrl+o",
+        "command": "workbench.action.openRecent"
       },
       {
-        "key": "alt+shift+t",
-        "command": "workbench.action.terminal.newWithProfile"
+        "key": "ctrl+x ctrl+p",
+        "command": "groog.cursorTop"
       },
       {
-        "key": "ctrl+x ctrl+c",
-        "when": "terminalFocus",
-        "command": "workbench.action.terminal.sendSequence",
+        "key": "ctrl+x ctrl+q",
+        "command": "workbench.action.toggleSidebarVisibility"
+      },
+      {
+        "key": "ctrl+x ctrl+r",
+        "command": "workbench.action.reloadWindow"
+      },
+      {
+        "key": "ctrl+x ctrl+s",
+        "command": "workbench.action.files.save"
+      },
+      {
+        "key": "ctrl+x ctrl+t",
+        "command": "groog.toggleQMK"
+      },
+      {
+        "key": "ctrl+x ctrl+tab",
+        "command": "groog.format"
+      },
+      {
+        "key": "ctrl+x ctrl+v",
+        "command": "groog.multiCommand.execute",
         "args": {
-          "text": "\u0018\u0003"
+          "sequence": [
+            "workbench.action.splitEditorDown",
+            "workbench.action.focusPreviousGroup"
+          ]
         }
+      },
+      {
+        "key": "ctrl+x ctrl+x",
+        "command": "groog.record.startRecording"
+      },
+      {
+        "key": "ctrl+x ctrl+y",
+        "command": "editor.action.clipboardPasteAction"
+      },
+      {
+        "key": "ctrl+x ctrl+z",
+        "command": "workbench.action.togglePanel"
+      },
+      {
+        "key": "ctrl+x shift+insert",
+        "command": "editor.action.clipboardPasteAction"
+      },
+      {
+        "key": "ctrl+y",
+        "command": "groog.paste"
+      },
+      {
+        "key": "delete",
+        "command": "groog.deleteRight"
+      },
+      {
+        "key": "down",
+        "command": "groog.cursorDown",
+        "when": "editorTextFocus \u0026\u0026 !suggestWidgetVisible"
+      },
+      {
+        "key": "down",
+        "command": "selectNextSuggestion",
+        "when": "editorTextFocus \u0026\u0026 suggestWidgetVisible"
+      },
+      {
+        "key": "down",
+        "command": "workbench.action.quickOpenNavigateNextInFilePicker",
+        "when": "inQuickOpen"
+      },
+      {
+        "key": "end",
+        "command": "groog.cursorEnd"
+      },
+      {
+        "key": "enter",
+        "command": "editor.action.nextMatchFindAction",
+        "when": "groog.findMode"
+      },
+      {
+        "key": "home",
+        "command": "groog.cursorHome"
+      },
+      {
+        "key": "left",
+        "command": "groog.cursorLeft"
+      },
+      {
+        "key": "pagedown",
+        "command": "groog.fall"
+      },
+      {
+        "key": "pageup",
+        "command": "groog.jump"
+      },
+      {
+        "key": "right",
+        "command": "groog.cursorRight"
+      },
+      {
+        "key": "shift+enter",
+        "command": "editor.action.previousMatchFindAction",
+        "when": "groog.findMode"
+      },
+      {
+        "key": "shift+home",
+        "command": "editor.action.selectAll"
+      },
+      {
+        "key": "shift+pageup",
+        "command": "editor.action.selectHighlights",
+        "when": "editorFocus"
+      },
+      {
+        "key": "up",
+        "command": "groog.cursorUp",
+        "when": "editorTextFocus \u0026\u0026 !suggestWidgetVisible"
+      },
+      {
+        "key": "up",
+        "command": "selectPrevSuggestion",
+        "when": "editorTextFocus \u0026\u0026 suggestWidgetVisible"
+      },
+      {
+        "key": "up",
+        "command": "workbench.action.quickOpenNavigatePreviousInFilePicker",
+        "when": "inQuickOpen"
       }
     ]
-  },
-  "scripts": {
-    "test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",
-    "pretest": "npm run compile-web",
-    "vscode:prepublish": "npm run package-web",
-    "compile-web": "webpack",
-    "watch-web": "webpack --watch",
-    "package-web": "webpack --mode production --devtool hidden-source-map",
-    "lint": "eslint src --ext ts",
-    "run-in-browser": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. ."
-  },
-  "devDependencies": {
-    "@types/vscode": "^1.64.0",
-    "@types/mocha": "^9.0.0",
-    "eslint": "^8.6.0",
-    "@typescript-eslint/eslint-plugin": "^5.9.1",
-    "@typescript-eslint/parser": "^5.9.1",
-    "mocha": "^9.1.3",
-    "typescript": "^4.5.4",
-    "@vscode/test-web": "^0.0.15",
-    "ts-loader": "^9.2.6",
-    "webpack": "^5.66.0",
-    "webpack-cli": "^4.9.1",
-    "@types/webpack-env": "^1.16.3",
-    "assert": "^2.0.0",
-    "process": "^0.11.10"
   }
 }
