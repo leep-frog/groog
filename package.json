@@ -661,9 +661,25 @@
         "command": "groog.yank"
       },
       {
+        "key": "ctrl+x ,",
+        "command": "workbench.action.openSettingsJson",
+        "when": "!activePanel"
+      },
+      {
         "key": "ctrl+x ctrl+,",
         "command": "workbench.action.openSettingsJson",
         "when": "!activePanel"
+      },
+      {
+        "key": "ctrl+x ,",
+        "command": "groog.multiCommand.execute",
+        "when": "activePanel",
+        "args": {
+          "sequence": [
+            "workbench.action.closePanel",
+            "workbench.action.openSettingsJson"
+          ]
+        }
       },
       {
         "key": "ctrl+x ctrl+,",
@@ -677,9 +693,25 @@
         }
       },
       {
+        "key": "ctrl+x .",
+        "command": "workbench.action.openGlobalKeybindingsFile",
+        "when": "!activePanel"
+      },
+      {
         "key": "ctrl+x ctrl+.",
         "command": "workbench.action.openGlobalKeybindingsFile",
         "when": "!activePanel"
+      },
+      {
+        "key": "ctrl+x .",
+        "command": "groog.multiCommand.execute",
+        "when": "activePanel",
+        "args": {
+          "sequence": [
+            "workbench.action.closePanel",
+            "workbench.action.openGlobalKeybindingsFile"
+          ]
+        }
       },
       {
         "key": "ctrl+x ctrl+.",
@@ -693,6 +725,14 @@
         }
       },
       {
+        "key": "ctrl+x c",
+        "command": "workbench.action.terminal.sendSequence",
+        "when": "terminalFocus",
+        "args": {
+          "text": "\u0018\u0003"
+        }
+      },
+      {
         "key": "ctrl+x ctrl+c",
         "command": "workbench.action.terminal.sendSequence",
         "when": "terminalFocus",
@@ -701,13 +741,33 @@
         }
       },
       {
+        "key": "ctrl+x d",
+        "command": "editor.action.revealDefinition"
+      },
+      {
         "key": "ctrl+x ctrl+d",
         "command": "editor.action.revealDefinition"
+      },
+      {
+        "key": "ctrl+x f",
+        "command": "workbench.action.quickOpen",
+        "when": "!activePanel"
       },
       {
         "key": "ctrl+x ctrl+f",
         "command": "workbench.action.quickOpen",
         "when": "!activePanel"
+      },
+      {
+        "key": "ctrl+x f",
+        "command": "groog.multiCommand.execute",
+        "when": "activePanel",
+        "args": {
+          "sequence": [
+            "workbench.action.closePanel",
+            "workbench.action.quickOpen"
+          ]
+        }
       },
       {
         "key": "ctrl+x ctrl+f",
@@ -717,6 +777,16 @@
           "sequence": [
             "workbench.action.closePanel",
             "workbench.action.quickOpen"
+          ]
+        }
+      },
+      {
+        "key": "ctrl+x h",
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            "workbench.action.splitEditorRight",
+            "workbench.action.focusPreviousGroup"
           ]
         }
       },
@@ -731,12 +801,25 @@
         }
       },
       {
+        "key": "ctrl+x insert",
+        "command": "editor.action.clipboardPasteAction"
+      },
+      {
         "key": "ctrl+x ctrl+insert",
         "command": "editor.action.clipboardPasteAction"
       },
       {
+        "key": "ctrl+x l",
+        "command": "workbench.action.gotoLine"
+      },
+      {
         "key": "ctrl+x ctrl+l",
         "command": "workbench.action.gotoLine"
+      },
+      {
+        "key": "ctrl+x m",
+        "command": "markdown.showPreviewToSide",
+        "when": "editorLangId == 'markdown'"
       },
       {
         "key": "ctrl+x ctrl+m",
@@ -744,9 +827,19 @@
         "when": "editorLangId == 'markdown'"
       },
       {
+        "key": "ctrl+x n",
+        "command": "groog.cursorBottom",
+        "when": "!terminalFocus"
+      },
+      {
         "key": "ctrl+x ctrl+n",
         "command": "groog.cursorBottom",
         "when": "!terminalFocus"
+      },
+      {
+        "key": "ctrl+x n",
+        "command": "workbench.action.terminal.rename",
+        "when": "terminalFocus"
       },
       {
         "key": "ctrl+x ctrl+n",
@@ -754,32 +847,78 @@
         "when": "terminalFocus"
       },
       {
+        "key": "ctrl+x o",
+        "command": "workbench.action.openRecent"
+      },
+      {
         "key": "ctrl+x ctrl+o",
         "command": "workbench.action.openRecent"
+      },
+      {
+        "key": "ctrl+x p",
+        "command": "groog.cursorTop"
       },
       {
         "key": "ctrl+x ctrl+p",
         "command": "groog.cursorTop"
       },
       {
+        "key": "ctrl+x q",
+        "command": "workbench.action.toggleSidebarVisibility"
+      },
+      {
         "key": "ctrl+x ctrl+q",
         "command": "workbench.action.toggleSidebarVisibility"
+      },
+      {
+        "key": "ctrl+x r",
+        "command": "workbench.action.reloadWindow"
       },
       {
         "key": "ctrl+x ctrl+r",
         "command": "workbench.action.reloadWindow"
       },
       {
+        "key": "ctrl+x s",
+        "command": "workbench.action.files.save"
+      },
+      {
         "key": "ctrl+x ctrl+s",
         "command": "workbench.action.files.save"
+      },
+      {
+        "key": "ctrl+x shift+insert",
+        "command": "editor.action.clipboardPasteAction"
+      },
+      {
+        "key": "ctrl+x ctrl+shift+insert",
+        "command": "editor.action.clipboardPasteAction"
+      },
+      {
+        "key": "ctrl+x t",
+        "command": "groog.toggleQMK"
       },
       {
         "key": "ctrl+x ctrl+t",
         "command": "groog.toggleQMK"
       },
       {
+        "key": "ctrl+x tab",
+        "command": "groog.format"
+      },
+      {
         "key": "ctrl+x ctrl+tab",
         "command": "groog.format"
+      },
+      {
+        "key": "ctrl+x v",
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            "workbench.action.splitEditorDown",
+            "workbench.action.focusPreviousGroup"
+          ]
+        }
       },
       {
         "key": "ctrl+x ctrl+v",
@@ -792,20 +931,28 @@
         }
       },
       {
+        "key": "ctrl+x x",
+        "command": "groog.record.startRecording"
+      },
+      {
         "key": "ctrl+x ctrl+x",
         "command": "groog.record.startRecording"
+      },
+      {
+        "key": "ctrl+x y",
+        "command": "editor.action.clipboardPasteAction"
       },
       {
         "key": "ctrl+x ctrl+y",
         "command": "editor.action.clipboardPasteAction"
       },
       {
-        "key": "ctrl+x ctrl+z",
+        "key": "ctrl+x z",
         "command": "workbench.action.togglePanel"
       },
       {
-        "key": "ctrl+x shift+insert",
-        "command": "editor.action.clipboardPasteAction"
+        "key": "ctrl+x ctrl+z",
+        "command": "workbench.action.togglePanel"
       },
       {
         "key": "ctrl+y",

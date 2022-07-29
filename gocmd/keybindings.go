@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
@@ -43,12 +44,14 @@ func kbDefsToBindings() []*Keybinding {
 				continue
 			}
 			// TODO: ctrl x doubler
-			kbs = append(kbs, &Keybinding{
-				Key:     key.ToString(),
-				When:    when,
-				Command: kb.Command,
-				Args:    kb.Args,
-			})
+			for _, ka := range key.keyAliases() {
+				kbs = append(kbs, &Keybinding{
+					Key:     ka,
+					When:    when,
+					Command: kb.Command,
+					Args:    kb.Args,
+				})
+			}
 		}
 	}
 	return kbs
@@ -346,6 +349,20 @@ func (k Key) ToString() string {
 	return string(k)
 }
 
+func (k Key) keyAliases() []string {
+	kas := []string{
+		k.ToString(),
+	}
+
+	// Ctrl+x duplication
+	prefix := "ctrl+x "
+	if strings.HasPrefix(k.ToString(), prefix) {
+		kas = append(kas, fmt.Sprintf("%sctrl+%s", prefix, k.ToString()[len(prefix):]))
+	}
+
+	return kas
+}
+
 func alt(c Key) Key {
 	return Key(fmt.Sprintf("alt+%s", c))
 }
@@ -391,8 +408,6 @@ func recordingSplit(recordingKB, otherKB *KB) map[string]*KB {
 	return contextualKB("groog.recording", recordingKB, otherKB)
 }
 
-// TODO: change implementation so we don't need separate
-// initialization of "ctrl+x c" and ctrl+x ctrl+c"
 func ctrlX(c string) Key {
-	return Key(fmt.Sprintf("ctrl+x ctrl+%s", c))
+	return Key(fmt.Sprintf("ctrl+x %s", c))
 }
