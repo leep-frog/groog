@@ -13,90 +13,90 @@ export class FindHandler implements TypeHandler {
     this.cursorStack = new CursorStack();
   }
 
-  nextMatch() {
+  async nextMatch() {
     // Then find next match
-    vscode.commands.executeCommand("editor.action.nextMatchFindAction");
+    await vscode.commands.executeCommand("editor.action.nextMatchFindAction");
   }
 
-  prevMatch() {
-    vscode.commands.executeCommand("editor.action.previousMatchFindAction");
+  async prevMatch() {
+    await vscode.commands.executeCommand("editor.action.previousMatchFindAction");
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
-    recorder.registerCommand(context, 'find', () => {
+    recorder.registerCommand(context, 'find', async () => {
       if (this.active) {
-        this.nextMatch();
+        await this.nextMatch();
       } else {
-        this.activate();
+        await this.activate();
       }
     });
-    recorder.registerCommand(context, 'reverseFind', () => {
+    recorder.registerCommand(context, 'reverseFind', async () => {
       if (this.active) {
-        this.prevMatch();
+        await this.prevMatch();
       } else {
-        this.activate();
+        await this.activate();
       }
     });
-    vscode.window.onDidChangeActiveTextEditor(() => {
-      this.deactivate();
+    vscode.window.onDidChangeActiveTextEditor(async () => {
+      await this.deactivate();
     });
   }
 
-  activate() {
+  async activate() {
     this.active = true;
-    vscode.commands.executeCommand('setContext', 'groog.findMode', true);
-    this.findWithArgs();
+    await vscode.commands.executeCommand('setContext', 'groog.findMode', true);
+    await this.findWithArgs();
   }
 
-  deactivate() {
+  async deactivate() {
     this.active = false;
-    vscode.commands.executeCommand('setContext', 'groog.findMode', false);
+    await vscode.commands.executeCommand('setContext', 'groog.findMode', false);
     // TODO: make text clearing optional? Differentiate in activate maybe?
     this.findText = "";
     this.cursorStack.clear();
-    vscode.commands.executeCommand("cancelSelection");
-    vscode.commands.executeCommand("closeFindWidget");
+    await vscode.commands.executeCommand("cancelSelection");
+    await vscode.commands.executeCommand("closeFindWidget");
   }
 
-  findWithArgs() {
+  async findWithArgs() {
     let txt = this.findText;
     if (this.findText.length === 0) {
       txt = "ENTER" + "_TEXT";
     }
-    vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": txt }).then(() => {
-      vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
-    }, () => {
-      vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
+    await vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": txt }).then(async () => {
+      await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
+    }, async () => {
+      await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
     }
     );
-    cursorToFront();
-    this.nextMatch();
+    await cursorToFront();
+    await this.nextMatch();
   }
 
-  ctrlG() {
-    this.deactivate();
+  async ctrlG() {
+    await this.deactivate();
   }
 
-  textHandler(s: string): boolean {
+   async textHandler(s: string): Promise<boolean> {
     // Enter, shift+enter, ctrl+n, ctrl+p taken care of in package.json
     this.findText = this.findText.concat(s);
     this.cursorStack.push();
-    this.findWithArgs();
+    await this.findWithArgs();
     return false;
   }
 
-  moveHandler(s: string): boolean {
-    this.deactivate();
+  async moveHandler(s: string): Promise<boolean> {
+    await this.deactivate();
     return true;
   }
 
-  delHandler(s: string): boolean {
+  async delHandler(s: string): Promise<boolean> {
     switch (s) {
       case "deleteLeft":
         if (this.findText.length > 0) {
           this.findText = this.findText.slice(0, this.findText.length - 1);
           this.cursorStack.popAndSet();
-          this.findWithArgs();
+          await this.findWithArgs();
         }
         break;
       default:
@@ -106,10 +106,10 @@ export class FindHandler implements TypeHandler {
   }
 
   // TODO: do something like error message or deactivate
-  onYank(s: string | undefined) { }
-  alwaysOnYank(): boolean { return false; }
-  onKill(s: string | undefined) { }
-  alwaysOnKill(): boolean { return false; }
+  async onYank(s: string | undefined) { }
+  async alwaysOnYank(): Promise<boolean> { return false; }
+  async onKill(s: string | undefined) { }
+  async alwaysOnKill(): Promise<boolean> { return false; }
 }
 
 class CursorStack {

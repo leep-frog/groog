@@ -12,19 +12,19 @@ export class MarkHandler implements TypeHandler {
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
-    recorder.registerCommand(context, 'toggleMarkMode', () => {
+    recorder.registerCommand(context, 'toggleMarkMode', async () => {
       if (this.active) {
-        this.deactivate();
+        await this.deactivate();
       } else {
-        this.activate();
+        await this.activate();
       }
     });
-    recorder.registerCommand(context, 'paste', () => {
+    recorder.registerCommand(context, 'paste', async () => {
       if (this.active) {
-        this.deactivate();
+        await this.deactivate();
       }
 
-      vscode.window.activeTextEditor?.edit(editBuilder => {
+      await vscode.window.activeTextEditor?.edit(editBuilder => {
         let editor = vscode.window.activeTextEditor;
         if (!editor) {
           return;
@@ -34,57 +34,57 @@ export class MarkHandler implements TypeHandler {
     });
   }
 
-  activate() {
+  async activate() {
     this.active = true;
-    vscode.commands.executeCommand('setContext', 'groog.markMode', true);
+    await vscode.commands.executeCommand('setContext', 'groog.markMode', true);
   }
 
-  deactivate() {
+  async deactivate() {
     this.active = false;
-    vscode.commands.executeCommand('setContext', 'groog.markMode', false);
+    await vscode.commands.executeCommand('setContext', 'groog.markMode', false);
   }
 
-  ctrlG() {
-    this.deactivate();
+  async ctrlG() {
+    await this.deactivate();
   }
 
-  textHandler(s: string): boolean {
-    this.deactivate();
+  async textHandler(s: string): Promise<boolean> {
+    await this.deactivate();
     return true;
   }
 
-  moveHandler(vsCommand: string, ...rest: any[]): boolean {
+  async moveHandler(vsCommand: string, ...rest: any[]): Promise<boolean> {
     // See below link for cusorMove args (including "select" keyword)
     // https://code.visualstudio.com/api/references/commands
     if (vsCommand === "cursorMove") {
       rest[0].select = true;
-      vscode.commands.executeCommand(vsCommand, ...rest);
+      await vscode.commands.executeCommand(vsCommand, ...rest);
     } else {
-      vscode.commands.executeCommand(vsCommand + "Select", ...rest);
+      await vscode.commands.executeCommand(vsCommand + "Select", ...rest);
     }
     return false;
   }
 
-  delHandler(s: string): boolean {
-    this.deactivate();
+  async delHandler(s: string): Promise<boolean> {
+    await this.deactivate();
     return true;
   }
 
-  onYank(s: string | undefined) {
-    this.deactivate();
+  async onYank(s: string | undefined) {
+    await this.deactivate();
     s ? this.yanked = s : this.yanked = "";
   }
 
-  alwaysOnYank(): boolean {
+  async alwaysOnYank(): Promise<boolean> {
     return true;
   }
 
-  onKill(s: string | undefined) {
-    this.deactivate();
+  async onKill(s: string | undefined) {
+    await this.deactivate();
     s ? this.yanked = s : this.yanked = "";
   }
 
-  alwaysOnKill(): boolean {
+  async alwaysOnKill(): Promise<boolean> {
     return true;
   }
 }

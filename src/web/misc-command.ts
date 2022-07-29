@@ -4,7 +4,7 @@ export interface MultiCommand {
   sequence: string[]
 }
 
-export function multiCommand(mc: MultiCommand) {
+export async function multiCommand(mc: MultiCommand) {
   for (var command of mc.sequence) {
     vscode.commands.executeCommand(command);
   }
@@ -14,7 +14,7 @@ export interface Message {
   message: string
 }
 
-export function infoMessage(msg: Message | undefined) {
+export async function infoMessage(msg: Message | undefined) {
   if (msg) {
     vscode.window.showInformationMessage(msg.message);
   } else {

@@ -59,8 +59,8 @@ class GlobalStateTracker<T> {
     return context.globalState.get<T>(this.key);
   }
 
-  update(context: vscode.ExtensionContext, t: T) {
-    context.globalState.update(this.key, t);
+  async update(context: vscode.ExtensionContext, t: T) {
+    await context.globalState.update(this.key, t);
   }
 }
 
@@ -95,8 +95,8 @@ export class Emacs {
       this.recorder.registerCommand(context, d, () => this.delCommand(d));
     }
 
-    context.subscriptions.push(vscode.commands.registerCommand('type', (...args: any[]) => {
-      this.type(...args);
+    context.subscriptions.push(vscode.commands.registerCommand('type', async (...args: any[]) => {
+      await this.type(...args);
     }));
 
     this.recorder.registerCommand(context, 'jump', () => this.jump());
@@ -123,19 +123,19 @@ export class Emacs {
     this.recorder.registerCommand(context, "message.info", infoMessage);
 
     // Register one-off commands.
-    commands.forEach((value: () => void, key: string) => {
+    commands.forEach((value: () => Thenable<any>, key: string) => {
       this.recorder.registerCommand(context, key, value);
-    });
+    });//
 
     // After all commands have been registered, check persistent data for qmk setting.
     this.setQMK(context, this.qmk.get(context));
   }
 
-  runHandlers(thCallback: (th: TypeHandler) => boolean, applyCallback: () => void) {
+  async runHandlers(thCallback: (th: TypeHandler) => Thenable<boolean>, applyCallback: () => Thenable<any>) {
     let apply = true;
     for (var th of this.typeHandlers) {
       if (th.active) {
-        if (!thCallback(th)) {
+        if (!(await thCallback(th))) {
           // Note, we can't do "apply &&= th.textHandler" because
           // if apply is set to false at some point, then later
           // handlers won't run
@@ -144,49 +144,49 @@ export class Emacs {
       }
     }
     if (apply) {
-      applyCallback();
+      await applyCallback();
     }
   }
 
-  type(...args: any[]) {
+  async type(...args: any[]) {
     if (!vscode.window.activeTextEditor) {
       vscode.window.showInformationMessage("NOT TEXT EDITOR?!?!");
     }
 
     let s = (args[0] as TypeArg).text;
-    this.runHandlers(
-      (th: TypeHandler): boolean => { return th.textHandler(s); },
-      () => { vscode.commands.executeCommand("default:type", ...args); },
+    await this.runHandlers(
+      async (th: TypeHandler): Promise<boolean> => { return await th.textHandler(s); },
+      async () => { await vscode.commands.executeCommand("default:type", ...args); },
     );
   }
 
-  delCommand(d: string) {
-    this.runHandlers(
-      (th: TypeHandler): boolean => { return th.delHandler(d); },
-      () => { vscode.commands.executeCommand(d); },
+  async delCommand(d: string) {
+    await this.runHandlers(
+      async (th: TypeHandler): Promise<boolean> => { return await th.delHandler(d); },
+      async () => { await vscode.commands.executeCommand(d); },
     );
   }
 
-  toggleQMK(context: vscode.ExtensionContext) {
-    this.setQMK(context, !this.qmk.get(context));
+  async toggleQMK(context: vscode.ExtensionContext) {
+    await this.setQMK(context, !this.qmk.get(context));
   }
 
-  setQMK(context: vscode.ExtensionContext, bu: boolean | undefined) {
+  async setQMK(context: vscode.ExtensionContext, bu: boolean | undefined) {
     let b = bu || false;
     if (b) {
       vscode.window.showInformationMessage('QMK keyboard mode activated');
     } else {
       vscode.window.showInformationMessage('Basic keyboard mode activated');
     }
-    this.qmk.update(context, b);
-    vscode.commands.executeCommand('setContext', 'groog.qmk', b);
+    await this.qmk.update(context, b);
+    await vscode.commands.executeCommand('setContext', 'groog.qmk', b);
   }
 
-  yank() {
+  async yank() {
     let range = vscode.window.activeTextEditor?.selection;
     let maybe = vscode.window.activeTextEditor?.document.getText(range);
     if (maybe) {
-      vscode.window.activeTextEditor?.edit(editBuilder => {
+      await vscode.window.activeTextEditor?.edit(editBuilder => {
         if (range) {
           editBuilder.delete(range);
         }
@@ -194,24 +194,24 @@ export class Emacs {
     }
 
     for (var th of this.typeHandlers) {
-      if (th.active || th.alwaysOnYank()) {
-        th.onYank(maybe);
+      if (th.active || await th.alwaysOnYank()) {
+        await th.onYank(maybe);
       }
     }
   }
 
-  ctrlG() {
+  async ctrlG() {
     for (var th of this.typeHandlers) {
       if (th.active) {
-        th.ctrlG();
+        await th.ctrlG();
       }
     }
     for (var cmd of ctrlGCommands) {
-      vscode.commands.executeCommand(cmd);
+      await vscode.commands.executeCommand(cmd);
     }
   }
 
-  kill() {
+  async kill() {
     let editor = vscode.window.activeTextEditor;
     if (!editor) {
       return;
@@ -225,44 +225,44 @@ export class Emacs {
       range = new vscode.Range(startPos, new vscode.Position(startPos.line + 1, 0));
     }
     for (var th of this.typeHandlers) {
-      if (th.active || th.alwaysOnKill()) {
+      if (th.active || await th.alwaysOnKill()) {
         th.onKill(text);
       }
     }
-    vscode.window.activeTextEditor?.edit(editBuilder => {
+    await vscode.window.activeTextEditor?.edit(editBuilder => {
       editBuilder.delete(range);
     });
   }
 
   // C-l
-  jump() {
-    this.move("cursorMove", { "to": "up", "by": "line", "value": jumpDist });
+  async jump() {
+    await this.move("cursorMove", { "to": "up", "by": "line", "value": jumpDist });
   }
 
   // C-v
-  fall() {
-    this.move("cursorMove", { "to": "down", "by": "line", "value": jumpDist });
+  async fall() {
+    await this.move("cursorMove", { "to": "down", "by": "line", "value": jumpDist });
   }
 
-  move(vsCommand: string, ...rest: any[]) {
-    this.runHandlers(
-      (th: TypeHandler): boolean => { return th.moveHandler(vsCommand, ...rest); },
-      () => { vscode.commands.executeCommand(vsCommand, ...rest); },
+  async move(vsCommand: string, ...rest: any[]) {
+    await this.runHandlers(
+      async (th: TypeHandler): Promise<boolean> => { return await th.moveHandler(vsCommand, ...rest); },
+      async () => { await vscode.commands.executeCommand(vsCommand, ...rest); },
     );
   }
 
-  format() {
+  async format() {
     let editor = vscode.window.activeTextEditor;
     if (!editor) {
       return;
     }
 
     if (editor.selection.isEmpty) {
-      vscode.commands.executeCommand("editor.action.formatDocument");
-      vscode.commands.executeCommand("editor.action.trimTrailingWhitespace");
-      vscode.commands.executeCommand("editor.action.organizeImports");
+      await vscode.commands.executeCommand("editor.action.formatDocument");
+      await vscode.commands.executeCommand("editor.action.trimTrailingWhitespace");
+      await vscode.commands.executeCommand("editor.action.organizeImports");
     } else {
-      vscode.commands.executeCommand("editor.action.formatSelection");
+      await vscode.commands.executeCommand("editor.action.formatSelection");
     }
   }
 }

@@ -1,5 +1,5 @@
 // TODO: Only need this for Windows shells (i.e. so maybe not at all).
-export var commands = new Map<string, () => void>([
+export var commands = new Map<string, () => Thenable<any>>([
   /*["terminalCursorUp", terminalCursorUp],
   ["terminalCursorDown", terminalCursorDown],*/
 ]);

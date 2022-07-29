@@ -35,9 +35,9 @@ export class Recorder implements TypeHandler {
     recorder.registerCommand(context, "record.findNext", () => recorder.findNext());
   }
 
-  registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => any) {
-    context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName, (...args: any) => {
-      this.execute("groog." + commandName, args, callback);
+  registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => Thenable<any>) {
+    context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName, async (...args: any) => {
+      await this.execute("groog." + commandName, args, callback);
     }));
   }
 
@@ -45,15 +45,15 @@ export class Recorder implements TypeHandler {
     context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName, callback));
   }
 
-  execute(command: string, args: any[], callback: (...args: any[]) => any): any {
+  async execute(command: string, args: any[], callback: (...args: any[]) => any) {
     if (command.includes("groog.record") || !this.active || !this.baseCommand) {
-      return callback(...args);
+      await callback(...args);
+      return;
     }
-    this.addRecord(new CommandRecord(command, args));
+    await this.addRecord(new CommandRecord(command, args));
     this.baseCommand = false;
-    let r = callback(...args);
+    await callback(...args);
     this.baseCommand = true;
-    return r;
   }
 
   // TODO: findPrev
@@ -62,7 +62,7 @@ export class Recorder implements TypeHandler {
       vscode.window.showErrorMessage("No find text has been set yet");
       return;
     }
-    this.lastFind.playback();
+    await this.lastFind.playback();
     this.addRecord(this.lastFind);
   }
 
@@ -80,7 +80,7 @@ export class Recorder implements TypeHandler {
     }
   }
 
-  startRecording() {
+  async startRecording() {
     if (this.active) {
       vscode.window.showInformationMessage("Already recording!");
     } else {
@@ -113,7 +113,7 @@ export class Recorder implements TypeHandler {
     vscode.window.showInformationMessage("Recording ended!");
   }
 
-  endRecording() {
+  async endRecording() {
     if (!this.active) {
       vscode.window.showInformationMessage("Not recording!");
     } else {
@@ -164,43 +164,44 @@ export class Recorder implements TypeHandler {
     // this.recordBook.map(async (r) => await r.playback());
   }
 
-  activate() {
+  async activate() {
     this.active = true;
-    vscode.commands.executeCommand('setContext', 'groog.recording', true);
+    await vscode.commands.executeCommand('setContext', 'groog.recording', true);
   }
 
-  deactivate() {
+  async deactivate() {
     this.active = false;
     this.lastFind = undefined;
-    vscode.commands.executeCommand('setContext', 'groog.recording', false);
-    vscode.commands.executeCommand("closeFindWidget");
+    await vscode.commands.executeCommand('setContext', 'groog.recording', false);
+    await vscode.commands.executeCommand("closeFindWidget");
   }
 
   addRecord(r: Record) {
     this.recordBook = this.recordBook.concat(r);
   }
 
-  textHandler(s: string): boolean {
+  async textHandler(s: string): Promise<boolean> {
     this.addRecord(new TypeRecord(s));
     return true;
   }
 
   // All these functions are associated with a "groog.*" command so these are
   // already added to the record book via the "type" command handling
-  onKill(s: string | undefined) { }
-  alwaysOnKill(): boolean { return false; }
-  ctrlG() { }
-  onYank(s: string | undefined) { }
-  alwaysOnYank(): boolean { return false; }
-  delHandler(s: string): boolean {
+  async onKill(s: string | undefined) { }
+  async alwaysOnKill(): Promise<boolean> { return false; }
+  async ctrlG() { }
+  async onYank(s: string | undefined) { }
+  async alwaysOnYank(): Promise<boolean> { return false; }
+  async delHandler(s: string): Promise<boolean> {
     return true;
   }
-  moveHandler(vsCommand: string, ...rest: any[]): boolean {
+  async moveHandler(vsCommand: string, ...rest: any[]): Promise<boolean> {
     return true;
   }
 }
 
 interface Record {
+  name(): string;
   playback(): Promise<void>;
 }
 
@@ -213,6 +214,10 @@ class TypeRecord implements Record {
 
   async playback(): Promise<void> {
     await vscode.commands.executeCommand("type", { "text": this.text });
+  }
+
+  name(): string {
+    return "TR: " + this.text;
   }
 }
 
@@ -228,6 +233,10 @@ class CommandRecord implements Record {
   async playback(): Promise<void> {
     await vscode.commands.executeCommand(this.command, ...this.args);
   }
+
+  name(): string {
+    return "CR: " + this.command;
+  }
 }
 
 class FindNextRecord implements Record {
@@ -241,5 +250,9 @@ class FindNextRecord implements Record {
     await vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": this.findText });
     await vscode.commands.executeCommand("editor.action.nextMatchFindAction");
     await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
+  }
+
+  name(): string {
+    return "FNR: " + this.findText;
   }
 }
