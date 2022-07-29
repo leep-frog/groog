@@ -321,7 +321,7 @@
       },
       {
         "key": "alt+t",
-        "command": "go.test.package"
+        "command": "workbench.action.terminal.new"
       },
       {
         "key": "alt+x",
@@ -822,6 +822,14 @@
         }
       },
       {
+        "key": "ctrl+x k",
+        "command": "groog.toggleQMK"
+      },
+      {
+        "key": "ctrl+x ctrl+k",
+        "command": "groog.toggleQMK"
+      },
+      {
         "key": "ctrl+x l",
         "command": "workbench.action.gotoLine"
       },
@@ -909,11 +917,11 @@
       },
       {
         "key": "ctrl+x t",
-        "command": "groog.toggleQMK"
+        "command": "go.test.package"
       },
       {
         "key": "ctrl+x ctrl+t",
-        "command": "groog.toggleQMK"
+        "command": "go.test.package"
       },
       {
         "key": "ctrl+x tab",

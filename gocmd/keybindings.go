@@ -243,7 +243,9 @@ var (
 			kb("workbench.action.closePanel"),
 			kb("workbench.action.toggleMaximizedPanel"),
 		),
+		// alt-t on QMK keyboard is actually ctrl+shift+t (for new tab)
 		ctrl(shift("t")): only("workbench.action.terminal.new"),
+		alt("t"): only("workbench.action.terminal.new"),
 		alt(shift("t")):  only("workbench.action.terminal.newWithProfile"),
 		// Ctrl+x ctrl+c isn't send to terminal directly, so we need to
 		// explicitly send the sequence.
@@ -302,7 +304,7 @@ var (
 		alt("n"): only("workbench.action.editor.nextChange"),
 
 		// Go
-		alt("t"): only("go.test.package"),
+		ctrlX("t"): only("go.test.package"),
 
 		// Miscellaneous
 		ctrlX("r"): only("workbench.action.reloadWindow"),
@@ -314,7 +316,7 @@ var (
 		shift(pageup): {
 			"editorFocus": kb("editor.action.selectHighlights"),
 		},
-		ctrlX("t"): only("groog.toggleQMK"),
+		ctrlX("k"): only("groog.toggleQMK"),
 	}
 )
 
