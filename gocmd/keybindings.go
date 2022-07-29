@@ -43,7 +43,6 @@ func kbDefsToBindings() []*Keybinding {
 			if kb == nil {
 				continue
 			}
-			// TODO: ctrl x doubler
 			for _, ka := range key.keyAliases() {
 				kbs = append(kbs, &Keybinding{
 					Key:     ka,
@@ -60,8 +59,7 @@ func kbDefsToBindings() []*Keybinding {
 var (
 	// Map from key to "when context" to command to run in that context
 	kbDefinitions = map[Key]map[string]*KB{
-		// TODO: when maps should be sorted to ensure consistent behavior.
-
+		// TODO: logic to ensure unique keys (not guaranteed by compiler or runtime since using functions to generate keys)
 		ctrlX("o"): only("workbench.action.openRecent"),
 		shift(pageup): {
 			"editorFocus": kb("editor.action.selectHighlights"),
@@ -119,11 +117,10 @@ var (
 			"editorTextFocus && suggestWidgetVisible":  kb("selectNextSuggestion"),
 			"inQuickOpen": kb("workbench.action.quickOpenNavigateNextInFilePicker"),
 		},
-		left:      only("groog.cursorLeft"),
-		ctrl("b"): only("groog.cursorLeft"),
-		right:     only("groog.cursorRight"),
-		home:      only("groog.cursorHome"),
-		// TODO: groog.qmk funciton (or use generic one like in other todo)
+		left:              only("groog.cursorLeft"),
+		ctrl("b"):         only("groog.cursorLeft"),
+		right:             only("groog.cursorRight"),
+		home:              only("groog.cursorHome"),
 		ctrl("a"):         keyboardSplit(kb("groog.cursorHome"), kb("editor.action.selectAll")),
 		ctrl(shift("a")):  only("editor.action.selectAll"),
 		ctrl(shift(home)): only("editor.action.selectAll"),
