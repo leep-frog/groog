@@ -82,6 +82,10 @@
   "contributes": {
     "commands": [
       {
+        "command": "groog.ctrlG",
+        "title": "Emacs Ctrl-G"
+      },
+      {
         "command": "groog.cursorBottom",
         "title": "Emacs Cursor Bottom"
       },
@@ -114,16 +118,12 @@
         "title": "Emacs Cursor Up"
       },
       {
-        "command": "groog.cursorWordRight",
-        "title": "Emacs Cursor Word Right"
-      },
-      {
         "command": "groog.cursorWordLeft",
         "title": "Emacs Cursor Word Left"
       },
       {
-        "command": "groog.ctrlG",
-        "title": "Emacs Ctrl-G"
+        "command": "groog.cursorWordRight",
+        "title": "Emacs Cursor Word Right"
       },
       {
         "command": "groog.deleteLeft",
