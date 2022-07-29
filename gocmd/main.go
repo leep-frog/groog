@@ -67,6 +67,9 @@ func node() *command.Node {
 			Commands:    CustomCommands,
 			Keybindings: kbDefsToBindings(),
 		}
+		slices.SortFunc(p.Contributes.Commands, func(a, b *Command) bool {
+			return a.Command < b.Command
+		})
 
 		j, err := json.MarshalIndent(p, "", "  ")
 		if err != nil {

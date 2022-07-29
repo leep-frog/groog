@@ -82,48 +82,20 @@
   "contributes": {
     "commands": [
       {
-        "command": "groog.find",
-        "title": "Groog find"
-      },
-      {
-        "command": "groog.reverseFind",
-        "title": "Groog reverse find"
-      },
-      {
-        "command": "groog.toggleQMK",
-        "title": "Emacs Toggle QMK"
-      },
-      {
-        "command": "groog.yank",
-        "title": "Emacs Yank"
-      },
-      {
-        "command": "groog.toggleMarkMode",
-        "title": "Emacs Toggle Mark Mode"
-      },
-      {
-        "command": "groog.paste",
-        "title": "Emacs Paste"
-      },
-      {
-        "command": "groog.kill",
-        "title": "Emacs Kill Line"
-      },
-      {
-        "command": "groog.jump",
-        "title": "Emacs Jump"
-      },
-      {
-        "command": "groog.fall",
-        "title": "Emacs Fall"
-      },
-      {
-        "command": "groog.cursorUp",
-        "title": "Emacs Cursor Up"
+        "command": "groog.cursorBottom",
+        "title": "Emacs Cursor Bottom"
       },
       {
         "command": "groog.cursorDown",
         "title": "Emacs Cursor Down"
+      },
+      {
+        "command": "groog.cursorEnd",
+        "title": "Emacs Cursor End"
+      },
+      {
+        "command": "groog.cursorHome",
+        "title": "Emacs Cursor Home"
       },
       {
         "command": "groog.cursorLeft",
@@ -134,12 +106,12 @@
         "title": "Emacs Cursor Right"
       },
       {
-        "command": "groog.cursorHome",
-        "title": "Emacs Cursor Home"
+        "command": "groog.cursorTop",
+        "title": "Emacs Cursor Top"
       },
       {
-        "command": "groog.cursorEnd",
-        "title": "Emacs Cursor End"
+        "command": "groog.cursorUp",
+        "title": "Emacs Cursor Up"
       },
       {
         "command": "groog.cursorWordRight",
@@ -150,56 +122,8 @@
         "title": "Emacs Cursor Word Left"
       },
       {
-        "command": "groog.cursorTop",
-        "title": "Emacs Cursor Top"
-      },
-      {
-        "command": "groog.cursorBottom",
-        "title": "Emacs Cursor Bottom"
-      },
-      {
         "command": "groog.ctrlG",
         "title": "Emacs Ctrl-G"
-      },
-      {
-        "command": "groog.undo",
-        "title": "Undo"
-      },
-      {
-        "command": "groog.multiCommand.execute",
-        "title": "Groog MultiCommand"
-      },
-      {
-        "command": "groog.message.info",
-        "title": "Groog Info Message"
-      },
-      {
-        "command": "groog.record.startRecording",
-        "title": "Groog Start Recording"
-      },
-      {
-        "command": "groog.record.endRecording",
-        "title": "Groog End Recording"
-      },
-      {
-        "command": "groog.record.saveRecordingAs",
-        "title": "Groog Save Recording As..."
-      },
-      {
-        "command": "groog.record.playRecording",
-        "title": "Groog Play Recording"
-      },
-      {
-        "command": "groog.record.playNamedRecording",
-        "title": "Groog Play Named Recording..."
-      },
-      {
-        "command": "groog.record.find",
-        "title": "Find selection during recording"
-      },
-      {
-        "command": "groog.record.findNext",
-        "title": "Find the next selection during recording"
       },
       {
         "command": "groog.deleteLeft",
@@ -218,12 +142,88 @@
         "title": "Groog delete right"
       },
       {
-        "command": "groog.updateSettings",
-        "title": "Groog update settings"
+        "command": "groog.fall",
+        "title": "Emacs Fall"
+      },
+      {
+        "command": "groog.find",
+        "title": "Groog find"
       },
       {
         "command": "groog.format",
         "title": "Groog format"
+      },
+      {
+        "command": "groog.jump",
+        "title": "Emacs Jump"
+      },
+      {
+        "command": "groog.kill",
+        "title": "Emacs Kill Line"
+      },
+      {
+        "command": "groog.message.info",
+        "title": "Groog Info Message"
+      },
+      {
+        "command": "groog.multiCommand.execute",
+        "title": "Groog MultiCommand"
+      },
+      {
+        "command": "groog.paste",
+        "title": "Emacs Paste"
+      },
+      {
+        "command": "groog.record.endRecording",
+        "title": "Groog End Recording"
+      },
+      {
+        "command": "groog.record.find",
+        "title": "Find selection during recording"
+      },
+      {
+        "command": "groog.record.findNext",
+        "title": "Find the next selection during recording"
+      },
+      {
+        "command": "groog.record.playNamedRecording",
+        "title": "Groog Play Named Recording..."
+      },
+      {
+        "command": "groog.record.playRecording",
+        "title": "Groog Play Recording"
+      },
+      {
+        "command": "groog.record.saveRecordingAs",
+        "title": "Groog Save Recording As..."
+      },
+      {
+        "command": "groog.record.startRecording",
+        "title": "Groog Start Recording"
+      },
+      {
+        "command": "groog.reverseFind",
+        "title": "Groog reverse find"
+      },
+      {
+        "command": "groog.toggleMarkMode",
+        "title": "Emacs Toggle Mark Mode"
+      },
+      {
+        "command": "groog.toggleQMK",
+        "title": "Emacs Toggle QMK"
+      },
+      {
+        "command": "groog.undo",
+        "title": "Undo"
+      },
+      {
+        "command": "groog.updateSettings",
+        "title": "Groog update settings"
+      },
+      {
+        "command": "groog.yank",
+        "title": "Emacs Yank"
       }
     ],
     "keybindings": [
@@ -799,14 +799,6 @@
             "workbench.action.focusPreviousGroup"
           ]
         }
-      },
-      {
-        "key": "ctrl+x insert",
-        "command": "editor.action.clipboardPasteAction"
-      },
-      {
-        "key": "ctrl+x ctrl+insert",
-        "command": "editor.action.clipboardPasteAction"
       },
       {
         "key": "ctrl+x l",
