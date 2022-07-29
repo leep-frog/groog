@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { Recorder } from './record';
 import { TypeHandler } from './interfaces';
+import { Recorder } from './record';
 
 export class FindHandler implements TypeHandler {
   active: boolean;
@@ -77,7 +77,7 @@ export class FindHandler implements TypeHandler {
     await this.deactivate();
   }
 
-   async textHandler(s: string): Promise<boolean> {
+  async textHandler(s: string): Promise<boolean> {
     // Enter, shift+enter, ctrl+n, ctrl+p taken care of in package.json
     this.findText = this.findText.concat(s);
     this.cursorStack.push();
@@ -152,10 +152,10 @@ class CursorStack {
 }
 
 export function cursorToFront() {
-    // Move cursor to beginning of selection
-    let editor = vscode.window.activeTextEditor;
-    if (editor) {
-      let startPos = editor.selection.start;
-      editor.selection = new vscode.Selection(startPos, startPos);
-    }
+  // Move cursor to beginning of selection
+  let editor = vscode.window.activeTextEditor;
+  if (editor) {
+    let startPos = editor.selection.start;
+    editor.selection = new vscode.Selection(startPos, startPos);
   }
+}

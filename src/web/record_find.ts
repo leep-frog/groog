@@ -9,8 +9,8 @@
 */
 
 import * as vscode from 'vscode';
-import { Recorder } from './record';
 import { TypeHandler } from './interfaces';
+import { Recorder } from './record';
 
 export class RecordFindHandler implements TypeHandler {
   active: boolean;
@@ -19,22 +19,22 @@ export class RecordFindHandler implements TypeHandler {
     this.active = false;
   }
 
-  activate(): void {
+  async activate(): Promise<void> {
     this.active = true;
   }
 
-  deactivate(): void {
+  async deactivate(): Promise<void> {
     this.active = false;
   }
 
   // Taken care of in record.ts
-  ctrlG(): void { }
+  async ctrlG(): Promise<void> { }
 
-  textHandler(s: string): boolean {
+  async textHandler(s: string): Promise<boolean> {
     return false;
   }
 
-  delHandler(cmd: string): boolean {
+  async delHandler(cmd: string): Promise<boolean> {
     return false;
   }
 
@@ -42,27 +42,27 @@ export class RecordFindHandler implements TypeHandler {
   // Actually, this should do everything and just point to
   // the recorder (and vice versa), so whenever this gets deactivated, we just
   // reactivate/unpause the recorder.
-  moveHandler(cmd: string, ...rest: any[]): boolean {
+  async moveHandler(cmd: string, ...rest: any[]): Promise<boolean> {
     return false;
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder): void {
-    
+
   }
 
-  onYank(text: string | undefined): void {
-    
+  async onYank(text: string | undefined): Promise<void> {
+
   }
 
-  onKill(text: string | undefined): void {
-    
+  async onKill(text: string | undefined): Promise<void> {
+
   }
 
-  alwaysOnKill(): boolean {
+  async alwaysOnKill(): Promise<boolean> {
     return false;
   }
 
-  alwaysOnYank(): boolean {
+  async alwaysOnYank(): Promise<boolean> {
     return false;
   }
 }
