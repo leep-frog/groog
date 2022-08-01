@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Color, ColorizedHandler, ColorMode } from './color_mode';
+import { ColorizedHandler, ColorMode, Mode } from './color_mode';
 import { TypeHandler } from './interfaces';
 import { Recorder } from './record';
 
@@ -60,8 +60,8 @@ export class FindHandler extends ColorizedHandler implements TypeHandler {
     await vscode.commands.executeCommand("closeFindWidget");
   }
 
-  modeColor(): Color {
-    return new Color(160, 160, 0);
+  mode(): Mode {
+    return Mode.FIND;
   }
 
   async findWithArgs() {

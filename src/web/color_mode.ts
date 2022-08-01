@@ -3,11 +3,20 @@ import * as vscode from 'vscode';
 const workbench = "workbench";
 const colorCustomizations = "colorCustomizations";
 
+export enum Mode {
+  FIND,
+  RECORD,
+  MARK,
+}
+
 export abstract class ColorizedHandler {
-  cm: ColorMode;
   abstract colorActivate(): Thenable<any>;
   abstract colorDeactivate(): Thenable<any>;
-  abstract modeColor(): Color;
+  abstract mode(): Mode;
+
+  // All persistent data should go in this.cm since that is shared across
+  // all classes (where ColorizedHandler will have multiple instances).
+  cm: ColorMode;
 
   constructor(cm: ColorMode) {
     this.cm = cm;
@@ -15,63 +24,53 @@ export abstract class ColorizedHandler {
 
   async activate() {
     await this.colorActivate();
-    await this.cm.add(this.modeColor());
+    await this.cm.add(this.mode());
   }
 
   async deactivate() {
     await this.colorDeactivate();
-    await this.cm.remove(this.modeColor());
+    await this.cm.remove(this.mode());
   }
 }
 
-// TODO: rather than have each mode set it's color, make one function in here
-// that determines it, and each inheriting class passes in a "modeName" string.
-// so function can check which modes are active
 export class ColorMode {
-  r: number;
-  g: number;
-  b: number;
-  colorCodes: Set<string>;
+  activeModes: Set<Mode>;
 
   constructor() {
-    this.r = 0;
-    this.g = 0;
-    this.b = 0;
-    this.colorCodes = new Set<string>();
+    this.activeModes = new Set<Mode>();
   }
 
-  async add(color: Color) {
-    if (this.colorCodes.has(color.toString())) {
+  async add(m: Mode) {
+    if (this.activeModes.has(m)) {
       return;
     }
-    this.colorCodes.add(color.toString());
-    this.r += color.r;
-    this.g += color.g;
-    this.b += color.b;
-    await this.update();
+    this.activeModes.add(m);
+    this.updateColors();
   }
 
-  async remove(color: Color) {
-    if (!this.colorCodes.has(color.toString())) {
+  async remove(m: Mode) {
+    if (!this.activeModes.has(m)) {
       return;
     }
-    this.colorCodes.delete(color.toString());
-    this.r -= color.r;
-    this.g -= color.g;
-    this.b -= color.b;
-    await this.update();
+    this.activeModes.delete(m);
+    this.updateColors();
   }
 
-  private async update() {
-    if (this.colorCodes.size === 0) {
-      await this.setP(undefined);
-    } else {
-      this.setP(new Color(
-        this.r / this.colorCodes.size,
-        this.g / this.colorCodes.size,
-        this.b / this.colorCodes.size,
-      ));
+  private async updateColors() {
+    let find = this.activeModes.has(Mode.FIND);
+    let rec = this.activeModes.has(Mode.RECORD);
+    let mark = this.activeModes.has(Mode.MARK);
+    let c: Color | undefined;
+    if (rec && mark) {
+      c = new Color(250, 0, 250);
+    } else if (find) {
+      c = new Color(220, 220, 0);
+    } else if (rec) {
+      c = new Color(190, 0, 0);
+    } else if (mark) {
+      c = new Color(0, 0, 160);
     }
+    await this.setP(c);
   }
 
   private async setP(c: Color | undefined) {

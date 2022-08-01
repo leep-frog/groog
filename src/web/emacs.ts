@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Color, ColorMode } from './color_mode';
+import { ColorMode } from './color_mode';
 import { commands } from './commands';
 import { FindHandler } from './find';
 import { Registerable, TypeHandler } from './interfaces';
@@ -69,7 +69,7 @@ export class Emacs {
   private qmk: GlobalStateTracker<boolean>;
   recorder: Recorder;
   typeHandlers: TypeHandler[];
-  cm:  ColorMode;
+  cm: ColorMode;
 
   constructor() {
     this.cm = new ColorMode();

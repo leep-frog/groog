@@ -8,12 +8,7 @@
 - ctrl+g or moveHandler ends the session (done in record handler)
 */
 
-import * as vscode from 'vscode';
-import { Color, ColorizedHandler, ColorMode } from './color_mode';
-import { TypeHandler } from './interfaces';
-import { Recorder } from './record';
-
-export class RecordFindHandler extends ColorizedHandler implements TypeHandler {
+/*export class RecordFindHandler extends ColorizedHandler implements TypeHandler {
   active: boolean;
 
   constructor(cm: ColorMode) {
@@ -72,3 +67,4 @@ export class RecordFindHandler extends ColorizedHandler implements TypeHandler {
     return false;
   }
 }
+*/

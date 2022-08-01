@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { Recorder } from './record';
+import { ColorizedHandler, ColorMode, Mode } from './color_mode';
 import { TypeHandler } from './interfaces';
-import { Color, ColorizedHandler, ColorMode } from './color_mode';
+import { Recorder } from './record';
 
 export class MarkHandler extends ColorizedHandler implements TypeHandler {
   active: boolean;
@@ -46,8 +46,8 @@ export class MarkHandler extends ColorizedHandler implements TypeHandler {
     await vscode.commands.executeCommand('setContext', 'groog.markMode', false);
   }
 
-  modeColor(): Color {
-    return new Color(0, 0, 160);
+  mode(): Mode {
+    return Mode.MARK;
   }
 
   async ctrlG() {
