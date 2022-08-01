@@ -1,5 +1,5 @@
 {
-  "name": "groogtest",
+  "name": "groog",
   "displayName": "groog",
   "description": "",
   "version": "0.0.47",
@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@types/mocha": "^9.0.0",
-    "@types/vscode": "^1.69.0",
+    "@types/vscode": "^1.64.0",
     "@types/webpack-env": "^1.16.3",
     "@typescript-eslint/eslint-plugin": "^5.9.1",
     "@typescript-eslint/parser": "^5.9.1",
