@@ -374,7 +374,7 @@
       {
         "key": "ctrl+/",
         "command": "groog.undo",
-        "when": "!terminalFocus"
+        "when": "!activePanel"
       },
       {
         "key": "ctrl+;",
@@ -517,12 +517,12 @@
       {
         "key": "ctrl+o",
         "command": "workbench.action.focusNextGroup",
-        "when": "!terminalFocus"
+        "when": "!activePanel"
       },
       {
         "key": "ctrl+o",
         "command": "workbench.action.terminal.focusNext",
-        "when": "terminalFocus"
+        "when": "activePanel"
       },
       {
         "key": "ctrl+p",
@@ -551,32 +551,32 @@
       {
         "key": "ctrl+pagedown",
         "command": "workbench.action.focusNextGroup",
-        "when": "!terminalFocus"
+        "when": "!activePanel"
       },
       {
         "key": "ctrl+pagedown",
         "command": "workbench.action.terminal.focusNext",
-        "when": "terminalFocus"
+        "when": "activePanel"
       },
       {
         "key": "ctrl+pageup",
         "command": "workbench.action.focusPreviousGroup",
-        "when": "!terminalFocus"
+        "when": "!activePanel"
       },
       {
         "key": "ctrl+pageup",
         "command": "workbench.action.terminal.focusPrevious",
-        "when": "terminalFocus"
+        "when": "activePanel"
       },
       {
         "key": "ctrl+q",
         "command": "workbench.action.closeEditorsAndGroup",
-        "when": "!terminalFocus"
+        "when": "!activePanel"
       },
       {
         "key": "ctrl+q",
         "command": "groog.message.info",
-        "when": "terminalFocus",
+        "when": "activePanel",
         "args": {
           "message": "Run ctrl+shift+q to kill the terminal"
         }
@@ -629,7 +629,7 @@
       {
         "key": "ctrl+shift+q",
         "command": "workbench.action.terminal.kill",
-        "when": "terminalFocus"
+        "when": "activePanel"
       },
       {
         "key": "ctrl+shift+s",
@@ -648,12 +648,12 @@
       {
         "key": "ctrl+shift+tab",
         "command": "workbench.action.focusPreviousGroup",
-        "when": "!terminalFocus"
+        "when": "!activePanel"
       },
       {
         "key": "ctrl+shift+tab",
         "command": "workbench.action.terminal.focusPrevious",
-        "when": "terminalFocus"
+        "when": "activePanel"
       },
       {
         "key": "ctrl+t",
@@ -668,22 +668,22 @@
       {
         "key": "ctrl+tab",
         "command": "workbench.action.focusNextGroup",
-        "when": "!terminalFocus"
+        "when": "!activePanel"
       },
       {
         "key": "ctrl+tab",
         "command": "workbench.action.terminal.focusNext",
-        "when": "terminalFocus"
+        "when": "activePanel"
       },
       {
         "key": "ctrl+u",
         "command": "workbench.action.focusPreviousGroup",
-        "when": "!terminalFocus"
+        "when": "!activePanel"
       },
       {
         "key": "ctrl+u",
         "command": "workbench.action.terminal.focusPrevious",
-        "when": "terminalFocus"
+        "when": "activePanel"
       },
       {
         "key": "ctrl+v",
@@ -760,7 +760,7 @@
       {
         "key": "ctrl+x c",
         "command": "workbench.action.terminal.sendSequence",
-        "when": "terminalFocus",
+        "when": "activePanel",
         "args": {
           "text": "\u0018\u0003"
         }
@@ -768,7 +768,7 @@
       {
         "key": "ctrl+x ctrl+c",
         "command": "workbench.action.terminal.sendSequence",
-        "when": "terminalFocus",
+        "when": "activePanel",
         "args": {
           "text": "\u0018\u0003"
         }
@@ -862,22 +862,22 @@
       {
         "key": "ctrl+x n",
         "command": "groog.cursorBottom",
-        "when": "!terminalFocus"
+        "when": "!activePanel"
       },
       {
         "key": "ctrl+x ctrl+n",
         "command": "groog.cursorBottom",
-        "when": "!terminalFocus"
+        "when": "!activePanel"
       },
       {
         "key": "ctrl+x n",
         "command": "workbench.action.terminal.rename",
-        "when": "terminalFocus"
+        "when": "activePanel"
       },
       {
         "key": "ctrl+x ctrl+n",
         "command": "workbench.action.terminal.rename",
-        "when": "terminalFocus"
+        "when": "activePanel"
       },
       {
         "key": "ctrl+x o",
