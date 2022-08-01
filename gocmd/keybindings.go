@@ -144,7 +144,7 @@ var (
 			"inQuickOpen && !suggestWidgetVisible":                   kb("workbench.action.closeQuickOpen"),
 			"suggestWidgetVisible":                                   kb("hideSuggestWidget"),
 		},
-		ctrl("/"):      terminalSplit(nil, kb("groog.undo")),
+		ctrl("/"):      panelSplit(nil, kb("groog.undo")),
 		ctrl(right):    only("groog.cursorWordRight"),
 		alt("b"):       only("groog.cursorWordLeft"),
 		ctrl(left):     only("groog.cursorWordLeft"),
@@ -187,27 +187,27 @@ var (
 		ctrl(pageup):     only("workbench.action.focusPreviousGroup"),
 		ctrl(shift("n")): only("workbench.action.files.newUntitledFile"),
 		ctrlX("d"):       only("editor.action.revealDefinition"),
-		ctrl(pagedown): terminalSplit(
+		ctrl(pagedown): panelSplit(
 			kb("workbench.action.terminal.focusNext"),
 			kb("workbench.action.focusNextGroup"),
 		),
-		ctrl(pageup): terminalSplit(
+		ctrl(pageup): panelSplit(
 			kb("workbench.action.terminal.focusPrevious"),
 			kb("workbench.action.focusPreviousGroup"),
 		),
-		ctrl("u"): terminalSplit(
+		ctrl("u"): panelSplit(
 			kb("workbench.action.terminal.focusPrevious"),
 			kb("workbench.action.focusPreviousGroup"),
 		),
-		ctrl("o"): terminalSplit(
+		ctrl("o"): panelSplit(
 			kb("workbench.action.terminal.focusNext"),
 			kb("workbench.action.focusNextGroup"),
 		),
-		ctrl(shift(tab)): terminalSplit(
+		ctrl(shift(tab)): panelSplit(
 			kb("workbench.action.terminal.focusPrevious"),
 			kb("workbench.action.focusPreviousGroup"),
 		),
-		ctrl(tab): terminalSplit(
+		ctrl(tab): panelSplit(
 			kb("workbench.action.terminal.focusNext"),
 			kb("workbench.action.focusNextGroup"),
 		),
@@ -236,12 +236,12 @@ var (
 		ctrlX("z"): only("workbench.action.togglePanel"),
 		// Really want to make sure we want to kill a terminal
 		// so we notify on ctrl+q and actually delete on ctrl+shift+q.
-		ctrl("q"): terminalSplit(
+		ctrl("q"): panelSplit(
 			notification("Run ctrl+shift+q to kill the terminal"),
 			kb("workbench.action.closeEditorsAndGroup"),
 		),
-		ctrl(shift("q")): terminalSplit(kb("workbench.action.terminal.kill"), nil),
-		ctrlX("n"): terminalSplit(
+		ctrl(shift("q")): panelSplit(kb("workbench.action.terminal.kill"), nil),
+		ctrlX("n"): panelSplit(
 			kb("workbench.action.terminal.rename"),
 			kb("groog.cursorBottom"),
 		),
@@ -257,7 +257,7 @@ var (
 		// explicitly send the sequence.
 		// See below link for unicode characters:
 		// https://en.wikipedia.org/wiki/List_of_Unicode_characters
-		ctrlX("c"): terminalSplit(sendSequence("\u0018\u0003"), nil),
+		ctrlX("c"): panelSplit(sendSequence("\u0018\u0003"), nil),
 
 		// Formatting
 		ctrlX(tab): only("groog.format"),
@@ -432,13 +432,18 @@ func keyboardSplit(basicKB, qmkKB *KB) map[string]*KB {
 	return contextualKB("groog.qmk", qmkKB, basicKB)
 }
 
+// panelSplit runs panelKB if the panel is avtice (i.e. visible) (so it may or
+// may not be focused), and otherKB otherwise.
 func panelSplit(panelKB, otherKB *KB) map[string]*KB {
 	return contextualKB("activePanel", panelKB, otherKB)
 }
 
-func terminalSplit(terminalKB, otherKB *KB) map[string]*KB {
+// terminalSplit runs terminalKB if focus is on the terminal and otherKB otherwise.
+// panelSplit should be preferred since it will still run panelKB even if focus
+// is on the side bar or menus.
+/*func terminalSplit(terminalKB, otherKB *KB) map[string]*KB {
 	return contextualKB(terminalFocus, terminalKB, otherKB)
-}
+}*/
 
 func recordingSplit(recordingKB, otherKB *KB) map[string]*KB {
 	return contextualKB("groog.recording", recordingKB, otherKB)
