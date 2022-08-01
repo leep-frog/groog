@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.45",
+  "version": "0.0.46",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -464,7 +464,13 @@
       },
       {
         "key": "ctrl+j",
-        "command": "groog.toggleMarkMode"
+        "command": "groog.toggleMarkMode",
+        "when": "!activePanel"
+      },
+      {
+        "key": "ctrl+j",
+        "command": "workbench.action.previousPanelView",
+        "when": "activePanel"
       },
       {
         "key": "ctrl+k",
@@ -472,7 +478,13 @@
       },
       {
         "key": "ctrl+l",
-        "command": "groog.jump"
+        "command": "groog.jump",
+        "when": "!activePanel"
+      },
+      {
+        "key": "ctrl+l",
+        "command": "workbench.action.nextPanelView",
+        "when": "activePanel"
       },
       {
         "key": "ctrl+left",

@@ -90,10 +90,16 @@ var (
 
 		// Emacs bindings
 		ctrl("w"): only("groog.yank"),
-		ctrl("j"): only("groog.toggleMarkMode"),
+		ctrl("j"): panelSplit(
+			kb("workbench.action.previousPanelView"),
+			kb("groog.toggleMarkMode"),
+		),
 		ctrl("y"): only("groog.paste"),
 		ctrl("k"): only("groog.kill"),
-		ctrl("l"): only("groog.jump"),
+		ctrl("l"): panelSplit(
+			kb("workbench.action.nextPanelView"),
+			kb("groog.jump"),
+		),
 		pageup:    only("groog.jump"),
 		ctrl("v"): only("groog.fall"),
 		pagedown:  only("groog.fall"),
