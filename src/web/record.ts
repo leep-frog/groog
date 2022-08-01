@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
+import { Color, ColorizedHandler, ColorMode } from './color_mode';
 import { TypeHandler } from './interfaces';
 
-export class Recorder implements TypeHandler {
+export class Recorder extends ColorizedHandler implements TypeHandler {
   // baseCommand ensures we don't infinite loop a command. For example,
   // if groog.CommandOne calls groog.CommandTwo, then we would record
   // both of them. But in the replay we would call groog.CommandOne (which would
@@ -18,7 +19,8 @@ export class Recorder implements TypeHandler {
   //       just create an equivalent vscode function.
   private namedRecordings: Map<string, Record[]>;
 
-  constructor() {
+  constructor(cm: ColorMode) {
+    super(cm);
     this.baseCommand = true;
     this.active = false;
     this.recordBook = [];
@@ -164,16 +166,20 @@ export class Recorder implements TypeHandler {
     // this.recordBook.map(async (r) => await r.playback());
   }
 
-  async activate() {
+  async colorActivate() {
     this.active = true;
     await vscode.commands.executeCommand('setContext', 'groog.recording', true);
   }
 
-  async deactivate() {
+  async colorDeactivate() {
     this.active = false;
     this.lastFind = undefined;
     await vscode.commands.executeCommand('setContext', 'groog.recording', false);
     await vscode.commands.executeCommand("closeFindWidget");
+  }
+
+  modeColor(): Color {
+    return new Color(160, 0, 0);
   }
 
   addRecord(r: Record) {

@@ -1,12 +1,14 @@
 import * as vscode from 'vscode';
 import { Recorder } from './record';
 import { TypeHandler } from './interfaces';
+import { Color, ColorizedHandler, ColorMode } from './color_mode';
 
-export class MarkHandler implements TypeHandler {
+export class MarkHandler extends ColorizedHandler implements TypeHandler {
   active: boolean;
   yanked: string;
 
-  constructor() {
+  constructor(cm: ColorMode) {
+    super(cm);
     this.active = false;
     this.yanked = "";
   }
@@ -34,14 +36,18 @@ export class MarkHandler implements TypeHandler {
     });
   }
 
-  async activate() {
+  async colorActivate() {
     this.active = true;
     await vscode.commands.executeCommand('setContext', 'groog.markMode', true);
   }
 
-  async deactivate() {
+  async colorDeactivate() {
     this.active = false;
     await vscode.commands.executeCommand('setContext', 'groog.markMode', false);
+  }
+
+  modeColor(): Color {
+    return new Color(0, 0, 160);
   }
 
   async ctrlG() {

@@ -9,22 +9,28 @@
 */
 
 import * as vscode from 'vscode';
+import { Color, ColorizedHandler, ColorMode } from './color_mode';
 import { TypeHandler } from './interfaces';
 import { Recorder } from './record';
 
-export class RecordFindHandler implements TypeHandler {
+export class RecordFindHandler extends ColorizedHandler implements TypeHandler {
   active: boolean;
 
-  constructor() {
+  constructor(cm: ColorMode) {
+    super(cm);
     this.active = false;
   }
 
-  async activate(): Promise<void> {
+  async colorActivate(): Promise<void> {
     this.active = true;
   }
 
-  async deactivate(): Promise<void> {
+  async colorDeactivate(): Promise<void> {
     this.active = false;
+  }
+
+  modeColor(): Color {
+    return new Color(160, 80, 0);
   }
 
   // Taken care of in record.ts

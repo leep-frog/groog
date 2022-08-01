@@ -1,13 +1,15 @@
 import * as vscode from 'vscode';
+import { Color, ColorizedHandler, ColorMode } from './color_mode';
 import { TypeHandler } from './interfaces';
 import { Recorder } from './record';
 
-export class FindHandler implements TypeHandler {
+export class FindHandler extends ColorizedHandler implements TypeHandler {
   active: boolean;
   findText: string;
   cursorStack: CursorStack;
 
-  constructor() {
+  constructor(cm: ColorMode) {
+    super(cm);
     this.active = false;
     this.findText = "";
     this.cursorStack = new CursorStack();
@@ -42,13 +44,13 @@ export class FindHandler implements TypeHandler {
     });
   }
 
-  async activate() {
+  async colorActivate() {
     this.active = true;
     await vscode.commands.executeCommand('setContext', 'groog.findMode', true);
     await this.findWithArgs();
   }
 
-  async deactivate() {
+  async colorDeactivate() {
     this.active = false;
     await vscode.commands.executeCommand('setContext', 'groog.findMode', false);
     // TODO: make text clearing optional? Differentiate in activate maybe?
@@ -56,6 +58,10 @@ export class FindHandler implements TypeHandler {
     this.cursorStack.clear();
     await vscode.commands.executeCommand("cancelSelection");
     await vscode.commands.executeCommand("closeFindWidget");
+  }
+
+  modeColor(): Color {
+    return new Color(160, 160, 0);
   }
 
   async findWithArgs() {

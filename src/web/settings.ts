@@ -29,10 +29,19 @@ export class Settings implements Registerable {
       new GlobalSetting("terminal", "integrated.allowChords", true),
       new GlobalSetting("terminal", "integrated.commandsToSkipShell", ics),
       new GlobalSetting("terminal", "integrated.copyOnSelection", true),
+      new GlobalSetting("workbench", "colorCustomizations", {
+        "editorGutter.background": "#000000",
+        "editorLineNumber.activeForeground": "#00ffff",
+        "editor.lineHighlightBackground": "#404040",
+      }),
       new GlobalSetting("workbench", "editor.limit.enabled", true),
       new GlobalSetting("workbench", "editor.limit.perEditorGroup", true),
       new GlobalSetting("workbench", "editor.limit.value", 1),
       new GlobalSetting("workbench", "startupEditor", "none"),
+      new GlobalSetting("terminal", "integrated.defaultProfile.windows", "MinGW"),
+      new GlobalSetting("terminal", "integrated.automationProfile.windows", {
+        "path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      }),
       new LanguageSetting("typescript", "editor", "defaultFormatter", "vscode.typescript-language-features"),
       // MinGW terminal
       // https://dev.to/yumetodo/make-the-integrated-shell-of-visual-studio-code-to-bash-of-msys2-5eao
