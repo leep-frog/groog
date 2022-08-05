@@ -30,6 +30,7 @@ export class Settings implements Registerable {
       new GlobalSetting("terminal", "integrated.allowChords", true),
       new GlobalSetting("terminal", "integrated.commandsToSkipShell", ics),
       new GlobalSetting("terminal", "integrated.copyOnSelection", true),
+      new GlobalSetting("terminal", "integrated.scrollback", 100_000),
       new GlobalSetting("workbench", "colorCustomizations", {
         "editorGutter.background": "#000000",
         "editorLineNumber.activeForeground": "#00ffff",
