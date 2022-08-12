@@ -41,6 +41,9 @@ export class ColorMode {
   }
 
   async add(m: Mode) {
+    // TODO: Updating settings is too slow. Make this
+    // work via a web view?
+    return;
     if (this.activeModes.has(m)) {
       return;
     }
@@ -49,6 +52,7 @@ export class ColorMode {
   }
 
   async remove(m: Mode) {
+    return;
     if (!this.activeModes.has(m)) {
       return;
     }
