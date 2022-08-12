@@ -13,5 +13,5 @@ export var commands = new Map<string, () => Thenable<any>>([
 function terminalCursorDown(): void {
   vscode.commands.executeCommand('workbench.action.terminal.sendSequence', {
     "text": "goodbye",
-  });  
+  });
 }*/

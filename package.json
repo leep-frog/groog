@@ -321,7 +321,7 @@
       },
       {
         "key": "alt+t",
-        "command": "workbench.action.terminal.new"
+        "command": "workbench.action.terminal.newInActiveWorkspace"
       },
       {
         "key": "alt+x",
@@ -643,7 +643,7 @@
       },
       {
         "key": "ctrl+shift+t",
-        "command": "workbench.action.terminal.new"
+        "command": "workbench.action.terminal.newInActiveWorkspace"
       },
       {
         "key": "ctrl+shift+tab",

@@ -61,7 +61,13 @@ export class Settings implements Registerable {
           "args": [
             "--login",
             "-i",
-          ]
+          ],
+          "env": {
+            // https://code.visualstudio.com/docs/editor/variables-reference
+            // Also need to add the following to bash profile:
+            // [[ -z "${VSCODE_FOLDER}" ]] || cd $VSCODE_FOLDER
+            "VSCODE_FOLDER": "${workspaceFolder}",
+          },
         },
       }),
     ];

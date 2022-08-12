@@ -250,8 +250,8 @@ var (
 			kb("workbench.action.toggleMaximizedPanel"),
 		),
 		// alt-t on QMK keyboard is actually ctrl+shift+t (for new tab)
-		ctrl(shift("t")): only("workbench.action.terminal.new"),
-		alt("t"): only("workbench.action.terminal.new"),
+		ctrl(shift("t")): only("workbench.action.terminal.newInActiveWorkspace"),
+		alt("t"):         only("workbench.action.terminal.newInActiveWorkspace"),
 		alt(shift("t")):  only("workbench.action.terminal.newWithProfile"),
 		// Ctrl+x ctrl+c isn't send to terminal directly, so we need to
 		// explicitly send the sequence.
