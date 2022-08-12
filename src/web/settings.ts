@@ -52,6 +52,9 @@ export class Settings implements Registerable {
         // Add the following to settings to make this the default terminal
         // "terminal.integrated.defaultProfile.windows": "MinGW",
         "MinGW": {
+          // Follow the instructions in this link to have VS Code open MINGW
+          // in the proper directory. Otherwise, will be opened in home directory.
+          // https://stackoverflow.com/a/43812298/18162937
           "path": "C:\\msys64\\usr\\bin\\bash.exe",
           "overrideName": true,
           "color": "terminal.ansiGreen",
@@ -62,12 +65,6 @@ export class Settings implements Registerable {
             "--login",
             "-i",
           ],
-          "env": {
-            // https://code.visualstudio.com/docs/editor/variables-reference
-            // Also need to add the following to bash profile:
-            // [[ -z "${VSCODE_FOLDER}" ]] || cd $VSCODE_FOLDER
-            "VSCODE_FOLDER": "${workspaceFolder}",
-          },
         },
       }),
     ];
