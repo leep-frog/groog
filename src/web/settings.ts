@@ -65,6 +65,11 @@ export class Settings implements Registerable {
             "--login",
             "-i",
           ],
+          "env": {
+            // See the below link for variables you can use here.
+            // https://code.visualstudio.com/docs/editor/variables-reference
+            "GROOG_VSCODE": "1",
+          },
         },
       }),
     ];
