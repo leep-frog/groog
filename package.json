@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.53",
+  "version": "0.0.54",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -392,7 +392,13 @@
       },
       {
         "key": "ctrl+b",
-        "command": "groog.cursorLeft"
+        "command": "groog.cursorLeft",
+        "when": "!inQuickOpen"
+      },
+      {
+        "key": "ctrl+b",
+        "command": "workbench.action.quickPickManyToggle",
+        "when": "inQuickOpen"
       },
       {
         "key": "ctrl+backspace",
@@ -422,7 +428,12 @@
       {
         "key": "ctrl+f",
         "command": "groog.cursorRight",
-        "when": "!groog.qmk"
+        "when": "!groog.qmk \u0026\u0026 !inQuickOpen"
+      },
+      {
+        "key": "ctrl+f",
+        "command": "workbench.action.quickPickManyToggle",
+        "when": "!groog.qmk \u0026\u0026 inQuickOpen"
       },
       {
         "key": "ctrl+f",
@@ -1025,7 +1036,13 @@
       },
       {
         "key": "left",
-        "command": "groog.cursorLeft"
+        "command": "groog.cursorLeft",
+        "when": "!inQuickOpen"
+      },
+      {
+        "key": "left",
+        "command": "workbench.action.quickPickManyToggle",
+        "when": "inQuickOpen"
       },
       {
         "key": "pagedown",
@@ -1037,7 +1054,13 @@
       },
       {
         "key": "right",
-        "command": "groog.cursorRight"
+        "command": "groog.cursorRight",
+        "when": "!inQuickOpen"
+      },
+      {
+        "key": "right",
+        "command": "workbench.action.quickPickManyToggle",
+        "when": "inQuickOpen"
       },
       {
         "key": "shift+enter",

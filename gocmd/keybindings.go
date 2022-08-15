@@ -62,9 +62,10 @@ var (
 	kbDefinitions = map[Key]map[string]*KB{
 		// Find bindings
 		ctrl("f"): {
-			"groog.qmk && !groog.recording": kb("groog.find"),
-			"!groog.qmk":                    kb("groog.cursorRight"),
 			"groog.qmk && groog.recording":  kb("groog.record.findNext"),
+			"groog.qmk && !groog.recording": kb("groog.find"),
+			"!groog.qmk && inQuickOpen":     kb("workbench.action.quickPickManyToggle"),
+			"!groog.qmk && !inQuickOpen":    kb("groog.cursorRight"),
 		},
 		ctrl("s"): {
 			"!groog.qmk && !groog.recording": kb("groog.find"),
@@ -127,9 +128,18 @@ var (
 			"editorTextFocus && suggestWidgetVisible":  kb("selectNextSuggestion"),
 			"inQuickOpen": kb("workbench.action.quickOpenNavigateNextInFilePicker"),
 		},
-		left:              only("groog.cursorLeft"),
-		ctrl("b"):         only("groog.cursorLeft"),
-		right:             only("groog.cursorRight"),
+		left: {
+			"inQuickOpen":  kb("workbench.action.quickPickManyToggle"),
+			"!inQuickOpen": kb("groog.cursorLeft"),
+		},
+		ctrl("b"): {
+			"inQuickOpen":  kb("workbench.action.quickPickManyToggle"),
+			"!inQuickOpen": kb("groog.cursorLeft"),
+		},
+		right: {
+			"inQuickOpen":  kb("workbench.action.quickPickManyToggle"),
+			"!inQuickOpen": kb("groog.cursorRight"),
+		},
 		home:              only("groog.cursorHome"),
 		ctrl("a"):         keyboardSplit(kb("groog.cursorHome"), kb("editor.action.selectAll")),
 		ctrl(shift("a")):  only("editor.action.selectAll"),
