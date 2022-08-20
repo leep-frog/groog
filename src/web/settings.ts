@@ -18,6 +18,9 @@ export class Settings implements Registerable {
     }
     return [
       new GlobalSetting("editor", "autoClosingQuotes", "never"),
+      new GlobalSetting("editor", "codeActionsOnSave", {
+        "source.organizeImports": true,
+      }),
       new GlobalSetting("editor", "detectIndentation", false),
       new GlobalSetting("editor", "insertSpaces", true),
       new GlobalSetting("editor", "rulers", [80, 200]),
