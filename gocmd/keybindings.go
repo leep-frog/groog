@@ -197,6 +197,10 @@ var (
 		ctrl(pageup):     only("workbench.action.focusPreviousGroup"),
 		ctrl(shift("n")): only("workbench.action.files.newUntitledFile"),
 		ctrlX("d"):       only("editor.action.revealDefinition"),
+		ctrl(shift("d")): onlyMC(
+			"workbench.action.splitEditorRight",
+			"editor.action.revealDefinition",
+		),
 		ctrl(pagedown): panelSplit(
 			kb("workbench.action.terminal.focusNext"),
 			kb("workbench.action.focusNextGroup"),

@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.55",
+  "version": "0.0.56",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -618,6 +618,16 @@
       {
         "key": "ctrl+shift+a",
         "command": "editor.action.selectAll"
+      },
+      {
+        "key": "ctrl+shift+d",
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            "workbench.action.splitEditorRight",
+            "editor.action.revealDefinition"
+          ]
+        }
       },
       {
         "key": "ctrl+shift+f",
