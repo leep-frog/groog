@@ -57,6 +57,13 @@ func kbDefsToBindings() []*Keybinding {
 }
 
 var (
+	revealInNewEditor = onlyMC(
+		"workbench.action.splitEditorRight",
+		"editor.action.revealDefinition",
+	)
+)
+
+var (
 	// Map from key to "when context" to command to run in that context
 	// TODO: logic to ensure unique keys (not guaranteed by compiler or runtime since using functions to generate keys)
 	kbDefinitions = map[Key]map[string]*KB{
@@ -197,10 +204,8 @@ var (
 		ctrl(pageup):     only("workbench.action.focusPreviousGroup"),
 		ctrl(shift("n")): only("workbench.action.files.newUntitledFile"),
 		ctrlX("d"):       only("editor.action.revealDefinition"),
-		ctrl(shift("d")): onlyMC(
-			"workbench.action.splitEditorRight",
-			"editor.action.revealDefinition",
-		),
+		ctrl(shift("d")): revealInNewEditor,
+		shift(delete):    revealInNewEditor,
 		ctrl(pagedown): panelSplit(
 			kb("workbench.action.terminal.focusNext"),
 			kb("workbench.action.focusNextGroup"),
