@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.58",
+  "version": "0.0.59",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -471,7 +471,7 @@
       },
       {
         "key": "ctrl+i",
-        "command": "editor.action.formatSelection"
+        "command": "editor.action.indentUsingSpaces"
       },
       {
         "key": "ctrl+j",
@@ -855,6 +855,14 @@
         }
       },
       {
+        "key": "ctrl+x i",
+        "command": "editor.action.organizeImports"
+      },
+      {
+        "key": "ctrl+x ctrl+i",
+        "command": "editor.action.organizeImports"
+      },
+      {
         "key": "ctrl+x k",
         "command": "groog.toggleQMK"
       },
@@ -1095,6 +1103,10 @@
         "key": "shift+pageup",
         "command": "editor.action.selectHighlights",
         "when": "editorFocus"
+      },
+      {
+        "key": "tab",
+        "command": "editor.action.indentUsingSpaces"
       },
       {
         "key": "up",
