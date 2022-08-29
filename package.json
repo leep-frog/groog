@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.59",
+  "version": "0.0.60",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -801,6 +801,14 @@
       {
         "key": "ctrl+x ctrl+d",
         "command": "editor.action.revealDefinition"
+      },
+      {
+        "key": "ctrl+x e",
+        "command": "workbench.extensions.action.checkForUpdates"
+      },
+      {
+        "key": "ctrl+x ctrl+e",
+        "command": "workbench.extensions.action.checkForUpdates"
       },
       {
         "key": "ctrl+x f",

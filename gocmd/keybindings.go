@@ -344,6 +344,7 @@ var (
 			"editorFocus": kb("editor.action.selectHighlights"),
 		},
 		ctrlX("k"): only("groog.toggleQMK"),
+		ctrlX("e"): only("workbench.extensions.action.checkForUpdates"),
 	}
 )
 
