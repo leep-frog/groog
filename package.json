@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.60",
+  "version": "0.0.61",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -471,7 +471,7 @@
       },
       {
         "key": "ctrl+i",
-        "command": "editor.action.indentUsingSpaces"
+        "command": "editor.action.indentLines"
       },
       {
         "key": "ctrl+j",
@@ -1111,10 +1111,6 @@
         "key": "shift+pageup",
         "command": "editor.action.selectHighlights",
         "when": "editorFocus"
-      },
-      {
-        "key": "tab",
-        "command": "editor.action.indentUsingSpaces"
       },
       {
         "key": "up",

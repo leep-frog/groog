@@ -280,8 +280,7 @@ var (
 
 		// Formatting
 		ctrlX(tab): only("groog.format"),
-		ctrl("i"):  only("editor.action.indentUsingSpaces"),
-		tab:        only("editor.action.indentUsingSpaces"),
+		ctrl("i"):  only("editor.action.indentLines"),
 		ctrlX("i"): only("editor.action.organizeImports"),
 
 		// Pasting
