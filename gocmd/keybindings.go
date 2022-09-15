@@ -50,6 +50,9 @@ var (
 	always               = wc("")
 	editorFocus          = wc("editorFocus")
 	editorTextFocus      = wc("editorTextFocus")
+	findWidgetVisible    = wc("findWidgetVisible")
+	findInputFocussed    = wc("findInputFocussed")
+	inputFocus           = wc("inputFocus")
 	groogFindMode        = wc("groog.findMode")
 	groogQMK             = wc("groog.qmk")
 	groogRecording       = wc("groog.recording")
@@ -76,6 +79,10 @@ var (
 		`ASDFGHJKL:"`,
 		`ZXCVBNM<>?`,
 	}, "")
+
+	// The context to use for keys that should have no binding in global find or
+	// input boxes, etc.
+	groogBehaviorContext = editorTextFocus.or(findInputFocussed)
 )
 
 const (
@@ -108,7 +115,7 @@ func kbDefsToBindings() []*Keybinding {
 				text = Key(shiftedCharacters[ci])
 			}
 			kbDefinitions[s] = map[string]*KB{
-				editorTextFocus.value: kbArgs("groog.type", map[string]interface{}{
+				groogBehaviorContext.value: kbArgs("groog.type", map[string]interface{}{
 					"text": text,
 				}),
 			}
@@ -446,7 +453,7 @@ func only(command string) map[string]*KB {
 }
 
 func textOnly(command string) map[string]*KB {
-	return onlyWhen(command, editorTextFocus)
+	return onlyWhen(command, groogBehaviorContext)
 }
 
 func onlyWhen(command string, context *WhenContext) map[string]*KB {

@@ -17,7 +17,7 @@ func node() *command.Node {
 			Name:        "groog",
 			DisplayName: "groog",
 			Description: "",
-			Version:     "0.0.62",
+			Version:     "0.0.63",
 			Publisher:   "groogle",
 			Browser:     "./dist/web/extension.js",
 			Engines: map[string]string{
