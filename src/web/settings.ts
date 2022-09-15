@@ -37,7 +37,8 @@ export class Settings implements Registerable {
       new GlobalSetting("workbench", "colorCustomizations", {
         "editorGutter.background": "#000000",
         "editorLineNumber.activeForeground": "#00ffff",
-        "editor.lineHighlightBackground": "#404040",
+        //"editor.lineHighlightBackground": "#404040",
+        "editor.lineHighlightBorder": "#707070",
       }),
       new GlobalSetting("workbench", "editor.limit.enabled", true),
       new GlobalSetting("workbench", "editor.limit.perEditorGroup", true),

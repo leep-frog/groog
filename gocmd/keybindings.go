@@ -9,7 +9,61 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+type WC string
+
+type WhenContext struct {
+	value       string
+	singleValue bool
+}
+
+func (wc *WhenContext) and(that *WhenContext) *WhenContext {
+	return &WhenContext{
+		fmt.Sprintf("%s && %s", wc.value, that.value),
+		false,
+	}
+}
+
+func (wc *WhenContext) or(that *WhenContext) *WhenContext {
+	return &WhenContext{
+		fmt.Sprintf("%s || %s", wc.value, that.value),
+		false,
+	}
+}
+
+func (wc *WhenContext) not() *WhenContext {
+	if !wc.singleValue {
+		panic("Can only negate a single when context")
+	}
+	return &WhenContext{
+		fmt.Sprintf("!%s", wc.value),
+		false,
+	}
+}
+
+func wc(s string) *WhenContext {
+	return &WhenContext{s, true}
+}
+
+var (
+	// When contexts
+	activePanel          = wc("activePanel")
+	always               = wc("")
+	editorFocus          = wc("editorFocus")
+	editorTextFocus      = wc("editorTextFocus")
+	groogFindMode        = wc("groog.findMode")
+	groogQMK             = wc("groog.qmk")
+	groogRecording       = wc("groog.recording")
+	inQuickOpen          = wc("inQuickOpen")
+	inSearchEditor       = wc("inSearchEditor")
+	panelFocus           = wc("panelFocus")
+	searchViewletFocus   = wc("searchViewletFocus")
+	sideBarFocus         = wc("sideBarFocus")
+	suggestWidgetVisible = wc("suggestWidgetVisible")
+	terminalFocus        = wc("terminalFocus")
+)
+
 const (
+	// Keys
 	up        = "up"
 	down      = "down"
 	left      = "left"
@@ -23,9 +77,6 @@ const (
 	insert    = "insert"
 	tab       = "tab"
 	enter     = "enter"
-	always    = ""
-
-	terminalFocus = "terminalFocus"
 )
 
 func kbDefsToBindings() []*Keybinding {
@@ -69,31 +120,31 @@ var (
 	kbDefinitions = map[Key]map[string]*KB{
 		// Find bindings
 		ctrl("f"): {
-			"groog.qmk && groog.recording":  kb("groog.record.findNext"),
-			"groog.qmk && !groog.recording": kb("groog.find"),
-			"!groog.qmk && inQuickOpen":     kb("workbench.action.quickPickManyToggle"),
-			"!groog.qmk && !inQuickOpen":    kb("groog.cursorRight"),
+			groogQMK.and(groogRecording).value:          kb("groog.record.findNext"),
+			groogQMK.and(groogRecording.not()).value:    kb("groog.find"),
+			groogQMK.not().and(inQuickOpen).value:       kb("workbench.action.quickPickManyToggle"),
+			groogQMK.not().and(inQuickOpen.not()).value: kb("groog.cursorRight"),
 		},
 		ctrl("s"): {
-			"!groog.qmk && !groog.recording": kb("groog.find"),
-			"groog.qmk":                      kb("groog.cursorRight"),
-			"!groog.qmk && groog.recording":  kb("groog.record.findNext"),
+			groogQMK.not().and(groogRecording.not()).value: kb("groog.find"),
+			groogQMK.value:                           kb("groog.cursorRight"),
+			groogQMK.not().and(groogRecording).value: kb("groog.record.findNext"),
 		},
 		ctrl("r"): only("groog.reverseFind"),
 		alt("s"):  only("editor.action.startFindReplaceAction"),
 		shift(enter): {
-			"groog.findMode": kb("editor.action.previousMatchFindAction"),
+			groogFindMode.value: kb("editor.action.previousMatchFindAction"),
 		},
 		enter: {
-			"groog.findMode": kb("editor.action.nextMatchFindAction"),
+			groogFindMode.value: kb("editor.action.nextMatchFindAction"),
 		},
 		alt("r"): only("toggleSearchEditorRegex"),
 		alt("c"): only("toggleSearchEditorCaseSensitive"),
 		alt("f4"): {
-			"groog.qmk && editorFocus":                                            kb("toggleFindWholeWord"),
-			"groog.qmk && inSearchEditor":                                         kb("toggleSearchEditorWholeWord"),
-			"groog.qmk && searchViewletFocus":                                     kb("toggleSearchWholeWord"),
-			"groog.qmk && !editorFocus && !inSearchEditor && !searchViewletFocus": kb("toggleSearchWholeWord"),
+			groogQMK.and(editorFocus).value:        kb("toggleFindWholeWord"),
+			groogQMK.and(inSearchEditor).value:     kb("toggleSearchEditorWholeWord"),
+			groogQMK.and(searchViewletFocus).value: kb("toggleSearchWholeWord"),
+			groogQMK.and(editorFocus.not()).and(inSearchEditor.not()).and(searchViewletFocus.not()).value: kb("toggleSearchWholeWord"),
 		},
 
 		// Emacs bindings
@@ -112,40 +163,40 @@ var (
 		ctrl("v"): only("groog.fall"),
 		pagedown:  only("groog.fall"),
 		ctrl("p"): {
-			always: kb("-workbench.action.quickOpen"),
-			"editorTextFocus && !suggestWidgetVisible": kb("groog.cursorUp"),
-			"editorTextFocus && suggestWidgetVisible":  kb("selectPrevSuggestion"),
-			"inQuickOpen":    kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
-			"groog.findMode": kb("editor.action.previousMatchFindAction"),
+			always.value: kb("-workbench.action.quickOpen"),
+			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorUp"),
+			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectPrevSuggestion"),
+			inQuickOpen.value:   kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
+			groogFindMode.value: kb("editor.action.previousMatchFindAction"),
 		},
 		up: {
-			"editorTextFocus && !suggestWidgetVisible": kb("groog.cursorUp"),
-			"editorTextFocus && suggestWidgetVisible":  kb("selectPrevSuggestion"),
-			"inQuickOpen": kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
+			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorUp"),
+			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectPrevSuggestion"),
+			inQuickOpen.value: kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
 		},
 		ctrl("n"): {
-			always: kb("-workbench.action.files.newUntitledFile"),
-			"editorTextFocus && !suggestWidgetVisible": kb("groog.cursorDown"),
-			"editorTextFocus && suggestWidgetVisible":  kb("selectNextSuggestion"),
-			"inQuickOpen":    kb("workbench.action.quickOpenNavigateNextInFilePicker"),
-			"groog.findMode": kb("editor.action.nextMatchFindAction"),
+			always.value: kb("-workbench.action.files.newUntitledFile"),
+			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorDown"),
+			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectNextSuggestion"),
+			inQuickOpen.value:   kb("workbench.action.quickOpenNavigateNextInFilePicker"),
+			groogFindMode.value: kb("editor.action.nextMatchFindAction"),
 		},
 		down: {
-			"editorTextFocus && !suggestWidgetVisible": kb("groog.cursorDown"),
-			"editorTextFocus && suggestWidgetVisible":  kb("selectNextSuggestion"),
-			"inQuickOpen": kb("workbench.action.quickOpenNavigateNextInFilePicker"),
+			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorDown"),
+			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectNextSuggestion"),
+			inQuickOpen.value: kb("workbench.action.quickOpenNavigateNextInFilePicker"),
 		},
 		left: {
-			"inQuickOpen":  kb("workbench.action.quickPickManyToggle"),
-			"!inQuickOpen": kb("groog.cursorLeft"),
+			inQuickOpen.value:       kb("workbench.action.quickPickManyToggle"),
+			inQuickOpen.not().value: kb("groog.cursorLeft"),
 		},
 		ctrl("b"): {
-			"inQuickOpen":  kb("workbench.action.quickPickManyToggle"),
-			"!inQuickOpen": kb("groog.cursorLeft"),
+			inQuickOpen.value:       kb("workbench.action.quickPickManyToggle"),
+			inQuickOpen.not().value: kb("groog.cursorLeft"),
 		},
 		right: {
-			"inQuickOpen":  kb("workbench.action.quickPickManyToggle"),
-			"!inQuickOpen": kb("groog.cursorRight"),
+			inQuickOpen.value:       kb("workbench.action.quickPickManyToggle"),
+			inQuickOpen.not().value: kb("groog.cursorRight"),
 		},
 		home:              only("groog.cursorHome"),
 		ctrl("a"):         keyboardSplit(kb("groog.cursorHome"), kb("editor.action.selectAll")),
@@ -156,10 +207,10 @@ var (
 		ctrl("e"):         only("groog.cursorEnd"),
 		alt("f"):          only("groog.cursorWordRight"),
 		ctrl("g"): {
-			"!sideBarFocus && !inQuickOpen && !suggestWidgetVisible": kb("groog.ctrlG"),
-			"sideBarFocus && !inQuickOpen && !suggestWidgetVisible":  kb("workbench.action.focusActiveEditorGroup"),
-			"inQuickOpen && !suggestWidgetVisible":                   kb("workbench.action.closeQuickOpen"),
-			"suggestWidgetVisible":                                   kb("hideSuggestWidget"),
+			sideBarFocus.not().and(inQuickOpen.not().and(suggestWidgetVisible.not())).value: kb("groog.ctrlG"),
+			sideBarFocus.and(inQuickOpen.not().and(suggestWidgetVisible.not())).value:       kb("workbench.action.focusActiveEditorGroup"),
+			inQuickOpen.and(suggestWidgetVisible.not()).value:                               kb("workbench.action.closeQuickOpen"),
+			suggestWidgetVisible.value: kb("hideSuggestWidget"),
 		},
 		ctrl("/"):      panelSplit(nil, kb("groog.undo")),
 		ctrl(right):    only("groog.cursorWordRight"),
@@ -174,8 +225,8 @@ var (
 		alt("h"):       only("groog.deleteWordLeft"),
 		alt(backspace): only("groog.deleteWordLeft"),
 		ctrl(backspace): {
-			"groog.qmk && panelFocus":   sendSequence("\u0008"),
-			"!groog.qmk || !panelFocus": kb("groog.deleteWordLeft"),
+			groogQMK.and(panelFocus).value:            sendSequence("\u0008"),
+			groogQMK.not().or(panelFocus.not()).value: kb("groog.deleteWordLeft"),
 		},
 		alt("d"):     only("groog.deleteWordRight"),
 		alt(delete):  only("groog.deleteWordRight"),
@@ -230,6 +281,7 @@ var (
 			kb("workbench.action.terminal.focusNext"),
 			kb("workbench.action.focusNextGroup"),
 		),
+		ctrlX("b"): only("editor.action.jumpToBracket"),
 
 		// Recording bindings
 		ctrlX("x"): only("groog.record.startRecording"),
@@ -242,12 +294,12 @@ var (
 			kb("groog.record.playNamedRecording"),
 		),
 		ctrl(shift("s")): {
-			"!groog.qmk && groog.recording":  kb("groog.record.find"),
-			"!groog.qmk && !groog.recording": kb("workbench.action.findInFiles"),
+			groogQMK.not().and(groogRecording).value:       kb("groog.record.find"),
+			groogQMK.not().and(groogRecording.not()).value: kb("workbench.action.findInFiles"),
 		},
 		ctrl(shift("f")): {
-			"groog.qmk && groog.recording":  kb("groog.record.find"),
-			"groog.qmk && !groog.recording": kb("workbench.action.findInFiles"),
+			groogQMK.and(groogRecording).value:       kb("groog.record.find"),
+			groogQMK.and(groogRecording.not()).value: kb("workbench.action.findInFiles"),
 		},
 
 		// Terminal and panel related bindings
@@ -340,7 +392,7 @@ var (
 		ctrlX("o"): only("workbench.action.openRecent"),
 		// ctrl+shift+l in qmk mode
 		shift(pageup): {
-			"editorFocus": kb("editor.action.selectHighlights"),
+			editorFocus.value: kb("editor.action.selectHighlights"),
 		},
 		ctrlX("k"): only("groog.toggleQMK"),
 		ctrlX("e"): only("workbench.extensions.action.checkForUpdates"),
@@ -353,16 +405,24 @@ type KB struct {
 }
 
 func only(command string) map[string]*KB {
-	return onlyArgs(command, nil)
+	return onlyWhen(command, always)
 }
 
-func onlyArgs(command string, args map[string]interface{}) map[string]*KB {
-	return onlyKB(kbArgs(command, args))
+func onlyWhen(command string, context *WhenContext) map[string]*KB {
+	return onlyArgsWhen(command, context, nil)
+}
+
+func onlyArgsWhen(command string, context *WhenContext, args map[string]interface{}) map[string]*KB {
+	return onlyKBWhen(kbArgs(command, args), context)
 }
 
 func onlyKB(kb *KB) map[string]*KB {
+	return onlyKBWhen(kb, always)
+}
+
+func onlyKBWhen(kb *KB, context *WhenContext) map[string]*KB {
 	return map[string]*KB{
-		always: kb,
+		context.value: kb,
 	}
 }
 
@@ -439,7 +499,8 @@ var (
 // contextualKB will run the trueKB if contextKey is set
 // and falseKB otherwise. An error is returned if `contextKey` is not
 // a single variable.
-func contextualKB(contextKey string, trueKB, falseKB *KB) map[string]*KB {
+func contextualKB(context *WhenContext, trueKB, falseKB *KB) map[string]*KB {
+	contextKey := context.value
 	if !simpleContextRegex.MatchString(contextKey) {
 		panic(fmt.Sprintf("context key (%q) does not match required regexp (%s)", contextKey, simpleContextRegex))
 	}
@@ -450,13 +511,13 @@ func contextualKB(contextKey string, trueKB, falseKB *KB) map[string]*KB {
 }
 
 func keyboardSplit(basicKB, qmkKB *KB) map[string]*KB {
-	return contextualKB("groog.qmk", qmkKB, basicKB)
+	return contextualKB(groogQMK, qmkKB, basicKB)
 }
 
 // panelSplit runs panelKB if the panel is avtice (i.e. visible) (so it may or
 // may not be focused), and otherKB otherwise.
 func panelSplit(panelKB, otherKB *KB) map[string]*KB {
-	return contextualKB("activePanel", panelKB, otherKB)
+	return contextualKB(activePanel, panelKB, otherKB)
 }
 
 // terminalSplit runs terminalKB if focus is on the terminal and otherKB otherwise.
@@ -467,7 +528,7 @@ func panelSplit(panelKB, otherKB *KB) map[string]*KB {
 }*/
 
 func recordingSplit(recordingKB, otherKB *KB) map[string]*KB {
-	return contextualKB("groog.recording", recordingKB, otherKB)
+	return contextualKB(groogRecording, recordingKB, otherKB)
 }
 
 func ctrlX(c string) Key {

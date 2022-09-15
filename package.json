@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.61",
+  "version": "0.0.62",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -777,6 +777,14 @@
             "workbench.action.openGlobalKeybindingsFile"
           ]
         }
+      },
+      {
+        "key": "ctrl+x b",
+        "command": "editor.action.jumpToBracket"
+      },
+      {
+        "key": "ctrl+x ctrl+b",
+        "command": "editor.action.jumpToBracket"
       },
       {
         "key": "ctrl+x c",
