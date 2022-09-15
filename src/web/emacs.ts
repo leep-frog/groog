@@ -98,9 +98,7 @@ export class Emacs {
       this.recorder.registerCommand(context, d, () => this.delCommand(d));
     }
 
-    context.subscriptions.push(vscode.commands.registerCommand('type', async (...args: any[]) => {
-      await this.type(...args);
-    }));
+    context.subscriptions.push(vscode.commands.registerCommand('groog.type', (arg: TypeArg) => this.type(arg)));
 
     this.recorder.registerCommand(context, 'jump', () => this.jump());
     this.recorder.registerCommand(context, 'fall', () => this.fall());
@@ -151,15 +149,11 @@ export class Emacs {
     }
   }
 
-  async type(...args: any[]) {
-    if (!vscode.window.activeTextEditor) {
-      vscode.window.showInformationMessage("NOT TEXT EDITOR?!?!");
-    }
-
-    let s = (args[0] as TypeArg).text;
+  async type(arg: TypeArg) {
+    let s = arg.text;
     await this.runHandlers(
       async (th: TypeHandler): Promise<boolean> => { return await th.textHandler(s); },
-      async () => { await vscode.commands.executeCommand("default:type", ...args); },
+      async () => { await vscode.commands.executeCommand("default:type", arg); },
     );
   }
 

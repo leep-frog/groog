@@ -60,6 +60,22 @@ var (
 	sideBarFocus         = wc("sideBarFocus")
 	suggestWidgetVisible = wc("suggestWidgetVisible")
 	terminalFocus        = wc("terminalFocus")
+
+	// Ignore typing when in find widget
+	characters = strings.Join([]string{
+		// Keyboard rows
+		"`1234567890-=",
+		`qwertyuiop[]\`,
+		`asdfghjkl;'`,
+		`zxcvbnm,./`,
+	}, "")
+	shiftedCharacters = strings.Join([]string{
+		// Keyboard rows
+		`~!@#$%^&*()_+`,
+		`QWERTYUIOP{}|`,
+		`ASDFGHJKL:"`,
+		`ZXCVBNM<>?`,
+	}, "")
 )
 
 const (
@@ -80,6 +96,26 @@ const (
 )
 
 func kbDefsToBindings() []*Keybinding {
+	// First add overrides when not in text editor
+	for ci, c := range characters {
+		k := Key(c)
+		for si, s := range []Key{k, shift(k)} {
+			if _, ok := kbDefinitions[s]; ok {
+				panic(fmt.Sprintf("kbDefinitions already contains key for %s", s))
+			}
+			text := s
+			if si != 0 {
+				text = Key(shiftedCharacters[ci])
+			}
+			kbDefinitions[s] = map[string]*KB{
+				editorTextFocus.value: kbArgs("groog.type", map[string]interface{}{
+					"text": text,
+				}),
+			}
+		}
+	}
+
+	// Then create all json values
 	keys := maps.Keys(kbDefinitions)
 	slices.Sort(keys)
 
@@ -159,9 +195,9 @@ var (
 			kb("workbench.action.nextPanelView"),
 			kb("groog.jump"),
 		),
-		pageup:    only("groog.jump"),
+		pageup:    textOnly("groog.jump"),
 		ctrl("v"): only("groog.fall"),
-		pagedown:  only("groog.fall"),
+		pagedown:  textOnly("groog.fall"),
 		ctrl("p"): {
 			always.value: kb("-workbench.action.quickOpen"),
 			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorUp"),
@@ -187,23 +223,23 @@ var (
 			inQuickOpen.value: kb("workbench.action.quickOpenNavigateNextInFilePicker"),
 		},
 		left: {
-			inQuickOpen.value:       kb("workbench.action.quickPickManyToggle"),
-			inQuickOpen.not().value: kb("groog.cursorLeft"),
+			inQuickOpen.value: kb("workbench.action.quickPickManyToggle"),
+			editorTextFocus.and(inQuickOpen.not()).value: kb("groog.cursorLeft"),
 		},
 		ctrl("b"): {
 			inQuickOpen.value:       kb("workbench.action.quickPickManyToggle"),
 			inQuickOpen.not().value: kb("groog.cursorLeft"),
 		},
 		right: {
-			inQuickOpen.value:       kb("workbench.action.quickPickManyToggle"),
-			inQuickOpen.not().value: kb("groog.cursorRight"),
+			inQuickOpen.value: kb("workbench.action.quickPickManyToggle"),
+			editorTextFocus.and(inQuickOpen.not()).value: kb("groog.cursorRight"),
 		},
-		home:              only("groog.cursorHome"),
+		home:              textOnly("groog.cursorHome"),
 		ctrl("a"):         keyboardSplit(kb("groog.cursorHome"), kb("editor.action.selectAll")),
 		ctrl(shift("a")):  only("editor.action.selectAll"),
 		ctrl(shift(home)): only("editor.action.selectAll"),
 		shift(home):       only("editor.action.selectAll"),
-		end:               only("groog.cursorEnd"),
+		end:               textOnly("groog.cursorEnd"),
 		ctrl("e"):         only("groog.cursorEnd"),
 		alt("f"):          only("groog.cursorWordRight"),
 		ctrl("g"): {
@@ -213,24 +249,25 @@ var (
 			suggestWidgetVisible.value: kb("hideSuggestWidget"),
 		},
 		ctrl("/"):      panelSplit(nil, kb("groog.undo")),
-		ctrl(right):    only("groog.cursorWordRight"),
+		ctrl(right):    textOnly("groog.cursorWordRight"),
 		alt("b"):       only("groog.cursorWordLeft"),
-		ctrl(left):     only("groog.cursorWordLeft"),
+		ctrl(left):     textOnly("groog.cursorWordLeft"),
 		ctrlX("p"):     only("groog.cursorTop"),
 		ctrlX("s"):     only("workbench.action.files.save"),
 		ctrl("h"):      only("groog.deleteLeft"),
-		backspace:      only("groog.deleteLeft"),
+		backspace:      textOnly("groog.deleteLeft"),
 		ctrl("d"):      only("groog.deleteRight"),
-		delete:         only("groog.deleteRight"),
+		delete:         textOnly("groog.deleteRight"),
 		alt("h"):       only("groog.deleteWordLeft"),
-		alt(backspace): only("groog.deleteWordLeft"),
+		alt(backspace): textOnly("groog.deleteWordLeft"),
 		ctrl(backspace): {
-			groogQMK.and(panelFocus).value:            sendSequence("\u0008"),
-			groogQMK.not().or(panelFocus.not()).value: kb("groog.deleteWordLeft"),
+			groogQMK.and(panelFocus).value: sendSequence("\u0008"),
+			editorTextFocus.value:          kb("groog.deleteWordLeft"),
+			// groogQMK.not().or(panelFocus.not()).value: kb("groog.deleteWordLeft"),
 		},
 		alt("d"):     only("groog.deleteWordRight"),
-		alt(delete):  only("groog.deleteWordRight"),
-		ctrl(delete): only("groog.deleteWordRight"),
+		alt(delete):  textOnly("groog.deleteWordRight"),
+		ctrl(delete): textOnly("groog.deleteWordRight"),
 		alt("x"):     only("workbench.action.showCommands"),
 		ctrlX("l"):   only("workbench.action.gotoLine"),
 		ctrl(";"):    only("editor.action.commentLine"),
@@ -406,6 +443,10 @@ type KB struct {
 
 func only(command string) map[string]*KB {
 	return onlyWhen(command, always)
+}
+
+func textOnly(command string) map[string]*KB {
+	return onlyWhen(command, editorTextFocus)
 }
 
 func onlyWhen(command string, context *WhenContext) map[string]*KB {

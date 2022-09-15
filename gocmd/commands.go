@@ -64,6 +64,7 @@ var (
 		cc("groog.reverseFind", "Groog reverse find"),
 		cc("groog.toggleMarkMode", "Emacs Toggle Mark Mode"),
 		cc("groog.toggleQMK", "Emacs Toggle QMK"),
+		cc("groog.type", "Groog Type"),
 		cc("groog.undo", "Undo"),
 		cc("groog.updateSettings", "Groog update settings"),
 		cc("groog.yank", "Emacs Yank"),

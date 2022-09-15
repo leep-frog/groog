@@ -75,6 +75,7 @@
     "onCommand:groog.reverseFind",
     "onCommand:groog.toggleMarkMode",
     "onCommand:groog.toggleQMK",
+    "onCommand:groog.type",
     "onCommand:groog.undo",
     "onCommand:groog.updateSettings",
     "onCommand:groog.yank"
@@ -214,6 +215,10 @@
         "title": "Emacs Toggle QMK"
       },
       {
+        "command": "groog.type",
+        "title": "Groog Type"
+      },
+      {
         "command": "groog.undo",
         "title": "Undo"
       },
@@ -228,12 +233,189 @@
     ],
     "keybindings": [
       {
+        "key": "'",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "'"
+        }
+      },
+      {
+        "key": ",",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": ","
+        }
+      },
+      {
+        "key": "-",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "-"
+        }
+      },
+      {
+        "key": ".",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "."
+        }
+      },
+      {
+        "key": "/",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "/"
+        }
+      },
+      {
+        "key": "0",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "0"
+        }
+      },
+      {
+        "key": "1",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "1"
+        }
+      },
+      {
+        "key": "2",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "2"
+        }
+      },
+      {
+        "key": "3",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "3"
+        }
+      },
+      {
+        "key": "4",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "4"
+        }
+      },
+      {
+        "key": "5",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "5"
+        }
+      },
+      {
+        "key": "6",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "6"
+        }
+      },
+      {
+        "key": "7",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "7"
+        }
+      },
+      {
+        "key": "8",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "8"
+        }
+      },
+      {
+        "key": "9",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "9"
+        }
+      },
+      {
+        "key": ";",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": ";"
+        }
+      },
+      {
+        "key": "=",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "="
+        }
+      },
+      {
+        "key": "[",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "["
+        }
+      },
+      {
+        "key": "\\",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "\\"
+        }
+      },
+      {
+        "key": "]",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "]"
+        }
+      },
+      {
+        "key": "`",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "`"
+        }
+      },
+      {
+        "key": "a",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "a"
+        }
+      },
+      {
         "key": "alt+b",
         "command": "groog.cursorWordLeft"
       },
       {
         "key": "alt+backspace",
-        "command": "groog.deleteWordLeft"
+        "command": "groog.deleteWordLeft",
+        "when": "editorTextFocus"
       },
       {
         "key": "alt+c",
@@ -245,7 +427,8 @@
       },
       {
         "key": "alt+delete",
-        "command": "groog.deleteWordRight"
+        "command": "groog.deleteWordRight",
+        "when": "editorTextFocus"
       },
       {
         "key": "alt+e",
@@ -336,8 +519,25 @@
         "command": "git.revertSelectedRanges"
       },
       {
+        "key": "b",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "b"
+        }
+      },
+      {
         "key": "backspace",
-        "command": "groog.deleteLeft"
+        "command": "groog.deleteLeft",
+        "when": "editorTextFocus"
+      },
+      {
+        "key": "c",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "c"
+        }
       },
       {
         "key": "ctrl+,",
@@ -403,7 +603,7 @@
       {
         "key": "ctrl+backspace",
         "command": "groog.deleteWordLeft",
-        "when": "!groog.qmk || !panelFocus"
+        "when": "editorTextFocus"
       },
       {
         "key": "ctrl+backspace",
@@ -419,7 +619,8 @@
       },
       {
         "key": "ctrl+delete",
-        "command": "groog.deleteWordRight"
+        "command": "groog.deleteWordRight",
+        "when": "editorTextFocus"
       },
       {
         "key": "ctrl+e",
@@ -499,7 +700,8 @@
       },
       {
         "key": "ctrl+left",
-        "command": "groog.cursorWordLeft"
+        "command": "groog.cursorWordLeft",
+        "when": "editorTextFocus"
       },
       {
         "key": "ctrl+n",
@@ -598,7 +800,8 @@
       },
       {
         "key": "ctrl+right",
-        "command": "groog.cursorWordRight"
+        "command": "groog.cursorWordRight",
+        "when": "editorTextFocus"
       },
       {
         "key": "ctrl+s",
@@ -1037,8 +1240,17 @@
         "command": "groog.paste"
       },
       {
+        "key": "d",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "d"
+        }
+      },
+      {
         "key": "delete",
-        "command": "groog.deleteRight"
+        "command": "groog.deleteRight",
+        "when": "editorTextFocus"
       },
       {
         "key": "down",
@@ -1056,8 +1268,17 @@
         "when": "inQuickOpen"
       },
       {
+        "key": "e",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "e"
+        }
+      },
+      {
         "key": "end",
-        "command": "groog.cursorEnd"
+        "command": "groog.cursorEnd",
+        "when": "editorTextFocus"
       },
       {
         "key": "enter",
@@ -1065,13 +1286,71 @@
         "when": "groog.findMode"
       },
       {
+        "key": "f",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "f"
+        }
+      },
+      {
+        "key": "g",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "g"
+        }
+      },
+      {
+        "key": "h",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "h"
+        }
+      },
+      {
         "key": "home",
-        "command": "groog.cursorHome"
+        "command": "groog.cursorHome",
+        "when": "editorTextFocus"
+      },
+      {
+        "key": "i",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "i"
+        }
+      },
+      {
+        "key": "j",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "j"
+        }
+      },
+      {
+        "key": "k",
+   
+     "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "k"
+        }
+      },
+      {
+        "key": "l",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "l"
+        }
       },
       {
         "key": "left",
         "command": "groog.cursorLeft",
-        "when": "!inQuickOpen"
+        "when": "editorTextFocus \u0026\u0026 !inQuickOpen"
       },
       {
         "key": "left",
@@ -1079,22 +1358,280 @@
         "when": "inQuickOpen"
       },
       {
+        "key": "m",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "m"
+        }
+      },
+      {
+        "key": "n",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "n"
+        }
+      },
+      {
+        "key": "o",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "o"
+        }
+      },
+      {
+        "key": "p",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "p"
+        }
+      },
+      {
         "key": "pagedown",
-        "command": "groog.fall"
+        "command": "groog.fall",
+        "when": "editorTextFocus"
       },
       {
         "key": "pageup",
-        "command": "groog.jump"
+        "command": "groog.jump",
+        "when": "editorTextFocus"
+      },
+      {
+        "key": "q",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "q"
+        }
+      },
+      {
+        "key": "r",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "r"
+        }
       },
       {
         "key": "right",
         "command": "groog.cursorRight",
-        "when": "!inQuickOpen"
+        "when": "editorTextFocus \u0026\u0026 !inQuickOpen"
       },
       {
         "key": "right",
         "command": "workbench.action.quickPickManyToggle",
         "when": "inQuickOpen"
+      },
+      {
+        "key": "s",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "s"
+        }
+      },
+      {
+        "key": "shift+'",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "\""
+        }
+      },
+      {
+        "key": "shift+,",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "\u003c"
+        }
+      },
+      {
+        "key": "shift+-",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "_"
+        }
+      },
+      {
+        "key": "shift+.",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "\u003e"
+        }
+      },
+      {
+        "key": "shift+/",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "?"
+        }
+      },
+      {
+        "key": "shift+0",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": ")"
+        }
+      },
+      {
+        "key": "shift+1",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "!"
+        }
+      },
+      {
+        "key": "shift+2",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "@"
+        }
+      },
+      {
+        "key": "shift+3",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "#"
+        }
+      },
+      {
+        "key": "shift+4",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "$"
+        }
+      },
+      {
+        "key": "shift+5",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "%"
+        }
+      },
+      {
+        "key": "shift+6",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "^"
+        }
+      },
+      {
+        "key": "shift+7",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "\u0026"
+        }
+      },
+      {
+        "key": "shift+8",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "*"
+        }
+      },
+      {
+        "key": "shift+9",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "("
+        }
+      },
+      {
+        "key": "shift+;",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": ":"
+        }
+      },
+      {
+        "key": "shift+=",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "+"
+        }
+      },
+      {
+        "key": "shift+[",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "{"
+        }
+      },
+      {
+        "key": "shift+\\",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "|"
+        }
+      },
+      {
+        "key": "shift+]",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "}"
+        }
+      },
+      {
+        "key": "shift+`",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "~"
+        }
+      },
+      {
+        "key": "shift+a",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "A"
+        }
+      },
+      {
+        "key": "shift+b",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "B"
+        }
+      },
+      {
+        "key": "shift+c",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "C"
+        }
+      },
+      {
+        "key": "shift+d",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "D"
+        }
       },
       {
         "key": "shift+delete",
@@ -1107,18 +1644,210 @@
         }
       },
       {
+        "key": "shift+e",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "E"
+        }
+      },
+      {
         "key": "shift+enter",
         "command": "editor.action.previousMatchFindAction",
         "when": "groog.findMode"
+      },
+      {
+        "key": "shift+f",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "F"
+        }
+      },
+      {
+        "key": "shift+g",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "G"
+        }
+      },
+      {
+        "key": "shift+h",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "H"
+        }
       },
       {
         "key": "shift+home",
         "command": "editor.action.selectAll"
       },
       {
+        "key": "shift+i",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "I"
+        }
+      },
+      {
+        "key": "shift+j",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "J"
+        }
+      },
+      {
+        "key": "shift+k",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "K"
+        }
+      },
+      {
+        "key": "shift+l",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "L"
+        }
+      },
+      {
+        "key": "shift+m",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "M"
+        }
+      },
+      {
+        "key": "shift+n",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "N"
+        }
+      },
+      {
+        "key": "shift+o",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "O"
+        }
+      },
+      {
+        "key": "shift+p",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "P"
+        }
+      },
+      {
         "key": "shift+pageup",
         "command": "editor.action.selectHighlights",
         "when": "editorFocus"
+      },
+      {
+        "key": "shift+q",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "Q"
+        }
+      },
+      {
+        "key": "shift+r",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "R"
+        }
+      },
+      {
+        "key": "shift+s",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "S"
+        }
+      },
+      {
+        "key": "shift+t",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "T"
+        }
+      },
+      {
+        "key": "shift+u",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "U"
+        }
+      },
+      {
+        "key": "shift+v",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "V"
+        }
+      },
+      {
+        "key": "shift+w",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "W"
+        }
+      },
+      {
+        "key": "shift+x",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "X"
+        }
+      },
+      {
+        "key": "shift+y",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "Y"
+        }
+      },
+      {
+        "key": "shift+z",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "Z"
+        }
+      },
+      {
+        "key": "t",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "t"
+        }
+      },
+      {
+        "key": "u",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "u"
+        }
       },
       {
         "key": "up",
@@ -1134,6 +1863,46 @@
         "key": "up",
         "command": "workbench.action.quickOpenNavigatePreviousInFilePicker",
         "when": "inQuickOpen"
+      },
+      {
+        "key": "v",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "v"
+        }
+      },
+      {
+        "key": "w",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "w"
+        }
+      },
+      {
+        "key": "x",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "x"
+        }
+      },
+      {
+        "key": "y",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "y"
+        }
+      },
+      {
+        "key": "z",
+        "command": "groog.type",
+        "when": "editorTextFocus",
+        "args": {
+          "text": "z"
+        }
       }
     ]
   }
