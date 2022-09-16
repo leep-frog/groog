@@ -180,6 +180,15 @@ var (
 		},
 		enter: {
 			groogFindMode.value: kb("editor.action.nextMatchFindAction"),
+			// This is needed so enter hits are recorded
+			// Don't do for tab since that can add a variable
+			// number of spaces. If seems necessary, we can add
+			// groog.tab later on, but given tab's dynamic nature
+			// depending on file type and context, that may become
+			// tricky rather quickly.
+			groogRecording.value: kbArgs("groog.type", map[string]interface{}{
+				"text": "\n",
+			}),
 		},
 		alt("r"): only("toggleSearchEditorRegex"),
 		alt("c"): only("toggleSearchEditorCaseSensitive"),

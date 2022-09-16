@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.63",
+  "version": "0.0.64",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -1286,8 +1286,17 @@
         "when": "groog.findMode"
       },
       {
-        "key": "f",
+        "key": "enter",
         "command": "groog.type",
+        "when": "groog.recording",
+        "args": {
+          "text": "\n"
+        }
+      },
+      {
+        "key": "f",
+        "command"
+: "groog.type",
         "when": "editorTextFocus || findInputFocussed",
         "args": {
           "text": "f"
@@ -1295,8 +1304,7 @@
       },
       {
         "key": "g",
- 
-       "command": "groog.type",
+        "command": "groog.type",
         "when": "editorTextFocus || findInputFocussed",
         "args": {
           "text": "g"
