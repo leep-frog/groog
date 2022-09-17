@@ -100,6 +100,7 @@ const (
 	insert    = "insert"
 	tab       = "tab"
 	enter     = "enter"
+	space     = "space"
 )
 
 func kbDefsToBindings() []*Keybinding {
@@ -188,6 +189,16 @@ var (
 			// tricky rather quickly.
 			groogRecording.value: kbArgs("groog.type", map[string]interface{}{
 				"text": "\n",
+			}),
+		},
+		space: {
+			groogBehaviorContext.value: kbArgs("groog.type", map[string]interface{}{
+				"text": " ",
+			}),
+		},
+		shift(space): {
+			groogBehaviorContext.value: kbArgs("groog.type", map[string]interface{}{
+				"text": " ",
 			}),
 		},
 		alt("r"): only("toggleSearchEditorRegex"),
