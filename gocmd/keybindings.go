@@ -459,7 +459,10 @@ var (
 			editorFocus.value: kb("editor.action.selectHighlights"),
 		},
 		ctrlX("k"): only("groog.toggleQMK"),
-		ctrlX("e"): only("workbench.extensions.action.checkForUpdates"),
+		ctrlX("e"): onlyMC(
+			"workbench.view.extensions",
+			"workbench.extensions.action.checkForUpdates",
+		),
 	}
 )
 

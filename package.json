@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.65",
+  "version": "0.0.66",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -1015,11 +1015,23 @@
       },
       {
         "key": "ctrl+x e",
-        "command": "workbench.extensions.action.checkForUpdates"
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            "workbench.view.extensions",
+            "workbench.extensions.action.checkForUpdates"
+          ]
+        }
       },
       {
         "key": "ctrl+x ctrl+e",
-        "command": "workbench.extensions.action.checkForUpdates"
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            "workbench.view.extensions",
+            "workbench.extensions.action.checkForUpdates"
+          ]
+        }
       },
       {
         "key": "ctrl+x f",
@@ -1295,8 +1307,7 @@
       },
       {
         "key": "f",
-        "command"
-: "groog.type",
+        "command": "groog.type",
         "when": "editorTextFocus || findInputFocussed",
         "args": {
           "text": "f"
