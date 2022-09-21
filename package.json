@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.66",
+  "version": "0.0.67",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -843,6 +843,16 @@
         "when": "groog.qmk \u0026\u0026 groog.recording"
       },
       {
+        "key": "ctrl+shift+h",
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            "workbench.action.splitEditorRight",
+            "workbench.action.quickOpen"
+          ]
+        }
+      },
+      {
         "key": "ctrl+shift+home",
         "command": "editor.action.selectAll"
       },
@@ -878,6 +888,16 @@
         "key": "ctrl+shift+tab",
         "command": "workbench.action.terminal.focusPrevious",
         "when": "activePanel"
+      },
+      {
+        "key": "ctrl+shift+v",
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            "workbench.action.splitEditorDown",
+            "workbench.action.quickOpen"
+          ]
+        }
       },
       {
         "key": "ctrl+t",

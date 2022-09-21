@@ -311,9 +311,17 @@ var (
 			"workbench.action.splitEditorDown",
 			"workbench.action.focusPreviousGroup",
 		),
+		ctrl(shift("v")): onlyMC(
+			"workbench.action.splitEditorDown",
+			"workbench.action.quickOpen",
+		),
 		ctrlX("h"): onlyMC(
 			"workbench.action.splitEditorRight",
 			"workbench.action.focusPreviousGroup",
+		),
+		ctrl(shift("h")): onlyMC(
+			"workbench.action.splitEditorRight",
+			"workbench.action.quickOpen",
 		),
 		ctrl(pagedown):   only("workbench.action.focusNextGroup"),
 		ctrl(pageup):     only("workbench.action.focusPreviousGroup"),
