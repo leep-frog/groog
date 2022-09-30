@@ -656,6 +656,11 @@
         "when": "groog.qmk \u0026\u0026 groog.recording"
       },
       {
+        "key": "ctrl+f",
+        "command": "workbench.action.terminal.focusFind",
+        "when": "groog.qmk \u0026\u0026 terminalFocus"
+      },
+      {
         "key": "ctrl+g",
         "command": "groog.ctrlG",
         "when": "!sideBarFocus \u0026\u0026 !inQuickOpen \u0026\u0026 !suggestWidgetVisible"
@@ -821,6 +826,11 @@
         "key": "ctrl+s",
         "command": "groog.record.findNext",
         "when": "!groog.qmk \u0026\u0026 groog.recording"
+      },
+      {
+        "key": "ctrl+s",
+        "command": "workbench.action.terminal.focusFind",
+        "when": "!groog.qmk \u0026\u0026 terminalFocus"
       },
       {
         "key": "ctrl+s",

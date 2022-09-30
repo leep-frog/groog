@@ -166,13 +166,15 @@ var (
 		ctrl("f"): {
 			groogQMK.and(groogRecording).value:          kb("groog.record.findNext"),
 			groogQMK.and(groogRecording.not()).value:    kb("groog.find"),
+			groogQMK.and(terminalFocus).value:           kb("workbench.action.terminal.focusFind"),
 			groogQMK.not().and(inQuickOpen).value:       kb("workbench.action.quickPickManyToggle"),
 			groogQMK.not().and(inQuickOpen.not()).value: kb("groog.cursorRight"),
 		},
 		ctrl("s"): {
+			groogQMK.not().and(terminalFocus).value:        kb("workbench.action.terminal.focusFind"),
 			groogQMK.not().and(groogRecording.not()).value: kb("groog.find"),
-			groogQMK.value:                           kb("groog.cursorRight"),
-			groogQMK.not().and(groogRecording).value: kb("groog.record.findNext"),
+			groogQMK.not().and(groogRecording).value:       kb("groog.record.findNext"),
+			groogQMK.value:                                 kb("groog.cursorRight"),
 		},
 		ctrl("r"): only("groog.reverseFind"),
 		alt("s"):  only("editor.action.startFindReplaceAction"),

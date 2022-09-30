@@ -33,6 +33,7 @@ const ctrlGCommands: string[] = [
   "closeParameterHints",
   "removeSecondaryCursors",
   "notifications.clearAll",
+  "workbench.action.terminal.hideFind",
 ];
 
 const deleteLeft = "deleteLeft";
