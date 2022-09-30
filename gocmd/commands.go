@@ -59,6 +59,7 @@ var (
 		cc("groog.record.findNext", "Find the next selection during recording"),
 		cc("groog.record.playNamedRecording", "Groog Play Named Recording..."),
 		cc("groog.record.playRecording", "Groog Play Recording"),
+		cc("groog.record.deleteRecording", "Groog Delete Recording"),
 		cc("groog.record.saveRecordingAs", "Groog Save Recording As..."),
 		cc("groog.record.startRecording", "Groog Start Recording"),
 		cc("groog.reverseFind", "Groog reverse find"),

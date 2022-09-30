@@ -365,6 +365,7 @@ var (
 			kb("groog.record.saveRecordingAs"),
 			kb("groog.record.playNamedRecording"),
 		),
+		alt(shift("d")): only("groog.record.deleteRecording"),
 		ctrl(shift("s")): {
 			groogQMK.not().and(groogRecording).value:       kb("groog.record.find"),
 			groogQMK.not().and(groogRecording.not()).value: kb("workbench.action.findInFiles"),

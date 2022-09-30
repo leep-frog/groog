@@ -33,6 +33,7 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
     recorder.registerCommand(context, "record.saveRecordingAs", () => recorder.saveRecordingAs());
     recorder.registerCommand(context, "record.playRecording", () => recorder.playback());
     recorder.registerCommand(context, "record.playNamedRecording", () => recorder.playbackNamedRecording());
+    recorder.registerCommand(context, "record.deleteRecording", () => recorder.deleteRecording());
     recorder.registerCommand(context, "record.find", () => recorder.find());
     recorder.registerCommand(context, "record.findNext", () => recorder.findNext());
   }
@@ -122,6 +123,27 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
       this.deactivate();
       vscode.window.showInformationMessage("Recording ended!");
     }
+  }
+
+  async deleteRecording() {
+    if (this.active) {
+      vscode.window.showInformationMessage("Still recording!");
+      return;
+    }
+    const result = await vscode.window.showQuickPick(
+      [...this.namedRecordings.keys()].sort((a: string, b: string): number => {
+        return a < b ? -1 : 1;
+      }),
+      {
+        placeHolder: "Recording name",
+        title: "Choose Recording to play",
+      },
+    );
+    if (!result) {
+      vscode.window.showErrorMessage("No recording chosen");
+      return;
+    }
+    this.namedRecordings.delete(result);
   }
 
   async playbackNamedRecording() {
