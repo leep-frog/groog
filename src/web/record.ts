@@ -13,10 +13,9 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
   active: boolean; // aka "recording"
   private recordBook: Record[];
   private lastFind: FindNextRecord | undefined;
-  // TODO: Would we ever want these in persistent memory?
-  //       Don't think so unless we made package public.
-  //       Otherwise, any recording I'd want public I could
-  //       just create an equivalent vscode function.
+  // Note: we would never need these in persistent memory
+  // because any recording I'd want public I could
+  // just create an equivalent vscode function.
   private namedRecordings: Map<string, Record[]>;
 
   constructor(cm: ColorMode) {
@@ -59,7 +58,6 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
     this.baseCommand = true;
   }
 
-  // TODO: findPrev
   async findNext() {
     if (!this.lastFind) {
       vscode.window.showErrorMessage("No find text has been set yet");
