@@ -34,6 +34,7 @@ const ctrlGCommands: string[] = [
   "removeSecondaryCursors",
   "notifications.clearAll",
   "workbench.action.terminal.hideFind",
+  "closeReferenceSearch",
 ];
 
 const deleteLeft = "deleteLeft";
