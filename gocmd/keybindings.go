@@ -63,6 +63,7 @@ var (
 	sideBarFocus         = wc("sideBarFocus")
 	suggestWidgetVisible = wc("suggestWidgetVisible")
 	terminalFocus        = wc("terminalFocus")
+	searchInputBoxFocus  = wc("searchInputBoxFocus")
 
 	// Ignore typing when in find widget
 	characters = strings.Join([]string{
@@ -237,19 +238,23 @@ var (
 		up: {
 			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorUp"),
 			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectPrevSuggestion"),
-			inQuickOpen.value: kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
+			inQuickOpen.value:   kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
+			groogFindMode.value: kb("editor.action.previousMatchFindAction"),
 		},
 		ctrl("n"): {
 			always.value: kb("-workbench.action.files.newUntitledFile"),
 			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorDown"),
 			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectNextSuggestion"),
-			inQuickOpen.value:   kb("workbench.action.quickOpenNavigateNextInFilePicker"),
-			groogFindMode.value: kb("editor.action.nextMatchFindAction"),
+			inQuickOpen.value:         kb("workbench.action.quickOpenNavigateNextInFilePicker"),
+			groogFindMode.value:       kb("editor.action.nextMatchFindAction"),
+			searchInputBoxFocus.value: kb("search.action.focusSearchList"),
 		},
 		down: {
 			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorDown"),
 			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectNextSuggestion"),
-			inQuickOpen.value: kb("workbench.action.quickOpenNavigateNextInFilePicker"),
+			inQuickOpen.value:         kb("workbench.action.quickOpenNavigateNextInFilePicker"),
+			groogFindMode.value:       kb("editor.action.nextMatchFindAction"),
+			searchInputBoxFocus.value: kb("search.action.focusSearchList"),
 		},
 		left: {
 			inQuickOpen.value: kb("workbench.action.quickPickManyToggle"),
@@ -277,16 +282,28 @@ var (
 			inQuickOpen.and(suggestWidgetVisible.not()).value:                               kb("workbench.action.closeQuickOpen"),
 			suggestWidgetVisible.value: kb("hideSuggestWidget"),
 		},
-		ctrl("/"):      panelSplit(nil, kb("groog.undo")),
-		ctrl(right):    textOnly("groog.cursorWordRight"),
-		alt("b"):       only("groog.cursorWordLeft"),
-		ctrl(left):     textOnly("groog.cursorWordLeft"),
-		ctrlX("p"):     only("groog.cursorTop"),
-		ctrlX("s"):     only("workbench.action.files.save"),
-		ctrl("h"):      only("groog.deleteLeft"),
-		backspace:      textOnly("groog.deleteLeft"),
-		ctrl("d"):      only("groog.deleteRight"),
-		delete:         textOnly("groog.deleteRight"),
+		ctrl("/"):   panelSplit(nil, kb("groog.undo")),
+		ctrl(right): textOnly("groog.cursorWordRight"),
+		alt("b"):    only("groog.cursorWordLeft"),
+		ctrl(left):  textOnly("groog.cursorWordLeft"),
+		ctrlX("p"):  only("groog.cursorTop"),
+		ctrlX("s"):  only("workbench.action.files.save"),
+		ctrl("h"): {
+			searchViewletFocus.not().value: kb("groog.deleteLeft"),
+			searchViewletFocus.value:       kb("search.action.remove"),
+		},
+		backspace: {
+			groogBehaviorContext.value: kb("groog.deleteLeft"),
+			searchViewletFocus.value:   kb("search.action.remove"),
+		},
+		ctrl("d"): {
+			searchViewletFocus.not().value: kb("groog.deleteRight"),
+			searchViewletFocus.value:       kb("search.action.remove"),
+		},
+		delete: {
+			groogBehaviorContext.value: kb("groog.deleteRight"),
+			searchViewletFocus.value:   kb("search.action.remove"),
+		},
 		alt("h"):       only("groog.deleteWordLeft"),
 		alt(backspace): textOnly("groog.deleteWordLeft"),
 		ctrl(backspace): {

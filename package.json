@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.68",
+  "version": "0.0.69",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -541,6 +541,11 @@
         "when": "editorTextFocus || findInputFocussed"
       },
       {
+        "key": "backspace",
+        "command": "search.action.remove",
+        "when": "searchViewletFocus"
+      },
+      {
         "key": "c",
         "command": "groog.type",
         "when": "editorTextFocus || findInputFocussed",
@@ -624,7 +629,13 @@
       },
       {
         "key": "ctrl+d",
-        "command": "groog.deleteRight"
+        "command": "groog.deleteRight",
+        "when": "!searchViewletFocus"
+      },
+      {
+        "key": "ctrl+d",
+        "command": "search.action.remove",
+        "when": "searchViewletFocus"
       },
       {
         "key": "ctrl+delete",
@@ -682,7 +693,13 @@
       },
       {
         "key": "ctrl+h",
-        "command": "groog.deleteLeft"
+        "command": "groog.deleteLeft",
+        "when": "!searchViewletFocus"
+      },
+      {
+        "key": "ctrl+h",
+        "command": "search.action.remove",
+        "when": "searchViewletFocus"
       },
       {
         "key": "ctrl+i",
@@ -740,6 +757,11 @@
         "key": "ctrl+n",
         "command": "workbench.action.quickOpenNavigateNextInFilePicker",
         "when": "inQuickOpen"
+      },
+      {
+        "key": "ctrl+n",
+        "command": "search.action.focusSearchList",
+        "when": "searchInputBoxFocus"
       },
       {
         "key": "ctrl+o",
@@ -1304,6 +1326,11 @@
         "when": "editorTextFocus || findInputFocussed"
       },
       {
+        "key": "delete",
+        "command": "search.action.remove",
+        "when": "searchViewletFocus"
+      },
+      {
         "key": "down",
         "command": "groog.cursorDown",
         "when": "editorTextFocus \u0026\u0026 !suggestWidgetVisible"
@@ -1315,8 +1342,18 @@
       },
       {
         "key": "down",
+        "command": "editor.action.nextMatchFindAction",
+        "when": "groog.findMode"
+      },
+      {
+        "key": "down",
         "command": "workbench.action.quickOpenNavigateNextInFilePicker",
         "when": "inQuickOpen"
+      },
+      {
+        "key": "down",
+        "command": "search.action.focusSearchList",
+        "when": "searchInputBoxFocus"
       },
       {
         "key": "e",
@@ -1932,6 +1969,11 @@
         "key": "up",
         "command": "selectPrevSuggestion",
         "when": "editorTextFocus \u0026\u0026 suggestWidgetVisible"
+      },
+      {
+        "key": "up",
+        "command": "editor.action.previousMatchFindAction",
+        "when": "groog.findMode"
       },
       {
         "key": "up",
