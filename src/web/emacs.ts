@@ -219,9 +219,14 @@ export class Emacs {
     let endPos = editor.document.lineAt(startPos.line).range.end;
     let range = new vscode.Range(startPos, endPos);
     let text = editor.document.getText(range);
-    if (text.trim().length === 0) {
-      range = new vscode.Range(startPos, new vscode.Position(startPos.line + 1, 0));
+    // Do nothing here so that "Undo" command doesn't undo nothing.
+    if (text.length === 0) {
+      return;
     }
+    // No longer pull next line because we would just do that with ctrl+d
+    /*if (text.trim().length === 0) {
+      range = new vscode.Range(startPos, new vscode.Position(startPos.line + 1, 0));
+    }*/
     for (var th of this.typeHandlers) {
       if (th.active || await th.alwaysOnKill()) {
         th.onKill(text);
