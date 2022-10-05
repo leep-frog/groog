@@ -234,6 +234,10 @@ var (
 			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectPrevSuggestion"),
 			inQuickOpen.value:   kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
 			groogFindMode.value: kb("editor.action.previousMatchFindAction"),
+			searchViewletFocus.value: mc(
+				"search.action.focusPreviousSearchResult",
+				"search.action.focusSearchList",
+			),
 		},
 		up: {
 			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorUp"),
@@ -248,6 +252,10 @@ var (
 			inQuickOpen.value:         kb("workbench.action.quickOpenNavigateNextInFilePicker"),
 			groogFindMode.value:       kb("editor.action.nextMatchFindAction"),
 			searchInputBoxFocus.value: kb("search.action.focusSearchList"),
+			searchViewletFocus.value: mc(
+				"search.action.focusNextSearchResult",
+				"search.action.focusSearchList",
+			),
 		},
 		down: {
 			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorDown"),
@@ -293,16 +301,16 @@ var (
 			searchViewletFocus.value:       kb("search.action.remove"),
 		},
 		backspace: {
-			groogBehaviorContext.value: kb("groog.deleteLeft"),
-			searchViewletFocus.value:   kb("search.action.remove"),
+			groogBehaviorContext.value:                              kb("groog.deleteLeft"),
+			searchInputBoxFocus.not().and(searchViewletFocus).value: kb("search.action.remove"),
 		},
 		ctrl("d"): {
 			searchViewletFocus.not().value: kb("groog.deleteRight"),
 			searchViewletFocus.value:       kb("search.action.remove"),
 		},
 		delete: {
-			groogBehaviorContext.value: kb("groog.deleteRight"),
-			searchViewletFocus.value:   kb("search.action.remove"),
+			groogBehaviorContext.value:                              kb("groog.deleteRight"),
+			searchInputBoxFocus.not().and(searchViewletFocus).value: kb("search.action.remove"),
 		},
 		alt("h"):       only("groog.deleteWordLeft"),
 		alt(backspace): textOnly("groog.deleteWordLeft"),

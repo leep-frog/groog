@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.70",
+  "version": "0.0.71",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -537,13 +537,13 @@
       },
       {
         "key": "backspace",
-        "command": "groog.deleteLeft",
-        "when": "editorTextFocus || findInputFocussed"
+        "command": "search.action.remove",
+        "when": "!searchInputBoxFocus \u0026\u0026 searchViewletFocus"
       },
       {
         "key": "backspace",
-        "command": "search.action.remove",
-        "when": "searchViewletFocus"
+        "command": "groog.deleteLeft",
+        "when": "editorTextFocus || findInputFocussed"
       },
       {
         "key": "c",
@@ -764,6 +764,17 @@
         "when": "searchInputBoxFocus"
       },
       {
+        "key": "ctrl+n",
+        "command": "groog.multiCommand.execute",
+        "when": "searchViewletFocus",
+        "args": {
+          "sequence": [
+            "search.action.focusNextSearchResult",
+            "search.action.focusSearchList"
+          ]
+        }
+      },
+      {
         "key": "ctrl+o",
         "command": "workbench.action.focusNextGroup",
         "when": "!activePanel"
@@ -796,6 +807,17 @@
         "key": "ctrl+p",
         "command": "workbench.action.quickOpenNavigatePreviousInFilePicker",
         "when": "inQuickOpen"
+      },
+      {
+        "key": "ctrl+p",
+        "command": "groog.multiCommand.execute",
+        "when": "searchViewletFocus",
+        "args": {
+          "sequence": [
+            "search.action.focusPreviousSearchResult",
+            "search.action.focusSearchList"
+          ]
+        }
       },
       {
         "key": "ctrl+pagedown",
@@ -1322,13 +1344,13 @@
       },
       {
         "key": "delete",
-        "command": "groog.deleteRight",
-        "when": "editorTextFocus || findInputFocussed"
+        "command": "search.action.remove",
+        "when": "!searchInputBoxFocus \u0026\u0026 searchViewletFocus"
       },
       {
         "key": "delete",
-        "command": "search.action.remove",
-        "when": "searchViewletFocus"
+        "command": "groog.deleteRight",
+        "when": "editorTextFocus || findInputFocussed"
       },
       {
         "key": "down",
