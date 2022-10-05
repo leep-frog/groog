@@ -424,11 +424,19 @@ var (
 		ctrl(shift("t")): only("workbench.action.terminal.newInActiveWorkspace"),
 		alt("t"):         only("workbench.action.terminal.newInActiveWorkspace"),
 		alt(shift("t")):  only("workbench.action.terminal.newWithProfile"),
-		// Ctrl+x ctrl+c isn't send to terminal directly, so we need to
+		// Ctrl+x ctrl+c isn't sent to terminal directly, so we need to
 		// explicitly send the sequence.
 		// See below link for unicode characters:
 		// https://en.wikipedia.org/wiki/List_of_Unicode_characters
 		ctrlX("c"): panelSplit(sendSequence("\u0018\u0003"), nil),
+		// To determine this, I did the following
+		// - ran `sed -n l` (as recommended in (1))
+		// - pressed "ctrl+/"
+		// - pressed enter to see following output: "\037$"
+		// - Converted 37 octal to hexidecimal (looked up in (2)) to get 001f
+		// (1): https://unix.stackexchange.com/questions/76566/where-do-i-find-a-list-of-terminal-key-codes-to-remap-shortcuts-in-bash
+		// (2): https://en.wikipedia.org/wiki/List_of_Unicode_characters
+		ctrl("z"): panelSplit(sendSequence("\u001F"), nil),
 
 		// Formatting
 		ctrlX(tab): only("groog.format"),

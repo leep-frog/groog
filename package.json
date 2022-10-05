@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.71",
+  "version": "0.0.72",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -1333,6 +1333,14 @@
       {
         "key": "ctrl+y",
         "command": "groog.paste"
+      },
+      {
+        "key": "ctrl+z",
+        "command": "workbench.action.terminal.sendSequence",
+        "when": "activePanel",
+        "args": {
+          "text": "\u001f"
+        }
       },
       {
         "key": "d",
