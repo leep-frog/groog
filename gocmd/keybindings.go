@@ -353,6 +353,10 @@ var (
 		ctrl(pagedown):   only("workbench.action.focusNextGroup"),
 		ctrl(pageup):     only("workbench.action.focusPreviousGroup"),
 		ctrl(shift("n")): only("workbench.action.files.newUntitledFile"),
+		// In our QMK keyboard, pressing "shift+n" in the LR_CTRL layer
+		// actually sends "shift+down" (no ctrl modifier).
+		// So when trying to press "ctrl+shift+n", do the same thing (new file).
+		shift(down):      onlyKBWhen(kb("workbench.action.files.newUntitledFile"), groogQMK),
 		ctrlX("d"):       only("editor.action.revealDefinition"),
 		ctrl(shift("d")): revealInNewEditor,
 		shift(delete):    revealInNewEditor,

@@ -1769,6 +1769,11 @@
         }
       },
       {
+        "key": "shift+down",
+        "command": "workbench.action.files.newUntitledFile",
+        "when": "groog.qmk"
+      },
+      {
         "key": "shift+e",
         "command": "groog.type",
         "when": "editorTextFocus || findInputFocussed",
