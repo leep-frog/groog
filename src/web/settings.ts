@@ -21,6 +21,7 @@ export class Settings implements Registerable {
       new GlobalSetting("editor", "codeActionsOnSave", {
         "source.organizeImports": true,
       }),
+      new GlobalSetting("window", "newWindowDimensions", "maximized"),
       new GlobalSetting("editor", "detectIndentation", false),
       new GlobalSetting("editor", "insertSpaces", true),
       new GlobalSetting("editor", "rulers", [80, 200]),
