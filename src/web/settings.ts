@@ -49,6 +49,7 @@ export class Settings implements Registerable {
       new GlobalSetting("terminal", "integrated.automationProfile.windows", {
         "path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
       }),
+      new WordSeparatorSetting("_"),
       new LanguageSetting("typescript", "editor", "defaultFormatter", "vscode.typescript-language-features"),
       // MinGW terminal
       // https://dev.to/yumetodo/make-the-integrated-shell-of-visual-studio-code-to-bash-of-msys2-5eao
@@ -111,6 +112,34 @@ class GlobalSetting implements Setting {
     vscode.workspace.getConfiguration(this.configSection).update(this.subsection, this.value, true);
   }
 }
+
+// WordSeparatorSetting *adds* the provided characters to the list of editor word-separators.
+class WordSeparatorSetting implements Setting {
+
+  private addCharacters: string;
+  private configSection : string = "editor";
+  private subsection : string = "wordSeparators";
+
+  constructor(addCharacters : string) {
+    this.addCharacters = addCharacters;
+  }
+
+  update(): void {
+    const configuration = vscode.workspace.getConfiguration(this.configSection);
+    let existing : string | undefined = configuration.get(this.subsection);
+    if (!existing) {
+      vscode.window.showErrorMessage("Failed to fetch setting %s");
+      return;
+    }
+    for (const char of this.addCharacters) {
+      if (!existing.includes(char)) {
+        existing += char;
+      }
+    }
+    configuration.update(this.subsection, existing, true);
+  }
+}
+
 
 class LanguageSetting implements Setting {
 
