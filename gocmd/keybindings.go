@@ -511,6 +511,8 @@ var (
 			"workbench.view.extensions",
 			"workbench.extensions.action.checkForUpdates",
 		),
+		// Prevent focus mode from ever being activated.
+		ctrl("m"): only("-editor.action.toggleTabFocusMode"),
 	}
 )
 

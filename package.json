@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.74",
+  "version": "0.0.75",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -733,6 +733,10 @@
         "key": "ctrl+left",
         "command": "groog.cursorWordLeft",
         "when": "editorTextFocus || findInputFocussed"
+      },
+      {
+        "key": "ctrl+m",
+        "command": "-editor.action.toggleTabFocusMode"
       },
       {
         "key": "ctrl+n",
