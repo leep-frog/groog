@@ -3,6 +3,9 @@ import { ColorizedHandler, ColorMode, Mode } from './color_mode';
 import { TypeHandler } from './interfaces';
 import { Recorder } from './record';
 
+// TODO: Implement a FindReplaceHandler?  alt+s/f -> type search term -> enter -> type replace term -> enter
+//       Would need to ensure regexp grouping still works (just use typescript regex on selection text (only if regexp enabled?)).
+//       Don't worry about implementing this until find a strong need for it.
 export class FindHandler extends ColorizedHandler implements TypeHandler {
   active: boolean;
   findText: string;
