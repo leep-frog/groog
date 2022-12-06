@@ -60,7 +60,7 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
 
   async findNext() {
     if (!this.lastFind) {
-      vscode.window.showErrorMessage("No find text has been set yet");
+      this.find();
       return;
     }
     await this.lastFind.playback();
@@ -68,7 +68,6 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
   }
 
   async find() {
-    vscode.window.showInformationMessage("inputting");
     const searchQuery = await vscode.window.showInputBox({
       placeHolder: "Search query",
       prompt: "Search text",
