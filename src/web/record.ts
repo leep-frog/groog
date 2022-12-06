@@ -72,9 +72,8 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
     const searchQuery = await vscode.window.showInputBox({
       placeHolder: "Search query",
       prompt: "Search text",
-      //value: selectedText
+      // value: selectedText
     });
-    vscode.window.showInformationMessage("got: " + searchQuery);
     if (searchQuery) {
       this.lastFind = new FindNextRecord(searchQuery);
       await this.findNext();
@@ -83,7 +82,7 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
 
   async startRecording() {
     if (this.active) {
-      vscode.window.showInformationMessage("Already recording!");
+      vscode.window.showErrorMessage("Already recording!");
     } else {
       this.activate();
       this.recordBook = [];
@@ -93,7 +92,7 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
 
   async saveRecordingAs() {
     if (!this.active) {
-      vscode.window.showInformationMessage("Not recording!");
+      vscode.window.showErrorMessage("Not recording!");
       return;
     }
 
@@ -168,8 +167,14 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
       return;
     }
     vscode.window.showInformationMessage(`Playing back "${result}"`);
-    for (var r of nr) {
-      await r.playback();
+    this.playRecords(nr);
+  }
+
+  async playRecords(records : Record[]) {
+    for (var r of records) {
+      if (!await r.playback()) {
+        break;
+      };
     }
   }
 
@@ -179,11 +184,7 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
       return;
     }
     vscode.window.showInformationMessage("Playing recording!");
-    for (var r of this.recordBook) {
-      await r.playback();
-    }
-    // TODO: not sure if this is identical
-    // this.recordBook.map(async (r) => await r.playback());
+    this.playRecords(this.recordBook);
   }
 
   async colorActivate() {
@@ -228,7 +229,7 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
 
 interface Record {
   name(): string;
-  playback(): Promise<void>;
+  playback(): Promise<boolean>;
 }
 
 class TypeRecord implements Record {
@@ -238,8 +239,9 @@ class TypeRecord implements Record {
     this.text = text;
   }
 
-  async playback(): Promise<void> {
+  async playback(): Promise<boolean> {
     await vscode.commands.executeCommand("type", { "text": this.text });
+    return true;
   }
 
   name(): string {
@@ -256,8 +258,9 @@ class CommandRecord implements Record {
     this.args = args;
   }
 
-  async playback(): Promise<void> {
+  async playback(): Promise<boolean> {
     await vscode.commands.executeCommand(this.command, ...this.args);
+    return true;
   }
 
   name(): string {
@@ -272,10 +275,24 @@ class FindNextRecord implements Record {
     this.findText = findText;
   }
 
-  async playback(): Promise<void> {
+  async playback(): Promise<boolean> {
     await vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": this.findText });
     await vscode.commands.executeCommand("editor.action.nextMatchFindAction");
+    // Can also do the following command instead of focusActiveEditorGroup:
+    // await vscode.commands.executeCommand("closeFindWidget");
     await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
+
+    let editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showErrorMessage("Cannot get active text editor for find playback");
+      return false;
+    }
+
+    if (editor.selection.isEmpty) {
+      vscode.window.showErrorMessage("No match found in find playback");
+      return false;
+    }
+    return true;
   }
 
   name(): string {
