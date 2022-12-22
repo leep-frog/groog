@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
-import { ColorizedHandler, ColorMode, Mode } from './color_mode';
-import { CursorMove, DeleteCommand, TypeHandler } from './interfaces';
+import { ColorMode, ModeColor } from './color_mode';
+import { TypeHandler } from './handler';
+import { CursorMove, DeleteCommand } from './interfaces';
 
-export class Recorder extends ColorizedHandler implements TypeHandler {
+export class Recorder extends TypeHandler {
   // baseCommand ensures we don't infinite loop a command. For example,
   // if groog.CommandOne calls groog.CommandTwo, then we would record
   // both of them. But in the replay we would call groog.CommandOne (which would
@@ -10,7 +11,6 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
   // groog.CommandTwo would be executed twice in the replay even though it only
   // happened once during recording.
   private baseCommand: boolean;
-  active: boolean; // aka "recording"
   private recordBook: Record[];
   private lastFind: FindNextRecord | undefined;
   // Note: we would never need these in persistent memory
@@ -18,10 +18,11 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
   // just create an equivalent vscode function.
   private namedRecordings: Map<string, Record[]>;
 
+  whenContext: string = "groog.recording";
+
   constructor(cm: ColorMode) {
-    super(cm);
+    super(cm, ModeColor.record);
     this.baseCommand = true;
-    this.active = false;
     this.recordBook = [];
     this.namedRecordings = new Map<string, Record[]>();
   }
@@ -48,7 +49,7 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
   }
 
   async execute(command: string, args: any[], callback: (...args: any[]) => any) {
-    if (command.includes("groog.record") || !this.active || !this.baseCommand) {
+    if (command.includes("groog.record") || !this.isActive() || !this.baseCommand) {
       await callback(...args);
       return;
     }
@@ -80,7 +81,7 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
   }
 
   async startRecording() {
-    if (this.active) {
+    if (this.isActive()) {
       vscode.window.showErrorMessage("Already recording!");
     } else {
       this.activate();
@@ -90,7 +91,7 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
   }
 
   async saveRecordingAs() {
-    if (!this.active) {
+    if (!this.isActive()) {
       vscode.window.showErrorMessage("Not recording!");
       return;
     }
@@ -113,7 +114,7 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
   }
 
   async endRecording() {
-    if (!this.active) {
+    if (!this.isActive()) {
       vscode.window.showInformationMessage("Not recording!");
     } else {
       this.deactivate();
@@ -122,7 +123,7 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
   }
 
   async deleteRecording() {
-    if (this.active) {
+    if (this.isActive()) {
       vscode.window.showInformationMessage("Still recording!");
       return;
     }
@@ -143,7 +144,7 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
   }
 
   async playbackNamedRecording() {
-    if (this.active) {
+    if (this.isActive()) {
       vscode.window.showInformationMessage("Still recording!");
       return;
     }
@@ -178,7 +179,7 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
   }
 
   async playback() {
-    if (this.active) {
+    if (this.isActive()) {
       vscode.window.showInformationMessage("Still recording!");
       return;
     }
@@ -186,20 +187,11 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
     this.playRecords(this.recordBook);
   }
 
-  async colorActivate() {
-    this.active = true;
-    await vscode.commands.executeCommand('setContext', 'groog.recording', true);
-  }
+  async handleActivation() {}
 
-  async colorDeactivate() {
-    this.active = false;
+  async handleDeactivation() {
     this.lastFind = undefined;
-    await vscode.commands.executeCommand('setContext', 'groog.recording', false);
     await vscode.commands.executeCommand("closeFindWidget");
-  }
-
-  mode(): Mode {
-    return Mode.RECORD;
   }
 
   addRecord(r: Record) {
@@ -214,10 +206,10 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
   // All these functions are associated with a "groog.*" command so these are
   // already added to the record book via the "type" command handling
   async onKill(s: string | undefined) { }
-  async alwaysOnKill(): Promise<boolean> { return false; }
+  alwaysOnKill: boolean = false;
   async ctrlG() { }
   async onYank(s: string | undefined) { }
-  async alwaysOnYank(): Promise<boolean> { return false; }
+  alwaysOnYank: boolean = false;
   async delHandler(s: DeleteCommand): Promise<boolean> {
     return true;
   }

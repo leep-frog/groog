@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.78",
+  "version": "0.0.79",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -659,17 +659,17 @@
       {
         "key": "ctrl+f",
         "command": "groog.find",
-        "when": "groog.qmk \u0026\u0026 !terminal.visible \u0026\u0026 !groog.recording"
+        "when": "groog.qmk \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.recording"
       },
       {
         "key": "ctrl+f",
         "command": "groog.record.findNext",
-        "when": "groog.qmk \u0026\u0026 !terminal.visible \u0026\u0026 groog.recording"
+        "when": "groog.qmk \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.recording"
       },
       {
         "key": "ctrl+f",
         "command": "groog.terminal.find",
-        "when": "groog.qmk \u0026\u0026 terminal.visible"
+        "when": "groog.qmk \u0026\u0026 view.terminal.visible"
       },
       {
         "key": "ctrl+g",
@@ -869,12 +869,12 @@
       {
         "key": "ctrl+r",
         "command": "groog.reverseFind",
-        "when": "!terminal.visible"
+        "when": "!view.terminal.visible"
       },
       {
         "key": "ctrl+r",
         "command": "groog.terminal.reverseFind",
-        "when": "terminal.visible"
+        "when": "view.terminal.visible"
       },
       {
         "key": "ctrl+right",
@@ -884,17 +884,17 @@
       {
         "key": "ctrl+s",
         "command": "groog.find",
-        "when": "!groog.qmk \u0026\u0026 !terminal.visible \u0026\u0026 !groog.recording"
+        "when": "!groog.qmk \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.recording"
       },
       {
         "key": "ctrl+s",
         "command": "groog.record.findNext",
-        "when": "!groog.qmk \u0026\u0026 !terminal.visible \u0026\u0026 groog.recording"
+        "when": "!groog.qmk \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.recording"
       },
       {
         "key": "ctrl+s",
         "command": "groog.terminal.find",
-        "when": "!groog.qmk \u0026\u0026 terminal.visible"
+        "when": "!groog.qmk \u0026\u0026 view.terminal.visible"
       },
       {
         "key": "ctrl+s",

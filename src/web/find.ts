@@ -1,19 +1,19 @@
 import * as vscode from 'vscode';
-import { ColorizedHandler, ColorMode, Mode } from './color_mode';
-import { CursorMove, DeleteCommand, TypeHandler } from './interfaces';
+import { ColorMode, ModeColor } from './color_mode';
+import { TypeHandler } from './handler';
+import { CursorMove, DeleteCommand } from './interfaces';
 import { Recorder } from './record';
 
 // TODO: Implement a FindReplaceHandler?  alt+s/f -> type search term -> enter -> type replace term -> enter
 //       Would need to ensure regexp grouping still works (just use typescript regex on selection text (only if regexp enabled?)).
 //       Don't worry about implementing this until find a strong need for it.
-export class FindHandler extends ColorizedHandler implements TypeHandler {
-  active: boolean;
+export class FindHandler extends TypeHandler {
   findText: string;
   cursorStack: CursorStack;
+  whenContext: string = "groog.findMode";
 
   constructor(cm: ColorMode) {
-    super(cm);
-    this.active = false;
+    super(cm, ModeColor.find);
     this.findText = "";
     this.cursorStack = new CursorStack();
   }
@@ -29,14 +29,14 @@ export class FindHandler extends ColorizedHandler implements TypeHandler {
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
     recorder.registerCommand(context, 'find', async () => {
-      if (this.active) {
+      if (this.isActive()) {
         await this.nextMatch();
       } else {
         await this.activate();
       }
     });
     recorder.registerCommand(context, 'reverseFind', async () => {
-      if (this.active) {
+      if (this.isActive()) {
         await this.prevMatch();
       } else {
         await this.activate();
@@ -47,24 +47,16 @@ export class FindHandler extends ColorizedHandler implements TypeHandler {
     });
   }
 
-  async colorActivate() {
-    this.active = true;
-    await vscode.commands.executeCommand('setContext', 'groog.findMode', true);
+  async handleActivation() {
     await this.findWithArgs();
   }
 
-  async colorDeactivate() {
-    this.active = false;
-    await vscode.commands.executeCommand('setContext', 'groog.findMode', false);
+  async handleDeactivation() {
     // TODO: make text clearing optional? Differentiate in activate maybe?
     this.findText = "";
     this.cursorStack.clear();
     await vscode.commands.executeCommand("cancelSelection");
     await vscode.commands.executeCommand("closeFindWidget");
-  }
-
-  mode(): Mode {
-    return Mode.FIND;
   }
 
   async findWithArgs() {
@@ -116,9 +108,9 @@ export class FindHandler extends ColorizedHandler implements TypeHandler {
 
   // TODO: do something like error message or deactivate
   async onYank(s: string | undefined) { }
-  async alwaysOnYank(): Promise<boolean> { return false; }
+  alwaysOnYank: boolean = false;
   async onKill(s: string | undefined) { }
-  async alwaysOnKill(): Promise<boolean> { return false; }
+  alwaysOnKill: boolean = false;
 }
 
 class CursorStack {

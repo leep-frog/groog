@@ -64,8 +64,10 @@ var (
 	sideBarFocus         = wc("sideBarFocus")
 	suggestWidgetVisible = wc("suggestWidgetVisible")
 	terminalFocus        = wc("terminalFocus")
-	terminalVisible      = wc("terminal.visible")
-	searchInputBoxFocus  = wc("searchInputBoxFocus")
+	// terminal.visible is true even when the terminal is in the back,
+	// hence why we need to use view.terminal.visible here.
+	terminalVisible     = wc("view.terminal.visible")
+	searchInputBoxFocus = wc("searchInputBoxFocus")
 
 	// Ignore typing when in find widget
 	characters = strings.Join([]string{

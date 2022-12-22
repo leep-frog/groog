@@ -1,12 +1,14 @@
 import * as vscode from 'vscode';
-import { CursorMove, DeleteCommand, TypeHandler } from './interfaces';
+import { ColorMode } from './color_mode';
+import { TypeHandler } from './handler';
+import { CursorMove, DeleteCommand } from './interfaces';
 import { Recorder } from './record';
 
-export class TerminalFindHandler implements TypeHandler {
-  active: boolean;
+export class TerminalFindHandler extends TypeHandler {
+  whenContext: string = "groog.terminal.finding";
 
-  constructor() {
-    this.active = false;
+  constructor(cm : ColorMode) {
+    super(cm);
   }
 
   async nextMatch() {
@@ -17,33 +19,24 @@ export class TerminalFindHandler implements TypeHandler {
     await vscode.commands.executeCommand("workbench.action.terminal.findPrevious");
   }
 
-  async activate() {
-    if (!this.active) {
-      this.active = true;
-      await vscode.commands.executeCommand("workbench.action.terminal.focusFind");
-      await vscode.commands.executeCommand('setContext', 'groog.terminal.finding', true);
-    }
+  async handleActivation() {
+    await vscode.commands.executeCommand("workbench.action.terminal.focusFind");
   }
 
-  async deactivate() {
-    if (this.active) {
-      this.active = false;
-      await vscode.commands.executeCommand("workbench.action.terminal.hideFind");
-      await vscode.commands.executeCommand('setContext', 'groog.terminal.finding', false);
-    }
+  async handleDeactivation() {
+    await vscode.commands.executeCommand("workbench.action.terminal.hideFind");
   }
-
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
     recorder.registerCommand(context, 'terminal.find', async () => {
-      if (this.active) {
+      if (this.isActive()) {
         await this.nextMatch();
       } else {
         this.activate();
       }
     });
     recorder.registerCommand(context, 'terminal.reverseFind', async () => {
-      if (this.active) {
+      if (this.isActive()) {
         await this.prevMatch();
       } else {
         this.activate();
@@ -78,7 +71,7 @@ export class TerminalFindHandler implements TypeHandler {
 
   // TODO: do something like error message or deactivate
   async onYank(s: string | undefined) { }
-  async alwaysOnYank(): Promise<boolean> { return false; }
+  alwaysOnYank: boolean = false;
   async onKill(s: string | undefined) { }
-  async alwaysOnKill(): Promise<boolean> { return false; }
+  alwaysOnKill: boolean = false;
 }

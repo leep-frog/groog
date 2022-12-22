@@ -2,7 +2,8 @@ import * as vscode from 'vscode';
 import { ColorMode } from './color_mode';
 import { commands } from './commands';
 import { FindHandler } from './find';
-import { CtrlGCommand, CursorMove, DeleteCommand, Registerable, TypeHandler } from './interfaces';
+import { Registerable, TypeHandler } from './handler';
+import { CtrlGCommand, CursorMove, DeleteCommand } from './interfaces';
 import { MarkHandler } from './mark';
 import { infoMessage, multiCommand } from './misc-command';
 import { Recorder } from './record';
@@ -42,7 +43,7 @@ export class Emacs {
     this.typeHandlers = [
       new FindHandler(this.cm),
       new MarkHandler(this.cm),
-      new TerminalFindHandler(),
+      new TerminalFindHandler(this.cm),
       this.recorder,
     ];
   }
@@ -100,7 +101,7 @@ export class Emacs {
   async runHandlers(thCallback: (th: TypeHandler) => Thenable<boolean>, applyCallback: () => Thenable<any>) {
     let apply = true;
     for (var th of this.typeHandlers) {
-      if (th.active) {
+      if (th.isActive()) {
         if (!(await thCallback(th))) {
           // Note, we can't do "apply &&= th.textHandler" because
           // if apply is set to false at some point, then later
@@ -156,7 +157,7 @@ export class Emacs {
     }
 
     for (var th of this.typeHandlers) {
-      if (th.active || await th.alwaysOnYank()) {
+      if (th.isActive() || await th.alwaysOnYank) {
         await th.onYank(maybe);
       }
     }
@@ -164,7 +165,7 @@ export class Emacs {
 
   async ctrlG() {
     for (var th of this.typeHandlers) {
-      if (th.active) {
+      if (th.isActive()) {
         await th.ctrlG();
       }
     }
@@ -192,7 +193,7 @@ export class Emacs {
       range = new vscode.Range(startPos, new vscode.Position(startPos.line + 1, 0));
     }*/
     for (var th of this.typeHandlers) {
-      if (th.active || await th.alwaysOnKill()) {
+      if (th.isActive() || await th.alwaysOnKill) {
         th.onKill(text);
       }
     }

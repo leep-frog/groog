@@ -1,28 +1,28 @@
 import * as vscode from 'vscode';
-import { ColorizedHandler, ColorMode, Mode } from './color_mode';
-import { CursorMove, DeleteCommand, TypeHandler } from './interfaces';
+import { ColorMode, ModeColor } from './color_mode';
+import { TypeHandler } from './handler';
+import { CursorMove, DeleteCommand } from './interfaces';
 import { Recorder } from './record';
 
-export class MarkHandler extends ColorizedHandler implements TypeHandler {
-  active: boolean;
+export class MarkHandler extends TypeHandler {
   yanked: string;
+  whenContext: string = "groog.markMode";
 
   constructor(cm: ColorMode) {
-    super(cm);
-    this.active = false;
+    super(cm, ModeColor.mark);
     this.yanked = "";
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
     recorder.registerCommand(context, 'toggleMarkMode', async () => {
-      if (this.active) {
+      if (this.isActive()) {
         await this.deactivate();
       } else {
         await this.activate();
       }
     });
     recorder.registerCommand(context, 'paste', async () => {
-      if (this.active) {
+      if (this.isActive()) {
         await this.deactivate();
       }
 
@@ -36,19 +36,9 @@ export class MarkHandler extends ColorizedHandler implements TypeHandler {
     });
   }
 
-  async colorActivate() {
-    this.active = true;
-    await vscode.commands.executeCommand('setContext', 'groog.markMode', true);
-  }
+  async handleActivation() {}
 
-  async colorDeactivate() {
-    this.active = false;
-    await vscode.commands.executeCommand('setContext', 'groog.markMode', false);
-  }
-
-  mode(): Mode {
-    return Mode.MARK;
-  }
+  async handleDeactivation() {}
 
   async ctrlG() {
     await this.deactivate();
@@ -62,7 +52,7 @@ export class MarkHandler extends ColorizedHandler implements TypeHandler {
   async moveHandler(vsCommand: CursorMove, ...rest: any[]): Promise<boolean> {
     // See below link for cusorMove args (including "select" keyword)
     // https://code.visualstudio.com/api/references/commands
-    if (vsCommand === "cursorMove") {
+    if (vsCommand === CursorMove.move) {
       rest[0].select = true;
       await vscode.commands.executeCommand(vsCommand, ...rest);
     } else {
@@ -81,16 +71,12 @@ export class MarkHandler extends ColorizedHandler implements TypeHandler {
     s ? this.yanked = s : this.yanked = "";
   }
 
-  async alwaysOnYank(): Promise<boolean> {
-    return true;
-  }
+  alwaysOnYank: boolean = true;
 
   async onKill(s: string | undefined) {
     await this.deactivate();
     s ? this.yanked = s : this.yanked = "";
   }
 
-  async alwaysOnKill(): Promise<boolean> {
-    return true;
-  }
+  alwaysOnKill: boolean = true;
 }

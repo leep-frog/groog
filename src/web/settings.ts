@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { commands } from './commands';
-import { Registerable } from './interfaces';
+import { Registerable } from './handler';
 import { Recorder } from './record';
 
 export class Settings implements Registerable {

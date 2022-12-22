@@ -3,44 +3,20 @@ import * as vscode from 'vscode';
 const workbench = "workbench";
 const colorCustomizations = "colorCustomizations";
 
-export enum Mode {
-  FIND,
-  RECORD,
-  MARK,
-}
-
-export abstract class ColorizedHandler {
-  abstract colorActivate(): Thenable<any>;
-  abstract colorDeactivate(): Thenable<any>;
-  abstract mode(): Mode;
-
-  // All persistent data should go in this.cm since that is shared across
-  // all classes (where ColorizedHandler will have multiple instances).
-  cm: ColorMode;
-
-  constructor(cm: ColorMode) {
-    this.cm = cm;
-  }
-
-  async activate() {
-    await this.colorActivate();
-    await this.cm.add(this.mode());
-  }
-
-  async deactivate() {
-    await this.colorDeactivate();
-    await this.cm.remove(this.mode());
-  }
+export enum ModeColor {
+  find,
+  record,
+  mark,
 }
 
 export class ColorMode {
-  activeModes: Set<Mode>;
+  activeModes: Set<ModeColor>;
 
   constructor() {
-    this.activeModes = new Set<Mode>();
+    this.activeModes = new Set<ModeColor>();
   }
 
-  async add(m: Mode) {
+  async add(m: ModeColor) {
     // TODO: Updating settings is too slow. Make this
     // work via a web view?
     return;
@@ -51,7 +27,7 @@ export class ColorMode {
     this.updateColors();
   }
 
-  async remove(m: Mode) {
+  async remove(m: ModeColor) {
     return;
     if (!this.activeModes.has(m)) {
       return;
@@ -61,9 +37,9 @@ export class ColorMode {
   }
 
   private async updateColors() {
-    let find = this.activeModes.has(Mode.FIND);
-    let rec = this.activeModes.has(Mode.RECORD);
-    let mark = this.activeModes.has(Mode.MARK);
+    let find = this.activeModes.has(ModeColor.find);
+    let rec = this.activeModes.has(ModeColor.record);
+    let mark = this.activeModes.has(ModeColor.mark);
     let c: Color | undefined;
     if (rec && mark) {
       c = new Color(250, 0, 250);
