@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ColorizedHandler, ColorMode, Mode } from './color_mode';
-import { TypeHandler } from './interfaces';
+import { CursorMove, DeleteCommand, TypeHandler } from './interfaces';
 import { Recorder } from './record';
 
 export class MarkHandler extends ColorizedHandler implements TypeHandler {
@@ -59,7 +59,7 @@ export class MarkHandler extends ColorizedHandler implements TypeHandler {
     return true;
   }
 
-  async moveHandler(vsCommand: string, ...rest: any[]): Promise<boolean> {
+  async moveHandler(vsCommand: CursorMove, ...rest: any[]): Promise<boolean> {
     // See below link for cusorMove args (including "select" keyword)
     // https://code.visualstudio.com/api/references/commands
     if (vsCommand === "cursorMove") {
@@ -71,7 +71,7 @@ export class MarkHandler extends ColorizedHandler implements TypeHandler {
     return false;
   }
 
-  async delHandler(s: string): Promise<boolean> {
+  async delHandler(s: DeleteCommand): Promise<boolean> {
     await this.deactivate();
     return true;
   }

@@ -659,17 +659,17 @@
       {
         "key": "ctrl+f",
         "command": "groog.find",
-        "when": "groog.qmk \u0026\u0026 !groog.recording"
+        "when": "groog.qmk \u0026\u0026 !terminal.visible \u0026\u0026 !groog.recording"
       },
       {
         "key": "ctrl+f",
         "command": "groog.record.findNext",
-        "when": "groog.qmk \u0026\u0026 groog.recording"
+        "when": "groog.qmk \u0026\u0026 !terminal.visible \u0026\u0026 groog.recording"
       },
       {
         "key": "ctrl+f",
-        "command": "workbench.action.terminal.focusFind",
-        "when": "groog.qmk \u0026\u0026 terminalFocus"
+        "command": "groog.terminal.find",
+        "when": "groog.qmk \u0026\u0026 terminal.visible"
       },
       {
         "key": "ctrl+g",
@@ -759,6 +759,11 @@
       },
       {
         "key": "ctrl+n",
+        "command": "groog.terminal.find",
+        "when": "groog.terminal.finding"
+      },
+      {
+        "key": "ctrl+n",
         "command": "workbench.action.quickOpenNavigateNextInFilePicker",
         "when": "inQuickOpen"
       },
@@ -806,6 +811,11 @@
         "key": "ctrl+p",
         "command": "editor.action.previousMatchFindAction",
         "when": "groog.findMode"
+      },
+      {
+        "key": "ctrl+p",
+        "command": "groog.terminal.reverseFind",
+        "when": "groog.terminal.finding"
       },
       {
         "key": "ctrl+p",
@@ -858,7 +868,13 @@
       },
       {
         "key": "ctrl+r",
-        "command": "groog.reverseFind"
+        "command": "groog.reverseFind",
+        "when": "!terminal.visible"
+      },
+      {
+        "key": "ctrl+r",
+        "command": "groog.terminal.reverseFind",
+        "when": "terminal.visible"
       },
       {
         "key": "ctrl+right",
@@ -868,17 +884,17 @@
       {
         "key": "ctrl+s",
         "command": "groog.find",
-        "when": "!groog.qmk \u0026\u0026 !groog.recording"
+        "when": "!groog.qmk \u0026\u0026 !terminal.visible \u0026\u0026 !groog.recording"
       },
       {
         "key": "ctrl+s",
         "command": "groog.record.findNext",
-        "when": "!groog.qmk \u0026\u0026 groog.recording"
+        "when": "!groog.qmk \u0026\u0026 !terminal.visible \u0026\u0026 groog.recording"
       },
       {
         "key": "ctrl+s",
-        "command": "workbench.action.terminal.focusFind",
-        "when": "!groog.qmk \u0026\u0026 terminalFocus"
+        "command": "groog.terminal.find",
+        "when": "!groog.qmk \u0026\u0026 terminal.visible"
       },
       {
         "key": "ctrl+s",
@@ -1381,6 +1397,11 @@
       },
       {
         "key": "down",
+        "command": "groog.terminal.find",
+        "when": "groog.terminal.finding"
+      },
+      {
+        "key": "down",
         "command": "workbench.action.quickOpenNavigateNextInFilePicker",
         "when": "inQuickOpen"
       },
@@ -1414,6 +1435,11 @@
         "args": {
           "text": "\n"
         }
+      },
+      {
+        "key": "enter",
+        "command": "groog.terminal.find",
+        "when": "groog.terminal.finding"
       },
       {
         "key": "f",
@@ -1791,6 +1817,11 @@
         "when": "groog.findMode"
       },
       {
+        "key": "shift+enter",
+        "command": "groog.terminal.reverseFind",
+        "when": "groog.terminal.finding"
+      },
+      {
         "key": "shift+f",
         "command": "groog.type",
         "when": "editorTextFocus || findInputFocussed",
@@ -2013,6 +2044,11 @@
         "key": "up",
         "command": "editor.action.previousMatchFindAction",
         "when": "groog.findMode"
+      },
+      {
+        "key": "up",
+        "command": "groog.terminal.reverseFind",
+        "when": "groog.terminal.finding"
       },
       {
         "key": "up",

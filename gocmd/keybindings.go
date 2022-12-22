@@ -56,6 +56,7 @@ var (
 	groogFindMode        = wc("groog.findMode")
 	groogQMK             = wc("groog.qmk")
 	groogRecording       = wc("groog.recording")
+	groogTerminalFinding = wc("groog.terminal.finding")
 	inQuickOpen          = wc("inQuickOpen")
 	inSearchEditor       = wc("inSearchEditor")
 	panelFocus           = wc("panelFocus")
@@ -63,6 +64,7 @@ var (
 	sideBarFocus         = wc("sideBarFocus")
 	suggestWidgetVisible = wc("suggestWidgetVisible")
 	terminalFocus        = wc("terminalFocus")
+	terminalVisible      = wc("terminal.visible")
 	searchInputBoxFocus  = wc("searchInputBoxFocus")
 
 	// Ignore typing when in find widget
@@ -165,25 +167,27 @@ var (
 	kbDefinitions = map[Key]map[string]*KB{
 		// Find bindings
 		ctrl("f"): {
-			groogQMK.and(groogRecording).value:          kb("groog.record.findNext"),
-			groogQMK.and(groogRecording.not()).value:    kb("groog.find"),
-			groogQMK.and(terminalFocus).value:           kb("workbench.action.terminal.focusFind"),
-			groogQMK.not().and(inQuickOpen).value:       kb("workbench.action.quickPickManyToggle"),
-			groogQMK.not().and(inQuickOpen.not()).value: kb("groog.cursorRight"),
+			groogQMK.and(terminalVisible).value:                                 kb("groog.terminal.find"),
+			groogQMK.and(terminalVisible.not()).and(groogRecording).value:       kb("groog.record.findNext"),
+			groogQMK.and(terminalVisible.not()).and(groogRecording.not()).value: kb("groog.find"),
+			groogQMK.not().and(inQuickOpen).value:                               kb("workbench.action.quickPickManyToggle"),
+			groogQMK.not().and(inQuickOpen.not()).value:                         kb("groog.cursorRight"),
 		},
 		ctrl("s"): {
-			groogQMK.not().and(terminalFocus).value:        kb("workbench.action.terminal.focusFind"),
-			groogQMK.not().and(groogRecording.not()).value: kb("groog.find"),
-			groogQMK.not().and(groogRecording).value:       kb("groog.record.findNext"),
-			groogQMK.value:                                 kb("groog.cursorRight"),
+			groogQMK.not().and(terminalVisible).value:                                 kb("groog.terminal.find"),
+			groogQMK.not().and(terminalVisible.not()).and(groogRecording).value:       kb("groog.record.findNext"),
+			groogQMK.not().and(terminalVisible.not()).and(groogRecording.not()).value: kb("groog.find"),
+			groogQMK.value: kb("groog.cursorRight"),
 		},
-		ctrl("r"): only("groog.reverseFind"),
+		ctrl("r"): contextualKB(terminalVisible, kb("groog.terminal.reverseFind"), kb("groog.reverseFind")),
 		alt("s"):  only("editor.action.startFindReplaceAction"),
 		shift(enter): {
-			groogFindMode.value: kb("editor.action.previousMatchFindAction"),
+			groogFindMode.value:        kb("editor.action.previousMatchFindAction"),
+			groogTerminalFinding.value: kb("groog.terminal.reverseFind"),
 		},
 		enter: {
-			groogFindMode.value: kb("editor.action.nextMatchFindAction"),
+			groogTerminalFinding.value: kb("groog.terminal.find"),
+			groogFindMode.value:        kb("editor.action.nextMatchFindAction"),
 			// This is needed so enter hits are recorded
 			// Don't do for tab since that can add a variable
 			// number of spaces. If seems necessary, we can add
@@ -229,7 +233,8 @@ var (
 		ctrl("v"): only("groog.fall"),
 		pagedown:  textOnly("groog.fall"),
 		ctrl("p"): {
-			always.value: kb("-workbench.action.quickOpen"),
+			groogTerminalFinding.value: kb("groog.terminal.reverseFind"),
+			always.value:               kb("-workbench.action.quickOpen"),
 			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorUp"),
 			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectPrevSuggestion"),
 			inQuickOpen.value:   kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
@@ -240,13 +245,15 @@ var (
 			),
 		},
 		up: {
+			groogTerminalFinding.value:                            kb("groog.terminal.reverseFind"),
 			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorUp"),
 			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectPrevSuggestion"),
-			inQuickOpen.value:   kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
-			groogFindMode.value: kb("editor.action.previousMatchFindAction"),
+			inQuickOpen.value:                                     kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
+			groogFindMode.value:                                   kb("editor.action.previousMatchFindAction"),
 		},
 		ctrl("n"): {
-			always.value: kb("-workbench.action.files.newUntitledFile"),
+			groogTerminalFinding.value: kb("groog.terminal.find"),
+			always.value:               kb("-workbench.action.files.newUntitledFile"),
 			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorDown"),
 			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectNextSuggestion"),
 			inQuickOpen.value:         kb("workbench.action.quickOpenNavigateNextInFilePicker"),
@@ -258,11 +265,12 @@ var (
 			),
 		},
 		down: {
+			groogTerminalFinding.value:                            kb("groog.terminal.find"),
 			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorDown"),
 			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectNextSuggestion"),
-			inQuickOpen.value:         kb("workbench.action.quickOpenNavigateNextInFilePicker"),
-			groogFindMode.value:       kb("editor.action.nextMatchFindAction"),
-			searchInputBoxFocus.value: kb("search.action.focusSearchList"),
+			inQuickOpen.value:                                     kb("workbench.action.quickOpenNavigateNextInFilePicker"),
+			groogFindMode.value:                                   kb("editor.action.nextMatchFindAction"),
+			searchInputBoxFocus.value:                             kb("search.action.focusSearchList"),
 		},
 		left: {
 			inQuickOpen.value: kb("workbench.action.quickPickManyToggle"),

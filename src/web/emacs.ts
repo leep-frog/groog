@@ -2,52 +2,14 @@ import * as vscode from 'vscode';
 import { ColorMode } from './color_mode';
 import { commands } from './commands';
 import { FindHandler } from './find';
-import { Registerable, TypeHandler } from './interfaces';
+import { CtrlGCommand, CursorMove, DeleteCommand, Registerable, TypeHandler } from './interfaces';
 import { MarkHandler } from './mark';
 import { infoMessage, multiCommand } from './misc-command';
 import { Recorder } from './record';
 import { Settings } from './settings';
+import { TerminalFindHandler } from './terminal-find';
 
 const jumpDist = 10;
-export const cursorMoves: string[] = [
-  // Note: if you are receiving an error of the form
-  // `command "groog.cursorUp" already exists`, it is probably
-  // because this extension is installed twice. Once as a regular
-  // extension and once as the development extension. Disable
-  // the regular extension to get the correct behavior.
-  "cursorUp",
-  "cursorDown",
-  "cursorLeft",
-  "cursorRight",
-  "cursorHome",
-  "cursorEnd",
-  "cursorWordLeft",
-  "cursorWordRight",
-  "cursorTop",
-  "cursorBottom"
-];
-
-const ctrlGCommands: string[] = [
-  "cancelSelection",
-  "closeFindWidget",
-  "closeParameterHints",
-  "removeSecondaryCursors",
-  "notifications.clearAll",
-  "workbench.action.terminal.hideFind",
-  "closeReferenceSearch",
-];
-
-const deleteLeft = "deleteLeft";
-const deleteRight = "deleteRight";
-const deleteWordLeft = "deleteWordLeft";
-const deleteWordRight = "deleteWordRight";
-
-export const deleteCommands: string[] = [
-  deleteLeft,
-  deleteRight,
-  deleteWordLeft,
-  deleteWordRight,
-];
 
 const qmkKey = "groog.keys.qmkState";
 
@@ -80,6 +42,7 @@ export class Emacs {
     this.typeHandlers = [
       new FindHandler(this.cm),
       new MarkHandler(this.cm),
+      new TerminalFindHandler(),
       this.recorder,
     ];
   }
@@ -91,11 +54,11 @@ export class Emacs {
   }
 
   register(context: vscode.ExtensionContext) {
-    for (var move of cursorMoves) {
+    for (var move of Object.values(CursorMove)) {
       const m = move;
       this.recorder.registerCommand(context, move, () => this.move(m));
     }
-    for (var dc of deleteCommands) {
+    for (var dc of Object.values(DeleteCommand)) {
       const d = dc;
       this.recorder.registerCommand(context, d, () => this.delCommand(d));
     }
@@ -159,7 +122,7 @@ export class Emacs {
     );
   }
 
-  async delCommand(d: string) {
+  async delCommand(d: DeleteCommand) {
     await this.runHandlers(
       async (th: TypeHandler): Promise<boolean> => { return await th.delHandler(d); },
       async () => { await vscode.commands.executeCommand(d); },
@@ -205,7 +168,7 @@ export class Emacs {
         await th.ctrlG();
       }
     }
-    for (var cmd of ctrlGCommands) {
+    for (var cmd of Object.values(CtrlGCommand)) {
       await vscode.commands.executeCommand(cmd);
     }
   }
@@ -240,15 +203,15 @@ export class Emacs {
 
   // C-l
   async jump() {
-    await this.move("cursorMove", { "to": "up", "by": "line", "value": jumpDist });
+    await this.move(CursorMove.move, { "to": "up", "by": "line", "value": jumpDist });
   }
 
   // C-v
   async fall() {
-    await this.move("cursorMove", { "to": "down", "by": "line", "value": jumpDist });
+    await this.move(CursorMove.move, { "to": "down", "by": "line", "value": jumpDist });
   }
 
-  async move(vsCommand: string, ...rest: any[]) {
+  async move(vsCommand: CursorMove, ...rest: any[]) {
     await this.runHandlers(
       async (th: TypeHandler): Promise<boolean> => { return await th.moveHandler(vsCommand, ...rest); },
       async () => { await vscode.commands.executeCommand(vsCommand, ...rest); },

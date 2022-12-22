@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ColorizedHandler, ColorMode, Mode } from './color_mode';
-import { TypeHandler } from './interfaces';
+import { CursorMove, DeleteCommand, TypeHandler } from './interfaces';
 import { Recorder } from './record';
 
 // TODO: Implement a FindReplaceHandler?  alt+s/f -> type search term -> enter -> type replace term -> enter
@@ -94,14 +94,14 @@ export class FindHandler extends ColorizedHandler implements TypeHandler {
     return false;
   }
 
-  async moveHandler(s: string): Promise<boolean> {
+  async moveHandler(cmd: CursorMove): Promise<boolean> {
     await this.deactivate();
     return true;
   }
 
-  async delHandler(s: string): Promise<boolean> {
+  async delHandler(s: DeleteCommand): Promise<boolean> {
     switch (s) {
-      case "deleteLeft":
+      case DeleteCommand.left:
         if (this.findText.length > 0) {
           this.findText = this.findText.slice(0, this.findText.length - 1);
           this.cursorStack.popAndSet();

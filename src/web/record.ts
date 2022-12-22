@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ColorizedHandler, ColorMode, Mode } from './color_mode';
-import { TypeHandler } from './interfaces';
+import { CursorMove, DeleteCommand, TypeHandler } from './interfaces';
 
 export class Recorder extends ColorizedHandler implements TypeHandler {
   // baseCommand ensures we don't infinite loop a command. For example,
@@ -218,10 +218,10 @@ export class Recorder extends ColorizedHandler implements TypeHandler {
   async ctrlG() { }
   async onYank(s: string | undefined) { }
   async alwaysOnYank(): Promise<boolean> { return false; }
-  async delHandler(s: string): Promise<boolean> {
+  async delHandler(s: DeleteCommand): Promise<boolean> {
     return true;
   }
-  async moveHandler(vsCommand: string, ...rest: any[]): Promise<boolean> {
+  async moveHandler(vsCommand: CursorMove, ...rest: any[]): Promise<boolean> {
     return true;
   }
 }

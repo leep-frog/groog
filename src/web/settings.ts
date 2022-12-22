@@ -12,6 +12,12 @@ export class Settings implements Registerable {
       "workbench.action.terminal.focusNext",
       "workbench.action.terminal.focusPrevious",
       "workbench.action.terminal.newWithProfile",
+      "groog.terminal.find",
+      "groog.terminal.reverseFind",
+      "workbench.action.terminal.focusFind",
+      "workbench.action.terminal.findNext",
+      "workbench.action.terminal.findPrevious",
+      "groog.ctrlG",
     ];
     for (let v of commands.keys()) {
       ics.push("groog." + v);
