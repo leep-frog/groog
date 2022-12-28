@@ -46,24 +46,24 @@ func wc(s string) *WhenContext {
 
 var (
 	// When contexts
-	activePanel          = wc("activePanel")
-	always               = wc("")
-	editorFocus          = wc("editorFocus")
-	editorTextFocus      = wc("editorTextFocus")
-	findWidgetVisible    = wc("findWidgetVisible")
-	findInputFocussed    = wc("findInputFocussed")
-	inputFocus           = wc("inputFocus")
-	groogFindMode        = wc("groog.findMode")
-	groogQMK             = wc("groog.qmk")
-	groogRecording       = wc("groog.recording")
-	groogTerminalFinding = wc("groog.terminal.finding")
-	inQuickOpen          = wc("inQuickOpen")
-	inSearchEditor       = wc("inSearchEditor")
-	panelFocus           = wc("panelFocus")
-	searchViewletFocus   = wc("searchViewletFocus")
-	sideBarFocus         = wc("sideBarFocus")
-	suggestWidgetVisible = wc("suggestWidgetVisible")
-	terminalFocus        = wc("terminalFocus")
+	activePanel           = wc("activePanel")
+	always                = wc("")
+	editorFocus           = wc("editorFocus")
+	editorTextFocus       = wc("editorTextFocus")
+	findWidgetVisible     = wc("findWidgetVisible")
+	findInputFocussed     = wc("findInputFocussed")
+	inputFocus            = wc("inputFocus")
+	groogFindMode         = wc("groog.findMode")
+	groogQMK              = wc("groog.qmk")
+	groogRecording        = wc("groog.recording")
+	groogTerminalFindMode = wc("groog.terminal.finding")
+	inQuickOpen           = wc("inQuickOpen")
+	inSearchEditor        = wc("inSearchEditor")
+	panelFocus            = wc("panelFocus")
+	searchViewletFocus    = wc("searchViewletFocus")
+	sideBarFocus          = wc("sideBarFocus")
+	suggestWidgetVisible  = wc("suggestWidgetVisible")
+	terminalFocus         = wc("terminalFocus")
 	// terminal.visible is true even when the terminal is in the back,
 	// hence why we need to use view.terminal.visible here.
 	terminalVisible     = wc("view.terminal.visible")
@@ -181,15 +181,17 @@ var (
 			groogQMK.not().and(terminalVisible.not()).and(groogRecording.not()).value: kb("groog.find"),
 			groogQMK.value: kb("groog.cursorRight"),
 		},
-		ctrl("r"): contextualKB(terminalVisible, kb("groog.terminal.reverseFind"), kb("groog.reverseFind")),
+		// Don't use 'terminalVisible' here because we don't want ctrl+r to activate terminal find mode.
+		// Instead, we want ctrl+r in non-find mode to search for matching bash commands (as it normally would)
+		ctrl("r"): contextualKB(groogTerminalFindMode, kb("groog.terminal.reverseFind"), kb("groog.reverseFind")),
 		alt("s"):  only("editor.action.startFindReplaceAction"),
 		shift(enter): {
-			groogFindMode.value:        kb("editor.action.previousMatchFindAction"),
-			groogTerminalFinding.value: kb("groog.terminal.reverseFind"),
+			groogFindMode.value:         kb("editor.action.previousMatchFindAction"),
+			groogTerminalFindMode.value: kb("groog.terminal.reverseFind"),
 		},
 		enter: {
-			groogTerminalFinding.value: kb("groog.terminal.find"),
-			groogFindMode.value:        kb("editor.action.nextMatchFindAction"),
+			groogTerminalFindMode.value: kb("groog.terminal.find"),
+			groogFindMode.value:         kb("editor.action.nextMatchFindAction"),
 			// This is needed so enter hits are recorded
 			// Don't do for tab since that can add a variable
 			// number of spaces. If seems necessary, we can add
@@ -235,8 +237,8 @@ var (
 		ctrl("v"): only("groog.fall"),
 		pagedown:  textOnly("groog.fall"),
 		ctrl("p"): {
-			groogTerminalFinding.value: kb("groog.terminal.reverseFind"),
-			always.value:               kb("-workbench.action.quickOpen"),
+			groogTerminalFindMode.value: kb("groog.terminal.reverseFind"),
+			always.value:                kb("-workbench.action.quickOpen"),
 			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorUp"),
 			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectPrevSuggestion"),
 			inQuickOpen.value:   kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
@@ -247,15 +249,15 @@ var (
 			),
 		},
 		up: {
-			groogTerminalFinding.value:                            kb("groog.terminal.reverseFind"),
+			groogTerminalFindMode.value:                           kb("groog.terminal.reverseFind"),
 			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorUp"),
 			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectPrevSuggestion"),
 			inQuickOpen.value:                                     kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
 			groogFindMode.value:                                   kb("editor.action.previousMatchFindAction"),
 		},
 		ctrl("n"): {
-			groogTerminalFinding.value: kb("groog.terminal.find"),
-			always.value:               kb("-workbench.action.files.newUntitledFile"),
+			groogTerminalFindMode.value: kb("groog.terminal.find"),
+			always.value:                kb("-workbench.action.files.newUntitledFile"),
 			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorDown"),
 			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectNextSuggestion"),
 			inQuickOpen.value:         kb("workbench.action.quickOpenNavigateNextInFilePicker"),
@@ -267,7 +269,7 @@ var (
 			),
 		},
 		down: {
-			groogTerminalFinding.value:                            kb("groog.terminal.find"),
+			groogTerminalFindMode.value:                           kb("groog.terminal.find"),
 			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorDown"),
 			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectNextSuggestion"),
 			inQuickOpen.value:                                     kb("workbench.action.quickOpenNavigateNextInFilePicker"),

@@ -25,7 +25,7 @@ func node() *command.Node {
 			},
 			Repository: &Repository{
 				Type: "git",
-				URL:  "https://github.com/leep-frog/vs-code",
+				URL:  "https://github.com/leep-frog/vs-extension",
 			},
 			Categories: []string{
 				"Other",
