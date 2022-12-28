@@ -10,7 +10,7 @@ import { Recorder } from './record';
 export class FindHandler extends TypeHandler {
   findText: string;
   cursorStack: CursorStack;
-  whenContext: string = "groog.findMode";
+  whenContext: string = "find";
 
   constructor(cm: ColorMode) {
     super(cm, ModeColor.find);

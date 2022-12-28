@@ -44,6 +44,11 @@ func wc(s string) *WhenContext {
 	return &WhenContext{s, true}
 }
 
+func groogContext(mode string) string {
+	// Logic copied from 'setGroogContext' function
+	return fmt.Sprintf("groog.context.%sMode", mode)
+}
+
 var (
 	// When contexts
 	activePanel           = wc("activePanel")
@@ -53,10 +58,10 @@ var (
 	findWidgetVisible     = wc("findWidgetVisible")
 	findInputFocussed     = wc("findInputFocussed")
 	inputFocus            = wc("inputFocus")
-	groogFindMode         = wc("groog.findMode")
-	groogQMK              = wc("groog.qmk")
-	groogRecording        = wc("groog.recording")
-	groogTerminalFindMode = wc("groog.terminal.finding")
+	groogFindMode         = wc(groogContext("find"))
+	groogQMK              = wc(groogContext("qmk"))
+	groogRecording        = wc(groogContext("record"))
+	groogTerminalFindMode = wc(groogContext("terminal.find"))
 	inQuickOpen           = wc("inQuickOpen")
 	inSearchEditor        = wc("inSearchEditor")
 	panelFocus            = wc("panelFocus")

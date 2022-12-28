@@ -3,7 +3,7 @@ import { ColorMode } from './color_mode';
 import { commands } from './commands';
 import { FindHandler } from './find';
 import { Registerable, TypeHandler } from './handler';
-import { CtrlGCommand, CursorMove, DeleteCommand } from './interfaces';
+import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { MarkHandler } from './mark';
 import { infoMessage, multiCommand } from './misc-command';
 import { Recorder } from './record';
@@ -142,7 +142,7 @@ export class Emacs {
       vscode.window.showInformationMessage('Basic keyboard mode activated');
     }
     await this.qmk.update(context, b);
-    await vscode.commands.executeCommand('setContext', 'groog.qmk', b);
+    await setGroogContext('qmk', b);
   }
 
   async yank() {

@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.79",
+  "version": "0.0.80",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -438,12 +438,12 @@
       {
         "key": "alt+e",
         "command": "groog.record.playRecording",
-        "when": "!groog.recording"
+        "when": "!groog.context.recordMode"
       },
       {
         "key": "alt+e",
         "command": "groog.record.endRecording",
-        "when": "groog.recording"
+        "when": "groog.context.recordMode"
       },
       {
         "key": "alt+f",
@@ -452,22 +452,22 @@
       {
         "key": "alt+f4",
         "command": "toggleSearchWholeWord",
-        "when": "groog.qmk \u0026\u0026 !editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus"
+        "when": "groog.context.qmkMode \u0026\u0026 !editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus"
       },
       {
         "key": "alt+f4",
         "command": "toggleFindWholeWord",
-        "when": "groog.qmk \u0026\u0026 editorFocus"
+        "when": "groog.context.qmkMode \u0026\u0026 editorFocus"
       },
       {
         "key": "alt+f4",
         "command": "toggleSearchEditorWholeWord",
-        "when": "groog.qmk \u0026\u0026 inSearchEditor"
+        "when": "groog.context.qmkMode \u0026\u0026 inSearchEditor"
       },
       {
         "key": "alt+f4",
         "command": "toggleSearchWholeWord",
-        "when": "groog.qmk \u0026\u0026 searchViewletFocus"
+        "when": "groog.context.qmkMode \u0026\u0026 searchViewletFocus"
       },
       {
         "key": "alt+g",
@@ -500,12 +500,12 @@
       {
         "key": "alt+shift+e",
         "command": "groog.record.playNamedRecording",
-        "when": "!groog.recording"
+        "when": "!groog.context.recordMode"
       },
       {
         "key": "alt+shift+e",
         "command": "groog.record.saveRecordingAs",
-        "when": "groog.recording"
+        "when": "groog.context.recordMode"
       },
       {
         "key": "alt+shift+t",
@@ -597,12 +597,12 @@
       {
         "key": "ctrl+a",
         "command": "groog.cursorHome",
-        "when": "!groog.qmk"
+        "when": "!groog.context.qmkMode"
       },
       {
         "key": "ctrl+a",
         "command": "editor.action.selectAll",
-        "when": "groog.qmk"
+        "when": "groog.context.qmkMode"
       },
       {
         "key": "ctrl+b",
@@ -622,7 +622,7 @@
       {
         "key": "ctrl+backspace",
         "command": "workbench.action.terminal.sendSequence",
-        "when": "groog.qmk \u0026\u0026 panelFocus",
+        "when": "groog.context.qmkMode \u0026\u0026 panelFocus",
         "args": {
           "text": "\u0008"
         }
@@ -649,27 +649,27 @@
       {
         "key": "ctrl+f",
         "command": "groog.cursorRight",
-        "when": "!groog.qmk \u0026\u0026 !inQuickOpen"
+        "when": "!groog.context.qmkMode \u0026\u0026 !inQuickOpen"
       },
       {
         "key": "ctrl+f",
         "command": "workbench.action.quickPickManyToggle",
-        "when": "!groog.qmk \u0026\u0026 inQuickOpen"
+        "when": "!groog.context.qmkMode \u0026\u0026 inQuickOpen"
       },
       {
         "key": "ctrl+f",
         "command": "groog.find",
-        "when": "groog.qmk \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.recording"
+        "when": "groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.context.recordMode"
       },
       {
         "key": "ctrl+f",
         "command": "groog.record.findNext",
-        "when": "groog.qmk \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.recording"
+        "when": "groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.context.recordMode"
       },
       {
         "key": "ctrl+f",
         "command": "groog.terminal.find",
-        "when": "groog.qmk \u0026\u0026 view.terminal.visible"
+        "when": "groog.context.qmkMode \u0026\u0026 view.terminal.visible"
       },
       {
         "key": "ctrl+g",
@@ -755,12 +755,12 @@
       {
         "key": "ctrl+n",
         "command": "editor.action.nextMatchFindAction",
-        "when": "groog.findMode"
+        "when": "groog.context.findMode"
       },
       {
         "key": "ctrl+n",
         "command": "groog.terminal.find",
-        "when": "groog.terminal.finding"
+        "when": "groog.context.terminal.findMode"
       },
       {
         "key": "ctrl+n",
@@ -810,12 +810,12 @@
       {
         "key": "ctrl+p",
         "command": "editor.action.previousMatchFindAction",
-        "when": "groog.findMode"
+        "when": "groog.context.findMode"
       },
       {
         "key": "ctrl+p",
         "command": "groog.terminal.reverseFind",
-        "when": "groog.terminal.finding"
+        "when": "groog.context.terminal.findMode"
       },
       {
         "key": "ctrl+p",
@@ -869,12 +869,12 @@
       {
         "key": "ctrl+r",
         "command": "groog.reverseFind",
-        "when": "!groog.terminal.finding"
+        "when": "!groog.context.terminal.findMode"
       },
       {
         "key": "ctrl+r",
         "command": "groog.terminal.reverseFind",
-        "when": "groog.terminal.finding"
+        "when": "groog.context.terminal.findMode"
       },
       {
         "key": "ctrl+right",
@@ -884,22 +884,22 @@
       {
         "key": "ctrl+s",
         "command": "groog.find",
-        "when": "!groog.qmk \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.recording"
+        "when": "!groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.context.recordMode"
       },
       {
         "key": "ctrl+s",
         "command": "groog.record.findNext",
-        "when": "!groog.qmk \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.recording"
+        "when": "!groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.context.recordMode"
       },
       {
         "key": "ctrl+s",
         "command": "groog.terminal.find",
-        "when": "!groog.qmk \u0026\u0026 view.terminal.visible"
+        "when": "!groog.context.qmkMode \u0026\u0026 view.terminal.visible"
       },
       {
         "key": "ctrl+s",
         "command": "groog.cursorRight",
-        "when": "groog.qmk"
+        "when": "groog.context.qmkMode"
       },
       {
         "key": "ctrl+shift+a",
@@ -918,12 +918,12 @@
       {
         "key": "ctrl+shift+f",
         "command": "workbench.action.findInFiles",
-        "when": "groog.qmk \u0026\u0026 !groog.recording"
+        "when": "groog.context.qmkMode \u0026\u0026 !groog.context.recordMode"
       },
       {
         "key": "ctrl+shift+f",
         "command": "groog.record.find",
-        "when": "groog.qmk \u0026\u0026 groog.recording"
+        "when": "groog.context.qmkMode \u0026\u0026 groog.context.recordMode"
       },
       {
         "key": "ctrl+shift+h",
@@ -951,12 +951,12 @@
       {
         "key": "ctrl+shift+s",
         "command": "workbench.action.findInFiles",
-        "when": "!groog.qmk \u0026\u0026 !groog.recording"
+        "when": "!groog.context.qmkMode \u0026\u0026 !groog.context.recordMode"
       },
       {
         "key": "ctrl+shift+s",
         "command": "groog.record.find",
-        "when": "!groog.qmk \u0026\u0026 groog.recording"
+        "when": "!groog.context.qmkMode \u0026\u0026 groog.context.recordMode"
       },
       {
         "key": "ctrl+shift+t",
@@ -1393,12 +1393,12 @@
       {
         "key": "down",
         "command": "editor.action.nextMatchFindAction",
-        "when": "groog.findMode"
+        "when": "groog.context.findMode"
       },
       {
         "key": "down",
         "command": "groog.terminal.find",
-        "when": "groog.terminal.finding"
+        "when": "groog.context.terminal.findMode"
       },
       {
         "key": "down",
@@ -1426,12 +1426,12 @@
       {
         "key": "enter",
         "command": "editor.action.nextMatchFindAction",
-        "when": "groog.findMode"
+        "when": "groog.context.findMode"
       },
       {
         "key": "enter",
         "command": "groog.type",
-        "when": "groog.recording",
+        "when": "groog.context.recordMode",
         "args": {
           "text": "\n"
         }
@@ -1439,7 +1439,7 @@
       {
         "key": "enter",
         "command": "groog.terminal.find",
-        "when": "groog.terminal.finding"
+        "when": "groog.context.terminal.findMode"
       },
       {
         "key": "f",
@@ -1801,7 +1801,7 @@
       {
         "key": "shift+down",
         "command": "workbench.action.files.newUntitledFile",
-        "when": "groog.qmk"
+        "when": "groog.context.qmkMode"
       },
       {
         "key": "shift+e",
@@ -1814,12 +1814,12 @@
       {
         "key": "shift+enter",
         "command": "editor.action.previousMatchFindAction",
-        "when": "groog.findMode"
+        "when": "groog.context.findMode"
       },
       {
         "key": "shift+enter",
         "command": "groog.terminal.reverseFind",
-        "when": "groog.terminal.finding"
+        "when": "groog.context.terminal.findMode"
       },
       {
         "key": "shift+f",
@@ -2043,12 +2043,12 @@
       {
         "key": "up",
         "command": "editor.action.previousMatchFindAction",
-        "when": "groog.findMode"
+        "when": "groog.context.findMode"
       },
       {
         "key": "up",
         "command": "groog.terminal.reverseFind",
-        "when": "groog.terminal.finding"
+        "when": "groog.context.terminal.findMode"
       },
       {
         "key": "up",

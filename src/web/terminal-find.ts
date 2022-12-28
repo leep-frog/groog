@@ -5,7 +5,7 @@ import { CursorMove, DeleteCommand } from './interfaces';
 import { Recorder } from './record';
 
 export class TerminalFindHandler extends TypeHandler {
-  whenContext: string = "groog.terminal.finding";
+  whenContext: string = "terminal.find";
 
   constructor(cm : ColorMode) {
     super(cm);

@@ -18,7 +18,7 @@ export class Recorder extends TypeHandler {
   // just create an equivalent vscode function.
   private namedRecordings: Map<string, Record[]>;
 
-  whenContext: string = "groog.recording";
+  whenContext: string = "record";
 
   constructor(cm: ColorMode) {
     super(cm, ModeColor.record);

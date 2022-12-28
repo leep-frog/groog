@@ -6,7 +6,7 @@ import { Recorder } from './record';
 
 export class MarkHandler extends TypeHandler {
   yanked: string;
-  whenContext: string = "groog.markMode";
+  whenContext: string = "mark";
 
   constructor(cm: ColorMode) {
     super(cm, ModeColor.mark);

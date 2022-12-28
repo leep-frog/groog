@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ColorMode, ModeColor } from './color_mode';
 
-import { CursorMove, DeleteCommand } from "./interfaces";
+import { CursorMove, DeleteCommand, setGroogContext } from "./interfaces";
 import { Recorder } from "./record";
 
 export interface Registerable {
@@ -12,7 +12,7 @@ export abstract class TypeHandler implements Registerable {
   private active: boolean;
   cm: ColorMode;
   mc?: ModeColor;
-  abstract whenContext : string | undefined;
+  abstract whenContext : string;
 
   constructor(cm: ColorMode, mc?: ModeColor) {
     this.active = false;
@@ -37,10 +37,8 @@ export abstract class TypeHandler implements Registerable {
     if (!this.active) {
       await this.handleActivation();
 
-      // Update when clause context if relevant
-      if (this.whenContext !== undefined) {
-        await vscode.commands.executeCommand('setContext', this.whenContext, true);
-      }
+      // Update when clause context
+      await setGroogContext(this.whenContext, true);
 
       // Update color if relevant
       if (this.mc !== undefined) {
@@ -56,10 +54,8 @@ export abstract class TypeHandler implements Registerable {
     if (this.active) {
       await this.handleDeactivation();
 
-      // Update when clause context if relevant
-      if (this.whenContext !== undefined) {
-        await vscode.commands.executeCommand('setContext', this.whenContext, false);
-      }
+      // Update when clause context
+      await setGroogContext(this.whenContext, false);
 
       // Update color if relevant
       if (this.mc !== undefined) {

@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 
 export enum CursorMove {
   move = "cursorMove",
@@ -28,4 +29,8 @@ export enum DeleteCommand {
   right = "deleteRight",
   wordLeft = "deleteWordLeft",
   wordRight = "deleteWordRight",
+}
+
+export async function setGroogContext(context : string, value : boolean) {
+  await vscode.commands.executeCommand('setContext', `groog.context.${context}Mode`, value);
 }
