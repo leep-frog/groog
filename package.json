@@ -491,7 +491,11 @@
       },
       {
         "key": "alt+s",
-        "command": "editor.action.startFindReplaceAction"
+        "command": "editor.action.replaceOne"
+      },
+      {
+        "key": "alt+shift+c",
+        "command": "togglePreserveCase"
       },
       {
         "key": "alt+shift+d",
@@ -506,6 +510,10 @@
         "key": "alt+shift+e",
         "command": "groog.record.saveRecordingAs",
         "when": "groog.context.recordMode"
+      },
+      {
+        "key": "alt+shift+s",
+        "command": "editor.action.replaceAll"
       },
       {
         "key": "alt+shift+t",
@@ -736,7 +744,7 @@
       },
       {
         "key": "ctrl+m",
-        "command": "-editor.action.toggleTabFocusMode"
+        "command": "groog.find.toggleReplaceMode"
       },
       {
         "key": "ctrl+n",

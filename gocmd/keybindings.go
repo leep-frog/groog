@@ -186,10 +186,12 @@ var (
 			groogQMK.not().and(terminalVisible.not()).and(groogRecording.not()).value: kb("groog.find"),
 			groogQMK.value: kb("groog.cursorRight"),
 		},
+		ctrl("m"):       only("groog.find.toggleReplaceMode"),
+		alt("s"):        only("editor.action.replaceOne"),
+		alt(shift("s")): only("editor.action.replaceAll"),
 		// Don't use 'terminalVisible' here because we don't want ctrl+r to activate terminal find mode.
 		// Instead, we want ctrl+r in non-find mode to search for matching bash commands (as it normally would)
 		ctrl("r"): contextualKB(groogTerminalFindMode, kb("groog.terminal.reverseFind"), kb("groog.reverseFind")),
-		alt("s"):  only("editor.action.startFindReplaceAction"),
 		shift(enter): {
 			groogFindMode.value:         kb("editor.action.previousMatchFindAction"),
 			groogTerminalFindMode.value: kb("groog.terminal.reverseFind"),
@@ -217,8 +219,9 @@ var (
 				"text": " ",
 			}),
 		},
-		alt("r"): only("toggleSearchEditorRegex"),
-		alt("c"): only("toggleSearchEditorCaseSensitive"),
+		alt("r"):        only("toggleSearchEditorRegex"),
+		alt("c"):        only("toggleSearchEditorCaseSensitive"),
+		alt(shift("c")): only("togglePreserveCase"),
 		alt("f4"): {
 			groogQMK.and(editorFocus).value:        kb("toggleFindWholeWord"),
 			groogQMK.and(inSearchEditor).value:     kb("toggleSearchEditorWholeWord"),
@@ -529,7 +532,8 @@ var (
 			"workbench.extensions.action.checkForUpdates",
 		),
 		// Prevent focus mode from ever being activated.
-		ctrl("m"): only("-editor.action.toggleTabFocusMode"),
+		// ctrl+m is set elsewhere in this file so this command is already overriden.
+		// ctrl("m"): only("-editor.action.toggleTabFocusMode"),
 	}
 )
 
