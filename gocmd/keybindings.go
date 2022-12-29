@@ -186,9 +186,6 @@ var (
 			groogQMK.not().and(terminalVisible.not()).and(groogRecording.not()).value: kb("groog.find"),
 			groogQMK.value: kb("groog.cursorRight"),
 		},
-		ctrl("m"):       only("groog.find.toggleReplaceMode"),
-		alt("s"):        only("editor.action.replaceOne"),
-		alt(shift("s")): only("editor.action.replaceAll"),
 		// Don't use 'terminalVisible' here because we don't want ctrl+r to activate terminal find mode.
 		// Instead, we want ctrl+r in non-find mode to search for matching bash commands (as it normally would)
 		ctrl("r"): contextualKB(groogTerminalFindMode, kb("groog.terminal.reverseFind"), kb("groog.reverseFind")),
@@ -231,12 +228,22 @@ var (
 
 		// Emacs bindings
 		ctrl("w"): only("groog.yank"),
-		ctrl("j"): panelSplit(
-			kb("workbench.action.previousPanelView"),
-			kb("groog.toggleMarkMode"),
-		),
-		ctrl("y"): only("groog.paste"),
-		ctrl("k"): only("groog.kill"),
+		ctrl("j"): {
+			// Jumps to other input box in find mode
+			groogFindMode.value: kb("groog.find.toggleReplaceMode"),
+			// Change panel in terminal
+			groogFindMode.not().and(activePanel).value: kb("workbench.action.previousPanelView"),
+			// Start mark mode in regular editor
+			groogFindMode.not().and(activePanel.not()).value: kb("groog.toggleMarkMode"),
+		},
+		ctrl("y"):        only("groog.paste"),
+		ctrl(shift("k")): only("editor.action.replaceAll"),
+		ctrl("k"): {
+			// Replace in find mode
+			groogFindMode.value: kb("editor.action.replaceOne"),
+			// Kill in editor
+			groogFindMode.not().value: kb("groog.kill"),
+		},
 		ctrl("l"): panelSplit(
 			kb("workbench.action.nextPanelView"),
 			kb("groog.jump"),
@@ -532,8 +539,7 @@ var (
 			"workbench.extensions.action.checkForUpdates",
 		),
 		// Prevent focus mode from ever being activated.
-		// ctrl+m is set elsewhere in this file so this command is already overriden.
-		// ctrl("m"): only("-editor.action.toggleTabFocusMode"),
+		ctrl("m"): only("-editor.action.toggleTabFocusMode"),
 	}
 )
 
