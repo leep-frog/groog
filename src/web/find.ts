@@ -72,7 +72,12 @@ export class FindHandler extends TypeHandler {
   }
 
   async findWithArgs() {
-    await vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": this.findText, "replaceString": this.replaceText, }).then(async () => {
+    let ft : string = this.findText;
+    if (ft.length === 0) {
+      // Plus sign so not annoying when searching in this file.
+      ft = "ENTER_" + "TEXT";
+    }
+    await vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": ft, "replaceString": this.replaceText, }).then(async () => {
       await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
     }, async () => {
       await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
