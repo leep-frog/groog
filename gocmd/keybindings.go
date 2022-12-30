@@ -224,7 +224,9 @@ var (
 			groogQMK.and(inSearchEditor).value:     kb("toggleSearchEditorWholeWord"),
 			groogQMK.and(searchViewletFocus).value: kb("toggleSearchWholeWord"),
 			groogQMK.and(editorFocus.not()).and(inSearchEditor.not()).and(searchViewletFocus.not()).value: kb("toggleSearchWholeWord"),
+			groogQMK.not().value: notification("Run alt+shift+f4 to close the window"),
 		},
+		alt(shift("f4")): only("workbench.action.closeWindow"),
 
 		// Emacs bindings
 		ctrl("w"): only("groog.yank"),

@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.81",
+  "version": "0.0.82",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -451,6 +451,14 @@
       },
       {
         "key": "alt+f4",
+        "command": "groog.message.info",
+        "when": "!groog.context.qmkMode",
+        "args": {
+          "message": "Run alt+shift+f4 to close the window"
+        }
+      },
+      {
+        "key": "alt+f4",
         "command": "toggleSearchWholeWord",
         "when": "groog.context.qmkMode \u0026\u0026 !editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus"
       },
@@ -506,6 +514,10 @@
         "key": "alt+shift+e",
         "command": "groog.record.saveRecordingAs",
         "when": "groog.context.recordMode"
+      },
+      {
+        "key": "alt+shift+f4",
+        "command": "workbench.action.closeWindow"
       },
       {
         "key": "alt+shift+t",
