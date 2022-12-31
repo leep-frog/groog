@@ -4,23 +4,109 @@ import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand } from './interfaces';
 import { Recorder } from './record';
 
-// TODO: Implement a FindReplaceHandler?  alt+s/f -> type search term -> enter -> type replace term -> enter
-//       Would need to ensure regexp grouping still works (just use typescript regex on selection text (only if regexp enabled?)).
-//       Don't worry about implementing this until find a strong need for it.
-export class FindHandler extends TypeHandler {
-  findText: string;
-  replaceText: string;
+const maxFindCacheSize : number = 100;
+
+interface FindContext {
+  findText : string;
+  replaceText : string;
+}
+
+class FindContextCache {
+  cache: FindContext[];
+  cacheIdx: number;
   cursorStack: CursorStack;
-  replaceMode: boolean;
-  whenContext: string = "find";
 
-
-  constructor(cm: ColorMode) {
-    super(cm, ModeColor.find);
-    this.findText = "";
-    this.replaceText = "";
+  constructor() {
+    this.cache = [];
+    this.cacheIdx = 0;
     this.cursorStack = new CursorStack();
-    this.replaceMode = false;
+  }
+
+  async startNew() : Promise<void> {
+    this.cache.push({
+      findText: "",
+      replaceText: "",
+    });
+    if (this.cache.length > maxFindCacheSize) {
+      this.cache = this.cache.slice(1);
+    }
+    this.cacheIdx = this.cache.length-1;
+    await this.findWithArgs();
+  }
+
+  async end(): Promise<void> {
+    let lastCtx = this.cache[this.cache.length-1];
+    if (lastCtx.findText.length === 0 && lastCtx.replaceText.length === 0) {
+      this.cache.pop();
+    }
+  }
+
+  currentContext() : FindContext {
+    return this.cache[this.cacheIdx ?? this.cache.length-1];
+  }
+
+  async nextContext(): Promise<void> {
+    if (this.cacheIdx >= this.cache.length-1) {
+      vscode.window.showInformationMessage("End of find cache");
+      return;
+    }
+    this.cacheIdx++;
+    this.cursorStack.clear();
+    await this.findWithArgs();
+  }
+
+  async prevContext(): Promise<void> {
+    if (this.cacheIdx <= 0) {
+      vscode.window.showInformationMessage("No earlier find contexts available");
+      return;
+    }
+    this.cacheIdx--;
+    this.cursorStack.clear();
+    await this.findWithArgs();
+  }
+
+  async insertText(s: string, replaceMode: boolean): Promise<void> {
+    let ctx = this.currentContext();
+    if (replaceMode) {
+      ctx.replaceText = ctx.replaceText.concat(s);
+    } else {
+      ctx.findText = ctx.findText.concat(s);
+      this.cursorStack.push();
+    }
+    await this.findWithArgs();
+  }
+
+  async deleteLeft(replaceMode: boolean): Promise<void> {
+    let ctx = this.currentContext();
+    if (replaceMode) {
+      if (ctx.replaceText.length > 0) {
+        ctx.replaceText = ctx.replaceText.slice(0, ctx.replaceText.length - 1);
+        await this.findWithArgs();
+      }
+    } else {
+      if (ctx.findText.length > 0) {
+        ctx.findText = ctx.findText.slice(0, ctx.findText.length - 1);
+        this.cursorStack.popAndSet();
+        await this.findWithArgs();
+      }
+    }
+  }
+
+  async findWithArgs() {
+    let ctx : FindContext = this.currentContext();
+    let ft : string = ctx.findText;
+    if (ft.length === 0) {
+      // Plus sign so not annoying when searching in this file.
+      ft = "ENTER_" + "TEXT";
+    }
+    await vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": ft, "replaceString": ctx.replaceText, }).then(async () => {
+      await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
+    }, async () => {
+      await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
+    }
+    );
+    await cursorToFront();
+    await this.nextMatch();
   }
 
   async nextMatch() {
@@ -30,11 +116,24 @@ export class FindHandler extends TypeHandler {
   async prevMatch() {
     await vscode.commands.executeCommand("editor.action.previousMatchFindAction");
   }
+}
+
+
+export class FindHandler extends TypeHandler {
+  replaceMode: boolean;
+  whenContext: string = "find";
+  cache : FindContextCache;
+
+  constructor(cm: ColorMode) {
+    super(cm, ModeColor.find);
+    this.replaceMode = false;
+    this.cache = new FindContextCache();
+  }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
     recorder.registerCommand(context, 'find', async () => {
       if (this.isActive()) {
-        await this.nextMatch();
+        await this.cache.nextMatch();
       } else {
         await this.activate();
       }
@@ -47,9 +146,23 @@ export class FindHandler extends TypeHandler {
     });
     recorder.registerCommand(context, 'reverseFind', async () => {
       if (this.isActive()) {
-        await this.prevMatch();
+        await this.cache.prevMatch();
       } else {
         await this.activate();
+      }
+    });
+    recorder.registerCommand(context, 'find.previous', async () => {
+      if (!this.isActive()) {
+        vscode.window.showInformationMessage("groog.find.previous can only be executed in find mode");
+      } else {
+        this.cache.prevContext();
+      }
+    });
+    recorder.registerCommand(context, 'find.next', async () => {
+      if (!this.isActive()) {
+        vscode.window.showInformationMessage("groog.find.next can only be executed in find mode");
+      } else {
+        this.cache.nextContext();
       }
     });
     vscode.window.onDidChangeActiveTextEditor(async () => {
@@ -58,33 +171,14 @@ export class FindHandler extends TypeHandler {
   }
 
   async handleActivation() {
-    await this.findWithArgs();
+    await this.cache.startNew();
   }
 
   async handleDeactivation() {
-    // TODO: cache last k searches
-    this.findText = "";
-    this.replaceText = "";
     this.replaceMode = false;
-    this.cursorStack.clear();
+    this.cache.end();
     await vscode.commands.executeCommand("cancelSelection");
     await vscode.commands.executeCommand("closeFindWidget");
-  }
-
-  async findWithArgs() {
-    let ft : string = this.findText;
-    if (ft.length === 0) {
-      // Plus sign so not annoying when searching in this file.
-      ft = "ENTER_" + "TEXT";
-    }
-    await vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": ft, "replaceString": this.replaceText, }).then(async () => {
-      await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
-    }, async () => {
-      await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
-    }
-    );
-    await cursorToFront();
-    await this.nextMatch();
   }
 
   async ctrlG() {
@@ -93,13 +187,7 @@ export class FindHandler extends TypeHandler {
 
   async textHandler(s: string): Promise<boolean> {
     // Enter, shift+enter, ctrl+n, ctrl+p taken care of in package.json
-    if (this.replaceMode) {
-      this.replaceText = this.replaceText.concat(s);
-    } else {
-      this.findText = this.findText.concat(s);
-      this.cursorStack.push();
-    }
-    await this.findWithArgs();
+    this.cache.insertText(s, this.replaceMode);
     return false;
   }
 
@@ -111,18 +199,7 @@ export class FindHandler extends TypeHandler {
   async delHandler(s: DeleteCommand): Promise<boolean> {
     switch (s) {
       case DeleteCommand.left:
-        if (this.replaceMode) {
-          if (this.replaceText.length > 0) {
-            this.replaceText = this.replaceText.slice(0, this.replaceText.length - 1);
-            await this.findWithArgs();
-          }
-        } else {
-          if (this.findText.length > 0) {
-            this.findText = this.findText.slice(0, this.findText.length - 1);
-            this.cursorStack.popAndSet();
-            await this.findWithArgs();
-          }
-        }
+        this.cache.deleteLeft(this.replaceMode);
         break;
       default:
         vscode.window.showInformationMessage("Unsupported find command: " + s);
@@ -176,7 +253,7 @@ class CursorStack {
   }
 }
 
-export function cursorToFront() {
+export async function cursorToFront() {
   // Move cursor to beginning of selection
   let editor = vscode.window.activeTextEditor;
   if (editor) {

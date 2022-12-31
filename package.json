@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.82",
+  "version": "0.0.83",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -59,6 +59,9 @@
     "onCommand:groog.deleteWordRight",
     "onCommand:groog.fall",
     "onCommand:groog.find",
+    "onCommand:groog.find.next",
+    "onCommand:groog.find.previous",
+    "onCommand:groog.find.toggleReplaceMode",
     "onCommand:groog.format",
     "onCommand:groog.jump",
     "onCommand:groog.kill",
@@ -150,6 +153,18 @@
       {
         "command": "groog.find",
         "title": "Groog find"
+      },
+      {
+        "command": "groog.find.next",
+        "title": "Groog go to next find context"
+      },
+      {
+        "command": "groog.find.previous",
+        "title": "Groog go to previous find context"
+      },
+      {
+        "command": "groog.find.toggleReplaceMode",
+        "title": "Groog toggle between find and replace input boxes"
       },
       {
         "command": "groog.format",
@@ -968,7 +983,17 @@
       },
       {
         "key": "ctrl+shift+n",
-        "command": "workbench.action.files.newUntitledFile"
+        "command": "workbench.action.files.newUntitledFile",
+        "when": "!groog.context.findMode"
+      },
+      {
+        "key": "ctrl+shift+n",
+        "command": "groog.find.next",
+        "when": "groog.context.findMode"
+      },
+      {
+        "key": "ctrl+shift+p",
+        "command": "groog.find.previous"
       },
       {
         "key": "ctrl+shift+q",

@@ -250,9 +250,10 @@ var (
 			kb("workbench.action.nextPanelView"),
 			kb("groog.jump"),
 		),
-		pageup:    textOnly("groog.jump"),
-		ctrl("v"): only("groog.fall"),
-		pagedown:  textOnly("groog.fall"),
+		pageup:           textOnly("groog.jump"),
+		ctrl("v"):        only("groog.fall"),
+		pagedown:         textOnly("groog.fall"),
+		ctrl(shift("p")): only("groog.find.previous"),
 		ctrl("p"): {
 			groogTerminalFindMode.value: kb("groog.terminal.reverseFind"),
 			always.value:                kb("-workbench.action.quickOpen"),
@@ -379,9 +380,12 @@ var (
 			"workbench.action.splitEditorRight",
 			"workbench.action.quickOpen",
 		),
-		ctrl(pagedown):   only("workbench.action.focusNextGroup"),
-		ctrl(pageup):     only("workbench.action.focusPreviousGroup"),
-		ctrl(shift("n")): only("workbench.action.files.newUntitledFile"),
+		ctrl(pagedown): only("workbench.action.focusNextGroup"),
+		ctrl(pageup):   only("workbench.action.focusPreviousGroup"),
+		ctrl(shift("n")): {
+			groogFindMode.value:       kb("groog.find.next"),
+			groogFindMode.not().value: kb("workbench.action.files.newUntitledFile"),
+		},
 		// In our QMK keyboard, pressing "shift+n" in the LR_CTRL layer
 		// actually sends "shift+down" (no ctrl modifier).
 		// So when trying to press "ctrl+shift+n", do the same thing (new file).
