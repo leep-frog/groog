@@ -159,12 +159,6 @@ export class FindHandler extends TypeHandler {
         await this.activate();
       }
     });
-    recorder.registerCommand(context, 'find.toggleReplaceMode', async () => {
-      if (!this.isActive()) {
-        return;
-      }
-      this.cache.toggleReplaceMode();
-    });
     recorder.registerCommand(context, 'reverseFind', async () => {
       if (this.isActive()) {
         await this.cache.prevMatch();
@@ -172,6 +166,15 @@ export class FindHandler extends TypeHandler {
         await this.activate();
       }
     });
+
+    recorder.registerCommand(context, 'find.toggleReplaceMode', async () => {
+      if (!this.isActive()) {
+        return;
+      }
+      this.cache.toggleReplaceMode();
+    });
+
+    // Goes to previous find context
     recorder.registerCommand(context, 'find.previous', async () => {
       if (!this.isActive()) {
         vscode.window.showInformationMessage("groog.find.previous can only be executed in find mode");
@@ -179,6 +182,7 @@ export class FindHandler extends TypeHandler {
         this.cache.prevContext();
       }
     });
+    // Goes to next find context
     recorder.registerCommand(context, 'find.next', async () => {
       if (!this.isActive()) {
         vscode.window.showInformationMessage("groog.find.next can only be executed in find mode");
