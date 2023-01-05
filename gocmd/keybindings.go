@@ -366,7 +366,7 @@ var (
 		),
 		ctrlX("v"): onlyMC(
 			"workbench.action.splitEditorDown",
-			"workbench.action.focusPreviousGroup",
+			"groog.focusPreviousEditor",
 		),
 		ctrl(shift("v")): onlyMC(
 			"workbench.action.splitEditorDown",
@@ -374,14 +374,14 @@ var (
 		),
 		ctrlX("h"): onlyMC(
 			"workbench.action.splitEditorRight",
-			"workbench.action.focusPreviousGroup",
+			"groog.focusPreviousEditor",
 		),
 		ctrl(shift("h")): onlyMC(
 			"workbench.action.splitEditorRight",
 			"workbench.action.quickOpen",
 		),
-		ctrl(pagedown): only("workbench.action.focusNextGroup"),
-		ctrl(pageup):   only("workbench.action.focusPreviousGroup"),
+		ctrl(pagedown): only("groog.focusNextEditor"),
+		ctrl(pageup):   only("groog.focusPreviousEditor"),
 		ctrl(shift("n")): {
 			groogFindMode.value:       kb("groog.find.next"),
 			groogFindMode.not().value: kb("workbench.action.files.newUntitledFile"),
@@ -395,27 +395,27 @@ var (
 		shift(delete):    revealInNewEditor,
 		ctrl(pagedown): panelSplit(
 			kb("workbench.action.terminal.focusNext"),
-			kb("workbench.action.focusNextGroup"),
+			kb("groog.focusNextEditor"),
 		),
 		ctrl(pageup): panelSplit(
 			kb("workbench.action.terminal.focusPrevious"),
-			kb("workbench.action.focusPreviousGroup"),
+			kb("groog.focusPreviousEditor"),
 		),
 		ctrl("u"): panelSplit(
 			kb("workbench.action.terminal.focusPrevious"),
-			kb("workbench.action.focusPreviousGroup"),
+			kb("groog.focusPreviousEditor"),
 		),
 		ctrl("o"): panelSplit(
 			kb("workbench.action.terminal.focusNext"),
-			kb("workbench.action.focusNextGroup"),
+			kb("groog.focusNextEditor"),
 		),
 		ctrl(shift(tab)): panelSplit(
 			kb("workbench.action.terminal.focusPrevious"),
-			kb("workbench.action.focusPreviousGroup"),
+			kb("groog.focusPreviousEditor"),
 		),
 		ctrl(tab): panelSplit(
 			kb("workbench.action.terminal.focusNext"),
-			kb("workbench.action.focusNextGroup"),
+			kb("groog.focusNextEditor"),
 		),
 		ctrlX("b"): only("editor.action.jumpToBracket"),
 

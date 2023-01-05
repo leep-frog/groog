@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.84",
+  "version": "0.0.85",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -62,6 +62,8 @@
     "onCommand:groog.find.next",
     "onCommand:groog.find.previous",
     "onCommand:groog.find.toggleReplaceMode",
+    "onCommand:groog.focusNextEditor",
+    "onCommand:groog.focusPreviousEditor",
     "onCommand:groog.format",
     "onCommand:groog.jump",
     "onCommand:groog.kill",
@@ -165,6 +167,14 @@
       {
         "command": "groog.find.toggleReplaceMode",
         "title": "Groog toggle between find and replace input boxes"
+      },
+      {
+        "command": "groog.focusNextEditor",
+        "title": "Focus next editor"
+      },
+      {
+        "command": "groog.focusPreviousEditor",
+        "title": "Focus next editor"
       },
       {
         "command": "groog.format",
@@ -823,7 +833,7 @@
       },
       {
         "key": "ctrl+o",
-        "command": "workbench.action.focusNextGroup",
+        "command": "groog.focusNextEditor",
         "when": "!activePanel"
       },
       {
@@ -873,7 +883,7 @@
       },
       {
         "key": "ctrl+pagedown",
-        "command": "workbench.action.focusNextGroup",
+        "command": "groog.focusNextEditor",
         "when": "!activePanel"
       },
       {
@@ -883,7 +893,7 @@
       },
       {
         "key": "ctrl+pageup",
-        "command": "workbench.action.focusPreviousGroup",
+        "command": "groog.focusPreviousEditor",
         "when": "!activePanel"
       },
       {
@@ -1016,7 +1026,7 @@
       },
       {
         "key": "ctrl+shift+tab",
-        "command": "workbench.action.focusPreviousGroup",
+        "command": "groog.focusPreviousEditor",
         "when": "!activePanel"
       },
       {
@@ -1046,7 +1056,7 @@
       },
       {
         "key": "ctrl+tab",
-        "command": "workbench.action.focusNextGroup",
+        "command": "groog.focusNextEditor",
         "when": "!activePanel"
       },
       {
@@ -1056,7 +1066,7 @@
       },
       {
         "key": "ctrl+u",
-        "command": "workbench.action.focusPreviousGroup",
+        "command": "groog.focusPreviousEditor",
         "when": "!activePanel"
       },
       {
@@ -1226,7 +1236,7 @@
         "args": {
           "sequence": [
             "workbench.action.splitEditorRight",
-            "workbench.action.focusPreviousGroup"
+            "groog.focusPreviousEditor"
           ]
         }
       },
@@ -1236,7 +1246,7 @@
         "args": {
           "sequence": [
             "workbench.action.splitEditorRight",
-            "workbench.action.focusPreviousGroup"
+            "groog.focusPreviousEditor"
           ]
         }
       },
@@ -1364,7 +1374,7 @@
         "args": {
           "sequence": [
             "workbench.action.splitEditorDown",
-            "workbench.action.focusPreviousGroup"
+            "groog.focusPreviousEditor"
           ]
         }
       },
@@ -1374,7 +1384,7 @@
         "args": {
           "sequence": [
             "workbench.action.splitEditorDown",
-            "workbench.action.focusPreviousGroup"
+            "groog.focusPreviousEditor"
           ]
         }
       },

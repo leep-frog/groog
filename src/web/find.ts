@@ -190,6 +190,15 @@ export class FindHandler extends TypeHandler {
         this.cache.nextContext();
       }
     });
+
+    recorder.registerCommand(context, 'focusNextEditor', async () => {
+      await this.deactivateCommands();
+      await vscode.commands.executeCommand("workbench.action.focusNextGroup");
+    });
+    recorder.registerCommand(context, 'focusPreviousEditor', async () => {
+      await this.deactivateCommands();
+      await vscode.commands.executeCommand("workbench.action.focusPreviousGroup");
+    });
     vscode.window.onDidChangeActiveTextEditor(async () => {
       await this.deactivate();
     });
@@ -199,10 +208,14 @@ export class FindHandler extends TypeHandler {
     await this.cache.startNew();
   }
 
-  async handleDeactivation() {
-    this.cache.end();
+  async deactivateCommands() {
     await vscode.commands.executeCommand("cancelSelection");
     await vscode.commands.executeCommand("closeFindWidget");
+  }
+
+  async handleDeactivation() {
+    this.cache.end();
+    await this.deactivateCommands();
   }
 
   async ctrlG() {

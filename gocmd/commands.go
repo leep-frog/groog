@@ -46,6 +46,8 @@ var (
 		cc("groog.deleteRight", "Groog delete right"),
 		cc("groog.deleteWordLeft", "Groog delete left"),
 		cc("groog.deleteWordRight", "Groog delete right"),
+		cc("groog.focusNextEditor", "Focus next editor"),
+		cc("groog.focusPreviousEditor", "Focus next editor"),
 		cc("groog.fall", "Emacs Fall"),
 		cc("groog.find", "Groog find"),
 		cc("groog.find.toggleReplaceMode", "Groog toggle between find and replace input boxes"),
