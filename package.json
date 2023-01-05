@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.85",
+  "version": "0.0.86",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -79,6 +79,8 @@
     "onCommand:groog.record.saveRecordingAs",
     "onCommand:groog.record.startRecording",
     "onCommand:groog.reverseFind",
+    "onCommand:groog.terminal.find",
+    "onCommand:groog.terminal.reverseFind",
     "onCommand:groog.toggleMarkMode",
     "onCommand:groog.toggleQMK",
     "onCommand:groog.type",
@@ -235,6 +237,14 @@
       {
         "command": "groog.reverseFind",
         "title": "Groog reverse find"
+      },
+      {
+        "command": "groog.terminal.find",
+        "title": "Groog find in terminal"
+      },
+      {
+        "command": "groog.terminal.reverseFind",
+        "title": "Groog find in terminal"
       },
       {
         "command": "groog.toggleMarkMode",
