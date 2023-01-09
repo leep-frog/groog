@@ -292,9 +292,9 @@ class CursorStack {
 
 export async function cursorToFront() {
   // Move cursor to beginning of selection
-  let editor = vscode.window.activeTextEditor;
+  const editor = vscode.window.activeTextEditor;
   if (editor) {
-    let startPos = editor.selection.start;
+    const startPos = editor.selection.start;
     editor.selection = new vscode.Selection(startPos, startPos);
   }
 }

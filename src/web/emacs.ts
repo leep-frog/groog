@@ -9,6 +9,7 @@ import { infoMessage, multiCommand } from './misc-command';
 import { Recorder } from './record';
 import { Settings } from './settings';
 import { TerminalFindHandler } from './terminal-find';
+import { TypoFixer } from './typo';
 
 const jumpDist = 10;
 
@@ -35,11 +36,13 @@ export class Emacs {
   recorder: Recorder;
   typeHandlers: TypeHandler[];
   cm: ColorMode;
+  typoFixer: TypoFixer;
 
   constructor() {
     this.cm = new ColorMode();
     this.qmk = new GlobalStateTracker<boolean>(qmkKey);
     this.recorder = new Recorder(this.cm);
+    this.typoFixer = new TypoFixer();
     this.typeHandlers = [
       new FindHandler(this.cm),
       new MarkHandler(this.cm),
@@ -92,7 +95,7 @@ export class Emacs {
     // Register one-off commands.
     commands.forEach((value: () => Thenable<any>, key: string) => {
       this.recorder.registerCommand(context, key, value);
-    });//
+    });
 
     // After all commands have been registered, check persistent data for qmk setting.
     this.setQMK(context, this.qmk.get(context));
@@ -119,7 +122,13 @@ export class Emacs {
     let s = arg.text;
     await this.runHandlers(
       async (th: TypeHandler): Promise<boolean> => { return await th.textHandler(s); },
-      async () => { await vscode.commands.executeCommand("default:type", arg); },
+      async () => {
+        // Before typing, check our dictionary.
+        if (!(await this.typoFixer.check(s))) {
+          await vscode.commands.executeCommand("default:type", arg);
+        }
+
+      },
     );
   }
 
@@ -235,10 +244,6 @@ export class Emacs {
   }
 }
 
-class TypeArg {
+interface TypeArg {
   text: string;
-
-  constructor(text: string) {
-    this.text = "";
-  }
 }
