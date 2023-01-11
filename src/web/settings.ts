@@ -18,6 +18,7 @@ export class Settings implements Registerable {
       "workbench.action.terminal.findNext",
       "workbench.action.terminal.findPrevious",
       "groog.ctrlG",
+      "termin-all-or-nothing.closePanel",
     ];
     for (let v of commands.keys()) {
       ics.push("groog." + v);
