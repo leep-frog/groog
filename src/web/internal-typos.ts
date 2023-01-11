@@ -5,12 +5,8 @@ import { Correction, defaultCorrections } from './typos';
 
 // TODO: Case match?
 
-export const globalLanguageKey = "*";
-export const goLanguageKey = "golang";
-export const jsoncLanguageKey = "jsonc";
-export const jsonLanguageKey = "json";
-
-// Types stored in settings
+const globalLanguageKey = "*";
+const whitespaceCharBreakKey = "WHITESPACE";
 
 // Types used internally
 interface CorrectionOptions {
@@ -18,14 +14,14 @@ interface CorrectionOptions {
   replacementTextAfterCursor?: string;
 }
 
-interface WordsToOptions {
-  // Key is word
+interface BreakCharToOptions {
+  // Key is break character
   [key: string]: CorrectionOptions;
 }
 
 interface InternalCorrector {
-  // Key is break character
-  [key: string]: WordsToOptions;
+  // Key is word
+  [key: string]: BreakCharToOptions;
 }
 
 interface InternalCorrectorsByLanguage {
@@ -72,7 +68,7 @@ export class TypoFixer {
 
   async check(char: string) : Promise<boolean> {
     // Only run if the user just inserted a word break character or a whitespace character.
-    if (!this.defaultBreakCharacters.includes(char) && !/\s/.test(char)) {
+    if (!this.defaultBreakCharacters.includes(char) && !this.isWhitespaceChar(char)) {
       return false;
     }
 
@@ -83,33 +79,35 @@ export class TypoFixer {
       return false;
     }
 
-    // First run the language specific correction
-    if (editor.document.languageId in this.perLanguageCorrections) {
-      const byBreakChar = this.perLanguageCorrections[editor.document.languageId];
-      if ((await this.runCorrection(byBreakChar, editor, char))) {
-        return true;
-      }
-    }
-
-    return this.runCorrection(this.globalCorrections, editor, char);
-  }
-
-  async runCorrection(corrector : InternalCorrector | undefined, editor : vscode.TextEditor, breakCharacter: string) : Promise<boolean> {
-    // START: Get this outside of run correction.
+    // Get the last word.
     const lastWordData = this.lastWord(editor);
     if (!lastWordData) {
       return false;
     }
-
-
     const [word, lastWordRange] : [string, vscode.Range] = lastWordData;
-    // END: Get this outside of run correction
 
-    if (!corrector || !(breakCharacter in corrector) || !(word in corrector[breakCharacter])) {
+    // First run the language specific correction.
+    if (editor.document.languageId in this.perLanguageCorrections) {
+      const byBreakChar = this.perLanguageCorrections[editor.document.languageId];
+      if ((await this.runCorrection(byBreakChar, editor, char, word, lastWordRange))) {
+        return true;
+      }
+    }
+
+    // If no match on language specific correction, then try the global one.
+    return this.runCorrection(this.globalCorrections, editor, char, word, lastWordRange);
+  }
+
+  async runCorrection(corrector : InternalCorrector | undefined, editor : vscode.TextEditor, breakCharacter: string, word : string, lastWordRange : vscode.Range) : Promise<boolean> {
+    if (!corrector || !(word in corrector)) {
       return false;
     }
 
-    const options = corrector[breakCharacter][word];
+    const options = this.getOptions(corrector[word], breakCharacter);
+    if (!options) {
+      return false;
+    }
+
     await editor.edit(
       editBuilder => {
         editBuilder.delete(lastWordRange);
@@ -122,6 +120,18 @@ export class TypoFixer {
       }
     );
     return true;
+  }
+
+  getOptions(byBreakChar : BreakCharToOptions, breakCharacter : string) : CorrectionOptions | undefined {
+    if (breakCharacter in byBreakChar) {
+      return byBreakChar[breakCharacter];
+    } else if (this.isWhitespaceChar(breakCharacter) && whitespaceCharBreakKey in byBreakChar) {
+      return byBreakChar[whitespaceCharBreakKey];
+    }
+  }
+
+  isWhitespaceChar(c : string): boolean {
+    return /\s/.test(c);
   }
 
   lastWord(editor : vscode.TextEditor) : [string, vscode.Range] | undefined {
@@ -157,18 +167,29 @@ export class TypoFixer {
           }
           const corrector = langCs[langId];
 
-          // Iterate over break characters
-          for (const breakChar of (correction.breakChars || this.defaultBreakCharacters)) {
-            if (!(breakChar in corrector)) {
-              corrector[breakChar] = {};
-            }
+          if (!(word in corrector)) {
+            corrector[word] = {};
+          }
 
+          const byBreakChar = corrector[word];
+
+          const breakChars = this.getBreakChars(correction);
+
+          // Iterate over break characters
+          for (const breakChar of breakChars) {
             // Add correction
-            corrector[breakChar][word] = opts;
+            byBreakChar[breakChar] = opts;
           }
         }
       }
     }
     return langCs;
+  }
+
+  getBreakChars(correction : Correction) : string[] {
+    if (correction.breakChars !== undefined) {
+      return correction.breakChars.split("");
+    }
+    return this.defaultBreakCharacters.split("").concat([whitespaceCharBreakKey]);
   }
 }

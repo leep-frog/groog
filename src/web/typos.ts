@@ -21,17 +21,23 @@ export interface Correction {
   replacementSuffixAfterCursor?: string;
 }
 
+const goLanguageKey = "golang";
+const jsoncLanguageKey = "jsonc";
+const jsonLanguageKey = "json";
+const typescriptLanguageKey = "typescript";
+
 export function defaultCorrections() : Correction[] {
   return [
     {
       // languages: [
-      //   jsonLanguageKey,
-      //   jsoncLanguageKey,
+      //   typescriptLanguageKey
       // ],
       words: {
-        "pritn": "print",
+        "sim": "vscode.window.showInformationMessage(\"",
+        "sem": "vscode.window.showInformationMessage(\"",
       },
-      replacementSuffix: "X",
+      // TODO: Replace break character option
+      replacementSuffix: "\")",
     },
   ];
 }
