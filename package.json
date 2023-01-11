@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.88",
+  "version": "0.0.89",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -1056,12 +1056,12 @@
       },
       {
         "key": "ctrl+t",
-        "command": "workbench.action.toggleMaximizedPanel",
+        "command": "termin-all-or-nothing.openPanel",
         "when": "!activePanel"
       },
       {
         "key": "ctrl+t",
-        "command": "workbench.action.closePanel",
+        "command": "termin-all-or-nothing.closePanel",
         "when": "activePanel"
       },
       {
@@ -1210,35 +1210,11 @@
       },
       {
         "key": "ctrl+x f",
-        "command": "workbench.action.quickOpen",
-        "when": "!activePanel"
+        "command": "workbench.action.quickOpen"
       },
       {
         "key": "ctrl+x ctrl+f",
-        "command": "workbench.action.quickOpen",
-        "when": "!activePanel"
-      },
-      {
-        "key": "ctrl+x f",
-        "command": "groog.multiCommand.execute",
-        "when": "activePanel",
-        "args": {
-          "sequence": [
-            "workbench.action.closePanel",
-            "workbench.action.quickOpen"
-          ]
-        }
-      },
-      {
-        "key": "ctrl+x ctrl+f",
-        "command": "groog.multiCommand.execute",
-        "when": "activePanel",
-        "args": {
-          "sequence": [
-            "workbench.action.closePanel",
-            "workbench.action.quickOpen"
-          ]
-        }
+        "command": "workbench.action.quickOpen"
       },
       {
         "key": "ctrl+x h",

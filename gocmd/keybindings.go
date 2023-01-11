@@ -357,13 +357,8 @@ var (
 		ctrl(";"):    only("editor.action.commentLine"),
 
 		// File navigation
-		ctrlX("f"): panelSplit(
-			mc(
-				"workbench.action.closePanel",
-				"workbench.action.quickOpen",
-			),
-			kb("workbench.action.quickOpen"),
-		),
+		// closePanel is taken care of by termin-all-or-nothing
+		ctrlX("f"): only("workbench.action.quickOpen"),
 		ctrlX("v"): onlyMC(
 			"workbench.action.splitEditorDown",
 			"groog.focusPreviousEditor",
@@ -454,8 +449,8 @@ var (
 			kb("groog.cursorBottom"),
 		),
 		ctrl("t"): panelSplit(
-			kb("workbench.action.closePanel"),
-			kb("workbench.action.toggleMaximizedPanel"),
+			kb("termin-all-or-nothing.closePanel"),
+			kb("termin-all-or-nothing.openPanel"),
 		),
 		// alt-t on QMK keyboard is actually ctrl+shift+t (for new tab)
 		ctrl(shift("t")): only("workbench.action.terminal.newInActiveWorkspace"),
