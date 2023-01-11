@@ -81,6 +81,11 @@ export class TypoFixer {
       return false;
     }
 
+    // Don't run if highlighting a section
+    if (!editor.selection.start.isEqual(editor.selection.end)) {
+      return false;
+    }
+
     // Get the last word.
     const lastWordData = this.lastWord(editor);
     if (!lastWordData) {
@@ -115,8 +120,8 @@ export class TypoFixer {
         editBuilder.delete(lastWordRange);
         editBuilder.insert(
           lastWordRange.start,
-          options.replacementText + (!!options.excludeBreakCharacter ? "" : breakCharacter),
-          );
+          options.replacementText + (!!options.excludeBreakCharacter ? "" : breakCharacter) + options.replacementTextAfterCursor,
+        );
       },
       {
         // TODO: Do this in record.ts!!!
@@ -124,6 +129,29 @@ export class TypoFixer {
         undoStopBefore: false,
       }
     );
+
+    // Move cursor to before replacementTextAfterCursor portion
+    if (options.replacementTextAfterCursor.length > 0) {
+      // position.translate and cursorMove does not doesn't move across newline characters.
+      // It just errors due to a negative 'character' value, hence why we do our own
+      // custom logic to determine exact cursor position here.
+
+      const textByLine = options.replacementTextAfterCursor.split("\n");
+      const lineOffset = textByLine.length - 1;
+      const cursorOffset = textByLine[0].length;
+
+      let toPos : vscode.Position;
+      if (lineOffset === 0) {
+        // We didn't jump across lines, so simply translate
+        toPos = editor.selection.start.translate(-lineOffset, -cursorOffset);
+      } else {
+        // We changed lines, so determine the line where the replacementTextAfterCursor started and only offset form there
+        const afterCursorReplacementStartLine = editor.document.lineAt(editor.selection.start.line-lineOffset);
+        const endChar = afterCursorReplacementStartLine.range.end.character;
+        toPos = new vscode.Position(afterCursorReplacementStartLine.lineNumber, endChar - textByLine[0].length);
+      }
+      editor.selection = new vscode.Selection(toPos, toPos);
+    }
     return true;
   }
 
@@ -160,7 +188,6 @@ export class TypoFixer {
       // Iterate over words
       for (const word in correction.words) {
 
-        // TODO: replacementSuffixAfterCursor
         const opts : CorrectionOptions = {
           replacementText: correction.words[word] + (correction.replacementSuffix || ""),
           replacementTextAfterCursor: correction.replacementSuffixAfterCursor || "",

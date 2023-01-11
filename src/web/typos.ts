@@ -37,7 +37,6 @@ export function defaultCorrections() : Correction[] {
         "sim": "vscode.window.showInformationMessage(\"",
         "sem": "vscode.window.showInformationMessage(\"",
       },
-      // TODO: Replace break character option
       replacementSuffix: "\")",
     },
   ];
