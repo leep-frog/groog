@@ -2167,6 +2167,45 @@
           "text": "z"
         }
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Groog",
+      "properties": {
+        "groog.typos": {
+          "description": "List of corrections to automatically fix.",
+          "items": {
+            "description": "A set of corrections to automatically fix and options on those corrections",
+            "properties": {
+              "breakChars": {
+                "markdownDescription": "Break characters for which the typos should be applied. For example, if this is `'- '`, then these corrections will only be applied when the word is followed by a space or hyphen character. This value must be a subset of `#editor.wordSeparators#`. Any characters included here that are not in `#editor.wordSeparators#` will be ignored.",
+                "type": "string"
+              },
+              "languages": {
+                "items": {
+                  "type": "string"
+                },
+                "markdownDescription": "Languages for which the corrections should be applied. If undefined or empty, then the correction is applied to all file types. The `*` character also indicates that these corrections should be applied globally.",
+                "type": "array"
+              },
+              "replacementSuffix": {
+                "markdownDescription": "A suffix to add after all of the corrections listed in this object. For example, if words is `{'pritn': 'print'}` and this value is `\"hello world\"`, then typing `pritn ` will result in an auto-correction to `print \"hello world\"`",
+                "type": "string"
+              },
+              "replacementSuffixAfterCursor": {
+                "markdownDescription": "This field is similar to `replacementSuffix` except that this field inserts the characters after the cursor",
+                "type": "string"
+              },
+              "words": {
+                "markdownDescription": "Map of typos to corrected spelling.",
+                "properties": {},
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
+        }
+      }
+    }
   }
 }

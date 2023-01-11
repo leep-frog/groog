@@ -4,12 +4,12 @@ import { commands } from './commands';
 import { FindHandler } from './find';
 import { Registerable, TypeHandler } from './handler';
 import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './interfaces';
+import { TypoFixer } from './internal-typos';
 import { MarkHandler } from './mark';
 import { infoMessage, multiCommand } from './misc-command';
 import { Recorder } from './record';
 import { Settings } from './settings';
 import { TerminalFindHandler } from './terminal-find';
-import { TypoFixer } from './typo';
 
 const jumpDist = 10;
 

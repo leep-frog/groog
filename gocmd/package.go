@@ -45,8 +45,9 @@ type Repository struct {
 }
 
 type Contribution struct {
-	Commands    []*Command    `json:"commands"`
-	Keybindings []*Keybinding `json:"keybindings"`
+	Commands      []*Command     `json:"commands"`
+	Keybindings   []*Keybinding  `json:"keybindings"`
+	Configuration *Configuration `json:"configuration"`
 }
 
 type Keybinding struct {

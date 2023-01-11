@@ -64,8 +64,9 @@ func node() *command.Node {
 		slices.Sort(p.ActivationEvents)
 
 		p.Contributes = &Contribution{
-			Commands:    CustomCommands,
-			Keybindings: kbDefsToBindings(),
+			Commands:      CustomCommands,
+			Keybindings:   kbDefsToBindings(),
+			Configuration: groogConfiguration(),
 		}
 		slices.SortFunc(p.Contributes.Commands, func(a, b *Command) bool {
 			return a.Command < b.Command

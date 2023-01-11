@@ -119,20 +119,20 @@ class GlobalSetting implements Setting {
   }
 }
 
+const configSection : string = "editor";
+const configSubsection : string = "wordSeparators";
+
 // WordSeparatorSetting *adds* the provided characters to the list of editor word-separators.
 class WordSeparatorSetting implements Setting {
 
   private addCharacters: string;
-  private configSection : string = "editor";
-  private subsection : string = "wordSeparators";
 
   constructor(addCharacters : string) {
     this.addCharacters = addCharacters;
   }
 
   update(): void {
-    const configuration = vscode.workspace.getConfiguration(this.configSection);
-    let existing : string | undefined = configuration.get(this.subsection);
+    let [configuration, existing] = getWordSeparators();
     if (!existing) {
       vscode.window.showErrorMessage("Failed to fetch setting %s");
       return;
@@ -142,10 +142,14 @@ class WordSeparatorSetting implements Setting {
         existing += char;
       }
     }
-    configuration.update(this.subsection, existing, true);
+    configuration.update(configSubsection, existing, true);
   }
 }
 
+export function getWordSeparators() : [vscode.WorkspaceConfiguration, string | undefined] {
+  const configuration = vscode.workspace.getConfiguration(configSection);
+  return [configuration, configuration.get(configSubsection)];
+}
 
 class LanguageSetting implements Setting {
 
