@@ -14,7 +14,7 @@ func correctionSchema() *JSONSchema {
 			NewJSONString(),
 			JSONMarkdownDescription("Languages for which the corrections should be applied. If undefined or empty, then the correction is applied to all file types. The `*` character also indicates that these corrections should be applied globally."),
 		),
-		"breakChars": NewJSONString(
+		"breakCharacters": NewJSONString(
 			JSONMarkdownDescription("Break characters for which the typos should be applied. For example, if this is `'- '`, then these corrections will only be applied when the word is followed by a space or hyphen character. This value must be a subset of `#editor.wordSeparators#`. Any characters included here that are not in `#editor.wordSeparators#` will be ignored."),
 		),
 		"replacementSuffix": NewJSONString(
@@ -22,6 +22,10 @@ func correctionSchema() *JSONSchema {
 		),
 		"replacementSuffixAfterCursor": NewJSONString(
 			JSONMarkdownDescription("This field is similar to `replacementSuffix` except that this field inserts the characters after the cursor"),
+		),
+		"excludeBreakCharacter": NewJSONBool(
+			JSONMarkdownDescription("If set to `true`, the break character typed will not be sent to the editor."),
+			JSONDefault(false),
 		),
 	}, JSONDescription("A set of corrections to automatically fix and options on those corrections"))
 }

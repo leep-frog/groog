@@ -2176,9 +2176,14 @@
           "items": {
             "description": "A set of corrections to automatically fix and options on those corrections",
             "properties": {
-              "breakChars": {
+              "breakCharacters": {
                 "markdownDescription": "Break characters for which the typos should be applied. For example, if this is `'- '`, then these corrections will only be applied when the word is followed by a space or hyphen character. This value must be a subset of `#editor.wordSeparators#`. Any characters included here that are not in `#editor.wordSeparators#` will be ignored.",
                 "type": "string"
+              },
+              "excludeBreakCharacter": {
+                "default": false,
+                "markdownDescription": "If set to `true`, the break character typed will not be sent to the editor.",
+                "type": "boolean"
               },
               "languages": {
                 "items": {

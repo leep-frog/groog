@@ -10,8 +10,10 @@ const whitespaceCharBreakKey = "WHITESPACE";
 
 // Types used internally
 interface CorrectionOptions {
+  // All fields are required since we construct this internally only.
   replacementText: string;
-  replacementTextAfterCursor?: string;
+  replacementTextAfterCursor: string;
+  excludeBreakCharacter: boolean;
 }
 
 interface BreakCharToOptions {
@@ -111,7 +113,10 @@ export class TypoFixer {
     await editor.edit(
       editBuilder => {
         editBuilder.delete(lastWordRange);
-        editBuilder.insert(lastWordRange.start, options.replacementText + breakCharacter);
+        editBuilder.insert(
+          lastWordRange.start,
+          options.replacementText + (!!options.excludeBreakCharacter ? "" : breakCharacter),
+          );
       },
       {
         // TODO: Do this in record.ts!!!
@@ -158,6 +163,8 @@ export class TypoFixer {
         // TODO: replacementSuffixAfterCursor
         const opts : CorrectionOptions = {
           replacementText: correction.words[word] + (correction.replacementSuffix || ""),
+          replacementTextAfterCursor: correction.replacementSuffixAfterCursor || "",
+          excludeBreakCharacter: !!correction.excludeBreakCharacter,
         };
 
         // Iterate over languages (or global if none provided)
@@ -187,8 +194,8 @@ export class TypoFixer {
   }
 
   getBreakChars(correction : Correction) : string[] {
-    if (correction.breakChars !== undefined) {
-      return correction.breakChars.split("");
+    if (correction.breakCharacters !== undefined) {
+      return correction.breakCharacters.split("");
     }
     return this.defaultBreakCharacters.split("").concat([whitespaceCharBreakKey]);
   }

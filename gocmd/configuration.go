@@ -27,7 +27,11 @@ func NewJSONArray(items *JSONSchema, opts ...JSONSchemaOption) *JSONSchema {
 }
 
 func NewJSONString(opts ...JSONSchemaOption) *JSONSchema {
-	return NewJSONSchema(&JSONSchemaString{}, opts...)
+	return NewJSONSchema(&JSONSchemaSimpleType{"string"}, opts...)
+}
+
+func NewJSONBool(opts ...JSONSchemaOption) *JSONSchema {
+	return NewJSONSchema(&JSONSchemaSimpleType{"boolean"}, opts...)
 }
 
 func NewJSONObject(properties map[string]*JSONSchema, opts ...JSONSchemaOption) *JSONSchema {
@@ -93,11 +97,13 @@ func (a *JSONSchemaArray) ToJSONSchema() map[string]interface{} {
 	}
 }
 
-type JSONSchemaString struct{}
+type JSONSchemaSimpleType struct {
+	type_ string
+}
 
-func (s *JSONSchemaString) ToJSONSchema() map[string]interface{} {
+func (s *JSONSchemaSimpleType) ToJSONSchema() map[string]interface{} {
 	return map[string]interface{}{
-		"type": "string",
+		"type": s.type_,
 	}
 }
 

@@ -14,11 +14,12 @@ export interface Correction {
   words: Words;
   // Break characters that apply for these corrections. If undefined, then
   // default break characters are used.
-  breakChars?: string;
+  breakCharacters?: string;
   // Words to add after the replacement, but before the cursor.
   replacementSuffix?: string;
   // Words to add after the replacement and after the cursor.
   replacementSuffixAfterCursor?: string;
+  excludeBreakCharacter?: boolean;
 }
 
 const goLanguageKey = "golang";
