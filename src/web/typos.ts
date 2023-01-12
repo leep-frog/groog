@@ -38,7 +38,7 @@ export function defaultCorrections() : Correction[] {
         "se": "vscode.window.showInformationMessage",
       },
       replacementSuffix: "(\"",
-      replacementSuffixAfterCursor: "\")",
+      replacementSuffixAfterCursor: "\");",
       excludeBreakCharacter: true,
     },
     {
