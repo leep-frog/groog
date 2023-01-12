@@ -30,14 +30,36 @@ const typescriptLanguageKey = "typescript";
 export function defaultCorrections() : Correction[] {
   return [
     {
-      // languages: [
-      //   typescriptLanguageKey
-      // ],
+      languages: [
+        typescriptLanguageKey,
+      ],
       words: {
-        "sim": "vscode.window.showInformationMessage(\"",
-        "sem": "vscode.window.showInformationMessage(\"",
+        "si": "vscode.window.showInformationMessage",
+        "se": "vscode.window.showInformationMessage",
       },
-      replacementSuffix: "\")",
+      replacementSuffix: "(\"",
+      replacementSuffixAfterCursor: "\")",
+      excludeBreakCharacter: true,
+    },
+    {
+      languages: [
+        goLanguageKey,
+      ],
+      words: {
+        // Println
+        "fpl": "fmt.Println",
+        "spl": "fmt.Sprintln",
+        "ool": "o.Stdoutln",
+        "oel": "o.Stderrln",
+        // Printf
+        "fpf": "fmt.Printf",
+        "spf": "fmt.Sprintf",
+        "oof": "o.Stdoutf",
+        "oef": "o.Stderrf",
+      },
+      replacementSuffix: "(\"",
+      replacementSuffixAfterCursor: "\")",
+      excludeBreakCharacter: true,
     },
   ];
 }
