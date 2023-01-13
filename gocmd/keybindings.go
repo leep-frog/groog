@@ -93,6 +93,9 @@ var (
 	// The context to use for keys that should have no binding in global find or
 	// input boxes, etc.
 	groogBehaviorContext = editorTextFocus.or(findInputFocussed)
+
+	// The execute wrap for terminAllOrNothing
+	terminAllOrNothingExecute = "termin-all-or-nothing.execute"
 )
 
 const (
@@ -522,7 +525,7 @@ var (
 		alt("n"): only("workbench.action.editor.nextChange"),
 
 		// Go
-		ctrlX("t"): only("go.test.package"),
+		ctrlX("t"): onlyArgs(terminAllOrNothingExecute, terminAllOrNothingWrap("go.test.package", nil)),
 
 		// Miscellaneous
 		ctrlX("r"): only("workbench.action.reloadWindow"),
@@ -549,8 +552,22 @@ type KB struct {
 	Args    map[string]interface{}
 }
 
+func terminAllOrNothingWrap(command string, args map[string]interface{}) map[string]interface{} {
+	m := map[string]interface{}{
+		"command": command,
+	}
+	if args != nil {
+		m["args"] = args
+	}
+	return m
+}
+
 func only(command string) map[string]*KB {
 	return onlyWhen(command, always)
+}
+
+func onlyArgs(command string, args map[string]interface{}) map[string]*KB {
+	return onlyWhenArgs(command, always, args)
 }
 
 func textOnly(command string) map[string]*KB {
@@ -558,10 +575,10 @@ func textOnly(command string) map[string]*KB {
 }
 
 func onlyWhen(command string, context *WhenContext) map[string]*KB {
-	return onlyArgsWhen(command, context, nil)
+	return onlyWhenArgs(command, context, nil)
 }
 
-func onlyArgsWhen(command string, context *WhenContext, args map[string]interface{}) map[string]*KB {
+func onlyWhenArgs(command string, context *WhenContext, args map[string]interface{}) map[string]*KB {
 	return onlyKBWhen(kbArgs(command, args), context)
 }
 

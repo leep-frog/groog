@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.93",
+  "version": "0.0.94",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -1340,11 +1340,17 @@
       },
       {
         "key": "ctrl+x t",
-        "command": "go.test.package"
+        "command": "termin-all-or-nothing.execute",
+        "args": {
+          "command": "go.test.package"
+        }
       },
       {
         "key": "ctrl+x ctrl+t",
-        "command": "go.test.package"
+        "command": "termin-all-or-nothing.execute",
+        "args": {
+          "command": "go.test.package"
+        }
       },
       {
         "key": "ctrl+x tab",
