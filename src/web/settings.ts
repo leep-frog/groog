@@ -27,6 +27,7 @@ export class Settings implements Registerable {
       new GlobalSetting("editor", "autoClosingQuotes", "never"),
       new GlobalSetting("editor", "codeActionsOnSave", {
         "source.organizeImports": true,
+        "source.fixAll.eslint": true,
       }),
       new GlobalSetting("window", "newWindowDimensions", "maximized"),
       new GlobalSetting("editor", "detectIndentation", false),
@@ -57,7 +58,7 @@ export class Settings implements Registerable {
         "path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
       }),
       new WordSeparatorSetting("_"),
-      new LanguageSetting("typescript", "editor", "defaultFormatter", "vscode.typescript-language-features"),
+      new LanguageSetting("typescript", "editor", "formatOnSave", true),
       // MinGW terminal
       // https://dev.to/yumetodo/make-the-integrated-shell-of-visual-studio-code-to-bash-of-msys2-5eao
       // https://code.visualstudio.com/docs/terminal/basics#_terminal-profiles
