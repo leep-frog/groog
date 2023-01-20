@@ -43,17 +43,27 @@ export function defaultCorrections() : Correction[] {
       replacementSuffixAfterCursor: "\");",
       excludeBreakCharacter: true,
     },
+    // Println replacements (no quotes in suffix fields)
     {
       languages: [
         goLanguageKey,
       ],
       words: {
-        // Println
         "fpl": "fmt.Println",
         "spl": "fmt.Sprintln",
         "ool": "o.Stdoutln",
         "oel": "o.Stderrln",
-        // Printf
+      },
+      replacementSuffix: "(",
+      replacementSuffixAfterCursor: ")",
+      excludeBreakCharacter: true,
+    },
+    // Printf replacements (quotes in suffix fields)
+    {
+      languages: [
+        goLanguageKey,
+      ],
+      words: {
         "fpf": "fmt.Printf",
         "spf": "fmt.Sprintf",
         "oof": "o.Stdoutf",

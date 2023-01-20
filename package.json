@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.96",
+  "version": "0.0.97",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
