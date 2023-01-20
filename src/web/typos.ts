@@ -22,7 +22,9 @@ export interface Correction {
   excludeBreakCharacter?: boolean;
 }
 
-const goLanguageKey = "golang";
+// See the below link for vscode language codes:
+// https://code.visualstudio.com/docs/languages/identifiers
+const goLanguageKey = "go";
 const jsoncLanguageKey = "jsonc";
 const jsonLanguageKey = "json";
 const typescriptLanguageKey = "typescript";
