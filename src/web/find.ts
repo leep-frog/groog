@@ -323,7 +323,7 @@ export async function cursorToBack() {
     // If at the end of the word, then cursor is considered to be "in" the match still
     // so when previous action is executed, we move to the previous selection rather
     // than staying at the current one.
-    let endPos = editor.selection.end.translate(0, 1);
+    const endPos = editor.selection.end.translate(0, 1);
     editor.selection = new vscode.Selection(endPos, endPos);
   }
 }
