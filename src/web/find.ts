@@ -52,9 +52,9 @@ class FindContextCache {
     this.replaceMode = false;
   }
 
-  public toggleReplaceMode() {
+  public async toggleReplaceMode() {
     this.replaceMode = !this.replaceMode;
-    this.findWithArgs();
+    await this.findWithArgs();
   }
 
   private currentContext() : FindContext {
@@ -183,7 +183,7 @@ export class FindHandler extends TypeHandler {
       if (!this.isActive()) {
         return;
       }
-      this.cache.toggleReplaceMode();
+      await this.cache.toggleReplaceMode();
     });
 
     // Goes to previous find context
@@ -191,7 +191,7 @@ export class FindHandler extends TypeHandler {
       if (!this.isActive()) {
         vscode.window.showInformationMessage("groog.find.previous can only be executed in find mode");
       } else {
-        this.cache.prevContext();
+        await this.cache.prevContext();
       }
     });
     // Goes to next find context
@@ -199,7 +199,7 @@ export class FindHandler extends TypeHandler {
       if (!this.isActive()) {
         vscode.window.showInformationMessage("groog.find.next can only be executed in find mode");
       } else {
-        this.cache.nextContext();
+        await this.cache.nextContext();
       }
     });
 
@@ -226,7 +226,7 @@ export class FindHandler extends TypeHandler {
   }
 
   async handleDeactivation() {
-    this.cache.end();
+    await this.cache.end();
     await this.deactivateCommands();
     this.findPrevOnType = false;
   }
