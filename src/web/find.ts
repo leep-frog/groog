@@ -237,7 +237,7 @@ export class FindHandler extends TypeHandler {
 
   async textHandler(s: string): Promise<boolean> {
     // Enter, shift+enter, ctrl+n, ctrl+p taken care of in package.json
-    this.cache.insertText(s);
+    await this.cache.insertText(s);
     return false;
   }
 
@@ -249,7 +249,7 @@ export class FindHandler extends TypeHandler {
   async delHandler(s: DeleteCommand): Promise<boolean> {
     switch (s) {
       case DeleteCommand.left:
-        this.cache.deleteLeft();
+        await this.cache.deleteLeft();
         break;
       default:
         vscode.window.showInformationMessage("Unsupported find command: " + s);
