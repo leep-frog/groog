@@ -21,15 +21,17 @@ class FindContextCache {
   private cacheIdx: number;
   private cursorStack: CursorStack;
   private replaceMode: boolean;
+  private findPrevOnType: boolean;
 
   constructor() {
     this.cache = [];
     this.cacheIdx = 0;
     this.cursorStack = new CursorStack();
     this.replaceMode = false;
+    this.findPrevOnType = false;
   }
 
-  public async startNew() : Promise<void> {
+  public async startNew(findPrevOnType: boolean) : Promise<void> {
     this.cache.push({
       findText: "",
       replaceText: "",
@@ -38,6 +40,7 @@ class FindContextCache {
       this.cache = this.cache.slice(1);
     }
     this.cacheIdx = this.cache.length-1;
+    this.findPrevOnType = findPrevOnType;
     await this.findWithArgs();
   }
 
@@ -99,7 +102,7 @@ class FindContextCache {
     } else {
       if (ctx.findText.length > 0) {
         ctx.findText = ctx.findText.slice(0, ctx.findText.length - 1);
-        this.cursorStack.popAndSet();
+        this.cursorStack.popAndSet(this.findPrevOnType);
         await this.findWithArgs();
       }
     }
@@ -128,8 +131,14 @@ class FindContextCache {
       await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
     }
     );
-    await cursorToFront();
-    await this.nextMatch();
+
+    if (this.findPrevOnType) {
+      await cursorToBack();
+      await this.prevMatch();
+    } else {
+      await cursorToFront();
+      await this.nextMatch();
+    }
   }
 
   async nextMatch() {
@@ -145,10 +154,12 @@ class FindContextCache {
 export class FindHandler extends TypeHandler {
   whenContext: string = "find";
   cache : FindContextCache;
+  findPrevOnType : boolean;
 
   constructor(cm: ColorMode) {
     super(cm, ModeColor.find);
     this.cache = new FindContextCache();
+    this.findPrevOnType = false;
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
@@ -163,6 +174,7 @@ export class FindHandler extends TypeHandler {
       if (this.isActive()) {
         await this.cache.prevMatch();
       } else {
+        this.findPrevOnType = true;
         await this.activate();
       }
     });
@@ -205,7 +217,7 @@ export class FindHandler extends TypeHandler {
   }
 
   async handleActivation() {
-    await this.cache.startNew();
+    await this.cache.startNew(this.findPrevOnType);
   }
 
   async deactivateCommands() {
@@ -216,6 +228,7 @@ export class FindHandler extends TypeHandler {
   async handleDeactivation() {
     this.cache.end();
     await this.deactivateCommands();
+    this.findPrevOnType = false;
   }
 
   async ctrlG() {
@@ -252,7 +265,7 @@ export class FindHandler extends TypeHandler {
 }
 
 class CursorStack {
-  selections: vscode.Position[];
+  selections: vscode.Selection[];
 
   constructor() {
     this.selections = [];
@@ -262,18 +275,17 @@ class CursorStack {
     let editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage("Couldn't find active editor");
-      this.selections.push(new vscode.Position(0, 0));
+      this.selections.push(new vscode.Selection(new vscode.Position(0, 0), new vscode.Position(0, 0)));
       return;
     }
-    this.selections.push(new vscode.Position(editor.selection.start.line, editor.selection.start.character));
+    this.selections.push(editor.selection);
   }
 
-  popAndSet() {
+  popAndSet(rev: boolean) {
     let p = this.selections.pop();
     if (!p) {
       // No longer error here since we can run out of cursor positions if
       // we start a search with a non-empty findText.
-      // vscode.window.showErrorMessage("Ran out of cursor positions");
       return;
     }
     let editor = vscode.window.activeTextEditor;
@@ -282,7 +294,12 @@ class CursorStack {
       return;
     }
     // https://github.com/microsoft/vscode/issues/111#issuecomment-157998910
-    editor.selection = new vscode.Selection(p, p);
+    if (rev) {
+      editor.selection = new vscode.Selection(p.end, p.end);
+    } else {
+      editor.selection = new vscode.Selection(p.start, p.start);
+    }
+
   }
 
   clear() {
@@ -296,5 +313,17 @@ export async function cursorToFront() {
   if (editor) {
     const startPos = editor.selection.start;
     editor.selection = new vscode.Selection(startPos, startPos);
+  }
+}
+
+export async function cursorToBack() {
+  // Move cursor to end of selection
+  const editor = vscode.window.activeTextEditor;
+  if (editor) {
+    // If at the end of the word, then cursor is considered to be "in" the match still
+    // so when previous action is executed, we move to the previous selection rather
+    // than staying at the current one.
+    let endPos = editor.selection.end.translate(0, 1);
+    editor.selection = new vscode.Selection(endPos, endPos);
   }
 }
