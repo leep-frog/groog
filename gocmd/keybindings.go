@@ -219,16 +219,13 @@ var (
 				"text": " ",
 			}),
 		},
-		alt("r"):        only("toggleSearchEditorRegex"),
-		alt("c"):        only("toggleSearchEditorCaseSensitive"),
+		alt("r"):        findToggler("Regex", nil, nil),
+		alt("c"):        findToggler("CaseSensitive", nil, nil),
+		alt("w"):        findToggler("WholeWord", nil, nil),
 		alt(shift("c")): only("togglePreserveCase"),
-		alt("f4"): {
-			groogQMK.and(editorFocus).value:        kb("toggleFindWholeWord"),
-			groogQMK.and(inSearchEditor).value:     kb("toggleSearchEditorWholeWord"),
-			groogQMK.and(searchViewletFocus).value: kb("toggleSearchWholeWord"),
-			groogQMK.and(editorFocus.not()).and(inSearchEditor.not()).and(searchViewletFocus.not()).value: kb("toggleSearchWholeWord"),
+		alt("f4"): findToggler("WholeWord", groogQMK, map[string]*KB{
 			groogQMK.not().value: notification("Run alt+shift+f4 to close the window"),
-		},
+		}),
 		alt(shift("f4")): only("workbench.action.closeWindow"),
 
 		// Emacs bindings
@@ -644,6 +641,30 @@ func (k Key) keyAliases() []string {
 	}
 
 	return kas
+}
+
+func findToggler(suffix string, context *WhenContext, m map[string]*KB) map[string]*KB {
+	groogCmd := fmt.Sprintf("groog.find.toggle%s", suffix)
+	ef := editorFocus
+	se := inSearchEditor
+	sv := searchViewletFocus
+	neg := editorFocus.not().and(inSearchEditor.not()).and(searchViewletFocus.not())
+	if context != nil {
+		ef = context.and(ef)
+		se = context.and(se)
+		sv = context.and(sv)
+		neg = context.and(neg)
+	}
+	r := map[string]*KB{
+		ef.value:  mc(groogCmd, fmt.Sprintf("toggleFind%s", suffix)),
+		se.value:  mc(groogCmd, fmt.Sprintf("toggleSearchEditor%s", suffix)),
+		sv.value:  mc(groogCmd, fmt.Sprintf("toggleSearch%s", suffix)),
+		neg.value: mc(groogCmd, fmt.Sprintf("toggleSearch%s", suffix)),
+	}
+	for k, v := range m {
+		r[k] = v
+	}
+	return r
 }
 
 func alt(c Key) Key {

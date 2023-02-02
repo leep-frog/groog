@@ -14,6 +14,9 @@ interface FindContext {
 interface FindWithArgs {
   searchString : string;
   replaceString? : string;
+  isRegex: boolean;
+  matchWholeWord: boolean;
+  isCaseSensitive: boolean;
 }
 
 class FindContextCache {
@@ -22,6 +25,9 @@ class FindContextCache {
   private cursorStack: CursorStack;
   private replaceMode: boolean;
   private findPrevOnType: boolean;
+  private regexToggle: boolean;
+  private caseToggle: boolean;
+  private wholeWordToggle: boolean;
 
   constructor() {
     this.cache = [];
@@ -29,6 +35,21 @@ class FindContextCache {
     this.cursorStack = new CursorStack();
     this.replaceMode = false;
     this.findPrevOnType = false;
+    this.regexToggle = false;
+    this.caseToggle = false;
+    this.wholeWordToggle = false;
+  }
+
+  public toggleRegex() {
+    this.regexToggle = !this.regexToggle;
+  }
+
+  public toggleCase() {
+    this.caseToggle = !this.caseToggle;
+  }
+
+  public toggleWholeWord() {
+    this.wholeWordToggle = !this.wholeWordToggle;
   }
 
   public async startNew(findPrevOnType: boolean) : Promise<void> {
@@ -117,28 +138,54 @@ class FindContextCache {
     }
 
     let args : FindWithArgs = {
-      "searchString": ft,
+      searchString: ft,
+      isRegex: this.regexToggle,
+      matchWholeWord: this.wholeWordToggle,
+      isCaseSensitive: this.caseToggle,
     };
     if (this.replaceMode) {
-      args = {
-        "searchString": ft,
-        "replaceString": ctx.replaceText,
-      };
+      args.replaceString = ctx.replaceText;
     }
     await vscode.commands.executeCommand("editor.actions.findWithArgs", args).then(async () => {
       await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
     }, async () => {
       await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
-    }
-    );
+    });
 
     if (this.findPrevOnType) {
-      await cursorToBack();
-      await this.prevMatch();
+      // Finding previous is tricky because sometimes if inserting two characters in
+      // quick succession, then the selection.end character isn't updated in the second
+      // character's execution, causing weird behavior here. Additionally, if adding
+      // a '*' character in a regex, then the end cursor will be in the match text,
+      // so we will jump to the previous match even though the current match might
+      // still be valid. So, we do the following:
+      // - Move cursor to the front
+      // - Run next match
+      // - See if the cursor position changed.
+      //   - If it did, then the current selection no longer matches, so find previous one
+      //   - Otherwise, it matches, so nothing else required.
+      const prevSel = (vscode.window.activeTextEditor?.selection);
+      const prevRange = (vscode.window.activeTextEditor?.visibleRanges);
+      await cursorToFront();
+      await this.nextMatch();
+      if (prevSel && vscode.window.activeTextEditor && !prevSel.start.isEqual(vscode.window.activeTextEditor.selection.start)) {
+        await this.prevMatch();
+      }
+
+      // Finally, check if we didn't need to move the screen
+      if (prevRange && vscode.window.activeTextEditor) {
+        if (this.rangesContains(prevRange, vscode.window.activeTextEditor.selection)) {
+          vscode.window.activeTextEditor.revealRange(prevRange[0]);
+        }
+      }
     } else {
       await cursorToFront();
       await this.nextMatch();
     }
+  }
+
+  private rangesContains(ranges: readonly vscode.Range[], selection: vscode.Selection) : boolean {
+    return ranges.reduce((prev: boolean, r: vscode.Range) => prev || r.contains(selection), false);
   }
 
   async nextMatch() {
@@ -213,6 +260,19 @@ export class FindHandler extends TypeHandler {
     });
     vscode.window.onDidChangeActiveTextEditor(async () => {
       await this.deactivate();
+    });
+
+    recorder.registerCommand(context, 'find.toggleRegex', async () => {
+      this.cache.toggleRegex();
+      await vscode.commands.executeCommand("toggleSearchEditorRegex");
+    });
+    recorder.registerCommand(context, 'find.toggleCaseSensitive', async () => {
+      this.cache.toggleCase();
+      await vscode.commands.executeCommand("toggleSearchEditorCaseSensitive");
+    });
+    recorder.registerCommand(context, 'find.toggleWholeWord', async () => {
+      this.cache.toggleWholeWord();
+      await vscode.commands.executeCommand("toggleSearchEditorWholeWord");
     });
   }
 
@@ -313,17 +373,5 @@ export async function cursorToFront() {
   if (editor) {
     const startPos = editor.selection.start;
     editor.selection = new vscode.Selection(startPos, startPos);
-  }
-}
-
-export async function cursorToBack() {
-  // Move cursor to end of selection
-  const editor = vscode.window.activeTextEditor;
-  if (editor) {
-    // If at the end of the word, then cursor is considered to be "in" the match still
-    // so when previous action is executed, we move to the previous selection rather
-    // than staying at the current one.
-    const endPos = editor.selection.end.translate(0, 1);
-    editor.selection = new vscode.Selection(endPos, endPos);
   }
 }

@@ -67,7 +67,7 @@ export class Emacs {
       this.recorder.registerCommand(context, d, () => this.delCommand(d));
     }
 
-    context.subscriptions.push(vscode.commands.registerCommand('groog.type', (arg: TypeArg) => this.type(arg)));
+    context.subscriptions.push(vscode.commands.registerCommand('groog.type', async (arg: TypeArg) => await this.type(arg)));
 
     this.recorder.registerCommand(context, 'jump', () => this.jump());
     this.recorder.registerCommand(context, 'fall', () => this.fall());

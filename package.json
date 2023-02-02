@@ -61,7 +61,10 @@
     "onCommand:groog.find",
     "onCommand:groog.find.next",
     "onCommand:groog.find.previous",
+    "onCommand:groog.find.toggleCase",
+    "onCommand:groog.find.toggleRegex",
     "onCommand:groog.find.toggleReplaceMode",
+    "onCommand:groog.find.toggleWholeWord",
     "onCommand:groog.focusNextEditor",
     "onCommand:groog.focusPreviousEditor",
     "onCommand:groog.format",
@@ -167,8 +170,20 @@
         "title": "Groog go to previous find context"
       },
       {
+        "command": "groog.find.toggleCase",
+        "title": "Groog toggle case"
+      },
+      {
+        "command": "groog.find.toggleRegex",
+        "title": "Groog toggle regex"
+      },
+      {
         "command": "groog.find.toggleReplaceMode",
         "title": "Groog toggle between find and replace input boxes"
+      },
+      {
+        "command": "groog.find.toggleWholeWord",
+        "title": "Groog toggle whole word"
       },
       {
         "command": "groog.focusNextEditor",
@@ -459,7 +474,47 @@
       },
       {
         "key": "alt+c",
-        "command": "toggleSearchEditorCaseSensitive"
+        "command": "groog.multiCommand.execute",
+        "when": "!editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus",
+        "args": {
+          "sequence": [
+            "groog.find.toggleCaseSensitive",
+            "toggleSearchCaseSensitive"
+          ]
+        }
+      },
+      {
+        "key": "alt+c",
+        "command": "groog.multiCommand.execute",
+        "when": "editorFocus",
+        "args": {
+          "sequence": [
+            "groog.find.toggleCaseSensitive",
+            "toggleFindCaseSensitive"
+          ]
+        }
+      },
+      {
+        "key": "alt+c",
+        "command": "groog.multiCommand.execute",
+        "when": "inSearchEditor",
+        "args": {
+          "sequence": [
+            "groog.find.toggleCaseSensitive",
+            "toggleSearchEditorCaseSensitive"
+          ]
+        }
+      },
+      {
+        "key": "alt+c",
+        "command": "groog.multiCommand.execute",
+        "when": "searchViewletFocus",
+        "args": {
+          "sequence": [
+            "groog.find.toggleCaseSensitive",
+            "toggleSearchCaseSensitive"
+          ]
+        }
       },
       {
         "key": "alt+d",
@@ -494,23 +549,47 @@
       },
       {
         "key": "alt+f4",
-        "command": "toggleSearchWholeWord",
-        "when": "groog.context.qmkMode \u0026\u0026 !editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus"
+        "command": "groog.multiCommand.execute",
+        "when": "groog.context.qmkMode \u0026\u0026 !editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus",
+        "args": {
+          "sequence": [
+            "groog.find.toggleWholeWord",
+            "toggleSearchWholeWord"
+          ]
+        }
       },
       {
         "key": "alt+f4",
-        "command": "toggleFindWholeWord",
-        "when": "groog.context.qmkMode \u0026\u0026 editorFocus"
+        "command": "groog.multiCommand.execute",
+        "when": "groog.context.qmkMode \u0026\u0026 editorFocus",
+        "args": {
+          "sequence": [
+            "groog.find.toggleWholeWord",
+            "toggleFindWholeWord"
+          ]
+        }
       },
       {
         "key": "alt+f4",
-        "command": "toggleSearchEditorWholeWord",
-        "when": "groog.context.qmkMode \u0026\u0026 inSearchEditor"
+        "command": "groog.multiCommand.execute",
+        "when": "groog.context.qmkMode \u0026\u0026 inSearchEditor",
+        "args": {
+          "sequence": [
+            "groog.find.toggleWholeWord",
+            "toggleSearchEditorWholeWord"
+          ]
+        }
       },
       {
         "key": "alt+f4",
-        "command": "toggleSearchWholeWord",
-        "when": "groog.context.qmkMode \u0026\u0026 searchViewletFocus"
+        "command": "groog.multiCommand.execute",
+        "when": "groog.context.qmkMode \u0026\u0026 searchViewletFocus",
+        "args": {
+          "sequence": [
+            "groog.find.toggleWholeWord",
+            "toggleSearchWholeWord"
+          ]
+        }
       },
       {
         "key": "alt+g",
@@ -530,7 +609,47 @@
       },
       {
         "key": "alt+r",
-        "command": "toggleSearchEditorRegex"
+        "command": "groog.multiCommand.execute",
+        "when": "!editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus",
+        "args": {
+          "sequence": [
+            "groog.find.toggleRegex",
+            "toggleSearchRegex"
+          ]
+        }
+      },
+      {
+        "key": "alt+r",
+        "command": "groog.multiCommand.execute",
+        "when": "editorFocus",
+        "args": {
+          "sequence": [
+            "groog.find.toggleRegex",
+            "toggleFindRegex"
+          ]
+        }
+      },
+      {
+        "key": "alt+r",
+        "command": "groog.multiCommand.execute",
+        "when": "inSearchEditor",
+        "args": {
+          "sequence": [
+            "groog.find.toggleRegex",
+            "toggleSearchEditorRegex"
+          ]
+        }
+      },
+      {
+        "key": "alt+r",
+        "command": "groog.multiCommand.execute",
+        "when": "searchViewletFocus",
+        "args": {
+          "sequence": [
+            "groog.find.toggleRegex",
+            "toggleSearchRegex"
+          ]
+        }
       },
       {
         "key": "alt+shift+c",
@@ -561,6 +680,50 @@
       {
         "key": "alt+t",
         "command": "workbench.action.terminal.newInActiveWorkspace"
+      },
+      {
+        "key": "alt+w",
+        "command": "groog.multiCommand.execute",
+        "when": "!editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus",
+        "args": {
+          "sequence": [
+            "groog.find.toggleWholeWord",
+            "toggleSearchWholeWord"
+          ]
+        }
+      },
+      {
+        "key": "alt+w",
+        "command": "groog.multiCommand.execute",
+        "when": "editorFocus",
+        "args": {
+          "sequence": [
+            "groog.find.toggleWholeWord",
+            "toggleFindWholeWord"
+          ]
+        }
+      },
+      {
+        "key": "alt+w",
+        "command": "groog.multiCommand.execute",
+        "when": "inSearchEditor",
+        "args": {
+          "sequence": [
+            "groog.find.toggleWholeWord",
+            "toggleSearchEditorWholeWord"
+          ]
+        }
+      },
+      {
+        "key": "alt+w",
+        "command": "groog.multiCommand.execute",
+        "when": "searchViewletFocus",
+        "args": {
+          "sequence": [
+            "groog.find.toggleWholeWord",
+            "toggleSearchWholeWord"
+          ]
+        }
       },
       {
         "key": "alt+x",
