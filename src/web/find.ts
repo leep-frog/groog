@@ -14,6 +14,8 @@ interface FindContext {
 interface FindWithArgs {
   searchString : string;
   replaceString? : string;
+  // Intellisense recommendations are wrong.
+  // See: https://github.com/microsoft/vscode/issues/138365
   isRegex: boolean;
   matchWholeWord: boolean;
   isCaseSensitive: boolean;
@@ -187,6 +189,32 @@ class FindContextCache {
   private rangesContains(ranges: readonly vscode.Range[], selection: vscode.Selection) : boolean {
     return ranges.reduce((prev: boolean, r: vscode.Range) => prev || r.contains(selection), false);
   }
+
+  /*private manualCheck(queryText: string) {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      return;
+    }
+
+    let docText = ""; //editor.document.getText()
+
+    if (this.caseToggle) {
+      queryText = queryText.toLowerCase();
+      docText = docText.toLowerCase();
+    }
+
+    let matchesFirst = false;
+    if (this.regexToggle) {
+      let r = new RegExp(queryText);
+      if (this.wholeWordToggle) {
+        r = new RegExp(`^${queryText}\b`);
+      }
+    } else {
+      if (this.wholeWordToggle) {
+
+      }
+    }
+  }*/
 
   async nextMatch() {
     await vscode.commands.executeCommand("editor.action.nextMatchFindAction");
