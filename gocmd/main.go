@@ -17,7 +17,7 @@ func node() *command.Node {
 			Name:        "groog",
 			DisplayName: "groog",
 			Description: "",
-			Version:     "0.0.103",
+			Version:     "0.0.104",
 			Publisher:   "groogle",
 			Browser:     "./dist/web/extension.js",
 			Engines: map[string]string{
@@ -57,11 +57,6 @@ func node() *command.Node {
 				"process":                          "^0.11.10",
 			},
 		}
-
-		for _, cc := range CustomCommands {
-			p.ActivationEvents = append(p.ActivationEvents, cc.activationEvent())
-		}
-		slices.Sort(p.ActivationEvents)
 
 		p.Contributes = &Contribution{
 			Commands:      CustomCommands,

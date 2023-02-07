@@ -59,6 +59,7 @@ export class Settings implements Registerable {
       new GlobalSetting("terminal", "integrated.automationProfile.windows", {
         "path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
       }),
+      new GlobalSetting("gopls", "analyses", { "composites": false }),
       new WordSeparatorSetting("_"),
       new LanguageSetting("typescript", "editor", "formatOnSave", true),
       // MinGW terminal
