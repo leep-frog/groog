@@ -41,6 +41,7 @@
     "webpack": "^5.66.0",
     "webpack-cli": "^4.9.1"
   },
+  "activationEvents": [],
   "contributes": {
     "commands": [
       {
@@ -2269,7 +2270,12 @@
         "gopls.analyses": {
           "properties": {
             "analyses": {
-              "type": "boolean"
+              "properties": {
+                "composites": {
+                  "type": "boolean"
+                }
+              },
+              "type": "object"
             }
           },
           "type": "object"
