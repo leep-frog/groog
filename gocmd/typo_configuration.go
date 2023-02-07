@@ -1,5 +1,16 @@
 package main
 
+func goplsSchema() *JSONSchema {
+	// This is not a registered configuration so it can't be updated automatically in settings.ts.
+	// We get around this issue by adding the configuration ourselves :)
+	// https://github.com/golang/vscode-go/issues/217
+	return NewJSONObject(map[string]*JSONSchema{
+		"analyses": NewJSONObject(map[string]*JSONSchema{
+			"composites": NewJSONBool(),
+		}),
+	})
+}
+
 func typosSchema() *JSONSchema {
 	return NewJSONArray(correctionSchema(), JSONDescription("List of corrections to automatically fix."))
 }

@@ -59,6 +59,7 @@ export class Settings implements Registerable {
       new GlobalSetting("terminal", "integrated.automationProfile.windows", {
         "path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
       }),
+      // https://github.com/golang/vscode-go/issues/217
       new GlobalSetting("gopls", "analyses", { "composites": false }),
       new WordSeparatorSetting("_"),
       new LanguageSetting("typescript", "editor", "formatOnSave", true),
@@ -92,10 +93,11 @@ export class Settings implements Registerable {
     ];
   }
 
-  private static updateSettings(): void {
+  private static async updateSettings(): Promise<void> {
     for (let s of this.settings()) {
-      s.update();
+      await s.update();
     }
+    vscode.window.showInformationMessage("Settings have been updated!");
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder): void {
@@ -104,7 +106,7 @@ export class Settings implements Registerable {
 }
 
 interface Setting {
-  update(): void;
+  update(): Promise<void>;
 }
 
 class GlobalSetting implements Setting {
@@ -119,8 +121,8 @@ class GlobalSetting implements Setting {
     this.value = value;
   }
 
-  update(): void {
-    vscode.workspace.getConfiguration(this.configSection).update(this.subsection, this.value, true);
+  async update(): Promise<void> {
+    await vscode.workspace.getConfiguration(this.configSection).update(this.subsection, this.value, true);
   }
 }
 
@@ -136,7 +138,7 @@ class WordSeparatorSetting implements Setting {
     this.addCharacters = addCharacters;
   }
 
-  update(): void {
+  async update(): Promise<void> {
     let [configuration, existing] = getWordSeparators();
     if (!existing) {
       vscode.window.showErrorMessage("Failed to fetch setting %s");
@@ -147,7 +149,7 @@ class WordSeparatorSetting implements Setting {
         existing += char;
       }
     }
-    configuration.update(configSubsection, existing, true);
+    await configuration.update(configSubsection, existing, true);
   }
 }
 
@@ -170,7 +172,7 @@ class LanguageSetting implements Setting {
     this.value = value;
   }
 
-  update(): void {
-    vscode.workspace.getConfiguration(this.configSection, { "languageId": this.languageId }).update(this.subsection, this.value, true, true);
+  async update(): Promise<void> {
+    await vscode.workspace.getConfiguration(this.configSection, { "languageId": this.languageId }).update(this.subsection, this.value, true, true);
   }
 }

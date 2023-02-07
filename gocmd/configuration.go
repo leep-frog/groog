@@ -50,7 +50,8 @@ func groogConfiguration() *Configuration {
 	return &Configuration{
 		"Groog",
 		map[string]map[string]interface{}{
-			"groog.typos": typosSchema().evaluate(),
+			"groog.typos":    typosSchema().evaluate(),
+			"gopls.analyses": goplsSchema().evaluate(),
 		},
 	}
 }

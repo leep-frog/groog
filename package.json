@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.104",
+  "version": "0.0.105",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -2266,6 +2266,14 @@
     "configuration": {
       "title": "Groog",
       "properties": {
+        "gopls.analyses": {
+          "properties": {
+            "analyses": {
+              "type": "boolean"
+            }
+          },
+          "type": "object"
+        },
         "groog.typos": {
           "description": "List of corrections to automatically fix.",
           "items": {
