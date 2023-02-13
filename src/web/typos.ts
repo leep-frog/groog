@@ -29,7 +29,7 @@ const jsoncLanguageKey = "jsonc";
 const jsonLanguageKey = "json";
 const typescriptLanguageKey = "typescript";
 
-export function defaultCorrections() : Correction[] {
+export function defaultCorrections(): Correction[] {
   return [
     {
       languages: [
@@ -58,7 +58,7 @@ export function defaultCorrections() : Correction[] {
       replacementSuffixAfterCursor: ")",
       excludeBreakCharacter: true,
     },
-    // Printf replacements (quotes in suffix fields)
+    // Printf and regex replacements (quotes in suffix fields)
     {
       languages: [
         goLanguageKey,
@@ -68,9 +68,21 @@ export function defaultCorrections() : Correction[] {
         "spf": "fmt.Sprintf",
         "oof": "o.Stdoutf",
         "oef": "o.Stderrf",
+        "rx": "rgx.New",
       },
       replacementSuffix: "(\"",
       replacementSuffixAfterCursor: "\")",
+      excludeBreakCharacter: true,
+    },
+    // Regex pattern shortcuts
+    {
+      languages: [
+        goLanguageKey,
+      ],
+      words: {
+        "rxn": "([1-9][0-9]*)",
+        "rxw": "([a-zA-Z]+)",
+      },
       excludeBreakCharacter: true,
     },
   ];
