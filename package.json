@@ -1170,13 +1170,25 @@
       },
       {
         "key": "ctrl+t",
-        "command": "termin-all-or-nothing.openPanel",
-        "when": "!activePanel"
+        "command": "groog.multiCommand.execute",
+        "when": "!activePanel",
+        "args": {
+          "sequence": [
+            "groog.ctrlG",
+            "termin-all-or-nothing.openPanel"
+          ]
+        }
       },
       {
         "key": "ctrl+t",
-        "command": "termin-all-or-nothing.closePanel",
-        "when": "activePanel"
+        "command": "groog.multiCommand.execute",
+        "when": "activePanel",
+        "args": {
+          "sequence": [
+            "groog.ctrlG",
+            "termin-all-or-nothing.closePanel"
+          ]
+        }
       },
       {
         "key": "ctrl+tab",
