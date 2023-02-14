@@ -18,6 +18,7 @@ export class Settings implements Registerable {
       "workbench.action.terminal.findNext",
       "workbench.action.terminal.findPrevious",
       "groog.ctrlG",
+      "groog.multiCommand.execute",
       "termin-all-or-nothing.closePanel",
     ];
     for (let v of commands.keys()) {
@@ -126,15 +127,15 @@ class GlobalSetting implements Setting {
   }
 }
 
-const configSection : string = "editor";
-const configSubsection : string = "wordSeparators";
+const configSection: string = "editor";
+const configSubsection: string = "wordSeparators";
 
 // WordSeparatorSetting *adds* the provided characters to the list of editor word-separators.
 class WordSeparatorSetting implements Setting {
 
   private addCharacters: string;
 
-  constructor(addCharacters : string) {
+  constructor(addCharacters: string) {
     this.addCharacters = addCharacters;
   }
 
@@ -153,7 +154,7 @@ class WordSeparatorSetting implements Setting {
   }
 }
 
-export function getWordSeparators() : [vscode.WorkspaceConfiguration, string | undefined] {
+export function getWordSeparators(): [vscode.WorkspaceConfiguration, string | undefined] {
   const configuration = vscode.workspace.getConfiguration(configSection);
   return [configuration, configuration.get(configSubsection)];
 }
