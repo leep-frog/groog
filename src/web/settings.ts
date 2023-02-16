@@ -55,6 +55,7 @@ export class Settings implements Registerable {
       new GlobalSetting("workbench", "editor.limit.enabled", true),
       new GlobalSetting("workbench", "editor.limit.perEditorGroup", true),
       new GlobalSetting("workbench", "editor.limit.value", 1),
+      new GlobalSetting("workbench", "editor.showTabs", false),
       new GlobalSetting("workbench", "startupEditor", "none"),
       new GlobalSetting("terminal", "integrated.defaultProfile.windows", "MinGW"),
       new GlobalSetting("terminal", "integrated.automationProfile.windows", {
