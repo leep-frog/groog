@@ -65,6 +65,7 @@ export function defaultCorrections(): Correction[] {
       ],
       words: {
         "fpf": "fmt.Printf",
+        "fef": "fmt.Errorf",
         "spf": "fmt.Sprintf",
         "oof": "o.Stdoutf",
         "oef": "o.Stderrf",
