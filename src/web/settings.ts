@@ -26,6 +26,7 @@ export class Settings implements Registerable {
     }
     return [
       new GlobalSetting("editor", "autoClosingQuotes", "never"),
+      new GlobalSetting("editor", "autoClosingBrackets", "never"),
       new GlobalSetting("editor", "codeActionsOnSave", {
         "source.organizeImports": true,
         "source.fixAll.eslint": true,
