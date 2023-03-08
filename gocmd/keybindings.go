@@ -460,7 +460,9 @@ var (
 		// explicitly send the sequence.
 		// See below link for unicode characters:
 		// https://en.wikipedia.org/wiki/List_of_Unicode_characters
-		ctrlX("c"): panelSplit(sendSequence("\u0018\u0003"), nil),
+		// ctrlX("c"): panelSplit(sendSequence("\u0018\u0003"), nil),
+		ctrlX("c"): panelSplit(kb("workbench.action.terminal.copyLastCommandOutput"), nil),
+
 		// To determine this, I did the following
 		// - ran `sed -n l` (as recommended in (1))
 		// - pressed "ctrl+/"

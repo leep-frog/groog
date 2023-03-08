@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.111",
+  "version": "0.0.112",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -1292,19 +1292,13 @@
       },
       {
         "key": "ctrl+x c",
-        "command": "workbench.action.terminal.sendSequence",
-        "when": "activePanel",
-        "args": {
-          "text": "\u0018\u0003"
-        }
+        "command": "workbench.action.terminal.copyLastCommandOutput",
+        "when": "activePanel"
       },
       {
         "key": "ctrl+x ctrl+c",
-        "command": "workbench.action.terminal.sendSequence",
-        "when": "activePanel",
-        "args": {
-          "text": "\u0018\u0003"
-        }
+        "command": "workbench.action.terminal.copyLastCommandOutput",
+        "when": "activePanel"
       },
       {
         "key": "ctrl+x d",
