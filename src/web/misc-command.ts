@@ -6,7 +6,7 @@ export interface MultiCommand {
 
 export async function multiCommand(mc: MultiCommand) {
   for (var command of mc.sequence) {
-    vscode.commands.executeCommand(command);
+    await vscode.commands.executeCommand(command);
   }
 }
 

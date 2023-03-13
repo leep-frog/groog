@@ -2,22 +2,30 @@ package main
 
 import (
 	"encoding/json"
+	"os"
 
 	"github.com/leep-frog/command"
+	"github.com/leep-frog/command/sourcerer"
 	"golang.org/x/exp/slices"
 )
 
 func main() {
-	command.RunNodes(node())
+	os.Exit(sourcerer.Source([]sourcerer.CLI{&cli{}}))
 }
 
-func node() *command.Node {
-	return command.SerialNodes(command.ExecuteErrNode(func(o command.Output, d *command.Data) error {
+type cli struct{}
+
+func (*cli) Name() string    { return "vs_package" }
+func (*cli) Setup() []string { return nil }
+func (*cli) Changed() bool   { return false }
+
+func (*cli) Node() command.Node {
+	return command.SerialNodes(&command.ExecutorProcessor{func(o command.Output, d *command.Data) error {
 		p := &Package{
 			Name:        "groog",
 			DisplayName: "groog",
 			Description: "",
-			Version:     "0.0.112",
+			Version:     "0.0.113",
 			Publisher:   "groogle",
 			Browser:     "./dist/web/extension.js",
 			Engines: map[string]string{
@@ -77,5 +85,5 @@ func node() *command.Node {
 
 		o.Stdoutln(string(j))
 		return nil
-	}))
+	}})
 }

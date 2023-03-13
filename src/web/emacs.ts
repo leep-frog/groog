@@ -78,6 +78,16 @@ export class Emacs {
     this.recorder.registerCommand(context, 'kill', () => this.kill());
     this.recorder.registerCommand(context, 'ctrlG', () => this.ctrlG());
 
+    // Make an explicit command so it is visible in "alt+x".
+    this.recorder.registerCommand(context, 'renameFile', async (): Promise<void> => {
+      await multiCommand({
+        sequence: [
+          "workbench.action.focusSideBar",
+          "renameFile",
+        ],
+      });
+    });
+
     // This needs to be a groog command so it can be recorded.
     this.recorder.registerCommand(context, 'undo', () => vscode.commands.executeCommand("undo"));
 
