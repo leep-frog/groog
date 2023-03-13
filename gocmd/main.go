@@ -25,7 +25,7 @@ func (*cli) Node() command.Node {
 			Name:        "groog",
 			DisplayName: "groog",
 			Description: "",
-			Version:     "0.0.113",
+			Version:     "0.0.114",
 			Publisher:   "groogle",
 			Browser:     "./dist/web/extension.js",
 			Engines: map[string]string{
@@ -73,6 +73,7 @@ func (*cli) Node() command.Node {
 			Commands:      CustomCommands,
 			Keybindings:   kbDefsToBindings(),
 			Configuration: groogConfiguration(),
+			Snipppets:     Snippets,
 		}
 		slices.SortFunc(p.Contributes.Commands, func(a, b *Command) bool {
 			return a.Command < b.Command

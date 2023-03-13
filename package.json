@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.113",
+  "version": "0.0.114",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -2330,6 +2330,12 @@
           "type": "array"
         }
       }
-    }
+    },
+    "snippets": [
+      {
+        "path": "snippets/go-test.json",
+        "language": "go"
+      }
+    ]
   }
 }

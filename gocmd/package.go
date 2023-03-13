@@ -46,6 +46,7 @@ type Contribution struct {
 	Commands      []*Command     `json:"commands"`
 	Keybindings   []*Keybinding  `json:"keybindings"`
 	Configuration *Configuration `json:"configuration"`
+	Snipppets     []*Snippet     `json:"snippets"`
 }
 
 type Keybinding struct {

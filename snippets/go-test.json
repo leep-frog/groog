@@ -1,0 +1,20 @@
+{
+  "Go Test": {
+    "prefix": ["gt", "goTest"],
+    "body": [
+      "func Test${1:Name}(t *testing.T) {",
+      "  for _, test := range []struct {",
+      "    name string",
+      "  }{",
+      "    {",
+      "      name: \"someTest\",",
+      "    },",
+      "  } {",
+      "    t.Run(test.name, func(t *testing.T) {",
+      "    })",
+      "  }",
+      "}"
+    ],
+    "description": "Go test function."
+  }
+}
