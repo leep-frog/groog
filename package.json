@@ -433,8 +433,12 @@
         "when": "!editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus",
         "args": {
           "sequence": [
-            "groog.find.toggleCaseSensitive",
-            "toggleSearchCaseSensitive"
+            {
+              "command": "groog.find.toggleCaseSensitive"
+            },
+            {
+              "command": "toggleSearchCaseSensitive"
+            }
           ]
         }
       },
@@ -444,8 +448,12 @@
         "when": "editorFocus",
         "args": {
           "sequence": [
-            "groog.find.toggleCaseSensitive",
-            "toggleFindCaseSensitive"
+            {
+              "command": "groog.find.toggleCaseSensitive"
+            },
+            {
+              "command": "toggleFindCaseSensitive"
+            }
           ]
         }
       },
@@ -455,8 +463,12 @@
         "when": "inSearchEditor",
         "args": {
           "sequence": [
-            "groog.find.toggleCaseSensitive",
-            "toggleSearchEditorCaseSensitive"
+            {
+              "command": "groog.find.toggleCaseSensitive"
+            },
+            {
+              "command": "toggleSearchEditorCaseSensitive"
+            }
           ]
         }
       },
@@ -466,8 +478,12 @@
         "when": "searchViewletFocus",
         "args": {
           "sequence": [
-            "groog.find.toggleCaseSensitive",
-            "toggleSearchCaseSensitive"
+            {
+              "command": "groog.find.toggleCaseSensitive"
+            },
+            {
+              "command": "toggleSearchCaseSensitive"
+            }
           ]
         }
       },
@@ -508,8 +524,12 @@
         "when": "groog.context.qmkMode \u0026\u0026 !editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus",
         "args": {
           "sequence": [
-            "groog.find.toggleWholeWord",
-            "toggleSearchWholeWord"
+            {
+              "command": "groog.find.toggleWholeWord"
+            },
+            {
+              "command": "toggleSearchWholeWord"
+            }
           ]
         }
       },
@@ -519,8 +539,12 @@
         "when": "groog.context.qmkMode \u0026\u0026 editorFocus",
         "args": {
           "sequence": [
-            "groog.find.toggleWholeWord",
-            "toggleFindWholeWord"
+            {
+              "command": "groog.find.toggleWholeWord"
+            },
+            {
+              "command": "toggleFindWholeWord"
+            }
           ]
         }
       },
@@ -530,8 +554,12 @@
         "when": "groog.context.qmkMode \u0026\u0026 inSearchEditor",
         "args": {
           "sequence": [
-            "groog.find.toggleWholeWord",
-            "toggleSearchEditorWholeWord"
+            {
+              "command": "groog.find.toggleWholeWord"
+            },
+            {
+              "command": "toggleSearchEditorWholeWord"
+            }
           ]
         }
       },
@@ -541,8 +569,12 @@
         "when": "groog.context.qmkMode \u0026\u0026 searchViewletFocus",
         "args": {
           "sequence": [
-            "groog.find.toggleWholeWord",
-            "toggleSearchWholeWord"
+            {
+              "command": "groog.find.toggleWholeWord"
+            },
+            {
+              "command": "toggleSearchWholeWord"
+            }
           ]
         }
       },
@@ -568,8 +600,12 @@
         "when": "!editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus",
         "args": {
           "sequence": [
-            "groog.find.toggleRegex",
-            "toggleSearchRegex"
+            {
+              "command": "groog.find.toggleRegex"
+            },
+            {
+              "command": "toggleSearchRegex"
+            }
           ]
         }
       },
@@ -579,8 +615,12 @@
         "when": "editorFocus",
         "args": {
           "sequence": [
-            "groog.find.toggleRegex",
-            "toggleFindRegex"
+            {
+              "command": "groog.find.toggleRegex"
+            },
+            {
+              "command": "toggleFindRegex"
+            }
           ]
         }
       },
@@ -590,8 +630,12 @@
         "when": "inSearchEditor",
         "args": {
           "sequence": [
-            "groog.find.toggleRegex",
-            "toggleSearchEditorRegex"
+            {
+              "command": "groog.find.toggleRegex"
+            },
+            {
+              "command": "toggleSearchEditorRegex"
+            }
           ]
         }
       },
@@ -601,8 +645,12 @@
         "when": "searchViewletFocus",
         "args": {
           "sequence": [
-            "groog.find.toggleRegex",
-            "toggleSearchRegex"
+            {
+              "command": "groog.find.toggleRegex"
+            },
+            {
+              "command": "toggleSearchRegex"
+            }
           ]
         }
       },
@@ -642,8 +690,12 @@
         "when": "!editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus",
         "args": {
           "sequence": [
-            "groog.find.toggleWholeWord",
-            "toggleSearchWholeWord"
+            {
+              "command": "groog.find.toggleWholeWord"
+            },
+            {
+              "command": "toggleSearchWholeWord"
+            }
           ]
         }
       },
@@ -653,8 +705,12 @@
         "when": "editorFocus",
         "args": {
           "sequence": [
-            "groog.find.toggleWholeWord",
-            "toggleFindWholeWord"
+            {
+              "command": "groog.find.toggleWholeWord"
+            },
+            {
+              "command": "toggleFindWholeWord"
+            }
           ]
         }
       },
@@ -664,8 +720,12 @@
         "when": "inSearchEditor",
         "args": {
           "sequence": [
-            "groog.find.toggleWholeWord",
-            "toggleSearchEditorWholeWord"
+            {
+              "command": "groog.find.toggleWholeWord"
+            },
+            {
+              "command": "toggleSearchEditorWholeWord"
+            }
           ]
         }
       },
@@ -675,8 +735,12 @@
         "when": "searchViewletFocus",
         "args": {
           "sequence": [
-            "groog.find.toggleWholeWord",
-            "toggleSearchWholeWord"
+            {
+              "command": "groog.find.toggleWholeWord"
+            },
+            {
+              "command": "toggleSearchWholeWord"
+            }
           ]
         }
       },
@@ -729,8 +793,12 @@
         "when": "activePanel",
         "args": {
           "sequence": [
-            "workbench.action.closePanel",
-            "workbench.action.openSettings"
+            {
+              "command": "workbench.action.closePanel"
+            },
+            {
+              "command": "workbench.action.openSettings"
+            }
           ]
         }
       },
@@ -745,8 +813,12 @@
         "when": "activePanel",
         "args": {
           "sequence": [
-            "workbench.action.closePanel",
-            "workbench.action.openGlobalKeybindings"
+            {
+              "command": "workbench.action.closePanel"
+            },
+            {
+              "command": "workbench.action.openGlobalKeybindings"
+            }
           ]
         }
       },
@@ -954,8 +1026,12 @@
         "when": "searchViewletFocus",
         "args": {
           "sequence": [
-            "search.action.focusNextSearchResult",
-            "search.action.focusSearchList"
+            {
+              "command": "search.action.focusNextSearchResult"
+            },
+            {
+              "command": "search.action.focusSearchList"
+            }
           ]
         }
       },
@@ -1004,8 +1080,12 @@
         "when": "searchViewletFocus",
         "args": {
           "sequence": [
-            "search.action.focusPreviousSearchResult",
-            "search.action.focusSearchList"
+            {
+              "command": "search.action.focusPreviousSearchResult"
+            },
+            {
+              "command": "search.action.focusSearchList"
+            }
           ]
         }
       },
@@ -1086,8 +1166,12 @@
         "command": "groog.multiCommand.execute",
         "args": {
           "sequence": [
-            "workbench.action.splitEditorRight",
-            "editor.action.revealDefinition"
+            {
+              "command": "workbench.action.splitEditorRight"
+            },
+            {
+              "command": "editor.action.revealDefinition"
+            }
           ]
         }
       },
@@ -1106,8 +1190,12 @@
         "command": "groog.multiCommand.execute",
         "args": {
           "sequence": [
-            "workbench.action.splitEditorRight",
-            "workbench.action.quickOpen"
+            {
+              "command": "workbench.action.splitEditorRight"
+            },
+            {
+              "command": "workbench.action.quickOpen"
+            }
           ]
         }
       },
@@ -1167,8 +1255,12 @@
         "command": "groog.multiCommand.execute",
         "args": {
           "sequence": [
-            "workbench.action.splitEditorDown",
-            "workbench.action.quickOpen"
+            {
+              "command": "workbench.action.splitEditorDown"
+            },
+            {
+              "command": "workbench.action.quickOpen"
+            }
           ]
         }
       },
@@ -1178,8 +1270,12 @@
         "when": "!activePanel",
         "args": {
           "sequence": [
-            "groog.ctrlG",
-            "termin-all-or-nothing.openPanel"
+            {
+              "command": "groog.ctrlG"
+            },
+            {
+              "command": "termin-all-or-nothing.openPanel"
+            }
           ]
         }
       },
@@ -1189,8 +1285,12 @@
         "when": "activePanel",
         "args": {
           "sequence": [
-            "groog.ctrlG",
-            "termin-all-or-nothing.closePanel"
+            {
+              "command": "groog.ctrlG"
+            },
+            {
+              "command": "termin-all-or-nothing.closePanel"
+            }
           ]
         }
       },
@@ -1238,8 +1338,12 @@
         "when": "activePanel",
         "args": {
           "sequence": [
-            "workbench.action.closePanel",
-            "workbench.action.openSettingsJson"
+            {
+              "command": "workbench.action.closePanel"
+            },
+            {
+              "command": "workbench.action.openSettingsJson"
+            }
           ]
         }
       },
@@ -1249,8 +1353,12 @@
         "when": "activePanel",
         "args": {
           "sequence": [
-            "workbench.action.closePanel",
-            "workbench.action.openSettingsJson"
+            {
+              "command": "workbench.action.closePanel"
+            },
+            {
+              "command": "workbench.action.openSettingsJson"
+            }
           ]
         }
       },
@@ -1270,8 +1378,12 @@
         "when": "activePanel",
         "args": {
           "sequence": [
-            "workbench.action.closePanel",
-            "workbench.action.openGlobalKeybindingsFile"
+            {
+              "command": "workbench.action.closePanel"
+            },
+            {
+              "command": "workbench.action.openGlobalKeybindingsFile"
+            }
           ]
         }
       },
@@ -1281,8 +1393,12 @@
         "when": "activePanel",
         "args": {
           "sequence": [
-            "workbench.action.closePanel",
-            "workbench.action.openGlobalKeybindingsFile"
+            {
+              "command": "workbench.action.closePanel"
+            },
+            {
+              "command": "workbench.action.openGlobalKeybindingsFile"
+            }
           ]
         }
       },
@@ -1317,8 +1433,12 @@
         "command": "groog.multiCommand.execute",
         "args": {
           "sequence": [
-            "workbench.view.extensions",
-            "workbench.extensions.action.checkForUpdates"
+            {
+              "command": "workbench.view.extensions"
+            },
+            {
+              "command": "workbench.extensions.action.checkForUpdates"
+            }
           ]
         }
       },
@@ -1327,8 +1447,12 @@
         "command": "groog.multiCommand.execute",
         "args": {
           "sequence": [
-            "workbench.view.extensions",
-            "workbench.extensions.action.checkForUpdates"
+            {
+              "command": "workbench.view.extensions"
+            },
+            {
+              "command": "workbench.extensions.action.checkForUpdates"
+            }
           ]
         }
       },
@@ -1345,8 +1469,12 @@
         "command": "groog.multiCommand.execute",
         "args": {
           "sequence": [
-            "workbench.action.splitEditorRight",
-            "groog.focusPreviousEditor"
+            {
+              "command": "workbench.action.splitEditorRight"
+            },
+            {
+              "command": "groog.focusPreviousEditor"
+            }
           ]
         }
       },
@@ -1355,8 +1483,12 @@
         "command": "groog.multiCommand.execute",
         "args": {
           "sequence": [
-            "workbench.action.splitEditorRight",
-            "groog.focusPreviousEditor"
+            {
+              "command": "workbench.action.splitEditorRight"
+            },
+            {
+              "command": "groog.focusPreviousEditor"
+            }
           ]
         }
       },
@@ -1489,8 +1621,12 @@
         "command": "groog.multiCommand.execute",
         "args": {
           "sequence": [
-            "workbench.action.splitEditorDown",
-            "groog.focusPreviousEditor"
+            {
+              "command": "workbench.action.splitEditorDown"
+            },
+            {
+              "command": "groog.focusPreviousEditor"
+            }
           ]
         }
       },
@@ -1499,8 +1635,12 @@
         "command": "groog.multiCommand.execute",
         "args": {
           "sequence": [
-            "workbench.action.splitEditorDown",
-            "groog.focusPreviousEditor"
+            {
+              "command": "workbench.action.splitEditorDown"
+            },
+            {
+              "command": "groog.focusPreviousEditor"
+            }
           ]
         }
       },
@@ -1971,8 +2111,12 @@
         "command": "groog.multiCommand.execute",
         "args": {
           "sequence": [
-            "workbench.action.splitEditorRight",
-            "editor.action.revealDefinition"
+            {
+              "command": "workbench.action.splitEditorRight"
+            },
+            {
+              "command": "editor.action.revealDefinition"
+            }
           ]
         }
       },

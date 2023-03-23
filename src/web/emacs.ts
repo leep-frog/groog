@@ -82,8 +82,8 @@ export class Emacs {
     this.recorder.registerCommand(context, 'renameFile', async (): Promise<void> => {
       await multiCommand({
         sequence: [
-          "workbench.action.focusSideBar",
-          "renameFile",
+          { command: "workbench.action.focusSideBar" },
+          { command: "renameFile" },
         ],
       });
     });

@@ -1,12 +1,17 @@
 import * as vscode from 'vscode';
 
+export interface SingleCommand {
+  command: string;
+  args?: any;
+}
+
 export interface MultiCommand {
-  sequence: string[]
+  sequence: SingleCommand[];
 }
 
 export async function multiCommand(mc: MultiCommand) {
-  for (var command of mc.sequence) {
-    await vscode.commands.executeCommand(command);
+  for (var sc of mc.sequence) {
+    await vscode.commands.executeCommand(sc.command, sc.args);
   }
 }
 

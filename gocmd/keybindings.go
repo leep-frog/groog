@@ -462,6 +462,12 @@ var (
 		// https://en.wikipedia.org/wiki/List_of_Unicode_characters
 		// ctrlX("c"): panelSplit(sendSequence("\u0018\u0003"), nil),
 		ctrlX("c"): panelSplit(kb("workbench.action.terminal.copyLastCommandOutput"), nil),
+		/*ctrlX("c"): panelSplit(
+		mc(
+			notification("bleh"),
+			kb("workbench.action.terminal.copyLastCommandOutput"),
+		),
+		nil),*/
 
 		// To determine this, I did the following
 		// - ran `sed -n l` (as recommended in (1))
@@ -607,8 +613,15 @@ func notification(message string) *KB {
 }
 
 func mc(cmds ...string) *KB {
+	var sequence []map[string]interface{}
+	for _, c := range cmds {
+		sequence = append(sequence, map[string]interface{}{
+			"command": c,
+		})
+	}
+
 	return kbArgs("groog.multiCommand.execute", map[string]interface{}{
-		"sequence": cmds,
+		"sequence": sequence,
 	})
 }
 
