@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.116",
+  "version": "0.0.117",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -1418,7 +1418,7 @@
           "sequence": [
             {
               "args": {
-                "message": "bleh"
+                "message": "Terminal output copied!"
               },
               "command": "groog.message.info"
             },
@@ -1437,7 +1437,7 @@
           "sequence": [
             {
               "args": {
-                "message": "bleh"
+                "message": "Terminal output copied!"
               },
               "command": "groog.message.info"
             },
