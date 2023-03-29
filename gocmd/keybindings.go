@@ -478,9 +478,15 @@ var (
 		ctrl("z"): panelSplit(sendSequence("\u001F"), nil),
 
 		// Formatting
-		ctrlX(tab): only("groog.format"),
-		ctrl("i"):  only("editor.action.indentLines"),
-		ctrlX("i"): only("editor.action.organizeImports"),
+		ctrlX(tab):       only("groog.format"),
+		ctrl("i"):        only("editor.action.indentLines"),
+		ctrl(shift("i")): only("editor.action.outdentLines"),
+		ctrlX("i"):       only("editor.action.organizeImports"),
+		alt("i"):         only("groog.indentToPreviousLine"),
+		alt(shift("i")): {
+			always.value:          kb("groog.indentToNextLine"),
+			editorTextFocus.value: kb("-editor.action.insertCursorAtEndOfEachLineSelected"),
+		},
 
 		// Pasting
 		ctrlX("y"): only("editor.action.clipboardPasteAction"),

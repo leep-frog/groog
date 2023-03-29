@@ -88,7 +88,10 @@ export class Emacs {
       });
     });
 
-    // This needs to be a groog command so it can be recorded.
+    this.recorder.registerCommand(context, 'indentToPreviousLine', () => this.indentToPrevLine(-1));
+    this.recorder.registerCommand(context, 'indentToNextLine', () => this.indentToPrevLine(1));
+
+    // TODO: This needs to be a groog command so it can be recorded.
     this.recorder.registerCommand(context, 'undo', () => vscode.commands.executeCommand("undo"));
 
     for (var th of this.typeHandlers) {
@@ -218,6 +221,39 @@ export class Emacs {
     }
     await vscode.window.activeTextEditor?.edit(editBuilder => {
       editBuilder.delete(range);
+    });
+  }
+
+  async indentToPrevLine(offset: number) {
+    let editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      return;
+    }
+
+    // Get line info
+    let curLine = editor.selection.active.line;
+    let otherLine = curLine + offset;
+    if (otherLine < 0 || otherLine >= editor.document.lineCount) {
+      return;
+    }
+    let curWSRange = new vscode.Range(
+      new vscode.Position(curLine, 0),
+      new vscode.Position(curLine, editor.document.lineAt(curLine).firstNonWhitespaceCharacterIndex),
+    );
+    let otherLineRange = editor.document.lineAt(otherLine).range;
+    let otherLineText = editor.document.getText(otherLineRange);
+
+    // Get the match
+    const r = /^\s*/;
+    const match = r.exec(otherLineText);
+    if (match === null) {
+      vscode.window.showInformationMessage("No match found.");
+      return;
+    }
+
+    // Replace text.
+    await vscode.window.activeTextEditor?.edit(editBuilder => {
+      editBuilder.replace(curWSRange, match[0]);
     });
   }
 

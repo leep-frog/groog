@@ -57,6 +57,8 @@ var (
 		cc("groog.find.previous", "Groog go to previous find context"),
 		cc("groog.find.next", "Groog go to next find context"),
 		cc("groog.format", "Groog format"),
+		cc("groog.indentToPreviousLine", "Indent to match previous line"),
+		cc("groog.indentToNextLine", "Indent to match next line"),
 		cc("groog.jump", "Emacs Jump"),
 		cc("groog.kill", "Emacs Kill Line"),
 		cc("groog.message.info", "Groog Info Message"),

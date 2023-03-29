@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.117",
+  "version": "0.0.118",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -147,6 +147,14 @@
       {
         "command": "groog.format",
         "title": "Groog format"
+      },
+      {
+        "command": "groog.indentToNextLine",
+        "title": "Indent to match next line"
+      },
+      {
+        "command": "groog.indentToPreviousLine",
+        "title": "Indent to match previous line"
       },
       {
         "command": "groog.jump",
@@ -587,6 +595,10 @@
         "command": "groog.deleteWordLeft"
       },
       {
+        "key": "alt+i",
+        "command": "groog.indentToPreviousLine"
+      },
+      {
         "key": "alt+n",
         "command": "workbench.action.editor.nextChange"
       },
@@ -675,6 +687,15 @@
       {
         "key": "alt+shift+f4",
         "command": "workbench.action.closeWindow"
+      },
+      {
+        "key": "alt+shift+i",
+        "command": "groog.indentToNextLine"
+      },
+      {
+        "key": "alt+shift+i",
+        "command": "-editor.action.insertCursorAtEndOfEachLineSelected",
+        "when": "editorTextFocus"
       },
       {
         "key": "alt+shift+t",
@@ -1202,6 +1223,10 @@
       {
         "key": "ctrl+shift+home",
         "command": "editor.action.selectAll"
+      },
+      {
+        "key": "ctrl+shift+i",
+        "command": "editor.action.outdentLines"
       },
       {
         "key": "ctrl+shift+k",
