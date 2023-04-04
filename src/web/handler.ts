@@ -35,6 +35,7 @@ export abstract class TypeHandler implements Registerable {
   // Returns whether or not it was actually activated
   async activate() {
     if (!this.active) {
+      this.active = true;
       await this.handleActivation();
 
       // Update when clause context
@@ -44,14 +45,14 @@ export abstract class TypeHandler implements Registerable {
       if (this.mc !== undefined) {
         this.cm.add(this.mc);
       }
-
-      this.active = true;
     }
   }
 
   // Returns whether or not it was actually deactivated
   async deactivate() {
     if (this.active) {
+      this.active = false;
+
       await this.handleDeactivation();
 
       // Update when clause context
@@ -61,8 +62,6 @@ export abstract class TypeHandler implements Registerable {
       if (this.mc !== undefined) {
         this.cm.remove(this.mc);
       }
-
-      this.active = false;
     }
   }
 
