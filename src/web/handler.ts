@@ -67,7 +67,7 @@ export abstract class TypeHandler implements Registerable {
 
   abstract ctrlG(): Thenable<void>;
 
-  abstract onYank(text: string | undefined): Thenable<void>;
+  abstract onYank(prefixText: string | undefined, text: string | undefined): Thenable<void>;
   abstract alwaysOnYank: boolean;
   abstract onKill(text: string | undefined): Thenable<void>;
   abstract alwaysOnKill: boolean;
@@ -79,4 +79,9 @@ export abstract class TypeHandler implements Registerable {
 
   // TODO pasteHandler
   // TODO escape handler (or just same ctrl g?)
+}
+
+export function getPrefixText(editor: vscode.TextEditor | undefined, range: vscode.Range) : string | undefined {
+  const preRange = new vscode.Range(range.start.line, 0, range.start.line, range.start.character);
+  return editor?.document.getText(preRange);
 }

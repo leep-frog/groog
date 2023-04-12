@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { ColorMode } from './color_mode';
 import { commands } from './commands';
 import { FindHandler } from './find';
-import { Registerable, TypeHandler } from './handler';
+import { Registerable, TypeHandler, getPrefixText } from './handler';
 import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { TypoFixer } from './internal-typos';
 import { MarkHandler } from './mark';
@@ -168,9 +168,12 @@ export class Emacs {
   }
 
   async yank() {
-    let range = vscode.window.activeTextEditor?.selection;
-    let maybe = vscode.window.activeTextEditor?.document.getText(range);
-    if (maybe) {
+    const editor = vscode.window.activeTextEditor;
+    let range = editor?.selection;
+    let maybeText = editor?.document.getText(range);
+    let prefixText: string | undefined = "";
+    if (range && maybeText) {
+      prefixText = getPrefixText(editor, range);
       await vscode.window.activeTextEditor?.edit(editBuilder => {
         if (range) {
           editBuilder.delete(range);
@@ -180,7 +183,7 @@ export class Emacs {
 
     for (var th of this.typeHandlers) {
       if (th.isActive() || await th.alwaysOnYank) {
-        await th.onYank(maybe);
+        await th.onYank(prefixText, maybeText);
       }
     }
   }

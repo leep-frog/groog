@@ -1,16 +1,18 @@
 import * as vscode from 'vscode';
 import { ColorMode, ModeColor } from './color_mode';
-import { TypeHandler } from './handler';
+import { TypeHandler, getPrefixText } from './handler';
 import { CursorMove, DeleteCommand } from './interfaces';
 import { Recorder } from './record';
 
 export class MarkHandler extends TypeHandler {
   yanked: string;
+  yankedPrefix: string;
   whenContext: string = "mark";
 
   constructor(cm: ColorMode) {
     super(cm, ModeColor.mark);
     this.yanked = "";
+    this.yankedPrefix = "";
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
@@ -26,12 +28,18 @@ export class MarkHandler extends TypeHandler {
         await this.deactivate();
       }
 
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        return;
+      }
+      const sel = editor.selection;
+      const curPrefix = getPrefixText(editor, new vscode.Range(sel.start, sel.end));
       await vscode.window.activeTextEditor?.edit(editBuilder => {
-        let editor = vscode.window.activeTextEditor;
-        if (!editor) {
-          return;
-        }
-        editBuilder.insert(editor.selection.active, this.yanked);
+        const whitespaceRegex = /^\s*$/;
+        const prefixesWhitespaceOnly = whitespaceRegex.test(this.yankedPrefix) && (!curPrefix || whitespaceRegex.test(curPrefix));
+        const replacement = prefixesWhitespaceOnly ? replaceAll(this.yanked, "\n" + this.yankedPrefix, "\n" + curPrefix) : this.yanked;
+        editBuilder.delete(editor.selection);
+        editBuilder.insert(editor.selection.start, replacement);
       });
     });
   }
@@ -66,9 +74,10 @@ export class MarkHandler extends TypeHandler {
     return true;
   }
 
-  async onYank(s: string | undefined) {
+  async onYank(prefixText: string | undefined, text: string | undefined) {
     await this.deactivate();
-    s ? this.yanked = s : this.yanked = "";
+    this.yankedPrefix = prefixText ?? "";
+    this.yanked = text ?? "";
   }
 
   alwaysOnYank: boolean = true;
@@ -79,4 +88,8 @@ export class MarkHandler extends TypeHandler {
   }
 
   alwaysOnKill: boolean = true;
+}
+
+function replaceAll(str: string, remove: string, replace: string): string {
+  return str.split(remove).join(replace);
 }

@@ -208,7 +208,7 @@ export class Recorder extends TypeHandler {
   async onKill(s: string | undefined) { }
   alwaysOnKill: boolean = false;
   async ctrlG() { }
-  async onYank(s: string | undefined) { }
+  async onYank() { }
   alwaysOnYank: boolean = false;
   async delHandler(s: DeleteCommand): Promise<boolean> {
     return true;

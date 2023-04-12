@@ -346,7 +346,7 @@ export class FindHandler extends TypeHandler {
   }
 
   // TODO: do something like error message or deactivate
-  async onYank(s: string | undefined) { }
+  async onYank() { }
   alwaysOnYank: boolean = false;
   async onKill(s: string | undefined) { }
   alwaysOnKill: boolean = false;
