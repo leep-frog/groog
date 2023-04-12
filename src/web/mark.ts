@@ -85,6 +85,8 @@ export class MarkHandler extends TypeHandler {
   async onKill(s: string | undefined) {
     await this.deactivate();
     s ? this.yanked = s : this.yanked = "";
+    // Yanked text is one line so need to consider the prefix context in this case.
+    this.yankedPrefix = "";
   }
 
   alwaysOnKill: boolean = true;
