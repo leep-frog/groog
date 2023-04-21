@@ -61,7 +61,8 @@ export class Settings implements Registerable {
       new GlobalSetting("workbench", "editor.limit.value", 1),
       new GlobalSetting("workbench", "editor.showTabs", false),
       new GlobalSetting("workbench", "startupEditor", "none"),
-      new GlobalSetting("terminal", "integrated.defaultProfile.windows", "MinGW"),
+      // TODO: How is this not set in linux (i.e. work computer)?
+      new GlobalSetting("terminal", "integrated.defaultProfile.windows", "PowerShell"),
       new GlobalSetting("terminal", "integrated.automationProfile.windows", {
         "path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
       }),
