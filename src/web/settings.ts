@@ -26,7 +26,10 @@ export class Settings implements Registerable {
     }
     return [
       new GlobalSetting("editor", "autoClosingQuotes", "never"),
-      new GlobalSetting("editor", "autoClosingBrackets", "always"),
+      // My preference is to only auto-close curly brackets, but this auto-closes (), [], and {}.
+      // So, we disable this, and manually implement auto-close for curly brackets ourselves.
+      // See keybindings.json behavior for the "{" character for implementation details.
+      new GlobalSetting("editor", "autoClosingBrackets", "never"),
       new GlobalSetting("editor", "codeActionsOnSave", {
         "source.organizeImports": true,
         "source.fixAll.eslint": true,

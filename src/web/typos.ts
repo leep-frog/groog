@@ -27,6 +27,7 @@ export interface Correction {
 const goLanguageKey = "go";
 const jsoncLanguageKey = "jsonc";
 const jsonLanguageKey = "json";
+export const globalLanguageKey = "*";
 const typescriptLanguageKey = "typescript";
 
 export function defaultCorrections(): Correction[] {

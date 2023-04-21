@@ -1,11 +1,10 @@
 // Used https://github.com/genesy/auto-correct as guidance for this logic.
 import * as vscode from 'vscode';
 import { getWordSeparators } from './settings';
-import { Correction, defaultCorrections } from './typos';
+import { Correction, defaultCorrections, globalLanguageKey } from './typos';
 
 // TODO: Case match?
 
-const globalLanguageKey = "*";
 const whitespaceCharBreakKey = "WHITESPACE";
 
 // Types used internally

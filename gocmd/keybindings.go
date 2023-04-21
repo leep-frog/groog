@@ -128,10 +128,19 @@ func kbDefsToBindings() []*Keybinding {
 			if si != 0 {
 				text = Key(shiftedCharacters[ci])
 			}
+
+			cmd := kbArgs("groog.type", map[string]interface{}{
+				"text": text,
+			})
+
+			// Manually implement auto-close for curly bracket (vs code settings are all-or-nothing for '([{' characters).
+			if text == "{" {
+				cmd.Args["text"] = "{}"
+				cmd = mcWithArgs(cmd, kb("groog.cursorLeft"))
+			}
+
 			kbDefinitions[s] = map[string]*KB{
-				groogBehaviorContext.value: kbArgs("groog.type", map[string]interface{}{
-					"text": text,
-				}),
+				groogBehaviorContext.value: cmd,
 			}
 		}
 	}

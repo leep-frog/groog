@@ -195,7 +195,9 @@ export class Recorder extends TypeHandler {
   }
 
   addRecord(r: Record) {
-    this.recordBook = this.recordBook.concat(r);
+    if (this.baseCommand) {
+      this.recordBook = this.recordBook.concat(r);
+    }
   }
 
   async textHandler(s: string): Promise<boolean> {
