@@ -145,10 +145,50 @@ export class Emacs {
     );
   }
 
+  private deleteSpaceRightCommands: DeleteCommand[] = [
+    DeleteCommand.right,
+    DeleteCommand.wordRight,
+  ];
+
+  private deleteSpaceRight(d: DeleteCommand): boolean {
+    if (!this.deleteSpaceRightCommands.includes(d)) {
+      return false;
+    }
+
+    const editor = vscode.window.activeTextEditor;
+
+    if (!editor || !editor.selection.isEmpty) {
+      return false;
+    }
+    const lineNumber = editor.selection.active.line;
+    const line = editor.document.lineAt(lineNumber);
+
+    const remainingText = line.text.slice(editor.selection.active.character);
+    if (!/^\s*$/.test(remainingText)) {
+      return false;
+    }
+
+    editor.edit(editBuilder => {
+      const endPos = lineNumber + 1 === editor.document.lineCount ?
+        new vscode.Position(lineNumber, line.text.length) :
+        new vscode.Position(lineNumber+1, editor.document.lineAt(lineNumber+1).firstNonWhitespaceCharacterIndex);
+
+      editBuilder.delete(new vscode.Range(
+        editor.selection.active,
+        endPos,
+      ));
+    });
+    return true;
+  }
+
   async delCommand(d: DeleteCommand) {
     await this.runHandlers(
       async (th: TypeHandler): Promise<boolean> => { return await th.delHandler(d); },
-      async () => { await vscode.commands.executeCommand(d); },
+      async () => {
+        if (!this.deleteSpaceRight(d)) {
+          await vscode.commands.executeCommand(d);
+        }
+      },
     );
   }
 
