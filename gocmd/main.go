@@ -30,7 +30,7 @@ func (*cli) Node() command.Node {
 				Name:        "groog",
 				DisplayName: "groog",
 				Description: "",
-				Version:     "0.0.125",
+				Version:     "0.0.126",
 				Publisher:   "groogle",
 				Browser:     "./dist/web/extension.js",
 				Engines: map[string]string{

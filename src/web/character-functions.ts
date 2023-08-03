@@ -8,8 +8,16 @@ interface TypedCharacterHandlerFunction {
 }
 
 const characterFnMap: Map<string, TypedCharacterHandlerFunction> = new Map<string, TypedCharacterHandlerFunction>([
+  // We only want the type-over feature of the autoClose* settings of vs code
+  // i.e. we don't want the closing character to be automatically added, except for brackets
   ["{", openBracketFunction],
-  ["}", closeBracketFunction],
+  ...typeOverFunctions(
+    "}",
+    "'",
+    "\"",
+    '`',
+    ")"
+  ),
 ]);
 
 const deleteFnMap: Map<DeleteCommand, TypedCharacterHandlerFunction> = new Map<DeleteCommand, TypedCharacterHandlerFunction>([
@@ -48,17 +56,25 @@ function openBracketFunction(editor: vscode.TextEditor): boolean {
   return true;
 }
 
-function closeBracketFunction(editor: vscode.TextEditor): boolean {
-  const cursor = editor.selection.active;
-  const nextPos = cursor.translate({characterDelta: 1});
-  const nextChar = editor.document.getText(new vscode.Range(cursor, nextPos));
-  if (nextChar !== "}") {
-    return false;
-  };
+function typeOverFunctions(...characters: string[]): Iterable<[string, TypedCharacterHandlerFunction]> {
+  return characters.map(c => [c, typeOverFunction(c)]);
+}
 
-  // Move the cursor
-  editor.selection = new vscode.Selection(nextPos, nextPos);
-  return true;
+// If typing 'character' symbol, and the next character is that character, then simply
+// type over it (i.e. move the cursor to the next position.
+function typeOverFunction(character: string): TypedCharacterHandlerFunction {
+  return (editor: vscode.TextEditor) => {
+    const cursor = editor.selection.active;
+    const nextPos = cursor.translate({characterDelta: 1});
+    const nextChar = editor.document.getText(new vscode.Range(cursor, nextPos));
+    if (nextChar !== character) {
+      return false;
+    };
+
+    // Move the cursor
+    editor.selection = new vscode.Selection(nextPos, nextPos);
+    return true;
+  };
 }
 
 function deleteSpaceRight(editor: vscode.TextEditor): boolean {
