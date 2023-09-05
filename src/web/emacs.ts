@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { ColorMode } from './color_mode';
-import { commands } from './commands';
 import { FindHandler } from './find';
 import { Registerable, TypeHandler, getPrefixText } from './handler';
 import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './interfaces';
@@ -105,11 +104,6 @@ export class Emacs {
 
     this.recorder.registerCommand(context, "multiCommand.execute", multiCommand);
     this.recorder.registerCommand(context, "message.info", infoMessage);
-
-    // Register one-off commands.
-    commands.forEach((value: () => Thenable<any>, key: string) => {
-      this.recorder.registerCommand(context, key, value);
-    });
 
     // After all commands have been registered, check persistent data for qmk setting.
     this.setQMK(context, this.qmk.get(context));
