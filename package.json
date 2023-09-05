@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.127",
+  "version": "0.0.128",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -1702,6 +1702,28 @@
         "when": "activePanel",
         "args": {
           "text": "\u001f"
+        }
+      },
+      {
+        "key": "ctrl+z f",
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            {
+              "command": "faves.search"
+            }
+          ]
+        }
+      },
+      {
+        "key": "ctrl+z ctrl+f",
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            {
+              "command": "faves.search"
+            }
+          ]
         }
       },
       {

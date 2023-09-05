@@ -366,6 +366,9 @@ var (
 		ctrl(shift("v")): onlyMC(
 			"faves.toggle",
 		),
+		ctrlZ("f"): onlyMC(
+			"faves.search",
+		),
 		ctrlX("h"): onlyMC(
 			"workbench.action.splitEditorRight",
 		),
@@ -662,9 +665,10 @@ func (k Key) keyAliases() []string {
 	}
 
 	// Ctrl+x duplication
-	prefix := "ctrl+x "
-	if strings.HasPrefix(k.ToString(), prefix) {
-		kas = append(kas, fmt.Sprintf("%sctrl+%s", prefix, k.ToString()[len(prefix):]))
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(k.ToString(), prefix) {
+			kas = append(kas, fmt.Sprintf("%sctrl+%s", prefix, k.ToString()[len(prefix):]))
+		}
 	}
 
 	return kas
@@ -745,6 +749,17 @@ func recordingSplit(recordingKB, otherKB *KB) map[string]*KB {
 	return contextualKB(groogRecording, recordingKB, otherKB)
 }
 
+var (
+	prefixes = []string{
+		"ctrl+x ",
+		"ctrl+z ",
+	}
+)
+
 func ctrlX(c string) Key {
 	return Key(fmt.Sprintf("ctrl+x %s", c))
+}
+
+func ctrlZ(c string) Key {
+	return Key(fmt.Sprintf("ctrl+z %s", c))
 }

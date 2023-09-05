@@ -30,7 +30,7 @@ func (*cli) Node() command.Node {
 				Name:        "groog",
 				DisplayName: "groog",
 				Description: "",
-				Version:     "0.0.127",
+				Version:     "0.0.128",
 				Publisher:   "groogle",
 				Browser:     "./dist/web/extension.js",
 				Engines: map[string]string{
@@ -89,7 +89,7 @@ func (*cli) Node() command.Node {
 				return o.Annotatef(err, "failed to marshal json")
 			}
 
-			if err := os.WriteFile(outputFile.Get(d), j, 0644); err != nil {
+			if err := os.WriteFile(outputFile.Get(d), append(j, byte('\n')), 0644); err != nil {
 				return o.Annotatef(err, "failed to write json to output file")
 			}
 			return nil
