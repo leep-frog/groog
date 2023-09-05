@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { commands } from './commands';
 import { Registerable } from './handler';
 import { Recorder } from './record';
 
@@ -21,9 +20,6 @@ export class Settings implements Registerable {
       "groog.multiCommand.execute",
       "termin-all-or-nothing.closePanel",
     ];
-    for (let v of commands.keys()) {
-      ics.push("groog." + v);
-    }
     return [
       new GlobalSetting("editor", "autoClosingQuotes", "never"),
       // My preference is to only auto-close curly brackets, but this auto-closes (), [], and {}.

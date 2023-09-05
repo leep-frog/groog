@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "0.0.126",
+  "version": "0.0.127",
   "publisher": "groogle",
   "browser": "./dist/web/extension.js",
   "engines": {
@@ -1207,20 +1207,6 @@
         "when": "groog.context.qmkMode \u0026\u0026 groog.context.recordMode"
       },
       {
-        "key": "ctrl+shift+h",
-        "command": "groog.multiCommand.execute",
-        "args": {
-          "sequence": [
-            {
-              "command": "workbench.action.splitEditorRight"
-            },
-            {
-              "command": "workbench.action.quickOpen"
-            }
-          ]
-        }
-      },
-      {
         "key": "ctrl+shift+home",
         "command": "editor.action.selectAll"
       },
@@ -1281,10 +1267,7 @@
         "args": {
           "sequence": [
             {
-              "command": "workbench.action.splitEditorDown"
-            },
-            {
-              "command": "workbench.action.quickOpen"
+              "command": "faves.toggle"
             }
           ]
         }
@@ -1524,9 +1507,6 @@
           "sequence": [
             {
               "command": "workbench.action.splitEditorRight"
-            },
-            {
-              "command": "groog.focusPreviousEditor"
             }
           ]
         }
@@ -1538,9 +1518,6 @@
           "sequence": [
             {
               "command": "workbench.action.splitEditorRight"
-            },
-            {
-              "command": "groog.focusPreviousEditor"
             }
           ]
         }
@@ -1676,9 +1653,6 @@
           "sequence": [
             {
               "command": "workbench.action.splitEditorDown"
-            },
-            {
-              "command": "groog.focusPreviousEditor"
             }
           ]
         }
@@ -1690,9 +1664,6 @@
           "sequence": [
             {
               "command": "workbench.action.splitEditorDown"
-            },
-            {
-              "command": "groog.focusPreviousEditor"
             }
           ]
         }

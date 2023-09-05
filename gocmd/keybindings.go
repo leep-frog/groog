@@ -362,19 +362,12 @@ var (
 		ctrlX("f"): only("workbench.action.quickOpen"),
 		ctrlX("v"): onlyMC(
 			"workbench.action.splitEditorDown",
-			"groog.focusPreviousEditor",
 		),
 		ctrl(shift("v")): onlyMC(
-			"workbench.action.splitEditorDown",
-			"workbench.action.quickOpen",
+			"faves.toggle",
 		),
 		ctrlX("h"): onlyMC(
 			"workbench.action.splitEditorRight",
-			"groog.focusPreviousEditor",
-		),
-		ctrl(shift("h")): onlyMC(
-			"workbench.action.splitEditorRight",
-			"workbench.action.quickOpen",
 		),
 		ctrl(pagedown): only("groog.focusNextEditor"),
 		ctrl(pageup):   only("groog.focusPreviousEditor"),
@@ -607,7 +600,6 @@ func kb(cmd string) *KB {
 	return kbArgs(cmd, nil)
 }
 
-// TODO: combine this with mc
 func onlyMC(cmds ...string) map[string]*KB {
 	return onlyKB(mc(cmds...))
 }
