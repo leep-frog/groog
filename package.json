@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -1256,17 +1256,6 @@
         "when": "activePanel"
       },
       {
-        "key": "ctrl+shift+v",
-        "command": "groog.multiCommand.execute",
-        "args": {
-          "sequence": [
-            {
-              "command": "faves.toggle"
-            }
-          ]
-        }
-      },
-      {
         "key": "ctrl+t",
         "command": "groog.multiCommand.execute",
         "when": "!activePanel",
@@ -1711,6 +1700,28 @@
       },
       {
         "key": "ctrl+z ctrl+f",
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            {
+              "command": "faves.search"
+            }
+          ]
+        }
+      },
+      {
+        "key": "ctrl+z v",
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            {
+              "command": "faves.search"
+            }
+          ]
+        }
+      },
+      {
+        "key": "ctrl+z ctrl+v",
         "command": "groog.multiCommand.execute",
         "args": {
           "sequence": [

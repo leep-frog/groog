@@ -363,8 +363,8 @@ var (
 		ctrlX("v"): onlyMC(
 			"workbench.action.splitEditorDown",
 		),
-		ctrl(shift("v")): onlyMC(
-			"faves.toggle",
+		ctrlZ("v"): onlyMC(
+			"faves.search",
 		),
 		ctrlZ("f"): onlyMC(
 			"faves.search",
