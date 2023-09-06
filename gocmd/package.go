@@ -8,7 +8,7 @@ type Package struct {
 	Description      string            `json:"description"`
 	Version          string            `json:"version"`
 	Publisher        string            `json:"publisher"`
-	Browser          string            `json:"browser"`
+	Main             string            `json:"main"`
 	Engines          map[string]string `json:"engines"`
 	Repository       *Repository       `json:"repository"`
 	Categories       []string          `json:"categories"`
