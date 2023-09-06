@@ -41,7 +41,7 @@ export class Emacs {
   constructor() {
     this.cm = new ColorMode();
     this.qmk = new GlobalStateTracker<boolean>(qmkKey);
-    this.recorder = new Recorder(this.cm);
+    this.recorder = new Recorder(this.cm, this);
     this.typoFixer = new TypoFixer();
     this.typeHandlers = [
       new FindHandler(this.cm),
@@ -130,28 +130,29 @@ export class Emacs {
     let s = arg.text;
     await this.runHandlers(
       async (th: TypeHandler): Promise<boolean> => { return await th.textHandler(s); },
-      async () => {
-        // Check for a dictionary replacement
-        if ((await this.typoFixer.check(s))) {
-          return;
-        }
-
-        if (handleTypedCharacter(s)) {
-          return;
-        }
-
-        vscode.window.showInformationMessage("");
-
-        await vscode.commands.executeCommand("default:type", arg);
-      },
+      async () => this.typeBonusFeatures(s),
     );
   }
+
+  public async typeBonusFeatures(s: string): Promise<void> {
+    // Check for a dictionary replacement
+    if ((await this.typoFixer.check(s))) {
+      return;
+    }
+
+    if (await handleTypedCharacter(s)) {
+      return;
+    }
+
+    await vscode.commands.executeCommand("default:type", {text: s});
+  }
+
 
   async delCommand(d: DeleteCommand) {
     await this.runHandlers(
       async (th: TypeHandler): Promise<boolean> => { return await th.delHandler(d); },
       async () => {
-        if (handleDeleteCharacter(d)) {
+        if (await handleDeleteCharacter(d)) {
           return;
         }
 

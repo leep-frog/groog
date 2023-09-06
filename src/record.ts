@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { ColorMode, ModeColor } from './color_mode';
 import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand } from './interfaces';
+import { Emacs } from './emacs';
 
 export class Recorder extends TypeHandler {
   // baseCommand ensures we don't infinite loop a command. For example,
@@ -17,14 +18,16 @@ export class Recorder extends TypeHandler {
   // because any recording I'd want public I could
   // just create an equivalent vscode function.
   private namedRecordings: Map<string, Record[]>;
+  private emacs: Emacs;
 
   whenContext: string = "record";
 
-  constructor(cm: ColorMode) {
+  constructor(cm: ColorMode, emacs: Emacs) {
     super(cm, ModeColor.record);
     this.baseCommand = true;
     this.recordBook = [];
     this.namedRecordings = new Map<string, Record[]>();
+    this.emacs = emacs;
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
@@ -172,7 +175,7 @@ export class Recorder extends TypeHandler {
 
   async playRecords(records : Record[]) {
     for (var r of records) {
-      if (!await r.playback()) {
+      if (!await r.playback(this.emacs)) {
         break;
       };
     }
@@ -222,7 +225,7 @@ export class Recorder extends TypeHandler {
 
 interface Record {
   name(): string;
-  playback(): Promise<boolean>;
+  playback(emacs: Emacs): Promise<boolean>;
 }
 
 class TypeRecord implements Record {
@@ -232,9 +235,12 @@ class TypeRecord implements Record {
     this.text = text;
   }
 
-  async playback(): Promise<boolean> {
-    await vscode.commands.executeCommand("type", { "text": this.text });
-    return true;
+  async playback(emacs: Emacs): Promise<boolean> {
+    // await vscode.commands.executeCommand("type", { "text": this.text });
+    return emacs.typeBonusFeatures(this.text).then(() => true).catch((reason: any) => {
+      vscode.window.showErrorMessage("WUT: " + reason);
+      return false;
+    });
   }
 
   name(): string {

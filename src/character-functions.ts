@@ -4,7 +4,7 @@ import { DeleteCommand } from './interfaces';
 
 interface TypedCharacterHandlerFunction {
   // Return true if the typed character should be ignored.
-  (editor: vscode.TextEditor): boolean;
+  (editor: vscode.TextEditor): Promise<boolean>;
 }
 
 const characterFnMap: Map<string, TypedCharacterHandlerFunction> = new Map<string, TypedCharacterHandlerFunction>([
@@ -25,15 +25,15 @@ const deleteFnMap: Map<DeleteCommand, TypedCharacterHandlerFunction> = new Map<D
   [DeleteCommand.wordRight, deleteSpaceRight],
 ]);
 
-export function handleTypedCharacter(s: string): boolean {
+export function handleTypedCharacter(s: string): Promise<boolean> {
   return genericHandle<string>(s, characterFnMap);
 }
 
-export function handleDeleteCharacter(dc: DeleteCommand): boolean {
+export function handleDeleteCharacter(dc: DeleteCommand): Promise<boolean> {
   return genericHandle<string>(dc, deleteFnMap);
 }
 
-function genericHandle<T>(t: T, map: Map<T, TypedCharacterHandlerFunction>): boolean {
+async function genericHandle<T>(t: T, map: Map<T, TypedCharacterHandlerFunction>): Promise<boolean> {
   const editor = vscode.window.activeTextEditor;
   if (!editor || !editor.selection.isEmpty) {
     return false;
@@ -46,11 +46,11 @@ function genericHandle<T>(t: T, map: Map<T, TypedCharacterHandlerFunction>): boo
   return fn(editor);
 }
 
-function openBracketFunction(editor: vscode.TextEditor): boolean {
-  editor.edit(editBuilder => {
+async function openBracketFunction(editor: vscode.TextEditor): Promise<boolean> {
+  await editor.edit(editBuilder => {
     editBuilder.insert(editor.selection.active, "{}");
   });
-  const nextPos = editor.selection.active.translate({characterDelta: 1});
+  const nextPos = editor.selection.active.translate({characterDelta: -1});
   editor.selection = new vscode.Selection(nextPos, nextPos);
 
   return true;
@@ -63,7 +63,7 @@ function typeOverFunctions(...characters: string[]): Iterable<[string, TypedChar
 // If typing 'character' symbol, and the next character is that character, then simply
 // type over it (i.e. move the cursor to the next position.
 function typeOverFunction(character: string): TypedCharacterHandlerFunction {
-  return (editor: vscode.TextEditor) => {
+  return async (editor: vscode.TextEditor): Promise<boolean> => {
     const cursor = editor.selection.active;
     const nextPos = cursor.translate({characterDelta: 1});
     const nextChar = editor.document.getText(new vscode.Range(cursor, nextPos));
@@ -77,7 +77,7 @@ function typeOverFunction(character: string): TypedCharacterHandlerFunction {
   };
 }
 
-function deleteSpaceRight(editor: vscode.TextEditor): boolean {
+async function deleteSpaceRight(editor: vscode.TextEditor): Promise<boolean> {
   const lineNumber = editor.selection.active.line;
   const line = editor.document.lineAt(lineNumber);
 
