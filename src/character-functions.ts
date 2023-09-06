@@ -10,7 +10,9 @@ interface TypedCharacterHandlerFunction {
 const characterFnMap: Map<string, TypedCharacterHandlerFunction> = new Map<string, TypedCharacterHandlerFunction>([
   // We only want the type-over feature of the autoClose* settings of vs code
   // i.e. we don't want the closing character to be automatically added, except for brackets
-  ["{", openBracketFunction],
+  ["{", openBracketFunction("{}")],
+  ["[", openBracketFunction("[]")],
+  ["(", openBracketFunction("()")],
   ...typeOverFunctions(
     "}",
     "'",
@@ -46,14 +48,27 @@ async function genericHandle<T>(t: T, map: Map<T, TypedCharacterHandlerFunction>
   return fn(editor);
 }
 
-async function openBracketFunction(editor: vscode.TextEditor): Promise<boolean> {
-  await editor.edit(editBuilder => {
-    editBuilder.insert(editor.selection.active, "{}");
-  });
-  const nextPos = editor.selection.active.translate({characterDelta: -1});
-  editor.selection = new vscode.Selection(nextPos, nextPos);
+function openBracketFunction(openClose: string): (editor: vscode.TextEditor) => Promise<boolean> {
+  return async (editor: vscode.TextEditor): Promise<boolean> => {
+    if (!onlyWhitespaceToRight(editor)) {
+      return false;
+    }
 
-  return true;
+    return editor.edit(editBuilder => {
+      editBuilder.insert(editor.selection.active, openClose);
+    }).then(res => {
+      if (!res) {
+        vscode.window.showErrorMessage("Failed to apply openBracket edit");
+        return false;
+      }
+      const nextPos = editor.selection.active.translate({characterDelta: -1});
+      editor.selection = new vscode.Selection(nextPos, nextPos);
+      return true;
+    }, (reason: any) => {
+      vscode.window.showErrorMessage(`Failed to apply openBracket edit: ${reason}`);
+      return false;
+    });
+  };
 }
 
 function typeOverFunctions(...characters: string[]): Iterable<[string, TypedCharacterHandlerFunction]> {
@@ -77,14 +92,20 @@ function typeOverFunction(character: string): TypedCharacterHandlerFunction {
   };
 }
 
-async function deleteSpaceRight(editor: vscode.TextEditor): Promise<boolean> {
+function onlyWhitespaceToRight(editor: vscode.TextEditor): boolean {
   const lineNumber = editor.selection.active.line;
   const line = editor.document.lineAt(lineNumber);
-
   const remainingText = line.text.slice(editor.selection.active.character);
-  if (!/^\s*$/.test(remainingText)) {
+  return /^\s*$/.test(remainingText);
+}
+
+async function deleteSpaceRight(editor: vscode.TextEditor): Promise<boolean> {
+  if (!onlyWhitespaceToRight(editor)) {
     return false;
   }
+
+  const lineNumber = editor.selection.active.line;
+  const line = editor.document.lineAt(lineNumber);
 
   editor.edit(editBuilder => {
     const endPos = lineNumber + 1 === editor.document.lineCount ?
