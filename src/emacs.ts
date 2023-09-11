@@ -60,11 +60,11 @@ export class Emacs {
   register(context: vscode.ExtensionContext) {
     for (var move of Object.values(CursorMove)) {
       const m = move;
-      this.recorder.registerCommand(context, move, () => this.move(m));
+      this.recorder.registerCommand(context, move, async () => await this.move(m));
     }
     for (var dc of Object.values(DeleteCommand)) {
       const d = dc;
-      this.recorder.registerCommand(context, d, () => this.delCommand(d));
+      this.recorder.registerCommand(context, d, async () => await this.delCommand(d));
     }
 
     context.subscriptions.push(vscode.commands.registerCommand('groog.type', async (arg: TypeArg) => await this.type(arg)));
@@ -109,28 +109,21 @@ export class Emacs {
     this.setQMK(context, this.qmk.get(context));
   }
 
-  async runHandlers(thCallback: (th: TypeHandler) => Thenable<boolean>, applyCallback: () => Thenable<any>) {
-    let apply = true;
-    for (var th of this.typeHandlers) {
+  async runHandlers(thCallback: (th: TypeHandler) => Thenable<boolean>, applyCallback: () => Thenable<any>): Promise<void> {
+    let chain: Promise<boolean> = Promise.resolve().then(() => true);
+    for (const th of this.typeHandlers) {
       if (th.isActive()) {
-        if (!(await thCallback(th))) {
-          // Note, we can't do "apply &&= th.textHandler" because
-          // if apply is set to false at some point, then later
-          // handlers won't run
-          apply = false;
-        }
+        chain = chain.then((apply: boolean) => apply ? thCallback(th) : thCallback(th).then(() => false));
       }
     }
-    if (apply) {
-      await applyCallback();
-    }
+    return chain.then((apply: boolean) => apply ? applyCallback() : false).catch((reason: any) => { vscode.window.showErrorMessage(`Failed to apply callbacks: ${reason}`); });
   }
 
-  async type(arg: TypeArg) {
-    let s = arg.text;
-    await this.runHandlers(
-      async (th: TypeHandler): Promise<boolean> => { return await th.textHandler(s); },
-      async () => this.typeBonusFeatures(s),
+  async type(arg: TypeArg): Promise<void> {
+    const s = arg.text;
+    return this.runHandlers(
+      async (th: TypeHandler): Promise<boolean> => th.textHandler(s),
+      async (): Promise<void> => this.typeBonusFeatures(s),
     );
   }
 
@@ -148,16 +141,10 @@ export class Emacs {
   }
 
 
-  async delCommand(d: DeleteCommand) {
-    await this.runHandlers(
-      async (th: TypeHandler): Promise<boolean> => { return await th.delHandler(d); },
-      async () => {
-        if (await handleDeleteCharacter(d)) {
-          return;
-        }
-
-        await vscode.commands.executeCommand(d);
-      },
+  async delCommand(d: DeleteCommand): Promise<void> {
+    return this.runHandlers(
+      async (th: TypeHandler): Promise<boolean> => th.delHandler(d),
+      async () => handleDeleteCharacter(d).then(b => b ? false : vscode.commands.executeCommand(d))
     );
   }
 
@@ -165,15 +152,14 @@ export class Emacs {
     await this.setQMK(context, !this.qmk.get(context));
   }
 
-  async setQMK(context: vscode.ExtensionContext, bu: boolean | undefined) {
-    let b = bu || false;
+  async setQMK(context: vscode.ExtensionContext, b: boolean | undefined) {
     if (b) {
       vscode.window.showInformationMessage('QMK keyboard mode activated');
     } else {
       vscode.window.showInformationMessage('Basic keyboard mode activated');
     }
-    await this.qmk.update(context, b);
-    await setGroogContext('qmk', b);
+    await this.qmk.update(context, !!b);
+    await setGroogContext('qmk', !!b);
   }
 
   async yank() {
@@ -279,10 +265,12 @@ export class Emacs {
     await this.move(CursorMove.move, { "to": "down", "by": "line", "value": jumpDist });
   }
 
-  async move(vsCommand: CursorMove, ...rest: any[]) {
-    await this.runHandlers(
-      async (th: TypeHandler): Promise<boolean> => { return await th.moveHandler(vsCommand, ...rest); },
-      async () => { await vscode.commands.executeCommand(vsCommand, ...rest); },
+  async move(vsCommand: CursorMove, ...rest: any[]): Promise<void> {
+    return this.runHandlers(
+      async (th: TypeHandler): Promise<boolean> => {
+        return th.moveHandler(vsCommand, ...rest);
+      },
+      async (): Promise<void> => vscode.commands.executeCommand(vsCommand, ...rest),
     );
   }
 

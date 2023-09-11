@@ -53,8 +53,7 @@ export class MarkHandler extends TypeHandler {
   }
 
   async textHandler(s: string): Promise<boolean> {
-    await this.deactivate();
-    return true;
+    return this.deactivate().then(() => true);
   }
 
   async moveHandler(vsCommand: CursorMove, ...rest: any[]): Promise<boolean> {
@@ -62,16 +61,13 @@ export class MarkHandler extends TypeHandler {
     // https://code.visualstudio.com/api/references/commands
     if (vsCommand === CursorMove.move) {
       rest[0].select = true;
-      await vscode.commands.executeCommand(vsCommand, ...rest);
-    } else {
-      await vscode.commands.executeCommand(vsCommand + "Select", ...rest);
+      return vscode.commands.executeCommand(vsCommand, ...rest).then(() => false);
     }
-    return false;
+    return vscode.commands.executeCommand(vsCommand + "Select", ...rest).then(() => false);
   }
 
   async delHandler(s: DeleteCommand): Promise<boolean> {
-    await this.deactivate();
-    return true;
+    return this.deactivate().then(() => true);
   }
 
   async onYank(prefixText: string | undefined, text: string | undefined) {

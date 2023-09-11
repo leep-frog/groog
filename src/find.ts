@@ -325,23 +325,18 @@ export class FindHandler extends TypeHandler {
 
   async textHandler(s: string): Promise<boolean> {
     // Enter, shift+enter, ctrl+n, ctrl+p taken care of in package.json
-    await this.cache.insertText(s);
-    return false;
+    return this.cache.insertText(s).then(() => false);
   }
 
   async moveHandler(cmd: CursorMove): Promise<boolean> {
-    await this.deactivate();
-    return true;
+    return this.deactivate().then(() => true);
   }
 
   async delHandler(s: DeleteCommand): Promise<boolean> {
-    switch (s) {
-      case DeleteCommand.left:
-        await this.cache.deleteLeft();
-        break;
-      default:
-        vscode.window.showInformationMessage("Unsupported find command: " + s);
+    if (s === DeleteCommand.left) {
+      return this.cache.deleteLeft().then(() => false);
     }
+    vscode.window.showInformationMessage("Unsupported find command: " + s);
     return false;
   }
 
