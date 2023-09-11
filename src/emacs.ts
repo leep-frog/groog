@@ -10,6 +10,7 @@ import { Recorder } from './record';
 import { Settings } from './settings';
 import { TerminalFindHandler } from './terminal-find';
 import { handleDeleteCharacter, handleTypedCharacter } from './character-functions';
+import AwaitLock from 'await-lock';
 
 const jumpDist = 10;
 
@@ -37,6 +38,7 @@ export class Emacs {
   typeHandlers: TypeHandler[];
   cm: ColorMode;
   typoFixer: TypoFixer;
+  private readonly typeLock: AwaitLock;
 
   constructor() {
     this.cm = new ColorMode();
@@ -49,6 +51,7 @@ export class Emacs {
       new TerminalFindHandler(this.cm),
       this.recorder,
     ];
+    this.typeLock = new AwaitLock();
   }
 
   private static registerables(): Registerable[] {
@@ -67,7 +70,8 @@ export class Emacs {
       this.recorder.registerCommand(context, d, async () => await this.delCommand(d));
     }
 
-    context.subscriptions.push(vscode.commands.registerCommand('groog.type', async (arg: TypeArg) => await this.type(arg)));
+    context.subscriptions.push(vscode.commands.registerCommand('groog.type', async (arg: TypeArg) =>
+      await this.typeLock.acquireAsync().then(() => this.type(arg)).then(() => this.typeLock.release())));
 
     this.recorder.registerCommand(context, 'jump', () => this.jump());
     this.recorder.registerCommand(context, 'fall', () => this.fall());
