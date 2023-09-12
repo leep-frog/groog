@@ -5,7 +5,7 @@ import { Registerable, TypeHandler, getPrefixText } from './handler';
 import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { TypoFixer } from './internal-typos';
 import { MarkHandler } from './mark';
-import { infoMessage, multiCommand } from './misc-command';
+import { Message, MultiCommand, infoMessage, multiCommand } from './misc-command';
 import { Recorder } from './record';
 import { Settings } from './settings';
 import { TerminalFindHandler } from './terminal-find';
@@ -46,9 +46,9 @@ export class Emacs {
     this.recorder = new Recorder(this.cm, this);
     this.typoFixer = new TypoFixer();
     this.typeHandlers = [
-      new FindHandler(this.cm),
-      new MarkHandler(this.cm),
-      new TerminalFindHandler(this.cm),
+      new FindHandler(this.cm, this),
+      new MarkHandler(this.cm, this),
+      new TerminalFindHandler(this.cm, this),
       this.recorder,
     ];
     this.typeLock = new AwaitLock();
@@ -60,43 +60,52 @@ export class Emacs {
     ];
   }
 
+  public lockWrap<T>(f: (t: T) => Thenable<void>): (t: T) => Thenable<void> {
+    // return this.typeLock.acquireAsync().then(f).finally(() => this.typeLock.release());
+    return async (t: T) => await this.typeLock.acquireAsync().then(() => f(t)).finally(() => this.typeLock.release());
+  }
+
   register(context: vscode.ExtensionContext) {
     for (var move of Object.values(CursorMove)) {
       const m = move;
-      this.recorder.registerCommand(context, move, async () => await this.move(m));
+      this.recorder.registerCommand(context, move, this.lockWrap(() => this.move(m)));
     }
     for (var dc of Object.values(DeleteCommand)) {
       const d = dc;
-      this.recorder.registerCommand(context, d, async () => await this.delCommand(d));
+      this.recorder.registerCommand(context, d, this.lockWrap(() => this.delCommand(d)));
     }
 
-    context.subscriptions.push(vscode.commands.registerCommand('groog.type', async (arg: TypeArg) =>
-      await this.typeLock.acquireAsync().then(() => this.type(arg)).then(() => this.typeLock.release())));
+    // I encountered an issue when coding with VSCode + SSH + QMK keyboard setup. Basically,
+    // the keycodes would be sent in quick succession (either b/c of send_string or tap dance logic),
+    // and their order would become mixed up due to the parallel nature of commands (which run async).
+    // The initialization of command executions, however, are well ordered, so requiring a lock
+    // immediately has proven to be a great solution to this problem.
+    context.subscriptions.push(vscode.commands.registerCommand('groog.type', this.lockWrap<TypeArg>((arg: TypeArg) => this.type(arg))));
 
-    this.recorder.registerCommand(context, 'jump', () => this.jump());
-    this.recorder.registerCommand(context, 'fall', () => this.fall());
-    this.recorder.registerCommand(context, 'format', () => this.format());
+    this.recorder.registerCommand(context, 'jump', this.lockWrap(() => this.jump()));
+    this.recorder.registerCommand(context, 'fall', this.lockWrap(() => this.fall()));
+    this.recorder.registerCommand(context, 'format', this.lockWrap(() => this.format()));
 
-    this.recorder.registerCommand(context, 'toggleQMK', () => this.toggleQMK(context));
-    this.recorder.registerCommand(context, 'yank', () => this.yank());
-    this.recorder.registerCommand(context, 'kill', () => this.kill());
-    this.recorder.registerCommand(context, 'ctrlG', () => this.ctrlG());
+    this.recorder.registerCommand(context, 'toggleQMK', this.lockWrap(() => this.toggleQMK(context)));
+    this.recorder.registerCommand(context, 'yank', this.lockWrap(() => this.yank()));
+    this.recorder.registerCommand(context, 'kill', this.lockWrap(() => this.kill()));
+    this.recorder.registerCommand(context, 'ctrlG', this.lockWrap(() => this.ctrlG()));
 
     // Make an explicit command so it is visible in "alt+x".
-    this.recorder.registerCommand(context, 'renameFile', async (): Promise<void> => {
-      await multiCommand({
+    this.recorder.registerCommand(context, 'renameFile', this.lockWrap(() => {
+      return multiCommand({
         sequence: [
           { command: "workbench.action.focusSideBar" },
           { command: "renameFile" },
         ],
       });
-    });
+    }));
 
-    this.recorder.registerCommand(context, 'indentToPreviousLine', () => this.indentToPrevLine(-1));
-    this.recorder.registerCommand(context, 'indentToNextLine', () => this.indentToPrevLine(1));
+    this.recorder.registerCommand(context, 'indentToPreviousLine', this.lockWrap(() => this.indentToPrevLine(-1)));
+    this.recorder.registerCommand(context, 'indentToNextLine', this.lockWrap(() => this.indentToPrevLine(1)));
 
     // TODO: This needs to be a groog command so it can be recorded.
-    this.recorder.registerCommand(context, 'undo', () => vscode.commands.executeCommand("undo"));
+    this.recorder.registerCommand(context, 'undo', this.lockWrap(() => vscode.commands.executeCommand("undo")));
 
     for (var th of this.typeHandlers) {
       th.register(context, this.recorder);
@@ -106,8 +115,8 @@ export class Emacs {
       r.register(context, this.recorder);
     }
 
-    this.recorder.registerCommand(context, "multiCommand.execute", multiCommand);
-    this.recorder.registerCommand(context, "message.info", infoMessage);
+    this.recorder.registerCommand(context, "multiCommand.execute", this.lockWrap<MultiCommand>((mc: MultiCommand) => multiCommand(mc)));
+    this.recorder.registerCommand(context, "message.info", this.lockWrap<Message | undefined>((msg: Message | undefined) => infoMessage(msg)));
 
     // After all commands have been registered, check persistent data for qmk setting.
     this.setQMK(context, this.qmk.get(context));

@@ -3,27 +3,29 @@ import { ColorMode, ModeColor } from './color_mode';
 import { TypeHandler, getPrefixText } from './handler';
 import { CursorMove, DeleteCommand } from './interfaces';
 import { Recorder } from './record';
+import { Emacs } from './emacs';
 
 export class MarkHandler extends TypeHandler {
   yanked: string;
   yankedPrefix: string;
   whenContext: string = "mark";
+  private emacs: Emacs;
 
-  constructor(cm: ColorMode) {
+  constructor(cm: ColorMode, emacs: Emacs) {
     super(cm, ModeColor.mark);
     this.yanked = "";
     this.yankedPrefix = "";
+    this.emacs = emacs;
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
-    recorder.registerCommand(context, 'toggleMarkMode', async () => {
+    recorder.registerCommand(context, 'toggleMarkMode', this.emacs.lockWrap(() => {
       if (this.isActive()) {
-        await this.deactivate();
-      } else {
-        await this.activate();
+        return this.deactivate();
       }
-    });
-    recorder.registerCommand(context, 'paste', async () => {
+      return this.activate();
+    }));
+    recorder.registerCommand(context, 'paste', this.emacs.lockWrap(async () => {
       if (this.isActive()) {
         await this.deactivate();
       }
@@ -41,7 +43,7 @@ export class MarkHandler extends TypeHandler {
         editBuilder.delete(editor.selection);
         editBuilder.insert(editor.selection.start, replacement);
       });
-    });
+    }));
   }
 
   async handleActivation() {}

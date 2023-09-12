@@ -3,45 +3,46 @@ import { ColorMode } from './color_mode';
 import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand } from './interfaces';
 import { Recorder } from './record';
+import { Emacs } from './emacs';
 
 export class TerminalFindHandler extends TypeHandler {
   whenContext: string = "terminal.find";
+  private emacs: Emacs;
 
-  constructor(cm : ColorMode) {
+  constructor(cm : ColorMode, emacs: Emacs) {
     super(cm);
+    this.emacs = emacs;
   }
 
-  async nextMatch() {
-    await vscode.commands.executeCommand("workbench.action.terminal.findNext");
+  async nextMatch(): Promise<void> {
+    return vscode.commands.executeCommand("workbench.action.terminal.findNext");
   }
 
-  async prevMatch() {
+  async prevMatch(): Promise<void> {
     await vscode.commands.executeCommand("workbench.action.terminal.findPrevious");
   }
 
-  async handleActivation() {
-    await vscode.commands.executeCommand("workbench.action.terminal.focusFind");
+  async handleActivation(): Promise<void> {
+    return vscode.commands.executeCommand("workbench.action.terminal.focusFind");
   }
 
-  async handleDeactivation() {
-    await vscode.commands.executeCommand("workbench.action.terminal.hideFind");
+  async handleDeactivation(): Promise<void> {
+    return vscode.commands.executeCommand("workbench.action.terminal.hideFind");
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
-    recorder.registerCommand(context, 'terminal.find', async () => {
+    recorder.registerCommand(context, 'terminal.find', this.emacs.lockWrap(() => {
       if (this.isActive()) {
-        await this.nextMatch();
-      } else {
-        this.activate();
+        return this.nextMatch();
       }
-    });
-    recorder.registerCommand(context, 'terminal.reverseFind', async () => {
+      return this.activate();
+    }));
+    recorder.registerCommand(context, 'terminal.reverseFind', this.emacs.lockWrap(() => {
       if (this.isActive()) {
-        await this.prevMatch();
-      } else {
-        this.activate();
+        return this.prevMatch();
       }
-    });
+      return this.activate();
+    }));
   }
 
   async ctrlG() {
