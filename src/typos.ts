@@ -38,10 +38,10 @@ export function defaultCorrections(): Correction[] {
       ],
       words: {
         "si": "vscode.window.showInformationMessage",
-        "se": "vscode.window.showInformationMessage",
+        "se": "vscode.window.showErrorMessage",
       },
-      replacementSuffix: "(\"",
-      replacementSuffixAfterCursor: "\");",
+      replacementSuffix: "(\`",
+      replacementSuffixAfterCursor: "\`);",
       excludeBreakCharacter: true,
     },
     // Println replacements (no quotes in suffix fields)

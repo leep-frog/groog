@@ -92,7 +92,6 @@ export class Emacs {
     this.recorder.registerCommand(context, 'indentToPreviousLine', () => this.indentToPrevLine(-1));
     this.recorder.registerCommand(context, 'indentToNextLine', () => this.indentToPrevLine(1));
 
-    // TODO: This needs to be a groog command so it can be recorded.
     this.recorder.registerCommand(context, 'undo', () => vscode.commands.executeCommand("undo"));
 
     for (var th of this.typeHandlers) {
