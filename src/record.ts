@@ -46,6 +46,8 @@ export class Recorder extends TypeHandler {
     recorder.registerCommand(context, "record.startRecording", () => recorder.startRecording());
     recorder.registerCommand(context, "record.endRecording", () => recorder.endRecording());
     recorder.registerCommand(context, "record.saveRecordingAs", () => recorder.saveRecordingAs());
+    // For some reason, we don't need to set `noLock` for play[Named]Recording. Not entirely sure
+    // how that doesn't cause a permanant lock like what was happening for multiCommand.
     recorder.registerCommand(context, "record.playRecording", () => recorder.playback());
     recorder.registerCommand(context, "record.playNamedRecording", () => recorder.playbackNamedRecording());
     recorder.registerCommand(context, "record.deleteRecording", () => recorder.deleteRecording());
@@ -53,9 +55,9 @@ export class Recorder extends TypeHandler {
     recorder.registerCommand(context, "record.findNext", () => recorder.findNext());
   }
 
-  registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => Thenable<any>) {
+  registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => Thenable<any>, noLock?: boolean) {
     context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName,
-      this.lockWrap((...args: any) => this.execute("groog." + commandName, args, callback))
+      noLock ? (...args: any) => this.execute("groog." + commandName, args, callback) : this.lockWrap((...args: any) => this.execute("groog." + commandName, args, callback))
     ));
   }
 

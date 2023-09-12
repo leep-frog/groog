@@ -103,7 +103,7 @@ export class Emacs {
       r.register(context, this.recorder);
     }
 
-    this.recorder.registerCommand(context, "multiCommand.execute", (mc: MultiCommand) => multiCommand(mc));
+    this.recorder.registerCommand(context, "multiCommand.execute", (mc: MultiCommand) => multiCommand(mc), true);
     this.recorder.registerCommand(context, "message.info", (msg: Message | undefined) => infoMessage(msg));
 
     // After all commands have been registered, check persistent data for qmk setting.
