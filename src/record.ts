@@ -46,13 +46,13 @@ export class Recorder extends TypeHandler {
     recorder.registerCommand(context, "record.startRecording", () => recorder.startRecording());
     recorder.registerCommand(context, "record.endRecording", () => recorder.endRecording());
     recorder.registerCommand(context, "record.saveRecordingAs", () => recorder.saveRecordingAs());
-    // For some reason, we don't need to set `noLock` for play[Named]Recording. Not entirely sure
-    // how that doesn't cause a permanant lock like what was happening for multiCommand.
-    recorder.registerCommand(context, "record.playRecording", () => recorder.playback());
-    recorder.registerCommand(context, "record.playNamedRecording", () => recorder.playbackNamedRecording());
     recorder.registerCommand(context, "record.deleteRecording", () => recorder.deleteRecording());
     recorder.registerCommand(context, "record.find", () => recorder.find());
     recorder.registerCommand(context, "record.findNext", () => recorder.findNext());
+
+    // We don't lock on playbacks because they are nested commands.
+    recorder.registerCommand(context, "record.playRecording", () => recorder.playback(), true);
+    recorder.registerCommand(context, "record.playNamedRecording", () => recorder.playbackNamedRecording(), true);
   }
 
   registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => Thenable<any>, noLock?: boolean) {
@@ -195,13 +195,13 @@ export class Recorder extends TypeHandler {
     }
   }
 
-  async playback() {
+  async playback(): Promise<void> {
     if (this.isActive()) {
       vscode.window.showInformationMessage("Still recording!");
       return;
     }
     vscode.window.showInformationMessage("Playing recording!");
-    this.playRecords(this.recordBook);
+    return this.playRecords(this.recordBook);
   }
 
   async handleActivation() {}
