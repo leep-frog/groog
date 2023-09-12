@@ -33,8 +33,12 @@ export class Recorder extends TypeHandler {
     this.typeLock = new AwaitLock();
   }
 
+  // I encountered an issue when coding with VSCode + SSH + QMK keyboard setup. Basically,
+  // the keycodes would be sent in such rapid succession (either b/c of send_string or tap dance logic),
+  // that their order would become mixed up due to the parallel nature of commands (which run async).
+  // The initialization of command executions, however, are well ordered, so requiring a lock
+  // immediately has proven to be a great solution to this problem.
   public lockWrap<T>(f: (t: T) => Thenable<void>): (t: T) => Thenable<void> {
-    // return this.typeLock.acquireAsync().then(f).finally(() => this.typeLock.release());
     return async (t: T) => await this.typeLock.acquireAsync().then(() => f(t)).finally(() => this.typeLock.release());
   }
 

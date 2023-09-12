@@ -68,11 +68,6 @@ export class Emacs {
       this.recorder.registerCommand(context, d, () => this.delCommand(d));
     }
 
-    // I encountered an issue when coding with VSCode + SSH + QMK keyboard setup. Basically,
-    // the keycodes would be sent in quick succession (either b/c of send_string or tap dance logic),
-    // and their order would become mixed up due to the parallel nature of commands (which run async).
-    // The initialization of command executions, however, are well ordered, so requiring a lock
-    // immediately has proven to be a great solution to this problem.
     context.subscriptions.push(vscode.commands.registerCommand('groog.type', this.recorder.lockWrap<TypeArg>((arg: TypeArg) => this.type(arg))));
 
     this.recorder.registerCommand(context, 'jump', () => this.jump());
