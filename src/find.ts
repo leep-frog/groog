@@ -231,76 +231,74 @@ export class FindHandler extends TypeHandler {
   whenContext: string = "find";
   cache : FindContextCache;
   findPrevOnType : boolean;
-  private emacs: Emacs;
 
-  constructor(cm: ColorMode, emacs: Emacs) {
+  constructor(cm: ColorMode) {
     super(cm, ModeColor.find);
     this.cache = new FindContextCache();
     this.findPrevOnType = false;
-    this.emacs = emacs;
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
-    recorder.registerCommand(context, 'find', this.emacs.lockWrap(() => {
+    recorder.registerCommand(context, 'find', () => {
       if (this.isActive()) {
         return this.cache.nextMatch();
       }
       return this.activate();
-    }));
-    recorder.registerCommand(context, 'reverseFind', this.emacs.lockWrap(() => {
+    });
+    recorder.registerCommand(context, 'reverseFind', () => {
       if (this.isActive()) {
         return this.cache.prevMatch();
       }
       this.findPrevOnType = true;
       return this.activate();
-    }));
+    });
 
-    recorder.registerCommand(context, 'find.toggleReplaceMode', this.emacs.lockWrap(async (): Promise<void> => {
+    recorder.registerCommand(context, 'find.toggleReplaceMode', async (): Promise<void> => {
       if (!this.isActive()) {
         return;
       }
       return this.cache.toggleReplaceMode();
-    }));
+    });
 
     // Goes to previous find context
-    recorder.registerCommand(context, 'find.previous', this.emacs.lockWrap(async (): Promise<void> => {
+    recorder.registerCommand(context, 'find.previous', async (): Promise<void> => {
       if (!this.isActive()) {
         vscode.window.showInformationMessage("groog.find.previous can only be executed in find mode");
         return;
       }
       return this.cache.prevContext();
-    }));
+    });
     // Goes to next find context
-    recorder.registerCommand(context, 'find.next', this.emacs.lockWrap(async () => {
+    recorder.registerCommand(context, 'find.next', async () => {
       if (!this.isActive()) {
         vscode.window.showInformationMessage("groog.find.next can only be executed in find mode");
         return;
       }
       return this.cache.nextContext();
-    }));
+    });
 
-    recorder.registerCommand(context, 'focusNextEditor', this.emacs.lockWrap(async () => {
+    recorder.registerCommand(context, 'focusNextEditor', async () => {
       return this.deactivateCommands().then(() => vscode.commands.executeCommand("workbench.action.focusNextGroup"));
-    }));
-    recorder.registerCommand(context, 'focusPreviousEditor', this.emacs.lockWrap(async () => {
+    });
+    recorder.registerCommand(context, 'focusPreviousEditor', async () => {
       return this.deactivateCommands().then(() => vscode.commands.executeCommand("workbench.action.focusPreviousGroup"));
-    }));
+    });
     vscode.window.onDidChangeActiveTextEditor(async () => {
       await this.deactivate();
     });
 
-    recorder.registerCommand(context, 'find.toggleRegex', this.emacs.lockWrap(() => {
+    recorder.registerCommand(context, 'find.toggleRegex', () => {
       this.cache.toggleRegex();
       return vscode.commands.executeCommand("toggleSearchEditorRegex");
-    }));
-    recorder.registerCommand(context, 'find.toggleCaseSensitive', this.emacs.lockWrap(() => {
+    });
+    recorder.registerCommand(context, 'find.toggleCaseSensitive', () => {
       this.cache.toggleCase();
       return vscode.commands.executeCommand("toggleSearchEditorCaseSensitive");
-    }));
-    recorder.registerCommand(context, 'find.toggleWholeWord', this.emacs.lockWrap(() => {
+    });
+    recorder.registerCommand(context, 'find.toggleWholeWord', () => {
       this.cache.toggleWholeWord();
       return vscode.commands.executeCommand("toggleSearchEditorWholeWord");
-    }));
+    });
   }
 
   async handleActivation() {

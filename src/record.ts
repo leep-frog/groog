@@ -3,6 +3,7 @@ import { ColorMode, ModeColor } from './color_mode';
 import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand } from './interfaces';
 import { Emacs } from './emacs';
+import AwaitLock from 'await-lock';
 
 export class Recorder extends TypeHandler {
   // baseCommand ensures we don't infinite loop a command. For example,
@@ -19,6 +20,7 @@ export class Recorder extends TypeHandler {
   // just create an equivalent vscode function.
   private namedRecordings: Map<string, Record[]>;
   private emacs: Emacs;
+  private readonly typeLock: AwaitLock;
 
   whenContext: string = "record";
 
@@ -28,27 +30,33 @@ export class Recorder extends TypeHandler {
     this.recordBook = [];
     this.namedRecordings = new Map<string, Record[]>();
     this.emacs = emacs;
+    this.typeLock = new AwaitLock();
+  }
+
+  public lockWrap<T>(f: (t: T) => Thenable<void>): (t: T) => Thenable<void> {
+    // return this.typeLock.acquireAsync().then(f).finally(() => this.typeLock.release());
+    return async (t: T) => await this.typeLock.acquireAsync().then(() => f(t)).finally(() => this.typeLock.release());
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
-    recorder.registerCommand(context, "record.startRecording", this.emacs.lockWrap(() => recorder.startRecording()));
-    recorder.registerCommand(context, "record.endRecording", this.emacs.lockWrap(() => recorder.endRecording()));
-    recorder.registerCommand(context, "record.saveRecordingAs", this.emacs.lockWrap(() => recorder.saveRecordingAs()));
-    recorder.registerCommand(context, "record.playRecording", this.emacs.lockWrap(() => recorder.playback()));
-    recorder.registerCommand(context, "record.playNamedRecording", this.emacs.lockWrap(() => recorder.playbackNamedRecording()));
-    recorder.registerCommand(context, "record.deleteRecording", this.emacs.lockWrap(() => recorder.deleteRecording()));
-    recorder.registerCommand(context, "record.find", this.emacs.lockWrap(() => recorder.find()));
-    recorder.registerCommand(context, "record.findNext", this.emacs.lockWrap(() => recorder.findNext()));
+    recorder.registerCommand(context, "record.startRecording", () => recorder.startRecording());
+    recorder.registerCommand(context, "record.endRecording", () => recorder.endRecording());
+    recorder.registerCommand(context, "record.saveRecordingAs", () => recorder.saveRecordingAs());
+    recorder.registerCommand(context, "record.playRecording", () => recorder.playback());
+    recorder.registerCommand(context, "record.playNamedRecording", () => recorder.playbackNamedRecording());
+    recorder.registerCommand(context, "record.deleteRecording", () => recorder.deleteRecording());
+    recorder.registerCommand(context, "record.find", () => recorder.find());
+    recorder.registerCommand(context, "record.findNext", () => recorder.findNext());
   }
 
   registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => Thenable<any>) {
-    context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName, async (...args: any) => {
-      await this.execute("groog." + commandName, args, callback);
-    }));
+    context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName,
+      this.lockWrap((...args: any) => this.execute("groog." + commandName, args, callback))
+    ));
   }
 
   registerUnrecordableCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => any) {
-    context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName, callback));
+    context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName, this.lockWrap(callback)));
   }
 
   async execute(command: string, args: any[], callback: (...args: any[]) => any) {

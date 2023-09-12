@@ -7,11 +7,9 @@ import { Emacs } from './emacs';
 
 export class TerminalFindHandler extends TypeHandler {
   whenContext: string = "terminal.find";
-  private emacs: Emacs;
 
-  constructor(cm : ColorMode, emacs: Emacs) {
+  constructor(cm : ColorMode) {
     super(cm);
-    this.emacs = emacs;
   }
 
   async nextMatch(): Promise<void> {
@@ -31,18 +29,18 @@ export class TerminalFindHandler extends TypeHandler {
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
-    recorder.registerCommand(context, 'terminal.find', this.emacs.lockWrap(() => {
+    recorder.registerCommand(context, 'terminal.find', () => {
       if (this.isActive()) {
         return this.nextMatch();
       }
       return this.activate();
-    }));
-    recorder.registerCommand(context, 'terminal.reverseFind', this.emacs.lockWrap(() => {
+    });
+    recorder.registerCommand(context, 'terminal.reverseFind', () => {
       if (this.isActive()) {
         return this.prevMatch();
       }
       return this.activate();
-    }));
+    });
   }
 
   async ctrlG() {

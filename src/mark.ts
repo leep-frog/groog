@@ -9,23 +9,21 @@ export class MarkHandler extends TypeHandler {
   yanked: string;
   yankedPrefix: string;
   whenContext: string = "mark";
-  private emacs: Emacs;
 
   constructor(cm: ColorMode, emacs: Emacs) {
     super(cm, ModeColor.mark);
     this.yanked = "";
     this.yankedPrefix = "";
-    this.emacs = emacs;
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
-    recorder.registerCommand(context, 'toggleMarkMode', this.emacs.lockWrap(() => {
+    recorder.registerCommand(context, 'toggleMarkMode', () => {
       if (this.isActive()) {
         return this.deactivate();
       }
       return this.activate();
-    }));
-    recorder.registerCommand(context, 'paste', this.emacs.lockWrap(async () => {
+    });
+    recorder.registerCommand(context, 'paste', async () => {
       if (this.isActive()) {
         await this.deactivate();
       }
@@ -43,7 +41,7 @@ export class MarkHandler extends TypeHandler {
         editBuilder.delete(editor.selection);
         editBuilder.insert(editor.selection.start, replacement);
       });
-    }));
+    });
   }
 
   async handleActivation() {}
