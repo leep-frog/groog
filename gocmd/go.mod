@@ -3,7 +3,7 @@ module example.com/clis
 go 1.18
 
 require (
-	github.com/leep-frog/command v0.0.0-20230313191808-9b85265f378f
+	github.com/leep-frog/command v0.0.0-20230829012600-6273ddae03d8
 	golang.org/x/exp v0.0.0-20220321124402-2d6d886f8a82
 )
 

@@ -12,8 +12,6 @@ import { TerminalFindHandler } from './terminal-find';
 import { handleDeleteCharacter, handleTypedCharacter } from './character-functions';
 import AwaitLock from 'await-lock';
 
-const jumpDist = 10;
-
 const qmkKey = "groog.keys.qmkState";
 
 class GlobalStateTracker<T> {
@@ -68,10 +66,12 @@ export class Emacs {
       this.recorder.registerCommand(context, d, () => this.delCommand(d));
     }
 
+    this.typoFixer.register(context);
+
     context.subscriptions.push(vscode.commands.registerCommand('groog.type', this.recorder.lockWrap<TypeArg>((arg: TypeArg) => this.type(arg))));
 
-    this.recorder.registerCommand(context, 'jump', () => this.jump());
-    this.recorder.registerCommand(context, 'fall', () => this.fall());
+    this.recorder.registerCommand(context, 'jump', (jd: JumpDist | undefined) => this.jump(jd || defaultJumpDist));
+    this.recorder.registerCommand(context, 'fall', (jd: JumpDist | undefined) => this.fall(jd || defaultJumpDist));
     this.recorder.registerCommand(context, 'format', () => this.format());
 
     this.recorder.registerCommand(context, 'toggleQMK', () => this.toggleQMK(context));
@@ -256,13 +256,13 @@ export class Emacs {
   }
 
   // C-l
-  async jump() {
-    await this.move(CursorMove.move, { "to": "up", "by": "line", "value": jumpDist });
+  async jump(jd: JumpDist) {
+    await this.move(CursorMove.move, { "to": "up", "by": "line", "value": jd.lines });
   }
 
   // C-v
-  async fall() {
-    await this.move(CursorMove.move, { "to": "down", "by": "line", "value": jumpDist });
+  async fall(jd: JumpDist) {
+    await this.move(CursorMove.move, { "to": "down", "by": "line", "value": jd.lines });
   }
 
   async move(vsCommand: CursorMove, ...rest: any[]): Promise<void> {
@@ -293,3 +293,11 @@ export class Emacs {
 interface TypeArg {
   text: string;
 }
+
+interface JumpDist {
+  lines: number;
+}
+
+const defaultJumpDist: JumpDist = {
+  lines: 10,
+};

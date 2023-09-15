@@ -18,7 +18,7 @@
   "scripts": {
     "compile": "tsc -p ./",
     "lint": "eslint src --ext ts",
-    "pretest": "npm run compile && npm run lint",
+    "pretest": "npm run compile \u0026\u0026 npm run lint",
     "test": "node ./out/test/runTest.js",
     "vscode:prepublish": "npm run compile",
     "watch": "tsc -watch -p ./"
@@ -432,7 +432,7 @@
       {
         "key": "alt+c",
         "command": "groog.multiCommand.execute",
-        "when": "!editorFocus && !inSearchEditor && !searchViewletFocus",
+        "when": "!editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus",
         "args": {
           "sequence": [
             {
@@ -523,7 +523,7 @@
       {
         "key": "alt+f4",
         "command": "groog.multiCommand.execute",
-        "when": "groog.context.qmkMode && !editorFocus && !inSearchEditor && !searchViewletFocus",
+        "when": "groog.context.qmkMode \u0026\u0026 !editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus",
         "args": {
           "sequence": [
             {
@@ -538,7 +538,7 @@
       {
         "key": "alt+f4",
         "command": "groog.multiCommand.execute",
-        "when": "groog.context.qmkMode && editorFocus",
+        "when": "groog.context.qmkMode \u0026\u0026 editorFocus",
         "args": {
           "sequence": [
             {
@@ -553,7 +553,7 @@
       {
         "key": "alt+f4",
         "command": "groog.multiCommand.execute",
-        "when": "groog.context.qmkMode && inSearchEditor",
+        "when": "groog.context.qmkMode \u0026\u0026 inSearchEditor",
         "args": {
           "sequence": [
             {
@@ -568,7 +568,7 @@
       {
         "key": "alt+f4",
         "command": "groog.multiCommand.execute",
-        "when": "groog.context.qmkMode && searchViewletFocus",
+        "when": "groog.context.qmkMode \u0026\u0026 searchViewletFocus",
         "args": {
           "sequence": [
             {
@@ -603,7 +603,7 @@
       {
         "key": "alt+r",
         "command": "groog.multiCommand.execute",
-        "when": "!editorFocus && !inSearchEditor && !searchViewletFocus",
+        "when": "!editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus",
         "args": {
           "sequence": [
             {
@@ -702,7 +702,7 @@
       {
         "key": "alt+w",
         "command": "groog.multiCommand.execute",
-        "when": "!editorFocus && !inSearchEditor && !searchViewletFocus",
+        "when": "!editorFocus \u0026\u0026 !inSearchEditor \u0026\u0026 !searchViewletFocus",
         "args": {
           "sequence": [
             {
@@ -782,7 +782,7 @@
       {
         "key": "backspace",
         "command": "search.action.remove",
-        "when": "!searchInputBoxFocus && searchViewletFocus"
+        "when": "!searchInputBoxFocus \u0026\u0026 searchViewletFocus"
       },
       {
         "key": "backspace",
@@ -874,9 +874,9 @@
       {
         "key": "ctrl+backspace",
         "command": "workbench.action.terminal.sendSequence",
-        "when": "groog.context.qmkMode && panelFocus",
+        "when": "groog.context.qmkMode \u0026\u0026 panelFocus",
         "args": {
-          "text": "\b"
+          "text": "\u0008"
         }
       },
       {
@@ -901,42 +901,42 @@
       {
         "key": "ctrl+f",
         "command": "groog.cursorRight",
-        "when": "!groog.context.qmkMode && !inQuickOpen"
+        "when": "!groog.context.qmkMode \u0026\u0026 !inQuickOpen"
       },
       {
         "key": "ctrl+f",
         "command": "workbench.action.quickPickManyToggle",
-        "when": "!groog.context.qmkMode && inQuickOpen"
+        "when": "!groog.context.qmkMode \u0026\u0026 inQuickOpen"
       },
       {
         "key": "ctrl+f",
         "command": "groog.find",
-        "when": "groog.context.qmkMode && !view.terminal.visible && !groog.context.recordMode"
+        "when": "groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.context.recordMode"
       },
       {
         "key": "ctrl+f",
         "command": "groog.record.findNext",
-        "when": "groog.context.qmkMode && !view.terminal.visible && groog.context.recordMode"
+        "when": "groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.context.recordMode"
       },
       {
         "key": "ctrl+f",
         "command": "groog.terminal.find",
-        "when": "groog.context.qmkMode && view.terminal.visible"
+        "when": "groog.context.qmkMode \u0026\u0026 view.terminal.visible"
       },
       {
         "key": "ctrl+g",
         "command": "groog.ctrlG",
-        "when": "!sideBarFocus && !inQuickOpen && !suggestWidgetVisible"
+        "when": "!sideBarFocus \u0026\u0026 !inQuickOpen \u0026\u0026 !suggestWidgetVisible"
       },
       {
         "key": "ctrl+g",
         "command": "workbench.action.closeQuickOpen",
-        "when": "inQuickOpen && !suggestWidgetVisible"
+        "when": "inQuickOpen \u0026\u0026 !suggestWidgetVisible"
       },
       {
         "key": "ctrl+g",
         "command": "workbench.action.focusActiveEditorGroup",
-        "when": "sideBarFocus && !inQuickOpen && !suggestWidgetVisible"
+        "when": "sideBarFocus \u0026\u0026 !inQuickOpen \u0026\u0026 !suggestWidgetVisible"
       },
       {
         "key": "ctrl+g",
@@ -960,12 +960,12 @@
       {
         "key": "ctrl+j",
         "command": "groog.toggleMarkMode",
-        "when": "!groog.context.findMode && !activePanel"
+        "when": "!groog.context.findMode \u0026\u0026 !activePanel"
       },
       {
         "key": "ctrl+j",
         "command": "workbench.action.previousPanelView",
-        "when": "!groog.context.findMode && activePanel"
+        "when": "!groog.context.findMode \u0026\u0026 activePanel"
       },
       {
         "key": "ctrl+j",
@@ -985,16 +985,17 @@
       {
         "key": "ctrl+l",
         "command": "groog.jump",
-        "when": "!activePanel && !inQuickOpen"
+        "when": "!activePanel \u0026\u0026 !inQuickOpen"
       },
       {
         "key": "ctrl+l",
         "command": "workbench.action.nextPanelView",
-        "when": "activePanel && !inQuickOpen"
+        "when": "activePanel \u0026\u0026 !inQuickOpen"
       },
       {
         "key": "ctrl+l",
         "command": "groog.multiCommand.execute",
+        "when": "inQuickOpen",
         "args": {
           "sequence": [
             {
@@ -1013,8 +1014,7 @@
               "command": "workbench.action.quickOpenNavigatePreviousInFilePicker"
             }
           ]
-        },
-        "when": "inQuickOpen"
+        }
       },
       {
         "key": "ctrl+left",
@@ -1032,12 +1032,12 @@
       {
         "key": "ctrl+n",
         "command": "groog.cursorDown",
-        "when": "editorTextFocus && !suggestWidgetVisible"
+        "when": "editorTextFocus \u0026\u0026 !suggestWidgetVisible"
       },
       {
         "key": "ctrl+n",
         "command": "selectNextSuggestion",
-        "when": "editorTextFocus && suggestWidgetVisible"
+        "when": "editorTextFocus \u0026\u0026 suggestWidgetVisible"
       },
       {
         "key": "ctrl+n",
@@ -1091,12 +1091,12 @@
       {
         "key": "ctrl+p",
         "command": "groog.cursorUp",
-        "when": "editorTextFocus && !suggestWidgetVisible"
+        "when": "editorTextFocus \u0026\u0026 !suggestWidgetVisible"
       },
       {
         "key": "ctrl+p",
         "command": "selectPrevSuggestion",
-        "when": "editorTextFocus && suggestWidgetVisible"
+        "when": "editorTextFocus \u0026\u0026 suggestWidgetVisible"
       },
       {
         "key": "ctrl+p",
@@ -1179,17 +1179,17 @@
       {
         "key": "ctrl+s",
         "command": "groog.find",
-        "when": "!groog.context.qmkMode && !view.terminal.visible && !groog.context.recordMode"
+        "when": "!groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.context.recordMode"
       },
       {
         "key": "ctrl+s",
         "command": "groog.record.findNext",
-        "when": "!groog.context.qmkMode && !view.terminal.visible && groog.context.recordMode"
+        "when": "!groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.context.recordMode"
       },
       {
         "key": "ctrl+s",
         "command": "groog.terminal.find",
-        "when": "!groog.context.qmkMode && view.terminal.visible"
+        "when": "!groog.context.qmkMode \u0026\u0026 view.terminal.visible"
       },
       {
         "key": "ctrl+s",
@@ -1217,12 +1217,12 @@
       {
         "key": "ctrl+shift+f",
         "command": "workbench.action.findInFiles",
-        "when": "groog.context.qmkMode && !groog.context.recordMode"
+        "when": "groog.context.qmkMode \u0026\u0026 !groog.context.recordMode"
       },
       {
         "key": "ctrl+shift+f",
         "command": "groog.record.find",
-        "when": "groog.context.qmkMode && groog.context.recordMode"
+        "when": "groog.context.qmkMode \u0026\u0026 groog.context.recordMode"
       },
       {
         "key": "ctrl+shift+home",
@@ -1258,12 +1258,12 @@
       {
         "key": "ctrl+shift+s",
         "command": "workbench.action.findInFiles",
-        "when": "!groog.context.qmkMode && !groog.context.recordMode"
+        "when": "!groog.context.qmkMode \u0026\u0026 !groog.context.recordMode"
       },
       {
         "key": "ctrl+shift+s",
         "command": "groog.record.find",
-        "when": "!groog.context.qmkMode && groog.context.recordMode"
+        "when": "!groog.context.qmkMode \u0026\u0026 groog.context.recordMode"
       },
       {
         "key": "ctrl+shift+t",
@@ -1337,6 +1337,7 @@
       {
         "key": "ctrl+v",
         "command": "groog.multiCommand.execute",
+        "when": "inQuickOpen",
         "args": {
           "sequence": [
             {
@@ -1355,8 +1356,7 @@
               "command": "workbench.action.quickOpenNavigateNextInFilePicker"
             }
           ]
-        },
-        "when": "inQuickOpen"
+        }
       },
       {
         "key": "ctrl+w",
@@ -1811,7 +1811,7 @@
       {
         "key": "delete",
         "command": "search.action.remove",
-        "when": "!searchInputBoxFocus && searchViewletFocus"
+        "when": "!searchInputBoxFocus \u0026\u0026 searchViewletFocus"
       },
       {
         "key": "delete",
@@ -1821,12 +1821,12 @@
       {
         "key": "down",
         "command": "groog.cursorDown",
-        "when": "editorTextFocus && !suggestWidgetVisible"
+        "when": "editorTextFocus \u0026\u0026 !suggestWidgetVisible"
       },
       {
         "key": "down",
         "command": "selectNextSuggestion",
-        "when": "editorTextFocus && suggestWidgetVisible"
+        "when": "editorTextFocus \u0026\u0026 suggestWidgetVisible"
       },
       {
         "key": "down",
@@ -1943,7 +1943,7 @@
       {
         "key": "left",
         "command": "groog.cursorLeft",
-        "when": "editorTextFocus && !inQuickOpen"
+        "when": "editorTextFocus \u0026\u0026 !inQuickOpen"
       },
       {
         "key": "left",
@@ -1985,12 +1985,65 @@
       {
         "key": "pagedown",
         "command": "groog.fall",
-        "when": "editorTextFocus || findInputFocussed"
+        "when": "!inQuickOpen"
+      },
+      {
+        "key": "pagedown",
+        "command": "groog.multiCommand.execute",
+        "when": "inQuickOpen",
+        "args": {
+          "sequence": [
+            {
+              "command": "workbench.action.quickOpenNavigateNextInFilePicker"
+            },
+            {
+              "command": "workbench.action.quickOpenNavigateNextInFilePicker"
+            },
+            {
+              "command": "workbench.action.quickOpenNavigateNextInFilePicker"
+            },
+            {
+              "command": "workbench.action.quickOpenNavigateNextInFilePicker"
+            },
+            {
+              "command": "workbench.action.quickOpenNavigateNextInFilePicker"
+            }
+          ]
+        }
       },
       {
         "key": "pageup",
         "command": "groog.jump",
-        "when": "editorTextFocus || findInputFocussed"
+        "when": "!activePanel \u0026\u0026 !inQuickOpen"
+      },
+      {
+        "key": "pageup",
+        "command": "workbench.action.nextPanelView",
+        "when": "activePanel \u0026\u0026 !inQuickOpen"
+      },
+      {
+        "key": "pageup",
+        "command": "groog.multiCommand.execute",
+        "when": "inQuickOpen",
+        "args": {
+          "sequence": [
+            {
+              "command": "workbench.action.quickOpenNavigatePreviousInFilePicker"
+            },
+            {
+              "command": "workbench.action.quickOpenNavigatePreviousInFilePicker"
+            },
+            {
+              "command": "workbench.action.quickOpenNavigatePreviousInFilePicker"
+            },
+            {
+              "command": "workbench.action.quickOpenNavigatePreviousInFilePicker"
+            },
+            {
+              "command": "workbench.action.quickOpenNavigatePreviousInFilePicker"
+            }
+          ]
+        }
       },
       {
         "key": "q",
@@ -2011,7 +2064,7 @@
       {
         "key": "right",
         "command": "groog.cursorRight",
-        "when": "editorTextFocus && !inQuickOpen"
+        "when": "editorTextFocus \u0026\u0026 !inQuickOpen"
       },
       {
         "key": "right",
@@ -2039,7 +2092,7 @@
         "command": "groog.type",
         "when": "editorTextFocus || findInputFocussed",
         "args": {
-          "text": "<"
+          "text": "\u003c"
         }
       },
       {
@@ -2055,7 +2108,7 @@
         "command": "groog.type",
         "when": "editorTextFocus || findInputFocussed",
         "args": {
-          "text": ">"
+          "text": "\u003e"
         }
       },
       {
@@ -2127,7 +2180,7 @@
         "command": "groog.type",
         "when": "editorTextFocus || findInputFocussed",
         "args": {
-          "text": "&"
+          "text": "\u0026"
         }
       },
       {
@@ -2475,12 +2528,12 @@
       {
         "key": "up",
         "command": "groog.cursorUp",
-        "when": "editorTextFocus && !suggestWidgetVisible"
+        "when": "editorTextFocus \u0026\u0026 !suggestWidgetVisible"
       },
       {
         "key": "up",
         "command": "selectPrevSuggestion",
-        "when": "editorTextFocus && suggestWidgetVisible"
+        "when": "editorTextFocus \u0026\u0026 suggestWidgetVisible"
       },
       {
         "key": "up",
@@ -2601,8 +2654,5 @@
         "language": "go"
       }
     ]
-  },
-  "dependencies": {
-    "await-lock": "^2.2.2"
   }
 }

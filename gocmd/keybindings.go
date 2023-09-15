@@ -247,17 +247,10 @@ var (
 			// Kill in editor
 			groogFindMode.not().value: kb("groog.kill"),
 		},
-		ctrl("l"): {
-			inQuickOpen.value:                              mc(repeat("workbench.action.quickOpenNavigatePreviousInFilePicker", 5)...),
-			activePanel.and(inQuickOpen.not()).value:       kb("workbench.action.nextPanelView"),
-			activePanel.not().and(inQuickOpen.not()).value: kb("groog.jump"),
-		},
-		pageup: textOnly("groog.jump"),
-		ctrl("v"): {
-			inQuickOpen.value:       mc(repeat("workbench.action.quickOpenNavigateNextInFilePicker", 5)...),
-			inQuickOpen.not().value: kb("groog.fall"),
-		},
-		pagedown:         textOnly("groog.fall"),
+		ctrl("l"):        ctrlL(),
+		pageup:           ctrlL(),
+		ctrl("v"):        ctrlV(),
+		pagedown:         ctrlV(),
 		ctrl(shift("p")): only("groog.find.previous"),
 		ctrl("p"): {
 			groogTerminalFindMode.value: kb("groog.terminal.reverseFind"),
@@ -773,8 +766,27 @@ func ctrlZ(c string) Key {
 
 func repeat(c string, times int) []string {
 	var r []string
-	for times > 0 {
+	for ; times > 0; times-- {
 		r = append(r, c)
 	}
 	return r
+}
+
+/***************************************
+ * key functions for multiple bindings *
+ ***************************************/
+
+func ctrlL() map[string]*KB {
+	return map[string]*KB{
+		inQuickOpen.value:                              mc(repeat("workbench.action.quickOpenNavigatePreviousInFilePicker", 5)...),
+		activePanel.and(inQuickOpen.not()).value:       kb("workbench.action.nextPanelView"),
+		activePanel.not().and(inQuickOpen.not()).value: kb("groog.jump"),
+	}
+}
+
+func ctrlV() map[string]*KB {
+	return map[string]*KB{
+		inQuickOpen.value:       mc(repeat("workbench.action.quickOpenNavigateNextInFilePicker", 5)...),
+		inQuickOpen.not().value: kb("groog.fall"),
+	}
 }

@@ -38,12 +38,14 @@ export class TypoFixer {
   globalCorrections: InternalCorrector;
   defaultBreakCharacters: string;
 
-  constructor(context: vscode.ExtensionContext) {
+  constructor() {
     this.perLanguageCorrections = {};
     this.globalCorrections = {};
     this.defaultBreakCharacters = "";
     this.reload();
+  }
 
+  register(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
       if (e.affectsConfiguration("groog")) {
         this.reload();
