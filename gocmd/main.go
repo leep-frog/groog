@@ -15,12 +15,15 @@ import (
 )
 
 func main() {
-	os.Exit(sourcerer.Source([]sourcerer.CLI{&cli{}}))
+	os.Exit(sourcerer.Source(
+		[]sourcerer.CLI{&cli{}},
+		sourcerer.NewAliaser("vu", "v", "u"),
+	))
 }
 
 type cli struct{}
 
-func (*cli) Name() string    { return "vsp" }
+func (*cli) Name() string    { return "v" }
 func (*cli) Setup() []string { return nil }
 func (*cli) Changed() bool   { return false }
 
@@ -29,7 +32,7 @@ var (
 )
 
 func (c *cli) Node() command.Node {
-	versionSectionArg := command.Arg[int]("VERSION", "Version section offset (0 for smallest, 1 for middle, 2 for major)", command.Default(0), command.Between(0, 2, true))
+	versionSectionArg := command.OptionalArg[int]("VERSION", "Version section offset (0 for smallest, 1 for middle, 2 for major)", command.Default(0), command.Between(0, 2, true))
 
 	runtimeNode := command.RuntimeCaller()
 
@@ -44,11 +47,11 @@ func (c *cli) Node() command.Node {
 					}
 
 					// Go two directories up (to groog root)
-					mainFile := filepath.Join(filepath.Dir(fileName), "main.go")
+					packageFile := filepath.Join(filepath.Dir(fileName), "package.go")
 
-					b, err := os.ReadFile(mainFile)
+					b, err := os.ReadFile(packageFile)
 					if err != nil {
-						return o.Annotatef(err, "failed to read main.go")
+						return o.Annotatef(err, "failed to read package.go")
 					}
 
 					contents := strings.Split(string(b), "\n")
@@ -68,6 +71,11 @@ func (c *cli) Node() command.Node {
 							if err != nil {
 								return o.Annotatef(err, "failed to convert version")
 							}
+
+							// Clear out smaller versions
+							for i := indexToChange; i < len(versionParts); i++ {
+								versionParts[i] = "0"
+							}
 							versionParts[indexToChange] = fmt.Sprintf("%d", vNum+1)
 							newVersion = strings.Join(versionParts, ".")
 							line = fmt.Sprintf("%s%s%s", prefix, newVersion, suffix)
@@ -79,8 +87,8 @@ func (c *cli) Node() command.Node {
 						return o.Stderrf("Made no replacements")
 					}
 
-					if err := os.WriteFile(mainFile, []byte(strings.Join(newContents, "\n")), 0644); err != nil {
-						return o.Annotatef(err, "failed to write new contents to main.go")
+					if err := os.WriteFile(packageFile, []byte(strings.Join(newContents, "\n")), 0644); err != nil {
+						return o.Annotatef(err, "failed to write new contents to package.go")
 					}
 
 					o.Stdoutln("Successfully updated to new version:", newVersion)
@@ -99,7 +107,6 @@ func (c *cli) Node() command.Node {
 }
 
 func (c *cli) execute(filename string) error {
-	fmt.Println("Starting")
 	p := groogPackage()
 
 	j, err := json.MarshalIndent(p, "", "  ")
