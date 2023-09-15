@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -985,12 +985,36 @@
       {
         "key": "ctrl+l",
         "command": "groog.jump",
-        "when": "!activePanel"
+        "when": "!activePanel && !inQuickOpen"
       },
       {
         "key": "ctrl+l",
         "command": "workbench.action.nextPanelView",
-        "when": "activePanel"
+        "when": "activePanel && !inQuickOpen"
+      },
+      {
+        "key": "ctrl+l",
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            {
+              "command": "workbench.action.quickOpenNavigatePreviousInFilePicker"
+            },
+            {
+              "command": "workbench.action.quickOpenNavigatePreviousInFilePicker"
+            },
+            {
+              "command": "workbench.action.quickOpenNavigatePreviousInFilePicker"
+            },
+            {
+              "command": "workbench.action.quickOpenNavigatePreviousInFilePicker"
+            },
+            {
+              "command": "workbench.action.quickOpenNavigatePreviousInFilePicker"
+            }
+          ]
+        },
+        "when": "inQuickOpen"
       },
       {
         "key": "ctrl+left",
@@ -1307,7 +1331,32 @@
       },
       {
         "key": "ctrl+v",
-        "command": "groog.fall"
+        "command": "groog.fall",
+        "when": "!inQuickOpen"
+      },
+      {
+        "key": "ctrl+v",
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            {
+              "command": "workbench.action.quickOpenNavigateNextInFilePicker"
+            },
+            {
+              "command": "workbench.action.quickOpenNavigateNextInFilePicker"
+            },
+            {
+              "command": "workbench.action.quickOpenNavigateNextInFilePicker"
+            },
+            {
+              "command": "workbench.action.quickOpenNavigateNextInFilePicker"
+            },
+            {
+              "command": "workbench.action.quickOpenNavigateNextInFilePicker"
+            }
+          ]
+        },
+        "when": "inQuickOpen"
       },
       {
         "key": "ctrl+w",

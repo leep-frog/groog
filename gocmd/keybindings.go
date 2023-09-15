@@ -247,12 +247,16 @@ var (
 			// Kill in editor
 			groogFindMode.not().value: kb("groog.kill"),
 		},
-		ctrl("l"): panelSplit(
-			kb("workbench.action.nextPanelView"),
-			kb("groog.jump"),
-		),
-		pageup:           textOnly("groog.jump"),
-		ctrl("v"):        only("groog.fall"),
+		ctrl("l"): {
+			inQuickOpen.value:                              mc(repeat("workbench.action.quickOpenNavigatePreviousInFilePicker", 5)...),
+			activePanel.and(inQuickOpen.not()).value:       kb("workbench.action.nextPanelView"),
+			activePanel.not().and(inQuickOpen.not()).value: kb("groog.jump"),
+		},
+		pageup: textOnly("groog.jump"),
+		ctrl("v"): {
+			inQuickOpen.value:       mc(repeat("workbench.action.quickOpenNavigateNextInFilePicker", 5)...),
+			inQuickOpen.not().value: kb("groog.fall"),
+		},
 		pagedown:         textOnly("groog.fall"),
 		ctrl(shift("p")): only("groog.find.previous"),
 		ctrl("p"): {
@@ -762,4 +766,12 @@ func ctrlX(c string) Key {
 
 func ctrlZ(c string) Key {
 	return Key(fmt.Sprintf("ctrl+z %s", c))
+}
+
+func repeat(c string, times int) []string {
+	var r []string
+	for times > 0 {
+		r = append(r, c)
+	}
+	return r
 }
