@@ -859,7 +859,7 @@
       {
         "key": "ctrl+b",
         "command": "groog.cursorLeft",
-        "when": "!inQuickOpen"
+        "when": "editorTextFocus \u0026\u0026 !inQuickOpen"
       },
       {
         "key": "ctrl+b",
@@ -901,7 +901,7 @@
       {
         "key": "ctrl+f",
         "command": "groog.cursorRight",
-        "when": "!groog.context.qmkMode \u0026\u0026 !inQuickOpen"
+        "when": "!groog.context.qmkMode \u0026\u0026 editorTextFocus \u0026\u0026 !inQuickOpen"
       },
       {
         "key": "ctrl+f",
@@ -1820,6 +1820,10 @@
       },
       {
         "key": "down",
+        "command": "-workbench.action.files.newUntitledFile"
+      },
+      {
+        "key": "down",
         "command": "groog.cursorDown",
         "when": "editorTextFocus \u0026\u0026 !suggestWidgetVisible"
       },
@@ -1847,6 +1851,21 @@
         "key": "down",
         "command": "search.action.focusSearchList",
         "when": "searchInputBoxFocus"
+      },
+      {
+        "key": "down",
+        "command": "groog.multiCommand.execute",
+        "when": "searchViewletFocus",
+        "args": {
+          "sequence": [
+            {
+              "command": "search.action.focusNextSearchResult"
+            },
+            {
+              "command": "search.action.focusSearchList"
+            }
+          ]
+        }
       },
       {
         "key": "e",
@@ -2527,6 +2546,10 @@
       },
       {
         "key": "up",
+        "command": "-workbench.action.quickOpen"
+      },
+      {
+        "key": "up",
         "command": "groog.cursorUp",
         "when": "editorTextFocus \u0026\u0026 !suggestWidgetVisible"
       },
@@ -2549,6 +2572,21 @@
         "key": "up",
         "command": "workbench.action.quickOpenNavigatePreviousInFilePicker",
         "when": "inQuickOpen"
+      },
+      {
+        "key": "up",
+        "command": "groog.multiCommand.execute",
+        "when": "searchViewletFocus",
+        "args": {
+          "sequence": [
+            {
+              "command": "search.action.focusPreviousSearchResult"
+            },
+            {
+              "command": "search.action.focusSearchList"
+            }
+          ]
+        }
       },
       {
         "key": "v",

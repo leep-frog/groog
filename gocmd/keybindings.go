@@ -182,7 +182,7 @@ var (
 			groogQMK.and(terminalVisible.not()).and(groogRecording).value:       kb("groog.record.findNext"),
 			groogQMK.and(terminalVisible.not()).and(groogRecording.not()).value: kb("groog.find"),
 			groogQMK.not().and(inQuickOpen).value:                               kb("workbench.action.quickPickManyToggle"),
-			groogQMK.not().and(inQuickOpen.not()).value:                         kb("groog.cursorRight"),
+			groogQMK.not().and(editorTextFocus.and(inQuickOpen.not())).value:    kb("groog.cursorRight"),
 		},
 		ctrl("s"): {
 			groogQMK.not().and(terminalVisible).value:                                 kb("groog.terminal.find"),
@@ -247,59 +247,17 @@ var (
 			// Kill in editor
 			groogFindMode.not().value: kb("groog.kill"),
 		},
-		ctrl("l"):        ctrlL(),
-		pageup:           ctrlL(),
-		ctrl("v"):        ctrlV(),
-		pagedown:         ctrlV(),
+		ctrl("l"):        ctrlLBindings(),
+		pageup:           ctrlLBindings(),
+		ctrl("v"):        ctrlVBindings(),
+		pagedown:         ctrlVBindings(),
 		ctrl(shift("p")): only("groog.find.previous"),
-		ctrl("p"): {
-			groogTerminalFindMode.value: kb("groog.terminal.reverseFind"),
-			always.value:                kb("-workbench.action.quickOpen"),
-			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorUp"),
-			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectPrevSuggestion"),
-			inQuickOpen.value:   kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
-			groogFindMode.value: kb("editor.action.previousMatchFindAction"),
-			searchViewletFocus.value: mc(
-				"search.action.focusPreviousSearchResult",
-				"search.action.focusSearchList",
-			),
-		},
-		up: {
-			groogTerminalFindMode.value:                           kb("groog.terminal.reverseFind"),
-			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorUp"),
-			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectPrevSuggestion"),
-			inQuickOpen.value:                                     kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
-			groogFindMode.value:                                   kb("editor.action.previousMatchFindAction"),
-		},
-		ctrl("n"): {
-			groogTerminalFindMode.value: kb("groog.terminal.find"),
-			always.value:                kb("-workbench.action.files.newUntitledFile"),
-			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorDown"),
-			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectNextSuggestion"),
-			inQuickOpen.value:         kb("workbench.action.quickOpenNavigateNextInFilePicker"),
-			groogFindMode.value:       kb("editor.action.nextMatchFindAction"),
-			searchInputBoxFocus.value: kb("search.action.focusSearchList"),
-			searchViewletFocus.value: mc(
-				"search.action.focusNextSearchResult",
-				"search.action.focusSearchList",
-			),
-		},
-		down: {
-			groogTerminalFindMode.value:                           kb("groog.terminal.find"),
-			editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorDown"),
-			editorTextFocus.and(suggestWidgetVisible).value:       kb("selectNextSuggestion"),
-			inQuickOpen.value:                                     kb("workbench.action.quickOpenNavigateNextInFilePicker"),
-			groogFindMode.value:                                   kb("editor.action.nextMatchFindAction"),
-			searchInputBoxFocus.value:                             kb("search.action.focusSearchList"),
-		},
-		left: {
-			inQuickOpen.value: kb("workbench.action.quickPickManyToggle"),
-			editorTextFocus.and(inQuickOpen.not()).value: kb("groog.cursorLeft"),
-		},
-		ctrl("b"): {
-			inQuickOpen.value:       kb("workbench.action.quickPickManyToggle"),
-			inQuickOpen.not().value: kb("groog.cursorLeft"),
-		},
+		ctrl("p"):        upBindings(),
+		up:               upBindings(),
+		ctrl("n"):        downBindings(),
+		down:             downBindings(),
+		left:             leftBindings(),
+		ctrl("b"):        leftBindings(),
 		right: {
 			inQuickOpen.value: kb("workbench.action.quickPickManyToggle"),
 			editorTextFocus.and(inQuickOpen.not()).value: kb("groog.cursorRight"),
@@ -776,7 +734,7 @@ func repeat(c string, times int) []string {
  * key functions for multiple bindings *
  ***************************************/
 
-func ctrlL() map[string]*KB {
+func ctrlLBindings() map[string]*KB {
 	return map[string]*KB{
 		inQuickOpen.value:                              mc(repeat("workbench.action.quickOpenNavigatePreviousInFilePicker", 5)...),
 		activePanel.and(inQuickOpen.not()).value:       kb("workbench.action.nextPanelView"),
@@ -784,9 +742,47 @@ func ctrlL() map[string]*KB {
 	}
 }
 
-func ctrlV() map[string]*KB {
+func ctrlVBindings() map[string]*KB {
 	return map[string]*KB{
 		inQuickOpen.value:       mc(repeat("workbench.action.quickOpenNavigateNextInFilePicker", 5)...),
 		inQuickOpen.not().value: kb("groog.fall"),
+	}
+}
+
+func upBindings() map[string]*KB {
+	return map[string]*KB{
+		groogTerminalFindMode.value: kb("groog.terminal.reverseFind"),
+		always.value:                kb("-workbench.action.quickOpen"),
+		editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorUp"),
+		editorTextFocus.and(suggestWidgetVisible).value:       kb("selectPrevSuggestion"),
+		inQuickOpen.value:   kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
+		groogFindMode.value: kb("editor.action.previousMatchFindAction"),
+		searchViewletFocus.value: mc(
+			"search.action.focusPreviousSearchResult",
+			"search.action.focusSearchList",
+		),
+	}
+}
+
+func downBindings() map[string]*KB {
+	return map[string]*KB{
+		groogTerminalFindMode.value: kb("groog.terminal.find"),
+		always.value:                kb("-workbench.action.files.newUntitledFile"),
+		editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorDown"),
+		editorTextFocus.and(suggestWidgetVisible).value:       kb("selectNextSuggestion"),
+		inQuickOpen.value:         kb("workbench.action.quickOpenNavigateNextInFilePicker"),
+		groogFindMode.value:       kb("editor.action.nextMatchFindAction"),
+		searchInputBoxFocus.value: kb("search.action.focusSearchList"),
+		searchViewletFocus.value: mc(
+			"search.action.focusNextSearchResult",
+			"search.action.focusSearchList",
+		),
+	}
+}
+
+func leftBindings() map[string]*KB {
+	return map[string]*KB{
+		inQuickOpen.value: kb("workbench.action.quickPickManyToggle"),
+		editorTextFocus.and(inQuickOpen.not()).value: kb("groog.cursorLeft"),
 	}
 }
