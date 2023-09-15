@@ -12,7 +12,6 @@ import (
 
 	"github.com/leep-frog/command"
 	"github.com/leep-frog/command/sourcerer"
-	"golang.org/x/exp/slices"
 )
 
 func main() {
@@ -30,112 +29,78 @@ var (
 )
 
 func (c *cli) Node() command.Node {
-	outputFile := command.FileArgument("OUTPUT_FILE", "File to write json contents", &command.FileCompleter[string]{
-		FileTypes: []string{"json"},
-	})
+	versionSectionArg := command.Arg[int]("VERSION", "Version section offset (0 for smallest, 1 for middle, 2 for major)", command.Default(0), command.Between(0, 2, true))
+
+	runtimeNode := command.RuntimeCaller()
+
 	return &command.BranchNode{
 		Branches: map[string]command.Node{
-			"update u": command.SerialNodes(&command.ExecutorProcessor{func(o command.Output, d *command.Data) error {
-				_, fileName, _, ok := runtime.Caller(0)
-				if !ok {
-					return o.Stderrf("failed to get runtime.Caller")
-				}
-
-				// Go two directories up (to groog root)
-				mainFile := filepath.Join(filepath.Dir(fileName), "main.go")
-
-				b, err := os.ReadFile(mainFile)
-				if err != nil {
-					return o.Annotatef(err, "failed to read main.go")
-				}
-
-				contents := strings.Split(string(b), "\n")
-				var newContents []string
-				var replaced int
-				for _, line := range contents {
-					m := versionRegex.FindStringSubmatch(line)
-					if len(m) > 0 {
-						replaced++
-						prefix, version, suffix := m[1], m[2], m[3]
-						versionParts := strings.Split(version, ".")
-						minor, err := strconv.Atoi(versionParts[len(versionParts)-1])
-						if err != nil {
-							return o.Annotatef(err, "failed to convert version")
-						}
-						versionParts[len(versionParts)-1] = fmt.Sprintf("%d", minor+1)
-						line = fmt.Sprintf("%s%s%s", prefix, strings.Join(versionParts, "."), suffix)
+			"update u": command.SerialNodes(
+				versionSectionArg,
+				&command.ExecutorProcessor{func(o command.Output, d *command.Data) error {
+					_, fileName, _, ok := runtime.Caller(0)
+					if !ok {
+						return o.Stderrf("failed to get runtime.Caller")
 					}
-					newContents = append(newContents, line)
-				}
 
-				if replaced == 0 {
-					return o.Stderrf("Made no replacements")
-				}
+					// Go two directories up (to groog root)
+					mainFile := filepath.Join(filepath.Dir(fileName), "main.go")
 
-				return o.Annotatef(os.WriteFile(mainFile, []byte(strings.Join(newContents, "\n")), 0644), "failed to write new contents to main.go")
-			}}),
+					b, err := os.ReadFile(mainFile)
+					if err != nil {
+						return o.Annotatef(err, "failed to read main.go")
+					}
+
+					contents := strings.Split(string(b), "\n")
+					var newContents []string
+					var replaced int
+					var newVersion string
+					for _, line := range contents {
+						m := versionRegex.FindStringSubmatch(line)
+						if len(m) > 0 {
+							replaced++
+							prefix, version, suffix := m[1], m[2], m[3]
+							versionParts := strings.Split(version, ".")
+
+							indexToChange := len(versionParts) - 1 - versionSectionArg.Get(d)
+
+							vNum, err := strconv.Atoi(versionParts[indexToChange])
+							if err != nil {
+								return o.Annotatef(err, "failed to convert version")
+							}
+							versionParts[indexToChange] = fmt.Sprintf("%d", vNum+1)
+							newVersion = strings.Join(versionParts, ".")
+							line = fmt.Sprintf("%s%s%s", prefix, newVersion, suffix)
+						}
+						newContents = append(newContents, line)
+					}
+
+					if replaced == 0 {
+						return o.Stderrf("Made no replacements")
+					}
+
+					if err := os.WriteFile(mainFile, []byte(strings.Join(newContents, "\n")), 0644); err != nil {
+						return o.Annotatef(err, "failed to write new contents to main.go")
+					}
+
+					o.Stdoutln("Successfully updated to new version:", newVersion)
+					return nil
+				}},
+			),
 		},
 		Default: command.SerialNodes(
-			outputFile,
+			runtimeNode,
 			&command.ExecutorProcessor{func(o command.Output, d *command.Data) error {
-				return o.Err(c.execute(outputFile.Get(d)))
+				path := filepath.Join(filepath.Dir(filepath.Dir(runtimeNode.Get(d))), "package.json")
+				return o.Err(c.execute(path))
 			}},
 		),
 	}
 }
 
 func (c *cli) execute(filename string) error {
-	p := &Package{
-		Name:        "groog",
-		DisplayName: "groog",
-		Description: "",
-		Version:     "1.0.13",
-		Publisher:   "groogle",
-		Main:        "./out/extension.js",
-		Engines: map[string]string{
-			"vscode": "^1.81.0",
-		},
-		Repository: &Repository{
-			Type: "git",
-			URL:  "https://github.com/leep-frog/vs-extension",
-		},
-		Categories: []string{
-			"Other",
-		},
-		Scripts: map[string]string{
-			"vscode:prepublish": "npm run compile",
-			"compile":           "tsc -p ./",
-			"watch":             "tsc -watch -p ./",
-			"pretest":           "npm run compile && npm run lint",
-			"lint":              "eslint src --ext ts",
-			"test":              "node ./out/test/runTest.js",
-		},
-		DevDependencies: map[string]string{
-			"@types/vscode":                    "^1.81.0",
-			"@types/mocha":                     "^10.0.1",
-			"@types/node":                      "16.x",
-			"@typescript-eslint/eslint-plugin": "^6.4.1",
-			"@typescript-eslint/parser":        "^6.4.1",
-			"eslint":                           "^8.47.0",
-			"glob":                             "^10.3.3",
-			"mocha":                            "^10.2.0",
-			"typescript":                       "^5.1.6",
-			"@vscode/test-electron":            "^2.3.4",
-		},
-		// onCommand activation events are auto-generated by vscode, so we don't
-		// actually need to populate this at all, but it needs to be present.
-		ActivationEvents: []string{},
-	}
-
-	p.Contributes = &Contribution{
-		Commands:      CustomCommands,
-		Keybindings:   kbDefsToBindings(),
-		Configuration: groogConfiguration(),
-		Snipppets:     Snippets,
-	}
-	slices.SortFunc(p.Contributes.Commands, func(a, b *Command) bool {
-		return a.Command < b.Command
-	})
+	fmt.Println("Starting")
+	p := groogPackage()
 
 	j, err := json.MarshalIndent(p, "", "  ")
 	if err != nil {
