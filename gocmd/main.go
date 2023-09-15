@@ -4,6 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
+	"regexp"
+	"runtime"
+	"strconv"
+	"strings"
 
 	"github.com/leep-frog/command"
 	"github.com/leep-frog/command/sourcerer"
@@ -16,19 +21,67 @@ func main() {
 
 type cli struct{}
 
-func (*cli) Name() string    { return "vs_package" }
+func (*cli) Name() string    { return "vsp" }
 func (*cli) Setup() []string { return nil }
 func (*cli) Changed() bool   { return false }
+
+var (
+	versionRegex = regexp.MustCompile("^(\\s*Version:\\s*[\"`])([0-9\\.]+)([\"`],)$")
+)
 
 func (c *cli) Node() command.Node {
 	outputFile := command.FileArgument("OUTPUT_FILE", "File to write json contents", &command.FileCompleter[string]{
 		FileTypes: []string{"json"},
 	})
-	return command.SerialNodes(
-		outputFile,
-		&command.ExecutorProcessor{func(o command.Output, d *command.Data) error {
-			return o.Err(c.execute(outputFile.Get(d)))
-		}})
+	return &command.BranchNode{
+		Branches: map[string]command.Node{
+			"update u": command.SerialNodes(&command.ExecutorProcessor{func(o command.Output, d *command.Data) error {
+				_, fileName, _, ok := runtime.Caller(0)
+				if !ok {
+					return o.Stderrf("failed to get runtime.Caller")
+				}
+
+				// Go two directories up (to groog root)
+				mainFile := filepath.Join(filepath.Dir(fileName), "main.go")
+
+				b, err := os.ReadFile(mainFile)
+				if err != nil {
+					return o.Annotatef(err, "failed to read main.go")
+				}
+
+				contents := strings.Split(string(b), "\n")
+				var newContents []string
+				var replaced int
+				for _, line := range contents {
+					m := versionRegex.FindStringSubmatch(line)
+					if len(m) > 0 {
+						replaced++
+						prefix, version, suffix := m[1], m[2], m[3]
+						versionParts := strings.Split(version, ".")
+						minor, err := strconv.Atoi(versionParts[len(versionParts)-1])
+						if err != nil {
+							return o.Annotatef(err, "failed to convert version")
+						}
+						versionParts[len(versionParts)-1] = fmt.Sprintf("%d", minor+1)
+						line = fmt.Sprintf("%s%s%s", prefix, strings.Join(versionParts, "."), suffix)
+					}
+					newContents = append(newContents, line)
+				}
+
+				if replaced == 0 {
+					return o.Stderrf("Made no replacements")
+				}
+
+				return o.Annotatef(os.WriteFile(mainFile, []byte(strings.Join(newContents, "\n")), 0644), "failed to write new contents to main.go")
+			}}),
+		},
+		Default: command.SerialNodes(
+			outputFile,
+			&command.ExecutorProcessor{func(o command.Output, d *command.Data) error {
+				return o.Err(c.execute(outputFile.Get(d)))
+			}},
+		),
+	}
 }
 
 func (c *cli) execute(filename string) error {
