@@ -283,9 +283,9 @@ export class FindHandler extends TypeHandler {
     recorder.registerCommand(context, 'focusPreviousEditor', async () => {
       return this.deactivateCommands().then(() => vscode.commands.executeCommand("workbench.action.focusPreviousGroup"));
     });
-    vscode.window.onDidChangeActiveTextEditor(async () => {
+    context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(async () => {
       await this.deactivate();
-    });
+    }));
 
     recorder.registerCommand(context, 'find.toggleRegex', () => {
       this.cache.toggleRegex();
