@@ -36,7 +36,7 @@ func (c *cli) execute(filename string) error {
 		Name:        "groog",
 		DisplayName: "groog",
 		Description: "",
-		Version:     "1.0.11",
+		Version:     "1.0.12",
 		Publisher:   "groogle",
 		Main:        "./out/extension.js",
 		Engines: map[string]string{
