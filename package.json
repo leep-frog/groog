@@ -99,6 +99,10 @@
         "title": "Groog delete right"
       },
       {
+        "command": "groog.emacsPaste",
+        "title": "Emacs Paste"
+      },
+      {
         "command": "groog.fall",
         "title": "Emacs Fall"
       },
@@ -168,7 +172,7 @@
       },
       {
         "command": "groog.paste",
-        "title": "Emacs Paste"
+        "title": "Groog Paste"
       },
       {
         "command": "groog.record.deleteRecording",
@@ -765,7 +769,7 @@
       },
       {
         "key": "alt+y",
-        "command": "editor.action.clipboardPasteAction"
+        "command": "groog.paste"
       },
       {
         "key": "alt+z",
@@ -1670,11 +1674,11 @@
       },
       {
         "key": "ctrl+x shift+insert",
-        "command": "editor.action.clipboardPasteAction"
+        "command": "groog.paste"
       },
       {
         "key": "ctrl+x ctrl+shift+insert",
-        "command": "editor.action.clipboardPasteAction"
+        "command": "groog.paste"
       },
       {
         "key": "ctrl+x t",
@@ -1730,11 +1734,11 @@
       },
       {
         "key": "ctrl+x y",
-        "command": "editor.action.clipboardPasteAction"
+        "command": "groog.paste"
       },
       {
         "key": "ctrl+x ctrl+y",
-        "command": "editor.action.clipboardPasteAction"
+        "command": "groog.paste"
       },
       {
         "key": "ctrl+x z",
@@ -1746,7 +1750,7 @@
       },
       {
         "key": "ctrl+y",
-        "command": "groog.paste"
+        "command": "groog.emacsPaste"
       },
       {
         "key": "ctrl+z",

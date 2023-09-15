@@ -239,7 +239,7 @@ var (
 			// Start mark mode in regular editor
 			groogFindMode.not().and(activePanel.not()).value: kb("groog.toggleMarkMode"),
 		},
-		ctrl("y"):        only("groog.paste"),
+		ctrl("y"):        only("groog.emacsPaste"),
 		ctrl(shift("k")): only("editor.action.replaceAll"),
 		ctrl("k"): {
 			// Replace in find mode
@@ -444,10 +444,10 @@ var (
 		},
 
 		// Pasting
-		ctrlX("y"): only("editor.action.clipboardPasteAction"),
+		ctrlX("y"): only("groog.paste"),
 		// ctrl+x ctrl+y on qmk keyboard
-		ctrl("x shift+insert"): only("editor.action.clipboardPasteAction"),
-		alt("y"):               only("editor.action.clipboardPasteAction"),
+		ctrl("x shift+insert"): only("groog.paste"),
+		alt("y"):               only("groog.paste"),
 
 		// Settings
 		ctrl("."): panelSplit(

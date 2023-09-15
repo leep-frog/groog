@@ -23,25 +23,37 @@ export class MarkHandler extends TypeHandler {
       }
       return this.activate();
     });
-    recorder.registerCommand(context, 'paste', async () => {
+    recorder.registerCommand(context, 'emacsPaste', async (): Promise<any> => {
       if (this.isActive()) {
-        await this.deactivate();
+        return this.deactivate();
       }
 
-      const editor = vscode.window.activeTextEditor;
-      if (!editor) {
-        return;
-      }
-      const sel = editor.selection;
-      const curPrefix = getPrefixText(editor, new vscode.Range(sel.start, sel.end));
-      await vscode.window.activeTextEditor?.edit(editBuilder => {
-        const whitespaceRegex = /^\s*$/;
-        const prefixesWhitespaceOnly = whitespaceRegex.test(this.yankedPrefix) && (!curPrefix || whitespaceRegex.test(curPrefix));
-        const replacement = prefixesWhitespaceOnly ? replaceAll(this.yanked, "\n" + this.yankedPrefix, "\n" + curPrefix) : this.yanked;
-        editBuilder.delete(editor.selection);
-        editBuilder.insert(editor.selection.start, replacement);
+      return this.paste(this.yankedPrefix, this.yanked);
+    });
+    recorder.registerCommand(context, 'paste', async (): Promise<any> => {
+      vscode.env.clipboard.readText().then(text => {
+        const prefixRegex = /^(\s*)/;
+        const prefix: string = prefixRegex.exec(text)?.[0] || "";
+        const pasteText: string = text.replace(prefixRegex, "");
+        return this.paste(prefix, pasteText).then(pasted => pasted ? false : vscode.commands.executeCommand("editor.action.clipboardPasteAction"));
       });
     });
+  }
+
+  async paste(prefixText: string, text: string): Promise<boolean> {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      return false;
+    }
+    const sel = editor.selection;
+    const curPrefix = getPrefixText(editor, new vscode.Range(sel.start, sel.end));
+    return editor.edit(editBuilder => {
+      const whitespaceRegex = /^\s*$/;
+      const prefixesWhitespaceOnly = whitespaceRegex.test(prefixText) && (!curPrefix || whitespaceRegex.test(curPrefix));
+      const replacement = prefixesWhitespaceOnly ? replaceAll(text, "\n" + prefixText, "\n" + curPrefix) : text;
+      editBuilder.delete(editor.selection);
+      editBuilder.insert(editor.selection.start, replacement);
+    }).then(() => true);
   }
 
   async handleActivation() {}
