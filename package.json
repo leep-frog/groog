@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -1444,11 +1444,31 @@
       },
       {
         "key": "ctrl+x b",
-        "command": "editor.action.jumpToBracket"
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            {
+              "command": "workbench.action.openPreviousEditorFromHistory"
+            },
+            {
+              "command": "workbench.action.acceptSelectedQuickOpenItem"
+            }
+          ]
+        }
       },
       {
         "key": "ctrl+x ctrl+b",
-        "command": "editor.action.jumpToBracket"
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            {
+              "command": "workbench.action.openPreviousEditorFromHistory"
+            },
+            {
+              "command": "workbench.action.acceptSelectedQuickOpenItem"
+            }
+          ]
+        }
       },
       {
         "key": "ctrl+x c",

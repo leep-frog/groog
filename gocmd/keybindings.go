@@ -413,8 +413,11 @@ var (
 			kb("workbench.action.terminal.focusNext"),
 			kb("groog.focusNextEditor"),
 		),
-		ctrlX("b"): only("editor.action.jumpToBracket"),
-
+		ctrlX("b"): onlyMC(
+			// This re-opens the previously opened file
+			"workbench.action.openPreviousEditorFromHistory",
+			"workbench.action.acceptSelectedQuickOpenItem",
+		),
 		// Recording bindings
 		ctrlX("x"): only("groog.record.startRecording"),
 		alt("e"): recordingSplit(
