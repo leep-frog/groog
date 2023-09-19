@@ -15,15 +15,16 @@ import (
 )
 
 func main() {
-	os.Exit(sourcerer.Source(
-		[]sourcerer.CLI{&cli{}},
-		sourcerer.NewAliaser("vu", "v", "u"),
+	_, file, _, _ := runtime.Caller(0)
+	os.Exit(sourcerer.Source([]sourcerer.CLI{&cli{}},
+		sourcerer.NewAliaser("v", "goleep", "-d", filepath.Dir(file), "vs-package"),
+		sourcerer.NewAliaser("vu", "goleep", "-d", filepath.Dir(file), "vs-package", "u"),
 	))
 }
 
 type cli struct{}
 
-func (*cli) Name() string    { return "v" }
+func (*cli) Name() string    { return "vs-package" }
 func (*cli) Setup() []string { return nil }
 func (*cli) Changed() bool   { return false }
 
