@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.20",
+  "version": "1.0.22",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -1071,18 +1071,8 @@
       },
       {
         "key": "ctrl+n",
-        "command": "groog.multiCommand.execute",
-        "when": "searchViewletFocus",
-        "args": {
-          "sequence": [
-            {
-              "command": "search.action.focusNextSearchResult"
-            },
-            {
-              "command": "search.action.focusSearchList"
-            }
-          ]
-        }
+        "command": "list.focusDown",
+        "when": "searchViewletFocus"
       },
       {
         "key": "ctrl+o",
@@ -1125,18 +1115,8 @@
       },
       {
         "key": "ctrl+p",
-        "command": "groog.multiCommand.execute",
-        "when": "searchViewletFocus",
-        "args": {
-          "sequence": [
-            {
-              "command": "search.action.focusPreviousSearchResult"
-            },
-            {
-              "command": "search.action.focusSearchList"
-            }
-          ]
-        }
+        "command": "list.focusUp",
+        "when": "searchViewletFocus"
       },
       {
         "key": "ctrl+pagedown",
@@ -1888,18 +1868,8 @@
       },
       {
         "key": "down",
-        "command": "groog.multiCommand.execute",
-        "when": "searchViewletFocus",
-        "args": {
-          "sequence": [
-            {
-              "command": "search.action.focusNextSearchResult"
-            },
-            {
-              "command": "search.action.focusSearchList"
-            }
-          ]
-        }
+        "command": "list.focusDown",
+        "when": "searchViewletFocus"
       },
       {
         "key": "e",
@@ -2609,18 +2579,8 @@
       },
       {
         "key": "up",
-        "command": "groog.multiCommand.execute",
-        "when": "searchViewletFocus",
-        "args": {
-          "sequence": [
-            {
-              "command": "search.action.focusPreviousSearchResult"
-            },
-            {
-              "command": "search.action.focusSearchList"
-            }
-          ]
-        }
+        "command": "list.focusUp",
+        "when": "searchViewletFocus"
       },
       {
         "key": "v",

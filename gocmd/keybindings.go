@@ -755,12 +755,9 @@ func upBindings() map[string]*KB {
 		always.value:                kb("-workbench.action.quickOpen"),
 		editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorUp"),
 		editorTextFocus.and(suggestWidgetVisible).value:       kb("selectPrevSuggestion"),
-		inQuickOpen.value:   kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
-		groogFindMode.value: kb("editor.action.previousMatchFindAction"),
-		searchViewletFocus.value: mc(
-			"search.action.focusPreviousSearchResult",
-			"search.action.focusSearchList",
-		),
+		inQuickOpen.value:        kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
+		groogFindMode.value:      kb("editor.action.previousMatchFindAction"),
+		searchViewletFocus.value: kb("list.focusUp"),
 	}
 }
 
@@ -773,10 +770,7 @@ func downBindings() map[string]*KB {
 		inQuickOpen.value:         kb("workbench.action.quickOpenNavigateNextInFilePicker"),
 		groogFindMode.value:       kb("editor.action.nextMatchFindAction"),
 		searchInputBoxFocus.value: kb("search.action.focusSearchList"),
-		searchViewletFocus.value: mc(
-			"search.action.focusNextSearchResult",
-			"search.action.focusSearchList",
-		),
+		searchViewletFocus.value:  kb("list.focusDown"),
 	}
 }
 
