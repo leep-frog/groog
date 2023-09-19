@@ -17,6 +17,9 @@ import (
 func main() {
 	_, file, _, _ := runtime.Caller(0)
 	os.Exit(sourcerer.Source([]sourcerer.CLI{&cli{}},
+		// Since the actual go files contain the extension configuration (and change frequently),
+		// rather than just directly calling this package, we call `goleep` to ensure all
+		// go file updates are included (without needing to reload the cli explicitly).
 		sourcerer.NewAliaser("v", "goleep", "-d", filepath.Dir(file), "vs-package"),
 		sourcerer.NewAliaser("vu", "goleep", "-d", filepath.Dir(file), "vs-package", "u"),
 	))
