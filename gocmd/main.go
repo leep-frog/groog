@@ -98,23 +98,23 @@ func (c *cli) Node() command.Node {
 
 						o.Stdoutln("Successfully updated to new version:", newVersion)
 
-						return c.regeneratePackageJson(o, d)
+						return c.regeneratePackageJson(o, d, newVersion)
 					}},
 				),
 			},
 			Default: command.SerialNodes(
 				&command.ExecutorProcessor{func(o command.Output, d *command.Data) error {
-					return c.regeneratePackageJson(o, d)
+					return c.regeneratePackageJson(o, d, "")
 				}},
 			),
 		},
 	)
 }
 
-func (c *cli) regeneratePackageJson(o command.Output, d *command.Data) error {
+func (c *cli) regeneratePackageJson(o command.Output, d *command.Data, versionOverride string) error {
 	filename := filepath.Join(filepath.Dir(filepath.Dir(runtimeNode.Get(d))), "package.json")
 
-	p := groogPackage()
+	p := groogPackage(versionOverride)
 
 	j, err := json.MarshalIndent(p, "", "  ")
 	if err != nil {
