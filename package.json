@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -769,7 +769,13 @@
       },
       {
         "key": "alt+y",
-        "command": "groog.paste"
+        "command": "editor.action.clipboardPasteAction",
+        "when": "!editorTextFocus"
+      },
+      {
+        "key": "alt+y",
+        "command": "groog.paste",
+        "when": "editorTextFocus"
       },
       {
         "key": "alt+z",
@@ -1674,11 +1680,23 @@
       },
       {
         "key": "ctrl+x shift+insert",
-        "command": "groog.paste"
+        "command": "editor.action.clipboardPasteAction",
+        "when": "!editorTextFocus"
       },
       {
         "key": "ctrl+x ctrl+shift+insert",
-        "command": "groog.paste"
+        "command": "editor.action.clipboardPasteAction",
+        "when": "!editorTextFocus"
+      },
+      {
+        "key": "ctrl+x shift+insert",
+        "command": "groog.paste",
+        "when": "editorTextFocus"
+      },
+      {
+        "key": "ctrl+x ctrl+shift+insert",
+        "command": "groog.paste",
+        "when": "editorTextFocus"
       },
       {
         "key": "ctrl+x t",
@@ -1734,11 +1752,23 @@
       },
       {
         "key": "ctrl+x y",
-        "command": "groog.paste"
+        "command": "editor.action.clipboardPasteAction",
+        "when": "!editorTextFocus"
       },
       {
         "key": "ctrl+x ctrl+y",
-        "command": "groog.paste"
+        "command": "editor.action.clipboardPasteAction",
+        "when": "!editorTextFocus"
+      },
+      {
+        "key": "ctrl+x y",
+        "command": "groog.paste",
+        "when": "editorTextFocus"
+      },
+      {
+        "key": "ctrl+x ctrl+y",
+        "command": "groog.paste",
+        "when": "editorTextFocus"
       },
       {
         "key": "ctrl+x z",

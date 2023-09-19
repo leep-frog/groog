@@ -100,7 +100,12 @@ func (c *cli) Node() command.Node {
 			runtimeNode,
 			&command.ExecutorProcessor{func(o command.Output, d *command.Data) error {
 				path := filepath.Join(filepath.Dir(filepath.Dir(runtimeNode.Get(d))), "package.json")
-				return o.Err(c.execute(path))
+				if err := c.execute(path); err != nil {
+					return err
+				}
+
+				o.Stdoutln("Successfully updated package.json")
+				return nil
 			}},
 		),
 	}

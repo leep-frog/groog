@@ -444,10 +444,10 @@ var (
 		},
 
 		// Pasting
-		ctrlX("y"): only("groog.paste"),
+		ctrlX("y"): paste(),
 		// ctrl+x ctrl+y on qmk keyboard
-		ctrl("x shift+insert"): only("groog.paste"),
-		alt("y"):               only("groog.paste"),
+		ctrl("x shift+insert"): paste(),
+		alt("y"):               paste(),
 
 		// Settings
 		ctrl("."): panelSplit(
@@ -784,5 +784,12 @@ func leftBindings() map[string]*KB {
 	return map[string]*KB{
 		inQuickOpen.value: kb("workbench.action.quickPickManyToggle"),
 		editorTextFocus.and(inQuickOpen.not()).value: kb("groog.cursorLeft"),
+	}
+}
+
+func paste() map[string]*KB {
+	return map[string]*KB{
+		editorTextFocus.value:       kb("groog.paste"),
+		editorTextFocus.not().value: kb("editor.action.clipboardPasteAction"),
 	}
 }
