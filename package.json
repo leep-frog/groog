@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.27",
+  "version": "1.0.28",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -1772,47 +1772,39 @@
       },
       {
         "key": "ctrl+z f",
-        "command": "groog.multiCommand.execute",
-        "args": {
-          "sequence": [
-            {
-              "command": "faves.search"
-            }
-          ]
-        }
+        "command": "faves.search"
       },
       {
         "key": "ctrl+z ctrl+f",
-        "command": "groog.multiCommand.execute",
-        "args": {
-          "sequence": [
-            {
-              "command": "faves.search"
-            }
-          ]
-        }
+        "command": "faves.search"
+      },
+      {
+        "key": "ctrl+z pagedown",
+        "command": "faves.toggle",
+        "when": "groog.context.qmkMode"
+      },
+      {
+        "key": "ctrl+z ctrl+pagedown",
+        "command": "faves.toggle",
+        "when": "groog.context.qmkMode"
+      },
+      {
+        "key": "ctrl+z right",
+        "command": "faves.search",
+        "when": "groog.context.qmkMode"
+      },
+      {
+        "key": "ctrl+z ctrl+right",
+        "command": "faves.search",
+        "when": "groog.context.qmkMode"
       },
       {
         "key": "ctrl+z v",
-        "command": "groog.multiCommand.execute",
-        "args": {
-          "sequence": [
-            {
-              "command": "faves.search"
-            }
-          ]
-        }
+        "command": "faves.toggle"
       },
       {
         "key": "ctrl+z ctrl+v",
-        "command": "groog.multiCommand.execute",
-        "args": {
-          "sequence": [
-            {
-              "command": "faves.search"
-            }
-          ]
-        }
+        "command": "faves.toggle"
       },
       {
         "key": "d",

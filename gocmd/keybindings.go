@@ -321,12 +321,10 @@ var (
 		ctrlX("v"): onlyMC(
 			"workbench.action.splitEditorDown",
 		),
-		ctrlZ("v"): onlyMC(
-			"faves.search",
-		),
-		ctrlZ("f"): onlyMC(
-			"faves.search",
-		),
+		ctrlZ("v"):      only("faves.toggle"),
+		ctrlZ(pagedown): onlyWhen("faves.toggle", groogQMK),
+		ctrlZ("f"):      only("faves.search"),
+		ctrlZ(right):    onlyWhen("faves.search", groogQMK),
 		ctrlX("h"): onlyMC(
 			"workbench.action.splitEditorRight",
 		),
