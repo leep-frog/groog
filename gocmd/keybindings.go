@@ -252,12 +252,15 @@ var (
 		ctrl("v"):        ctrlVBindings(),
 		pagedown:         ctrlVBindings(),
 		ctrl(shift("p")): only("groog.find.previous"),
-		ctrl("p"):        upBindings(),
-		up:               upBindings(),
-		ctrl("n"):        downBindings(),
-		down:             downBindings(),
-		left:             leftBindings(),
-		ctrl("b"):        leftBindings(),
+		shift(up): {
+			groogQMK.and(groogFindMode).value: kb("groog.find.previous"),
+		},
+		ctrl("p"): upBindings(),
+		up:        upBindings(),
+		ctrl("n"): downBindings(),
+		down:      downBindings(),
+		left:      leftBindings(),
+		ctrl("b"): leftBindings(),
 		right: {
 			inQuickOpen.value: kb("workbench.action.quickPickManyToggle"),
 			editorTextFocus.and(inQuickOpen.not()).value: kb("groog.cursorRight"),
@@ -336,7 +339,10 @@ var (
 		// In our QMK keyboard, pressing "shift+n" in the LR_CTRL layer
 		// actually sends "shift+down" (no ctrl modifier).
 		// So when trying to press "ctrl+shift+n", do the same thing (new file).
-		shift(down):      onlyKBWhen(kb("workbench.action.files.newUntitledFile"), groogQMK),
+		shift(down): {
+			groogQMK.and(groogFindMode).value:       kb("groog.find.next"),
+			groogQMK.and(groogFindMode.not()).value: kb("workbench.action.files.newUntitledFile"),
+		},
 		ctrlX("d"):       only("editor.action.revealDefinition"),
 		ctrl(shift("d")): revealInNewEditor,
 		shift(delete):    revealInNewEditor,

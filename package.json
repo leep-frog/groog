@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.26",
+  "version": "1.0.27",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -2319,7 +2319,12 @@
       {
         "key": "shift+down",
         "command": "workbench.action.files.newUntitledFile",
-        "when": "groog.context.qmkMode"
+        "when": "groog.context.qmkMode \u0026\u0026 !groog.context.findMode"
+      },
+      {
+        "key": "shift+down",
+        "command": "groog.find.next",
+        "when": "groog.context.qmkMode \u0026\u0026 groog.context.findMode"
       },
       {
         "key": "shift+e",
@@ -2483,6 +2488,11 @@
         "args": {
           "text": "U"
         }
+      },
+      {
+        "key": "shift+up",
+        "command": "groog.find.previous",
+        "when": "groog.context.qmkMode \u0026\u0026 groog.context.findMode"
       },
       {
         "key": "shift+v",
