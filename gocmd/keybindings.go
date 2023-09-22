@@ -774,7 +774,7 @@ func downBindings() map[string]*KB {
 		inQuickOpen.value:         kb("workbench.action.quickOpenNavigateNextInFilePicker"),
 		groogFindMode.value:       kb("editor.action.nextMatchFindAction"),
 		searchInputBoxFocus.value: kb("search.action.focusSearchList"),
-		searchViewletFocus.value:  kb("list.focusDown"),
+		searchInputBoxFocus.not().and(searchViewletFocus).value: kb("list.focusDown"),
 	}
 }
 
