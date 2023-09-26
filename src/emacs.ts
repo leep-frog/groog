@@ -93,6 +93,7 @@ export class Emacs {
     this.recorder.registerCommand(context, 'indentToNextLine', () => this.indentToPrevLine(1));
 
     this.recorder.registerCommand(context, 'undo', () => vscode.commands.executeCommand("undo"));
+    this.recorder.registerCommand(context, 'redo', () => vscode.commands.executeCommand("redo"));
 
     for (var th of this.typeHandlers) {
       th.register(context, this.recorder);

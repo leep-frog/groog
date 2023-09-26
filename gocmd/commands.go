@@ -80,7 +80,8 @@ var (
 		cc("groog.toggleMarkMode", "Emacs Toggle Mark Mode"),
 		cc("groog.toggleQMK", "Emacs Toggle QMK"),
 		cc("groog.type", "Groog Type"),
-		cc("groog.undo", "Undo"),
+		cc("groog.undo", "Groog Undo"),
+		cc("groog.redo", "Groog Redo"),
 		cc("groog.updateSettings", "Groog update settings"),
 		cc("groog.yank", "Emacs Yank"),
 	}

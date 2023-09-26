@@ -207,6 +207,10 @@
         "title": "Groog Start Recording"
       },
       {
+        "command": "groog.redo",
+        "title": "Groog Redo"
+      },
+      {
         "command": "groog.renameFile",
         "title": "Groog Rename File"
       },
@@ -236,7 +240,7 @@
       },
       {
         "command": "groog.undo",
-        "title": "Undo"
+        "title": "Groog Undo"
       },
       {
         "command": "groog.updateSettings",
@@ -1185,6 +1189,11 @@
         "key": "ctrl+s",
         "command": "groog.cursorRight",
         "when": "groog.context.qmkMode"
+      },
+      {
+        "key": "ctrl+shift+/",
+        "command": "groog.redo",
+        "when": "!activePanel"
       },
       {
         "key": "ctrl+shift+a",
