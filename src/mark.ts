@@ -45,14 +45,16 @@ export class MarkHandler extends TypeHandler {
     if (!editor) {
       return false;
     }
-    const sel = editor.selection;
-    const curPrefix = getPrefixText(editor, new vscode.Range(sel.start, sel.end));
+
     return editor.edit(editBuilder => {
-      const whitespaceRegex = /^\s*$/;
-      const prefixesWhitespaceOnly = whitespaceRegex.test(prefixText) && (!curPrefix || whitespaceRegex.test(curPrefix));
-      const replacement = prefixesWhitespaceOnly ? replaceAll(text, "\n" + prefixText, "\n" + curPrefix) : text;
-      editBuilder.delete(editor.selection);
-      editBuilder.insert(editor.selection.start, replacement);
+      for (const sel of editor.selections) {
+        const curPrefix = getPrefixText(editor, new vscode.Range(sel.start, sel.end));
+        const whitespaceRegex = /^\s*$/;
+        const prefixesWhitespaceOnly = whitespaceRegex.test(prefixText) && (!curPrefix || whitespaceRegex.test(curPrefix));
+        const replacement = prefixesWhitespaceOnly ? replaceAll(text, "\n" + prefixText, "\n" + curPrefix) : text;
+        editBuilder.delete(sel);
+        editBuilder.insert(sel.start, replacement);
+      }
     }).then(() => true);
   }
 
