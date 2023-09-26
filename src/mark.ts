@@ -24,11 +24,7 @@ export class MarkHandler extends TypeHandler {
       return this.activate();
     });
     recorder.registerCommand(context, 'emacsPaste', async (): Promise<any> => {
-      if (this.isActive()) {
-        return this.deactivate();
-      }
-
-      return this.paste(this.yankedPrefix, this.yanked);
+      return this.deactivate().then(() => this.paste(this.yankedPrefix, this.yanked));
     });
     recorder.registerCommand(context, 'paste', async (): Promise<any> => {
       vscode.env.clipboard.readText().then(text => {
