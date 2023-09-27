@@ -795,13 +795,13 @@
       },
       {
         "key": "backspace",
-        "command": "search.action.remove",
-        "when": "!searchInputBoxFocus \u0026\u0026 searchViewletFocus"
+        "command": "groog.deleteLeft",
+        "when": "editorTextFocus || findInputFocussed"
       },
       {
         "key": "backspace",
-        "command": "groog.deleteLeft",
-        "when": "editorTextFocus || findInputFocussed"
+        "command": "search.action.remove",
+        "when": "searchViewletFocus \u0026\u0026 listFocus"
       },
       {
         "key": "c",
@@ -1825,13 +1825,13 @@
       },
       {
         "key": "delete",
-        "command": "search.action.remove",
-        "when": "!searchInputBoxFocus \u0026\u0026 searchViewletFocus"
+        "command": "groog.deleteRight",
+        "when": "editorTextFocus || findInputFocussed"
       },
       {
         "key": "delete",
-        "command": "groog.deleteRight",
-        "when": "editorTextFocus || findInputFocussed"
+        "command": "search.action.remove",
+        "when": "searchViewletFocus \u0026\u0026 listFocus"
       },
       {
         "key": "down",

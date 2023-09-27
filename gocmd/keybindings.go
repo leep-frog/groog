@@ -65,6 +65,7 @@ var (
 	inQuickOpen           = wc("inQuickOpen")
 	inSearchEditor        = wc("inSearchEditor")
 	panelFocus            = wc("panelFocus")
+	listFocus             = wc("listFocus")
 	searchViewletFocus    = wc("searchViewletFocus")
 	sideBarFocus          = wc("sideBarFocus")
 	suggestWidgetVisible  = wc("suggestWidgetVisible")
@@ -291,16 +292,16 @@ var (
 			searchViewletFocus.value:       kb("search.action.remove"),
 		},
 		backspace: {
-			groogBehaviorContext.value:                              kb("groog.deleteLeft"),
-			searchInputBoxFocus.not().and(searchViewletFocus).value: kb("search.action.remove"),
+			groogBehaviorContext.value:              kb("groog.deleteLeft"),
+			searchViewletFocus.and(listFocus).value: kb("search.action.remove"),
 		},
 		ctrl("d"): {
 			searchViewletFocus.not().value: kb("groog.deleteRight"),
 			searchViewletFocus.value:       kb("search.action.remove"),
 		},
 		delete: {
-			groogBehaviorContext.value:                              kb("groog.deleteRight"),
-			searchInputBoxFocus.not().and(searchViewletFocus).value: kb("search.action.remove"),
+			groogBehaviorContext.value:              kb("groog.deleteRight"),
+			searchViewletFocus.and(listFocus).value: kb("search.action.remove"),
 		},
 		alt("h"):       only("groog.deleteWordLeft"),
 		alt(backspace): textOnly("groog.deleteWordLeft"),
