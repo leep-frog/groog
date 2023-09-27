@@ -6,6 +6,7 @@ export class Settings implements Registerable {
 
   private static settings(): Setting[] {
     let ics = [
+      "workbench.action.terminal.sendSequence",
       "groog.message.info",
       "workbench.action.closePanel",
       "workbench.action.terminal.focusNext",

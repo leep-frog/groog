@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -890,7 +890,7 @@
         "command": "workbench.action.terminal.sendSequence",
         "when": "groog.context.qmkMode \u0026\u0026 panelFocus",
         "args": {
-          "text": "\u0008"
+          "text": "\u0018\u0008"
         }
       },
       {

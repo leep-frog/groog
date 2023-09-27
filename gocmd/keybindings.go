@@ -305,7 +305,15 @@ var (
 		alt("h"):       only("groog.deleteWordLeft"),
 		alt(backspace): textOnly("groog.deleteWordLeft"),
 		ctrl(backspace): {
-			groogQMK.and(panelFocus).value: sendSequence("\u0008"),
+			// Requires following command in shell/powershell profiles:
+			// Bash:
+			// bind '"\C-x\C-h":backward-kill-word'
+			//
+			// PowerShell:
+			// Set-PSReadLineKeyHandler -Chord Ctrl+x,Ctrl+h -ScriptBlock {
+			// 	[Microsoft.PowerShell.PSConsoleReadLine]::BackwardDeleteWord()
+			// }
+			groogQMK.and(panelFocus).value: sendSequence("\u0018\u0008"),
 			editorTextFocus.value:          kb("groog.deleteWordLeft"),
 			// groogQMK.not().or(panelFocus.not()).value: kb("groog.deleteWordLeft"),
 		},
