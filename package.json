@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.34",
+  "version": "1.0.35",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -1071,12 +1071,17 @@
       {
         "key": "ctrl+o",
         "command": "groog.focusNextEditor",
-        "when": "!activePanel"
+        "when": "!panelFocus"
+      },
+      {
+        "key": "ctrl+o",
+        "command": "workbench.action.terminal.focus",
+        "when": "panelFocus \u0026\u0026 !terminalFocus"
       },
       {
         "key": "ctrl+o",
         "command": "workbench.action.terminal.focusNext",
-        "when": "activePanel"
+        "when": "terminalFocus"
       },
       {
         "key": "ctrl+p",
@@ -1115,22 +1120,32 @@
       {
         "key": "ctrl+pagedown",
         "command": "groog.focusNextEditor",
-        "when": "!activePanel"
+        "when": "!panelFocus"
+      },
+      {
+        "key": "ctrl+pagedown",
+        "command": "workbench.action.terminal.focus",
+        "when": "panelFocus \u0026\u0026 !terminalFocus"
       },
       {
         "key": "ctrl+pagedown",
         "command": "workbench.action.terminal.focusNext",
-        "when": "activePanel"
+        "when": "terminalFocus"
       },
       {
         "key": "ctrl+pageup",
         "command": "groog.focusPreviousEditor",
-        "when": "!activePanel"
+        "when": "!panelFocus"
+      },
+      {
+        "key": "ctrl+pageup",
+        "command": "workbench.action.terminal.focus",
+        "when": "panelFocus \u0026\u0026 !terminalFocus"
       },
       {
         "key": "ctrl+pageup",
         "command": "workbench.action.terminal.focusPrevious",
-        "when": "activePanel"
+        "when": "terminalFocus"
       },
       {
         "key": "ctrl+q",
@@ -1261,12 +1276,17 @@
       {
         "key": "ctrl+shift+tab",
         "command": "groog.focusPreviousEditor",
-        "when": "!activePanel"
+        "when": "!panelFocus"
+      },
+      {
+        "key": "ctrl+shift+tab",
+        "command": "workbench.action.terminal.focus",
+        "when": "panelFocus \u0026\u0026 !terminalFocus"
       },
       {
         "key": "ctrl+shift+tab",
         "command": "workbench.action.terminal.focusPrevious",
-        "when": "activePanel"
+        "when": "terminalFocus"
       },
       {
         "key": "ctrl+t",
@@ -1301,22 +1321,32 @@
       {
         "key": "ctrl+tab",
         "command": "groog.focusNextEditor",
-        "when": "!activePanel"
+        "when": "!panelFocus"
+      },
+      {
+        "key": "ctrl+tab",
+        "command": "workbench.action.terminal.focus",
+        "when": "panelFocus \u0026\u0026 !terminalFocus"
       },
       {
         "key": "ctrl+tab",
         "command": "workbench.action.terminal.focusNext",
-        "when": "activePanel"
+        "when": "terminalFocus"
       },
       {
         "key": "ctrl+u",
         "command": "groog.focusPreviousEditor",
-        "when": "!activePanel"
+        "when": "!panelFocus"
+      },
+      {
+        "key": "ctrl+u",
+        "command": "workbench.action.terminal.focus",
+        "when": "panelFocus \u0026\u0026 !terminalFocus"
       },
       {
         "key": "ctrl+u",
         "command": "workbench.action.terminal.focusPrevious",
-        "when": "activePanel"
+        "when": "terminalFocus"
       },
       {
         "key": "ctrl+v",

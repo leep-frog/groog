@@ -354,30 +354,12 @@ var (
 		ctrlX("d"):       only("editor.action.revealDefinition"),
 		ctrl(shift("d")): revealInNewEditor,
 		shift(delete):    revealInNewEditor,
-		ctrl(pagedown): panelSplit(
-			kb("workbench.action.terminal.focusNext"),
-			kb("groog.focusNextEditor"),
-		),
-		ctrl(pageup): panelSplit(
-			kb("workbench.action.terminal.focusPrevious"),
-			kb("groog.focusPreviousEditor"),
-		),
-		ctrl("u"): panelSplit(
-			kb("workbench.action.terminal.focusPrevious"),
-			kb("groog.focusPreviousEditor"),
-		),
-		ctrl("o"): panelSplit(
-			kb("workbench.action.terminal.focusNext"),
-			kb("groog.focusNextEditor"),
-		),
-		ctrl(shift(tab)): panelSplit(
-			kb("workbench.action.terminal.focusPrevious"),
-			kb("groog.focusPreviousEditor"),
-		),
-		ctrl(tab): panelSplit(
-			kb("workbench.action.terminal.focusNext"),
-			kb("groog.focusNextEditor"),
-		),
+		ctrl(pageup):     prevTab(),
+		ctrl(pagedown):   nextTab(),
+		ctrl("u"):        prevTab(),
+		ctrl("o"):        nextTab(),
+		ctrl(shift(tab)): prevTab(),
+		ctrl(tab):        nextTab(),
 		ctrlX("b"): onlyMC(
 			// This re-opens the previously opened file
 			"workbench.action.openPreviousEditorFromHistory",
@@ -710,6 +692,14 @@ func panelSplit(panelKB, otherKB *KB) map[string]*KB {
 	return contextualKB(activePanel, panelKB, otherKB)
 }
 
+func terminalPanelSplit(terminalKB, panelKB, otherKB *KB) map[string]*KB {
+	return map[string]*KB{
+		terminalFocus.value:                       terminalKB,
+		panelFocus.and(terminalFocus.not()).value: panelKB,
+		panelFocus.not().value:                    otherKB,
+	}
+}
+
 // terminalSplit runs terminalKB if focus is on the terminal and otherKB otherwise.
 // panelSplit should be preferred since it will still run panelKB even if focus
 // is on the side bar or menus.
@@ -801,4 +791,20 @@ func paste() map[string]*KB {
 		editorTextFocus.value:       kb("groog.paste"),
 		editorTextFocus.not().value: kb("editor.action.clipboardPasteAction"),
 	}
+}
+
+func prevTab() map[string]*KB {
+	return terminalPanelSplit(
+		kb("workbench.action.terminal.focusPrevious"),
+		kb("workbench.action.terminal.focus"),
+		kb("groog.focusPreviousEditor"),
+	)
+}
+
+func nextTab() map[string]*KB {
+	return terminalPanelSplit(
+		kb("workbench.action.terminal.focusNext"),
+		kb("workbench.action.terminal.focus"),
+		kb("groog.focusNextEditor"),
+	)
 }
