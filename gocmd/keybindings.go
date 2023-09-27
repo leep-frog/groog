@@ -51,25 +51,26 @@ func groogContext(mode string) string {
 
 var (
 	// When contexts
-	activePanel           = wc("activePanel")
-	always                = wc("")
-	editorFocus           = wc("editorFocus")
-	editorTextFocus       = wc("editorTextFocus")
-	findWidgetVisible     = wc("findWidgetVisible")
-	findInputFocussed     = wc("findInputFocussed")
-	inputFocus            = wc("inputFocus")
-	groogFindMode         = wc(groogContext("find"))
-	groogQMK              = wc(groogContext("qmk"))
-	groogRecording        = wc(groogContext("record"))
-	groogTerminalFindMode = wc(groogContext("terminal.find"))
-	inQuickOpen           = wc("inQuickOpen")
-	inSearchEditor        = wc("inSearchEditor")
-	panelFocus            = wc("panelFocus")
-	listFocus             = wc("listFocus")
-	searchViewletFocus    = wc("searchViewletFocus")
-	sideBarFocus          = wc("sideBarFocus")
-	suggestWidgetVisible  = wc("suggestWidgetVisible")
-	terminalFocus         = wc("terminalFocus")
+	activePanel             = wc("activePanel")
+	always                  = wc("")
+	editorFocus             = wc("editorFocus")
+	editorTextFocus         = wc("editorTextFocus")
+	findWidgetVisible       = wc("findWidgetVisible")
+	findInputFocussed       = wc("findInputFocussed")
+	inputFocus              = wc("inputFocus")
+	groogFindMode           = wc(groogContext("find"))
+	groogQMK                = wc(groogContext("qmk"))
+	groogRecording          = wc(groogContext("record"))
+	groogTerminalFindMode   = wc(groogContext("terminal.find"))
+	inQuickOpen             = wc("inQuickOpen")
+	inSearchEditor          = wc("inSearchEditor")
+	panelFocus              = wc("panelFocus")
+	listFocus               = wc("listFocus")
+	listSupportsMultiselect = wc("listSupportsMultiselect")
+	searchViewletFocus      = wc("searchViewletFocus")
+	sideBarFocus            = wc("sideBarFocus")
+	suggestWidgetVisible    = wc("suggestWidgetVisible")
+	terminalFocus           = wc("terminalFocus")
 	// terminal.visible is true even when the terminal is in the back,
 	// hence why we need to use view.terminal.visible here.
 	terminalVisible     = wc("view.terminal.visible")
@@ -182,7 +183,6 @@ var (
 			groogQMK.and(terminalVisible).value:                                 kb("groog.terminal.find"),
 			groogQMK.and(terminalVisible.not()).and(groogRecording).value:       kb("groog.record.findNext"),
 			groogQMK.and(terminalVisible.not()).and(groogRecording.not()).value: kb("groog.find"),
-			groogQMK.not().and(inQuickOpen).value:                               kb("workbench.action.quickPickManyToggle"),
 			groogQMK.not().and(editorTextFocus.and(inQuickOpen.not())).value:    kb("groog.cursorRight"),
 		},
 		ctrl("s"): {
@@ -262,8 +262,8 @@ var (
 		down:      downBindings(),
 		left:      leftBindings(),
 		ctrl("b"): leftBindings(),
+		ctrl("m"): onlyWhen("workbench.action.quickPickManyToggle", inQuickOpen.and(listSupportsMultiselect)),
 		right: {
-			inQuickOpen.value: kb("workbench.action.quickPickManyToggle"),
 			editorTextFocus.and(inQuickOpen.not()).value: kb("groog.cursorRight"),
 		},
 		home:              textOnly("groog.cursorHome"),
@@ -790,7 +790,8 @@ func downBindings() map[string]*KB {
 
 func leftBindings() map[string]*KB {
 	return map[string]*KB{
-		inQuickOpen.value: kb("workbench.action.quickPickManyToggle"),
+		// "workbench.action.quickPickManyToggle" was removed because we want
+		// left to just move the cursor in the quick open text to the left.
 		editorTextFocus.and(inQuickOpen.not()).value: kb("groog.cursorLeft"),
 	}
 }

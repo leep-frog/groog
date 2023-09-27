@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.33",
+  "version": "1.0.34",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -876,11 +876,6 @@
         "when": "editorTextFocus \u0026\u0026 !inQuickOpen"
       },
       {
-        "key": "ctrl+b",
-        "command": "workbench.action.quickPickManyToggle",
-        "when": "inQuickOpen"
-      },
-      {
         "key": "ctrl+backspace",
         "command": "groog.deleteWordLeft",
         "when": "editorTextFocus"
@@ -916,11 +911,6 @@
         "key": "ctrl+f",
         "command": "groog.cursorRight",
         "when": "!groog.context.qmkMode \u0026\u0026 editorTextFocus \u0026\u0026 !inQuickOpen"
-      },
-      {
-        "key": "ctrl+f",
-        "command": "workbench.action.quickPickManyToggle",
-        "when": "!groog.context.qmkMode \u0026\u0026 inQuickOpen"
       },
       {
         "key": "ctrl+f",
@@ -1970,11 +1960,6 @@
         "when": "editorTextFocus \u0026\u0026 !inQuickOpen"
       },
       {
-        "key": "left",
-        "command": "workbench.action.quickPickManyToggle",
-        "when": "inQuickOpen"
-      },
-      {
         "key": "m",
         "command": "groog.type",
         "when": "editorTextFocus || findInputFocussed",
@@ -2089,11 +2074,6 @@
         "key": "right",
         "command": "groog.cursorRight",
         "when": "editorTextFocus \u0026\u0026 !inQuickOpen"
-      },
-      {
-        "key": "right",
-        "command": "workbench.action.quickPickManyToggle",
-        "when": "inQuickOpen"
       },
       {
         "key": "s",
