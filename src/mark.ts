@@ -28,7 +28,6 @@ export class MarkHandler extends TypeHandler {
       return this.deactivate().then(() => this.paste(this.yankedPrefix, this.yanked));
     });
     recorder.registerCommand(context, 'paste', async (): Promise<any> => {
-      await new Promise(f => setTimeout(f, 15000));
       // For paste, we assume that the first and second line are indented the same amount
       vscode.env.clipboard.readText().then(text => {
         const prefixRegex = /^(\s*)/;
