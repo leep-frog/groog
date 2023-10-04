@@ -68,7 +68,7 @@ export class Emacs {
 
     this.typoFixer.register(context);
 
-    context.subscriptions.push(vscode.commands.registerCommand('groog.type', this.recorder.lockWrap<TypeArg>((arg: TypeArg) => this.type(arg))));
+    context.subscriptions.push(vscode.commands.registerCommand('groog.type', this.recorder.lockWrap<TypeArg>('groog.type', (arg: TypeArg) => this.type(arg))));
 
     this.recorder.registerCommand(context, 'jump', (jd: JumpDist | undefined) => this.jump(jd || defaultJumpDist));
     this.recorder.registerCommand(context, 'fall', (jd: JumpDist | undefined) => this.fall(jd || defaultJumpDist));

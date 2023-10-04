@@ -38,8 +38,13 @@ export class Recorder extends TypeHandler {
   // that their order would become mixed up due to the parallel nature of commands (which run async).
   // The initialization of command executions, however, are well ordered, so requiring a lock
   // immediately has proven to be a great solution to this problem.
-  public lockWrap<T>(f: (t: T) => Thenable<void>): (t: T) => Thenable<void> {
-    return async (t: T) => await this.typeLock.acquireAsync().then(() => f(t)).finally(() => this.typeLock.release());
+  public lockWrap<T>(name: string, f: (t: T) => Thenable<void>): (t: T) => Thenable<void> {
+    return async (t: T) => await this.typeLock.acquireAsync()
+      .then(() => setTimeout(() => {
+          vscode.window.showErrorMessage(`LockWrap "${name}" is taking too long`);
+      }, 1000))
+      .then((timeoutRef) => f(t).then(() => clearTimeout(timeoutRef)))
+      .finally(() => this.typeLock.release());
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
@@ -57,12 +62,12 @@ export class Recorder extends TypeHandler {
 
   registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => Thenable<any>, noLock?: boolean) {
     context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName,
-      noLock ? (...args: any) => this.execute("groog." + commandName, args, callback) : this.lockWrap((...args: any) => this.execute("groog." + commandName, args, callback))
+      noLock ? (...args: any) => this.execute("groog." + commandName, args, callback) : this.lockWrap("groog." + commandName, (...args: any) => this.execute("groog." + commandName, args, callback))
     ));
   }
 
   registerUnrecordableCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => any) {
-    context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName, this.lockWrap(callback)));
+    context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName, this.lockWrap("groog." + commandName, callback)));
   }
 
   async execute(command: string, args: any[], callback: (...args: any[]) => any) {
