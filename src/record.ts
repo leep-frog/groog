@@ -41,7 +41,7 @@ export class Recorder extends TypeHandler {
   public lockWrap<T>(name: string, f: (t: T) => Thenable<void>): (t: T) => Thenable<void> {
     return async (t: T) => await this.typeLock.acquireAsync()
       .then(() => setTimeout(() => {
-          vscode.window.showErrorMessage(`LockWrap "${name}" is taking too long`);
+        vscode.window.showErrorMessage(`LockWrap "${name}" is taking too long`);
       }, 1000))
       .then((timeoutRef) => f(t).then(() => clearTimeout(timeoutRef)))
       .finally(() => this.typeLock.release());
