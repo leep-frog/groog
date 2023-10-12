@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.37",
+  "version": "1.0.38",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -906,6 +906,10 @@
       {
         "key": "ctrl+e",
         "command": "groog.cursorEnd"
+      },
+      {
+        "key": "ctrl+f",
+        "command": "-workbench.action.terminal.focusFind"
       },
       {
         "key": "ctrl+f",

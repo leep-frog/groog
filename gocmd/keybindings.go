@@ -184,6 +184,7 @@ var (
 			groogQMK.and(terminalVisible.not()).and(groogRecording).value:       kb("groog.record.findNext"),
 			groogQMK.and(terminalVisible.not()).and(groogRecording.not()).value: kb("groog.find"),
 			groogQMK.not().and(editorTextFocus.and(inQuickOpen.not())).value:    kb("groog.cursorRight"),
+			always.value: kb("-workbench.action.terminal.focusFind"),
 		},
 		ctrl("s"): {
 			groogQMK.not().and(terminalVisible).value:                                 kb("groog.terminal.find"),

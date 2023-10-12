@@ -4,7 +4,6 @@ import { TypeHandler, getPrefixText } from './handler';
 import { CursorMove, DeleteCommand } from './interfaces';
 import { Recorder } from './record';
 import { Emacs } from './emacs';
-import { time } from 'console';
 
 export class MarkHandler extends TypeHandler {
   yanked: string;
