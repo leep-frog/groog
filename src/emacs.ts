@@ -168,6 +168,13 @@ export class Emacs {
     let range = editor?.selection;
     let maybeText = editor?.document.getText(range);
     let prefixText: string | undefined = "";
+
+    for (var th of this.typeHandlers) {
+      if (th.isActive() || th.alwaysOnYank) {
+        await th.onYank(prefixText, maybeText);
+      }
+    }
+
     if (range && maybeText) {
       prefixText = getPrefixText(editor, range);
       await vscode.window.activeTextEditor?.edit(editBuilder => {
@@ -175,12 +182,6 @@ export class Emacs {
           editBuilder.delete(range);
         }
       });
-    }
-
-    for (var th of this.typeHandlers) {
-      if (th.isActive() || await th.alwaysOnYank) {
-        await th.onYank(prefixText, maybeText);
-      }
     }
   }
 
