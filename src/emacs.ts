@@ -165,9 +165,13 @@ export class Emacs {
 
   async yank() {
     const editor = vscode.window.activeTextEditor;
-    let range = editor?.selection;
-    let maybeText = editor?.document.getText(range);
-    let prefixText: string | undefined = "";
+    if (!editor) {
+      return;
+    }
+
+    const range = editor.selection;
+    const maybeText = editor.document.getText(range);
+    const prefixText = getPrefixText(editor, range);
 
     for (var th of this.typeHandlers) {
       if (th.isActive() || th.alwaysOnYank) {
@@ -175,12 +179,9 @@ export class Emacs {
       }
     }
 
-    if (range && maybeText) {
-      prefixText = getPrefixText(editor, range);
+    if (range.active.compareTo(range.anchor)) {
       await vscode.window.activeTextEditor?.edit(editBuilder => {
-        if (range) {
-          editBuilder.delete(range);
-        }
+        editBuilder.delete(range);
       });
     }
   }
