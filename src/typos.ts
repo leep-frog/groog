@@ -98,6 +98,7 @@ export function defaultCorrections(): Correction[] {
         "jcl": "Collectors.toList",
         "jlo": "ImmutableList.of",
         "jso": "ImmutableSet.of",
+        "jaa": "Arrays.asList",
       },
       replacementSuffix: "(\`",
       replacementSuffixAfterCursor: "\`);",
