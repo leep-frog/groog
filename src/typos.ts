@@ -91,7 +91,7 @@ export function defaultCorrections(): Correction[] {
     // Java typos
     {
       languages: [
-        typescriptLanguageKey,
+        javaLanguageKey,
       ],
       words: {
         "jsf": "String.format",
