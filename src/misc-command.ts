@@ -3,6 +3,8 @@ import * as vscode from 'vscode';
 export interface SingleCommand {
   command: string;
   args?: any;
+  async?: boolean;
+  delay?: number;
 }
 
 export interface MultiCommand {
@@ -10,8 +12,14 @@ export interface MultiCommand {
 }
 
 export async function multiCommand(mc: MultiCommand) {
-  for (var sc of mc.sequence) {
-    await vscode.commands.executeCommand(sc.command, sc.args);
+  for (const sc of mc.sequence) {
+    if (sc.delay) {
+      setTimeout(() => vscode.commands.executeCommand(sc.command, sc.args), sc.delay);
+    } else if (sc.async) {
+      vscode.commands.executeCommand(sc.command, sc.args);
+    } else {
+      await vscode.commands.executeCommand(sc.command, sc.args);
+    }
   }
 }
 

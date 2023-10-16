@@ -26,6 +26,7 @@ export interface Correction {
 // https://code.visualstudio.com/docs/languages/identifiers
 const goLanguageKey = "go";
 const jsoncLanguageKey = "jsonc";
+const javaLanguageKey = "java";
 const jsonLanguageKey = "json";
 export const globalLanguageKey = "*";
 const typescriptLanguageKey = "typescript";
@@ -85,6 +86,21 @@ export function defaultCorrections(): Correction[] {
         "rxn": "([1-9][0-9]*)",
         "rxw": "([a-zA-Z]+)",
       },
+      excludeBreakCharacter: true,
+    },
+    // Java typos
+    {
+      languages: [
+        typescriptLanguageKey,
+      ],
+      words: {
+        "jsf": "String.format",
+        "jcl": "Collectors.toList",
+        "jlo": "ImmutableList.of",
+        "jso": "ImmutableSet.of",
+      },
+      replacementSuffix: "(\`",
+      replacementSuffixAfterCursor: "\`);",
       excludeBreakCharacter: true,
     },
   ];

@@ -487,7 +487,25 @@ var (
 		alt("n"): only("workbench.action.editor.nextChange"),
 
 		// Go
-		ctrlX("t"): onlyArgs(terminAllOrNothingExecute, terminAllOrNothingWrap("go.test.package", nil)),
+		ctrlX("t"): {
+			always.value: &KB{
+				Command: "groog.multiCommand.execute",
+				Args: map[string]interface{}{
+					"sequence": []map[string]interface{}{
+						// go.test.package only brings focus to the panel after
+						// the test copletes so ctrl+o doesn't work
+						{
+							"command": "go.test.package",
+							"async":   true,
+						},
+						{
+							"command": "workbench.action.focusPanel",
+							"delay":   1000,
+						},
+					},
+				},
+			},
+		},
 
 		// Miscellaneous
 		ctrlX("r"): only("workbench.action.reloadWindow"),

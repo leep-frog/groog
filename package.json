@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.40",
+  "version": "1.0.41",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -1713,16 +1713,34 @@
       },
       {
         "key": "ctrl+x t",
-        "command": "termin-all-or-nothing.execute",
+        "command": "groog.multiCommand.execute",
         "args": {
-          "command": "go.test.package"
+          "sequence": [
+            {
+              "async": true,
+              "command": "go.test.package"
+            },
+            {
+              "command": "workbench.action.focusPanel",
+              "delay": 1000
+            }
+          ]
         }
       },
       {
         "key": "ctrl+x ctrl+t",
-        "command": "termin-all-or-nothing.execute",
+        "command": "groog.multiCommand.execute",
         "args": {
-          "command": "go.test.package"
+          "sequence": [
+            {
+              "async": true,
+              "command": "go.test.package"
+            },
+            {
+              "command": "workbench.action.focusPanel",
+              "delay": 1000
+            }
+          ]
         }
       },
       {
