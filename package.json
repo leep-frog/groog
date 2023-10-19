@@ -705,7 +705,27 @@
       },
       {
         "key": "alt+t",
-        "command": "workbench.action.terminal.newInActiveWorkspace"
+        "command": "groog.multiCommand.execute",
+        "when": "!activePanel",
+        "args": {
+          "sequence": [
+            {
+              "command": "workbench.action.terminal.runRecentCommand",
+              "async": true
+            },
+            {
+              "command": "workbench.action.acceptSelectedQuickOpenItem"
+            },
+            {
+              "command": "terminal.focus"
+            }
+          ]
+        }
+      },
+      {
+        "key": "alt+t",
+        "command": "workbench.action.terminal.newInActiveWorkspace",
+        "when": "activePanel"
       },
       {
         "key": "alt+w",
@@ -1275,7 +1295,27 @@
       },
       {
         "key": "ctrl+shift+t",
-        "command": "workbench.action.terminal.newInActiveWorkspace"
+        "command": "groog.multiCommand.execute",
+        "when": "!activePanel",
+        "args": {
+          "sequence": [
+            {
+              "command": "workbench.action.terminal.runRecentCommand",
+              "async": true
+            },
+            {
+              "command": "workbench.action.acceptSelectedQuickOpenItem"
+            },
+            {
+              "command": "terminal.focus"
+            }
+          ]
+        }
+      },
+      {
+        "key": "ctrl+shift+t",
+        "command": "workbench.action.terminal.newInActiveWorkspace",
+        "when": "activePanel"
       },
       {
         "key": "ctrl+shift+tab",
@@ -1500,13 +1540,12 @@
         "args": {
           "sequence": [
             {
+              "command": "groog.message.info",
               "args": {
                 "message": "Terminal output copied!"
-              },
-              "command": "groog.message.info"
+              }
             },
             {
-              "args": null,
               "command": "workbench.action.terminal.copyLastCommandOutput"
             }
           ]
@@ -1519,13 +1558,12 @@
         "args": {
           "sequence": [
             {
+              "command": "groog.message.info",
               "args": {
                 "message": "Terminal output copied!"
-              },
-              "command": "groog.message.info"
+              }
             },
             {
-              "args": null,
               "command": "workbench.action.terminal.copyLastCommandOutput"
             }
           ]

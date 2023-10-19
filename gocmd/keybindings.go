@@ -160,6 +160,7 @@ func kbDefsToBindings() []*Keybinding {
 					When:    when,
 					Command: kb.Command,
 					Args:    kb.Args,
+					// We don't set Async because that is only used in multi-command args
 				})
 			}
 		}
@@ -405,8 +406,8 @@ var (
 			mc("groog.ctrlG", "termin-all-or-nothing.openPanel"),
 		),
 		// alt-t on QMK keyboard is actually ctrl+shift+t (for new tab)
-		ctrl(shift("t")): only("workbench.action.terminal.newInActiveWorkspace"),
-		alt("t"):         only("workbench.action.terminal.newInActiveWorkspace"),
+		ctrl(shift("t")): altT(),
+		alt("t"):         altT(),
 		alt(shift("t")):  only("workbench.action.terminal.newWithProfile"),
 		// Ctrl+x ctrl+c isn't sent to terminal directly, so we need to
 		// explicitly send the sequence.
@@ -528,8 +529,10 @@ var (
 )
 
 type KB struct {
-	Command string
-	Args    map[string]interface{}
+	Command string                 `json:"command"`
+	Args    map[string]interface{} `json:"args,omitempty"`
+	// This is for multi-command (it's a pointer so omitempty works)
+	Async *bool `json:"async,omitempty"`
 }
 
 func terminAllOrNothingWrap(command string, args map[string]interface{}) map[string]interface{} {
@@ -587,16 +590,8 @@ func notification(message string) *KB {
 }
 
 func mcWithArgs(cmds ...*KB) *KB {
-	var sequence []map[string]interface{}
-	for _, c := range cmds {
-		sequence = append(sequence, map[string]interface{}{
-			"command": c.Command,
-			"args":    c.Args,
-		})
-	}
-
 	return kbArgs("groog.multiCommand.execute", map[string]interface{}{
-		"sequence": sequence,
+		"sequence": cmds,
 	})
 }
 
@@ -825,5 +820,20 @@ func nextTab() map[string]*KB {
 		kb("workbench.action.terminal.focusNext"),
 		kb("workbench.action.terminal.focus"),
 		kb("groog.focusNextEditor"),
+	)
+}
+
+func altT() map[string]*KB {
+	troo := true
+	return panelSplit(
+		kb("workbench.action.terminal.newInActiveWorkspace"),
+		mcWithArgs(
+			&KB{
+				Command: "workbench.action.terminal.runRecentCommand",
+				Async:   &troo,
+			},
+			kb("workbench.action.acceptSelectedQuickOpenItem"),
+			kb("terminal.focus"),
+		),
 	)
 }
