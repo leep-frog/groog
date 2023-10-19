@@ -428,6 +428,7 @@ var (
 				kb("workbench.action.terminal.copyLastCommandOutput"),
 			),
 			nil),
+		ctrlZ("c"): only("groog.copyFilename"),
 
 		// To determine this, I did the following
 		// - ran `sed -n l` (as recommended in (1))

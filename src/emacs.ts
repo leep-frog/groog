@@ -1,16 +1,15 @@
 import * as vscode from 'vscode';
+import { handleDeleteCharacter, handleTypedCharacter } from './character-functions';
 import { ColorMode } from './color_mode';
 import { FindHandler } from './find';
 import { Registerable, TypeHandler, getPrefixText } from './handler';
 import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { TypoFixer } from './internal-typos';
 import { MarkHandler } from './mark';
-import { Message, MultiCommand, infoMessage, multiCommand } from './misc-command';
+import { miscCommands, multiCommand } from './misc-command';
 import { Recorder } from './record';
 import { Settings } from './settings';
 import { TerminalFindHandler } from './terminal-find';
-import { handleDeleteCharacter, handleTypedCharacter } from './character-functions';
-import AwaitLock from 'await-lock';
 
 const qmkKey = "groog.keys.qmkState";
 
@@ -103,8 +102,7 @@ export class Emacs {
       r.register(context, this.recorder);
     }
 
-    this.recorder.registerCommand(context, "multiCommand.execute", (mc: MultiCommand) => multiCommand(mc), true);
-    this.recorder.registerCommand(context, "message.info", (msg: Message | undefined) => infoMessage(msg));
+    miscCommands.forEach(mc => this.recorder.registerCommand(context, mc.name, mc.f, mc.noLock));
 
     // After all commands have been registered, check persistent data for qmk setting.
     this.setQMK(context, this.qmk.get(context));

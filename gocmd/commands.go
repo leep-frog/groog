@@ -74,6 +74,7 @@ var (
 		cc("groog.record.saveRecordingAs", "Groog Save Recording As..."),
 		cc("groog.record.startRecording", "Groog Start Recording"),
 		cc("groog.renameFile", "Groog Rename File"),
+		cc("groog.copyFilename", "Groog Copy Filename"),
 		cc("groog.reverseFind", "Groog reverse find"),
 		cc("groog.terminal.find", "Groog find in terminal"),
 		cc("groog.terminal.reverseFind", "Groog find in terminal"),

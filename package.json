@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.44",
+  "version": "1.0.45",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -38,6 +38,10 @@
   "activationEvents": [],
   "contributes": {
     "commands": [
+      {
+        "command": "groog.copyFilename",
+        "title": "Groog Copy Filename"
+      },
       {
         "command": "groog.ctrlG",
         "title": "Emacs Ctrl-G"
@@ -1858,6 +1862,14 @@
         "args": {
           "text": "\u001f"
         }
+      },
+      {
+        "key": "ctrl+z c",
+        "command": "groog.copyFilename"
+      },
+      {
+        "key": "ctrl+z ctrl+c",
+        "command": "groog.copyFilename"
       },
       {
         "key": "ctrl+z f",

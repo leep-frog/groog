@@ -1,13 +1,36 @@
+import { basename } from 'path';
 import * as vscode from 'vscode';
 
-export interface SingleCommand {
+export interface MiscCommand {
+  name: string;
+  f: (...args: any[]) => Thenable<any>;
+  noLock?: boolean;
+}
+
+export const miscCommands: MiscCommand[] = [
+  {
+    name: "multiCommand.execute",
+    f: (mc: MultiCommand) => multiCommand(mc),
+    noLock: true,
+  },
+  {
+    name: "message.info",
+    f: (msg: Message | undefined) => infoMessage(msg),
+  },
+  {
+    name: "copyFilename",
+    f: () => copyFileName(),
+  },
+];
+
+interface SingleCommand {
   command: string;
   args?: any;
   async?: boolean;
   delay?: number;
 }
 
-export interface MultiCommand {
+interface MultiCommand {
   sequence: SingleCommand[];
 }
 
@@ -23,14 +46,24 @@ export async function multiCommand(mc: MultiCommand) {
   }
 }
 
-export interface Message {
+interface Message {
   message: string
 }
 
-export async function infoMessage(msg: Message | undefined) {
+async function infoMessage(msg: Message | undefined) {
   if (msg) {
     vscode.window.showInformationMessage(msg.message);
   } else {
-    vscode.window.showInformationMessage("no message set");
+    vscode.window.showErrorMessage("No message set");
+  }
+}
+
+async function copyFileName() {
+  const editor = vscode.window.activeTextEditor;
+  if (editor) {
+    vscode.env.clipboard.writeText(basename(editor.document.fileName));
+    vscode.window.showInformationMessage(`Filename copied!`);
+  } else {
+    vscode.window.showErrorMessage(`No active editor`);
   }
 }
