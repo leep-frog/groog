@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.43",
+  "version": "1.0.44",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -1755,8 +1755,8 @@
         "args": {
           "sequence": [
             {
-              "async": true,
-              "command": "go.test.package"
+              "command": "go.test.package",
+              "async": true
             },
             {
               "command": "workbench.action.focusPanel",
@@ -1771,8 +1771,8 @@
         "args": {
           "sequence": [
             {
-              "async": true,
-              "command": "go.test.package"
+              "command": "go.test.package",
+              "async": true
             },
             {
               "command": "workbench.action.focusPanel",

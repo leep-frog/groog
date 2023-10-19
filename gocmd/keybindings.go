@@ -49,6 +49,14 @@ func groogContext(mode string) string {
 	return fmt.Sprintf("groog.context.%sMode", mode)
 }
 
+func async(b bool) *bool {
+	return &b
+}
+
+func delay(n int) *int {
+	return &n
+}
+
 var (
 	// When contexts
 	activePanel             = wc("activePanel")
@@ -160,7 +168,7 @@ func kbDefsToBindings() []*Keybinding {
 					When:    when,
 					Command: kb.Command,
 					Args:    kb.Args,
-					// We don't set Async because that is only used in multi-command args
+					// We don't set Async or Delay because those are only used in multi-command args
 				})
 			}
 		}
@@ -489,23 +497,18 @@ var (
 
 		// Go
 		ctrlX("t"): {
-			always.value: &KB{
-				Command: "groog.multiCommand.execute",
-				Args: map[string]interface{}{
-					"sequence": []map[string]interface{}{
-						// go.test.package only brings focus to the panel after
-						// the test copletes so ctrl+o doesn't work
-						{
-							"command": "go.test.package",
-							"async":   true,
-						},
-						{
-							"command": "workbench.action.focusPanel",
-							"delay":   1000,
-						},
-					},
+			always.value: mcWithArgs(
+				// go.test.package only brings focus to the panel after
+				// the test copletes so ctrl+o doesn't work
+				&KB{
+					Command: "go.test.package",
+					Async:   async(true),
 				},
-			},
+				&KB{
+					Command: "workbench.action.focusPanel",
+					Delay:   delay(1000),
+				},
+			),
 		},
 
 		// Miscellaneous
@@ -533,6 +536,7 @@ type KB struct {
 	Args    map[string]interface{} `json:"args,omitempty"`
 	// This is for multi-command (it's a pointer so omitempty works)
 	Async *bool `json:"async,omitempty"`
+	Delay *int  `json:"delay,omitempty"`
 }
 
 func terminAllOrNothingWrap(command string, args map[string]interface{}) map[string]interface{} {
@@ -824,13 +828,12 @@ func nextTab() map[string]*KB {
 }
 
 func altT() map[string]*KB {
-	troo := true
 	return panelSplit(
 		kb("workbench.action.terminal.newInActiveWorkspace"),
 		mcWithArgs(
 			&KB{
 				Command: "workbench.action.terminal.runRecentCommand",
-				Async:   &troo,
+				Async:   async(true),
 			},
 			kb("workbench.action.acceptSelectedQuickOpenItem"),
 			kb("terminal.focus"),
