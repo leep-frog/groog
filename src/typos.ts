@@ -102,7 +102,7 @@ export function defaultCorrections(): Correction[] {
         "jaa": "Arrays.asList",
       },
       replacementSuffix: "(",
-      replacementSuffixAfterCursor: ");",
+      replacementSuffixAfterCursor: ")",
       excludeBreakCharacter: true,
     },
   ];
