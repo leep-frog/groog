@@ -832,11 +832,14 @@ func altT() map[string]*KB {
 	return panelSplit(
 		kb("workbench.action.terminal.newInActiveWorkspace"),
 		mcWithArgs(
+			/** The below didn't work in wsl/ssh terminals :(
 			&KB{
 				Command: "workbench.action.terminal.runRecentCommand",
 				Async:   async(true),
 			},
 			kb("workbench.action.acceptSelectedQuickOpenItem"),
+			*/
+			sendSequence("\u001b[A\u000d"),
 			kb("terminal.focus"),
 		),
 	)

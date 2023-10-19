@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.45",
+  "version": "1.0.46",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -714,11 +714,10 @@
         "args": {
           "sequence": [
             {
-              "command": "workbench.action.terminal.runRecentCommand",
-              "async": true
-            },
-            {
-              "command": "workbench.action.acceptSelectedQuickOpenItem"
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "\u001b[A\r"
+              }
             },
             {
               "command": "terminal.focus"
@@ -1304,11 +1303,10 @@
         "args": {
           "sequence": [
             {
-              "command": "workbench.action.terminal.runRecentCommand",
-              "async": true
-            },
-            {
-              "command": "workbench.action.acceptSelectedQuickOpenItem"
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "\u001b[A\r"
+              }
             },
             {
               "command": "terminal.focus"
