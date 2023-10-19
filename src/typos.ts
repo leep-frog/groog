@@ -95,13 +95,14 @@ export function defaultCorrections(): Correction[] {
       ],
       words: {
         "jsf": "String.format",
+        "jce": "Collectors.emptyList",
         "jcl": "Collectors.toList",
         "jlo": "ImmutableList.of",
         "jso": "ImmutableSet.of",
         "jaa": "Arrays.asList",
       },
-      replacementSuffix: "(\`",
-      replacementSuffixAfterCursor: "\`);",
+      replacementSuffix: "(",
+      replacementSuffixAfterCursor: ");",
       excludeBreakCharacter: true,
     },
   ];
