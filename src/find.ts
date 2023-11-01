@@ -65,7 +65,7 @@ class FindContextCache {
     }
     this.cacheIdx = this.cache.length-1;
     this.findPrevOnType = findPrevOnType;
-    await this.findWithArgs();
+    await this.findWithArgs(true);
   }
 
   public async end(): Promise<void> {
@@ -132,7 +132,7 @@ class FindContextCache {
     }
   }
 
-  private async findWithArgs() {
+  private async findWithArgs(onActivation?: boolean) {
     let ctx : FindContext = this.currentContext();
     let ft : string = ctx.findText;
     if (ft.length === 0) {
@@ -170,7 +170,7 @@ class FindContextCache {
       const prevSel = (vscode.window.activeTextEditor?.selection);
       const prevRange = (vscode.window.activeTextEditor?.visibleRanges);
       await cursorToFront();
-      await this.nextMatch();
+      await this.nextMatch(!!onActivation);
       if (prevSel && vscode.window.activeTextEditor && !prevSel.start.isEqual(vscode.window.activeTextEditor.selection.start)) {
         await this.prevMatch();
       }
@@ -183,7 +183,7 @@ class FindContextCache {
       }
     } else {
       await cursorToFront();
-      await this.nextMatch();
+      await this.nextMatch(!!onActivation);
     }
   }
 
@@ -217,8 +217,17 @@ class FindContextCache {
     }
   }*/
 
-  async nextMatch() {
-    await vscode.commands.executeCommand("editor.action.nextMatchFindAction");
+  async nextMatch(onActivation: boolean) {
+    // Most recent one will be empty
+    const prevCache = this.cache.at(-2);
+    const curCache = this.cache.at(-1);
+    if (curCache && prevCache && !onActivation && !curCache.findText && !curCache.replaceText) {
+      this.cache.pop();
+      this.cacheIdx--;
+      this.findWithArgs();
+    } else {
+      return vscode.commands.executeCommand("editor.action.nextMatchFindAction");
+    }
   }
 
   async prevMatch() {
@@ -241,7 +250,7 @@ export class FindHandler extends TypeHandler {
   register(context: vscode.ExtensionContext, recorder: Recorder) {
     recorder.registerCommand(context, 'find', () => {
       if (this.isActive()) {
-        return this.cache.nextMatch();
+        return this.cache.nextMatch(false);
       }
       return this.activate();
     });
