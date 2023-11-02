@@ -56,11 +56,11 @@ class FindContextCache {
     this.wholeWordToggle = !this.wholeWordToggle;
   }
 
-  public async startNew(findPrevOnType: boolean) : Promise<void> {
+  public async startNew(findPrevOnType: boolean, disallowPreviousContext: boolean, initText?: string) : Promise<void> {
     this.cursorStack.clear();
     this.cache.push({
-      modified: false,
-      findText: "",
+      modified: !!initText,
+      findText: initText || "",
       replaceText: "",
     });
     if (this.cache.length > maxFindCacheSize) {
@@ -68,7 +68,7 @@ class FindContextCache {
     }
     this.cacheIdx = this.cache.length-1;
     this.findPrevOnType = findPrevOnType;
-    await this.findWithArgs(true);
+    await this.findWithArgs(disallowPreviousContext);
   }
 
   public async end(): Promise<void> {
@@ -138,7 +138,7 @@ class FindContextCache {
     }
   }
 
-  private async findWithArgs(onActivation?: boolean) {
+  private async findWithArgs(disallowPreviousContext?: boolean) {
     let ctx : FindContext = this.currentContext();
     let ft : string = ctx.findText;
     if (ft.length === 0) {
@@ -176,7 +176,7 @@ class FindContextCache {
       const prevSel = (vscode.window.activeTextEditor?.selection);
       const prevRange = (vscode.window.activeTextEditor?.visibleRanges);
       await cursorToFront();
-      await this.nextMatch(!!onActivation);
+      await this.nextMatch(!!disallowPreviousContext);
       if (prevSel && vscode.window.activeTextEditor && !prevSel.start.isEqual(vscode.window.activeTextEditor.selection.start)) {
         await this.prevMatch();
       }
@@ -189,7 +189,7 @@ class FindContextCache {
       }
     } else {
       await cursorToFront();
-      await this.nextMatch(!!onActivation);
+      await this.nextMatch(!!disallowPreviousContext);
     }
   }
 
@@ -223,11 +223,11 @@ class FindContextCache {
     }
   }*/
 
-  async nextMatch(onActivation: boolean) {
+  async nextMatch(disallowPreviousContext: boolean) {
     // Most recent one will be empty
     const prevCache = this.cache.at(-2);
     const curCache = this.cache.at(-1);
-    if (curCache && prevCache && !onActivation && !curCache.modified) {
+    if (curCache && prevCache && !disallowPreviousContext && !curCache.modified) {
       this.cache.pop();
       this.cacheIdx--;
       this.findWithArgs();
@@ -245,12 +245,18 @@ class FindContextCache {
 export class FindHandler extends TypeHandler {
   whenContext: string = "find";
   cache : FindContextCache;
+  // If true, go to the previous match when typing
   findPrevOnType : boolean;
+  // If true, we have a simpler find interaction (specifically, don't
+  // findWithArgs on every type).
+  simpleMode: boolean;
 
   constructor(cm: ColorMode) {
     super(cm, ModeColor.find);
     this.cache = new FindContextCache();
     this.findPrevOnType = false;
+    // TODO: Set this in a setting (see ctrl+x ctrl+k keybinding for keyboard mode change as example)
+    this.simpleMode = false;
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
@@ -302,6 +308,15 @@ export class FindHandler extends TypeHandler {
       await this.deactivate();
     }));
 
+    recorder.registerCommand(context, 'find.toggleSimpleMode', async () => {
+      this.simpleMode = !this.simpleMode;
+      if (this.simpleMode) {
+        vscode.window.showInformationMessage(`Activated Find Simple Mode`);
+      } else {
+        vscode.window.showInformationMessage(`Deactivated Find Simple Mode`);
+      }
+    });
+
     recorder.registerCommand(context, 'find.toggleRegex', () => {
       this.cache.toggleRegex();
       return vscode.commands.executeCommand("toggleSearchEditorRegex");
@@ -317,7 +332,17 @@ export class FindHandler extends TypeHandler {
   }
 
   async handleActivation() {
-    await this.cache.startNew(this.findPrevOnType);
+    if (this.simpleMode) {
+      const searchQuery = await vscode.window.showInputBox({
+        placeHolder: "Search query",
+        prompt: "Search text",
+        // value: TODO: update this with context on ctrl+shift+p
+      });
+      await this.cache.startNew(this.findPrevOnType, false, searchQuery);
+    } else {
+      await this.cache.startNew(this.findPrevOnType, true);
+    }
+
   }
 
   async deactivateCommands() {

@@ -263,6 +263,7 @@ var (
 		ctrl("v"):        ctrlVBindings(),
 		pagedown:         ctrlVBindings(),
 		ctrl(shift("p")): only("groog.find.previous"),
+		alt("s"):         only("groog.find.toggleSimpleMode"),
 		shift(up): {
 			groogQMK.and(groogFindMode).value: kb("groog.find.previous"),
 		},

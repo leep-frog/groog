@@ -673,6 +673,10 @@
         }
       },
       {
+        "key": "alt+s",
+        "command": "groog.find.toggleSimpleMode"
+      },
+      {
         "key": "alt+shift+c",
         "command": "togglePreserveCase"
       },
