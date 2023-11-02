@@ -336,7 +336,6 @@ export class FindHandler extends TypeHandler {
       const searchQuery = await vscode.window.showInputBox({
         placeHolder: "Search query",
         prompt: "Search text",
-        // value: TODO: update this with context on ctrl+shift+p
       });
       await this.cache.startNew(this.findPrevOnType, false, searchQuery);
     } else {

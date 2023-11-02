@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.49",
+  "version": "1.0.50",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -946,7 +946,12 @@
       {
         "key": "ctrl+f",
         "command": "groog.find",
-        "when": "groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.context.recordMode"
+        "when": "groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.context.recordMode \u0026\u0026 !inQuickOpen"
+      },
+      {
+        "key": "ctrl+f",
+        "command": "workbench.action.acceptSelectedQuickOpenItem",
+        "when": "groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.context.recordMode \u0026\u0026 inQuickOpen"
       },
       {
         "key": "ctrl+f",
@@ -1209,7 +1214,12 @@
       {
         "key": "ctrl+s",
         "command": "groog.find",
-        "when": "!groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.context.recordMode"
+        "when": "!groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.context.recordMode \u0026\u0026 !inQuickOpen"
+      },
+      {
+        "key": "ctrl+s",
+        "command": "workbench.action.acceptSelectedQuickOpenItem",
+        "when": "!groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.context.recordMode \u0026\u0026 inQuickOpen"
       },
       {
         "key": "ctrl+s",

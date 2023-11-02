@@ -189,17 +189,22 @@ var (
 	kbDefinitions = map[Key]map[string]*KB{
 		// Find bindings
 		ctrl("f"): {
-			groogQMK.and(terminalVisible).value:                                 kb("groog.terminal.find"),
-			groogQMK.and(terminalVisible.not()).and(groogRecording).value:       kb("groog.record.findNext"),
-			groogQMK.and(terminalVisible.not()).and(groogRecording.not()).value: kb("groog.find"),
-			groogQMK.not().and(editorTextFocus.and(inQuickOpen.not())).value:    kb("groog.cursorRight"),
+			groogQMK.and(terminalVisible).value:                           kb("groog.terminal.find"),
+			groogQMK.and(terminalVisible.not()).and(groogRecording).value: kb("groog.record.findNext"),
+			// This is mostly relevant for Find Simple Mode (so `ctrl+s; ctrl+s` results in redoing previous find)
+			groogQMK.and(terminalVisible.not()).and(groogRecording.not()).and(inQuickOpen).value:       kb("workbench.action.acceptSelectedQuickOpenItem"),
+			groogQMK.and(terminalVisible.not()).and(groogRecording.not()).and(inQuickOpen.not()).value: kb("groog.find"),
+			groogQMK.not().and(editorTextFocus.and(inQuickOpen.not())).value:                           kb("groog.cursorRight"),
 			always.value: kb("-workbench.action.terminal.focusFind"),
 		},
 		ctrl("s"): {
-			groogQMK.not().and(terminalVisible).value:                                 kb("groog.terminal.find"),
-			groogQMK.not().and(terminalVisible.not()).and(groogRecording).value:       kb("groog.record.findNext"),
-			groogQMK.not().and(terminalVisible.not()).and(groogRecording.not()).value: kb("groog.find"),
+			// "workbench.action.acceptSelectedQuickOpenItem",
 			groogQMK.value: kb("groog.cursorRight"),
+			groogQMK.not().and(terminalVisible).value:                           kb("groog.terminal.find"),
+			groogQMK.not().and(terminalVisible.not()).and(groogRecording).value: kb("groog.record.findNext"),
+			// This is mostly relevant for Find Simple Mode (so `ctrl+s; ctrl+s` results in redoing previous find)
+			groogQMK.not().and(terminalVisible.not()).and(groogRecording.not()).and(inQuickOpen).value:       kb("workbench.action.acceptSelectedQuickOpenItem"),
+			groogQMK.not().and(terminalVisible.not()).and(groogRecording.not()).and(inQuickOpen.not()).value: kb("groog.find"),
 		},
 		// Don't use 'terminalVisible' here because we don't want ctrl+r to activate terminal find mode.
 		// Instead, we want ctrl+r in non-find mode to search for matching bash commands (as it normally would)
