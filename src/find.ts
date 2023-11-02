@@ -8,6 +8,7 @@ import { Emacs } from './emacs';
 const maxFindCacheSize : number = 100;
 
 interface FindContext {
+  modified : boolean;
   findText : string;
   replaceText : string;
 }
@@ -56,7 +57,9 @@ class FindContextCache {
   }
 
   public async startNew(findPrevOnType: boolean) : Promise<void> {
+    this.cursorStack.clear();
     this.cache.push({
+      modified: false,
       findText: "",
       replaceText: "",
     });
@@ -107,6 +110,7 @@ class FindContextCache {
 
   public async insertText(s: string): Promise<void> {
     let ctx = this.currentContext();
+    ctx.modified = true;
     if (this.replaceMode) {
       ctx.replaceText = ctx.replaceText.concat(s);
     } else {
@@ -120,11 +124,13 @@ class FindContextCache {
     let ctx = this.currentContext();
     if (this.replaceMode) {
       if (ctx.replaceText.length > 0) {
+        ctx.modified = true;
         ctx.replaceText = ctx.replaceText.slice(0, ctx.replaceText.length - 1);
         await this.findWithArgs();
       }
     } else {
       if (ctx.findText.length > 0) {
+        ctx.modified = true;
         ctx.findText = ctx.findText.slice(0, ctx.findText.length - 1);
         this.cursorStack.popAndSet(this.findPrevOnType);
         await this.findWithArgs();
@@ -221,7 +227,7 @@ class FindContextCache {
     // Most recent one will be empty
     const prevCache = this.cache.at(-2);
     const curCache = this.cache.at(-1);
-    if (curCache && prevCache && !onActivation && !curCache.findText && !curCache.replaceText) {
+    if (curCache && prevCache && !onActivation && !curCache.modified) {
       this.cache.pop();
       this.cacheIdx--;
       this.findWithArgs();
