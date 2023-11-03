@@ -73,8 +73,12 @@ class FindContextCache {
   }
 
   public async end(): Promise<void> {
-    let lastCtx = this.cache[this.cache.length-1];
-    if (lastCtx.findText.length === 0 && lastCtx.replaceText.length === 0) {
+    let lastCtx = this.cache.at(-1);
+    if (lastCtx && lastCtx.findText.length === 0 && lastCtx.replaceText.length === 0) {
+      this.cache.pop();
+    }
+
+    for (let [lastCtx, secondLastCtx] = [this.cache.at(-1), this.cache.at(-2)]; lastCtx && secondLastCtx && lastCtx.findText === secondLastCtx.findText && lastCtx.replaceText === secondLastCtx.replaceText; [lastCtx, secondLastCtx] = [this.cache.at(-1), this.cache.at(-2)]) {
       this.cache.pop();
     }
     this.replaceMode = false;
