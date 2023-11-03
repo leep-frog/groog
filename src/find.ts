@@ -3,7 +3,8 @@ import { ColorMode, ModeColor } from './color_mode';
 import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand } from './interfaces';
 import { Recorder } from './record';
-import { Emacs } from './emacs';
+import { Emacs, GlobalBoolTracker, GlobalStateTracker } from './emacs';
+import { Glob } from 'glob';
 
 const maxFindCacheSize : number = 100;
 
@@ -249,14 +250,17 @@ export class FindHandler extends TypeHandler {
   findPrevOnType : boolean;
   // If true, we have a simpler find interaction (specifically, don't
   // findWithArgs on every type).
-  simpleMode: boolean;
+  simpleModeTracker : GlobalBoolTracker;
 
   constructor(cm: ColorMode) {
     super(cm, ModeColor.find);
     this.cache = new FindContextCache();
     this.findPrevOnType = false;
-    // TODO: Set this in a setting (see ctrl+x ctrl+k keybinding for keyboard mode change as example)
-    this.simpleMode = false;
+    this.simpleModeTracker = new GlobalBoolTracker("find.simpleMode", () => {
+      vscode.window.showInformationMessage(`Simple Find Mode activated`);
+    }, () => {
+      vscode.window.showInformationMessage(`Regular Find Mode activated`);
+    });
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
@@ -309,12 +313,7 @@ export class FindHandler extends TypeHandler {
     }));
 
     recorder.registerCommand(context, 'find.toggleSimpleMode', async () => {
-      this.simpleMode = !this.simpleMode;
-      if (this.simpleMode) {
-        vscode.window.showInformationMessage(`Activated Find Simple Mode`);
-      } else {
-        vscode.window.showInformationMessage(`Deactivated Find Simple Mode`);
-      }
+      this.simpleModeTracker.toggle(context);
     });
 
     recorder.registerCommand(context, 'find.toggleRegex', () => {
@@ -332,7 +331,7 @@ export class FindHandler extends TypeHandler {
   }
 
   async handleActivation() {
-    if (this.simpleMode) {
+    if (this.simpleModeTracker.get()) {
       const searchQuery = await vscode.window.showInputBox({
         placeHolder: "Search query",
         prompt: "Search text",

@@ -11,13 +11,40 @@ import { Recorder } from './record';
 import { Settings } from './settings';
 import { TerminalFindHandler } from './terminal-find';
 
-const qmkKey = "groog.keys.qmkState";
+export class GlobalBoolTracker {
+  private stateTracker: GlobalStateTracker<boolean>;
+  private value: boolean;
+  private toggleActions: Map<boolean, () => any>;
 
-class GlobalStateTracker<T> {
+  constructor(key: string, activateFunc: () => any, deactivateFunc: () => any) {
+    this.stateTracker = new GlobalStateTracker<boolean>(key);
+    this.value = false; // This is actually set in initialize()
+    this.toggleActions = new Map<boolean, () => void>([
+      [true, activateFunc],
+      [false, deactivateFunc],
+    ]);
+  }
+
+  async initialize(context: vscode.ExtensionContext) {
+    this.value = !!this.stateTracker.get(context);
+    this.toggleActions.get(this.value)!();
+  }
+
+  async toggle(context: vscode.ExtensionContext) {
+    this.value = !this.value;
+    return this.stateTracker.update(context, this.value).then(() => this.toggleActions.get(this.value)!());
+  }
+
+  get(): boolean {
+    return this.value;
+  }
+}
+
+export class GlobalStateTracker<T> {
   private key: string;
 
   constructor(key: string) {
-    this.key = key;
+    this.key = `groog.keys.${key}`;
   }
 
   get(context: vscode.ExtensionContext): T | undefined {
@@ -30,7 +57,7 @@ class GlobalStateTracker<T> {
 }
 
 export class Emacs {
-  private qmk: GlobalStateTracker<boolean>;
+  qmkTracker: GlobalBoolTracker;
   recorder: Recorder;
   typeHandlers: TypeHandler[];
   cm: ColorMode;
@@ -38,7 +65,11 @@ export class Emacs {
 
   constructor() {
     this.cm = new ColorMode();
-    this.qmk = new GlobalStateTracker<boolean>(qmkKey);
+    this.qmkTracker = new GlobalBoolTracker("qmkState", () => {
+      setGroogContext('qmk', true).then(() => vscode.window.showInformationMessage(`QMK keyboard mode activated`));
+    }, () => {
+      setGroogContext('qmk', false).then(() => vscode.window.showInformationMessage(`Basic keyboard mode activated`));
+    });
     this.recorder = new Recorder(this.cm, this);
     this.typoFixer = new TypoFixer();
     this.typeHandlers = [
@@ -73,7 +104,7 @@ export class Emacs {
     this.recorder.registerCommand(context, 'fall', (jd: JumpDist | undefined) => this.fall(jd || defaultJumpDist));
     this.recorder.registerCommand(context, 'format', () => this.format());
 
-    this.recorder.registerCommand(context, 'toggleQMK', () => this.toggleQMK(context));
+    this.recorder.registerCommand(context, 'toggleQMK', () => this.qmkTracker.toggle(context));
     this.recorder.registerCommand(context, 'yank', () => this.yank());
     this.recorder.registerCommand(context, 'kill', () => this.kill());
     this.recorder.registerCommand(context, 'ctrlG', () => this.ctrlG());
@@ -105,7 +136,7 @@ export class Emacs {
     miscCommands.forEach(mc => this.recorder.registerCommand(context, mc.name, mc.f, mc.noLock));
 
     // After all commands have been registered, check persistent data for qmk setting.
-    this.setQMK(context, this.qmk.get(context));
+    this.qmkTracker.initialize(context);
   }
 
   async runHandlers(thCallback: (th: TypeHandler) => Thenable<boolean>, applyCallback: () => Thenable<any>): Promise<void> {
@@ -145,20 +176,6 @@ export class Emacs {
       async (th: TypeHandler): Promise<boolean> => th.delHandler(d),
       async () => handleDeleteCharacter(d).then(b => b ? false : vscode.commands.executeCommand(d))
     );
-  }
-
-  async toggleQMK(context: vscode.ExtensionContext) {
-    await this.setQMK(context, !this.qmk.get(context));
-  }
-
-  async setQMK(context: vscode.ExtensionContext, b: boolean | undefined) {
-    if (b) {
-      vscode.window.showInformationMessage('QMK keyboard mode activated');
-    } else {
-      vscode.window.showInformationMessage('Basic keyboard mode activated');
-    }
-    await this.qmk.update(context, !!b);
-    await setGroogContext('qmk', !!b);
   }
 
   async yank() {
