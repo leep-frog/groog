@@ -60,6 +60,7 @@ export class Settings implements Registerable {
       new GlobalSetting("workbench", "startupEditor", "none"),
       // TODO: How is this not set in linux (i.e. work computer)?
       new GlobalSetting("terminal", "integrated.defaultProfile.windows", "PowerShell"),
+      new GlobalSetting("powershell", "startAutomatically", false), // Don't start a powershell terminal when opening a powershell script
       new GlobalSetting("terminal", "integrated.automationProfile.windows", {
         "path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
       }),

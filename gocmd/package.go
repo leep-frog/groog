@@ -7,7 +7,7 @@ func groogPackage(versionOverride string) *Package {
 		Name:        "groog",
 		DisplayName: "groog",
 		Description: "",
-		Version:     "1.0.51",
+		Version:     "1.0.52",
 		Publisher:   "groogle",
 		Main:        "./out/extension.js",
 		Engines: map[string]string{
@@ -55,10 +55,19 @@ func groogPackage(versionOverride string) *Package {
 		Configuration: groogConfiguration(),
 		Snipppets:     Snippets,
 	}
-	slices.SortFunc(p.Contributes.Commands, func(a, b *Command) bool {
+	sortFunc(p.Contributes.Commands, func(a, b *Command) bool {
 		return a.Command < b.Command
 	})
 	return p
+}
+
+func sortFunc[T any](ts []T, f func(a, b T) bool) {
+	slices.SortFunc(ts, func(a, b T) int {
+		if f(a, b) {
+			return -1
+		}
+		return 1
+	})
 }
 
 type Package struct {
@@ -78,11 +87,11 @@ type Package struct {
 }
 
 func (p *Package) sort() {
-	slices.SortFunc(p.Contributes.Commands, func(a, b *Command) bool {
+	sortFunc(p.Contributes.Commands, func(a, b *Command) bool {
 		return a.Title < b.Title
 	})
 
-	slices.SortFunc(p.Contributes.Keybindings, func(a, b *Keybinding) bool {
+	sortFunc(p.Contributes.Keybindings, func(a, b *Keybinding) bool {
 		if a.Key != b.Key {
 			return a.Key < b.Key
 		}
