@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.52",
+  "version": "1.0.53",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -1776,7 +1776,7 @@
             },
             {
               "command": "workbench.action.focusPanel",
-              "delay": 1000
+              "delay": 250
             }
           ]
         }
@@ -1792,7 +1792,7 @@
             },
             {
               "command": "workbench.action.focusPanel",
-              "delay": 1000
+              "delay": 250
             }
           ]
         }

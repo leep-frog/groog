@@ -77,6 +77,17 @@ export function defaultCorrections(): Correction[] {
       replacementSuffixAfterCursor: "\")",
       excludeBreakCharacter: true,
     },
+    // strings.Join typos
+    {
+      languages: [
+        goLanguageKey,
+      ],
+      words: {
+        "sj": "strings.Join([]string{",
+      },
+      replacementSuffixAfterCursor: "}, \"\\n\")",
+      excludeBreakCharacter: true,
+    },
     // Regex pattern shortcuts
     {
       languages: [

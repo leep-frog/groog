@@ -513,7 +513,7 @@ var (
 				},
 				&KB{
 					Command: "workbench.action.focusPanel",
-					Delay:   delay(1000),
+					Delay:   delay(250),
 				},
 			),
 		},
