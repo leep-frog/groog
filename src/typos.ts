@@ -77,6 +77,22 @@ export function defaultCorrections(): Correction[] {
       replacementSuffixAfterCursor: "\")",
       excludeBreakCharacter: true,
     },
+    {
+      languages: [
+        goLanguageKey,
+      ],
+      words: {
+        "fpfe": "fmt.Printf",
+        "fefe": "fmt.Errorf",
+        "spfe": "fmt.Sprintf",
+        "oofe": "o.Stdoutf",
+        "oefe": "o.Stderrf",
+        "rxe": "rgx.New",
+      },
+      replacementSuffix: "(",
+      replacementSuffixAfterCursor: ")",
+      excludeBreakCharacter: true,
+    },
     // strings.Join typos
     {
       languages: [
