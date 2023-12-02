@@ -32,6 +32,7 @@ export class Settings implements Registerable {
         "source.fixAll.eslint": true,
       }),
       new GlobalSetting("window", "newWindowDimensions", "maximized"),
+      new GlobalSetting("editor", "cursorSurroundingLines", 6),
       new GlobalSetting("editor", "detectIndentation", false),
       new GlobalSetting("editor", "insertSpaces", true),
       new GlobalSetting("editor", "rulers", [80, 200]),

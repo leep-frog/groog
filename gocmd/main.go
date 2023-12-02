@@ -10,19 +10,21 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/leep-frog/command"
+	"github.com/leep-frog/command/command"
+	"github.com/leep-frog/command/commander"
 	"github.com/leep-frog/command/sourcerer"
 )
 
 func main() {
-	_, file, _, _ := runtime.Caller(0)
-	os.Exit(sourcerer.Source([]sourcerer.CLI{&cli{}},
-		// Since the actual go files contain the extension configuration (and change frequently),
-		// rather than just directly calling this package, we call `goleep` to ensure all
-		// go file updates are included (without needing to reload the cli explicitly).
-		sourcerer.NewAliaser("v", "goleep", "-d", filepath.Dir(file), "vs-package"),
-		sourcerer.NewAliaser("vu", "goleep", "-d", filepath.Dir(file), "vs-package", "u"),
-	))
+	os.Exit(sourcerer.RunCLI(&cli{}))
+
+	// _, file, _, _ := runtime.Caller(0)
+	// os.Exit(sourcerer.Source([]sourcerer.CLI{&cli{}})) // Since the actual go files contain the extension configuration (and change frequently),
+	// rather than just directly calling this package, we call `goleep` to ensure all
+	// go file updates are included (without needing to reload the cli explicitly).
+	// sourcerer.NewAliaser("v", "goleep", "-d", filepath.Dir(file), "vs-package"),
+	// sourcerer.NewAliaser("vu", "goleep", "-d", filepath.Dir(file), "vs-package", "u"),
+
 }
 
 type cli struct{}
@@ -33,19 +35,19 @@ func (*cli) Changed() bool   { return false }
 
 var (
 	versionRegex = regexp.MustCompile("^(\\s*Version:\\s*[\"`])([0-9\\.]+)([\"`],)$")
-	runtimeNode  = command.RuntimeCaller()
+	runtimeNode  = commander.RuntimeCaller()
 )
 
 func (c *cli) Node() command.Node {
-	versionSectionArg := command.OptionalArg[int]("VERSION", "Version section offset (0 for smallest, 1 for middle, 2 for major)", command.Default(0), command.Between(0, 2, true))
+	versionSectionArg := commander.OptionalArg[int]("VERSION", "Version section offset (0 for smallest, 1 for middle, 2 for major)", commander.Default(0), commander.Between(0, 2, true))
 
-	return command.SerialNodes(
+	return commander.SerialNodes(
 		runtimeNode,
-		&command.BranchNode{
+		&commander.BranchNode{
 			Branches: map[string]command.Node{
-				"update u": command.SerialNodes(
+				"update u": commander.SerialNodes(
 					versionSectionArg,
-					&command.ExecutorProcessor{func(o command.Output, d *command.Data) error {
+					&commander.ExecutorProcessor{func(o command.Output, d *command.Data) error {
 						_, fileName, _, ok := runtime.Caller(0)
 						if !ok {
 							return o.Stderrf("failed to get runtime.Caller")
@@ -102,8 +104,8 @@ func (c *cli) Node() command.Node {
 					}},
 				),
 			},
-			Default: command.SerialNodes(
-				&command.ExecutorProcessor{func(o command.Output, d *command.Data) error {
+			Default: commander.SerialNodes(
+				&commander.ExecutorProcessor{func(o command.Output, d *command.Data) error {
 					return c.regeneratePackageJson(o, d, "")
 				}},
 			),
