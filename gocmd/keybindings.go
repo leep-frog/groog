@@ -400,6 +400,9 @@ var (
 			groogQMK.and(groogRecording).value:       kb("groog.record.find"),
 			groogQMK.and(groogRecording.not()).value: kb("workbench.action.findInFiles"),
 		},
+		shift(backspace): { // This is basically ctrl+shift+h
+			groogQMK.value: kb("workbench.action.replaceInFiles"),
+		},
 
 		// Terminal and panel related bindings
 		ctrlX("q"): only("workbench.action.toggleSidebarVisibility"),

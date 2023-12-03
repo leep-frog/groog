@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.56",
+  "version": "1.0.57",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -2408,6 +2408,11 @@
         "args": {
           "text": "B"
         }
+      },
+      {
+        "key": "shift+backspace",
+        "command": "workbench.action.replaceInFiles",
+        "when": "groog.context.qmkMode"
       },
       {
         "key": "shift+c",
