@@ -208,6 +208,7 @@ export class Emacs {
       }
     }
     for (var cmd of Object.values(CtrlGCommand)) {
+      // TODO: Maybe don't await if this starts to take too long.
       await vscode.commands.executeCommand(cmd);
     }
   }

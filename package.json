@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.55",
+  "version": "1.0.56",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -706,6 +706,34 @@
         "key": "alt+shift+i",
         "command": "-editor.action.insertCursorAtEndOfEachLineSelected",
         "when": "editorTextFocus"
+      },
+      {
+        "key": "alt+shift+n",
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            {
+              "command": "editor.action.marker.nextInFiles"
+            },
+            {
+              "command": "closeMarkersNavigation"
+            }
+          ]
+        }
+      },
+      {
+        "key": "alt+shift+p",
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            {
+              "command": "editor.action.marker.prevInFiles"
+            },
+            {
+              "command": "closeMarkersNavigation"
+            }
+          ]
+        }
       },
       {
         "key": "alt+shift+t",

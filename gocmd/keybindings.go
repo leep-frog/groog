@@ -502,6 +502,10 @@ var (
 		alt("p"): only("workbench.action.editor.previousChange"),
 		alt("n"): only("workbench.action.editor.nextChange"),
 
+		// Errors (like git ones with addition of shift modifier).
+		alt(shift("p")): onlyMC("editor.action.marker.prevInFiles", "closeMarkersNavigation"),
+		alt(shift("n")): onlyMC("editor.action.marker.nextInFiles", "closeMarkersNavigation"),
+
 		// Go
 		ctrlX("t"): {
 			always.value: mcWithArgs(

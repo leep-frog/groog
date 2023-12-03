@@ -22,6 +22,7 @@ export enum CtrlGCommand {
   notificationsclearAll = "notifications.clearAll",
   workbenchActionTerminalHideFind = "workbench.action.terminal.hideFind",
   closeReferenceSearch = "closeReferenceSearch",
+  closeMarkersNavigation = "closeMarkersNavigation",
 }
 
 export enum DeleteCommand {
