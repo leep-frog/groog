@@ -519,8 +519,11 @@ var (
 					Async:   async(true),
 				},
 				&KB{
-					Command: "workbench.action.focusPanel",
+					Command: "workbench.action.toggleMaximizedPanel",
 					Delay:   delay(250),
+				},
+				&KB{
+					Command: "workbench.action.focusPanel",
 				},
 			),
 		},
