@@ -339,7 +339,9 @@ var (
 		ctrl(delete): textOnly("groog.deleteWordRight"),
 		alt("x"):     only("workbench.action.showCommands"),
 		ctrlX("l"):   only("workbench.action.gotoLine"),
-		ctrl(";"):    only("editor.action.commentLine"),
+		// nextPanelView was removed from ctrl+l because we want that
+		// to work as regular jump behavior in terminal editors (e.g. `git diff` interactions)
+		ctrl(";"): panelSplit(kb("workbench.action.nextPanelView"), kb("editor.action.commentLine")),
 
 		// File navigation
 		// closePanel is taken care of by termin-all-or-nothing
@@ -772,9 +774,8 @@ func repeat(c string, times int) []string {
 
 func ctrlLBindings() map[string]*KB {
 	return map[string]*KB{
-		inQuickOpen.value:                              mc(repeat("workbench.action.quickOpenNavigatePreviousInFilePicker", 5)...),
-		activePanel.and(inQuickOpen.not()).value:       kb("workbench.action.nextPanelView"),
-		activePanel.not().and(inQuickOpen.not()).value: kb("groog.jump"),
+		inQuickOpen.value:       mc(repeat("workbench.action.quickOpenNavigatePreviousInFilePicker", 5)...),
+		inQuickOpen.not().value: kb("groog.jump"),
 	}
 }
 

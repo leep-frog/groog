@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.59",
+  "version": "1.0.61",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -913,7 +913,13 @@
       },
       {
         "key": "ctrl+;",
-        "command": "editor.action.commentLine"
+        "command": "editor.action.commentLine",
+        "when": "!activePanel"
+      },
+      {
+        "key": "ctrl+;",
+        "command": "workbench.action.nextPanelView",
+        "when": "activePanel"
       },
       {
         "key": "ctrl+a",
@@ -1053,12 +1059,7 @@
       {
         "key": "ctrl+l",
         "command": "groog.jump",
-        "when": "!activePanel \u0026\u0026 !inQuickOpen"
-      },
-      {
-        "key": "ctrl+l",
-        "command": "workbench.action.nextPanelView",
-        "when": "activePanel \u0026\u0026 !inQuickOpen"
+        "when": "!inQuickOpen"
       },
       {
         "key": "ctrl+l",
@@ -2165,12 +2166,7 @@
       {
         "key": "pageup",
         "command": "groog.jump",
-        "when": "!activePanel \u0026\u0026 !inQuickOpen"
-      },
-      {
-        "key": "pageup",
-        "command": "workbench.action.nextPanelView",
-        "when": "activePanel \u0026\u0026 !inQuickOpen"
+        "when": "!inQuickOpen"
       },
       {
         "key": "pageup",
