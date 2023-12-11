@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.62",
+  "version": "1.0.63",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -1067,7 +1067,15 @@
       {
         "key": "ctrl+l",
         "command": "groog.jump",
-        "when": "!inQuickOpen"
+        "when": "!inQuickOpen \u0026\u0026 !terminalFocus"
+      },
+      {
+        "key": "ctrl+l",
+        "command": "workbench.action.terminal.sendSequence",
+        "when": "!inQuickOpen \u0026\u0026 terminalFocus",
+        "args": {
+          "text": "\u001b[5~"
+        }
       },
       {
         "key": "ctrl+l",
@@ -1448,7 +1456,15 @@
       {
         "key": "ctrl+v",
         "command": "groog.fall",
-        "when": "!inQuickOpen"
+        "when": "!inQuickOpen \u0026\u0026 !terminalFocus"
+      },
+      {
+        "key": "ctrl+v",
+        "command": "workbench.action.terminal.sendSequence",
+        "when": "!inQuickOpen \u0026\u0026 terminalFocus",
+        "args": {
+          "text": "\u001b[6~"
+        }
       },
       {
         "key": "ctrl+v",
@@ -2145,7 +2161,15 @@
       {
         "key": "pagedown",
         "command": "groog.fall",
-        "when": "!inQuickOpen"
+        "when": "!inQuickOpen \u0026\u0026 !terminalFocus"
+      },
+      {
+        "key": "pagedown",
+        "command": "workbench.action.terminal.sendSequence",
+        "when": "!inQuickOpen \u0026\u0026 terminalFocus",
+        "args": {
+          "text": "\u001b[6~"
+        }
       },
       {
         "key": "pagedown",
@@ -2174,7 +2198,15 @@
       {
         "key": "pageup",
         "command": "groog.jump",
-        "when": "!inQuickOpen"
+        "when": "!inQuickOpen \u0026\u0026 !terminalFocus"
+      },
+      {
+        "key": "pageup",
+        "command": "workbench.action.terminal.sendSequence",
+        "when": "!inQuickOpen \u0026\u0026 terminalFocus",
+        "args": {
+          "text": "\u001b[5~"
+        }
       },
       {
         "key": "pageup",

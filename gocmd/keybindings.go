@@ -774,15 +774,21 @@ func repeat(c string, times int) []string {
 
 func ctrlLBindings() map[string]*KB {
 	return map[string]*KB{
-		inQuickOpen.value:       mc(repeat("workbench.action.quickOpenNavigatePreviousInFilePicker", 5)...),
-		inQuickOpen.not().value: kb("groog.jump"),
+		inQuickOpen.value: mc(repeat("workbench.action.quickOpenNavigatePreviousInFilePicker", 5)...),
+		inQuickOpen.not().and(terminalFocus.not()).value: kb("groog.jump"),
+		// Sending this sequence sends the equivalent of pressing the page-up key while in the terminal.
+		// See this stack overflow post: https://stackoverflow.com/questions/61742559/need-vscode-sendsequence-keybindings-for-previous-command-next-command-move-to
+		// and this page that it links to (ctrl+f for "pageup"): https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+		inQuickOpen.not().and(terminalFocus).value: sendSequence("\u001b[5~"),
 	}
 }
 
 func ctrlVBindings() map[string]*KB {
 	return map[string]*KB{
-		inQuickOpen.value:       mc(repeat("workbench.action.quickOpenNavigateNextInFilePicker", 5)...),
-		inQuickOpen.not().value: kb("groog.fall"),
+		inQuickOpen.value: mc(repeat("workbench.action.quickOpenNavigateNextInFilePicker", 5)...),
+		inQuickOpen.not().and(terminalFocus.not()).value: kb("groog.fall"),
+		// See ctrlLBindings function for description of what this means
+		inQuickOpen.not().and(terminalFocus).value: sendSequence("\u001b[6~"),
 	}
 }
 
