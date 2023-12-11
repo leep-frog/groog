@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.58",
+  "version": "1.0.59",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -1803,11 +1803,8 @@
               "async": true
             },
             {
-              "command": "workbench.action.toggleMaximizedPanel",
+              "command": "workbench.action.focusPanel",
               "delay": 250
-            },
-            {
-              "command": "workbench.action.focusPanel"
             }
           ]
         }
@@ -1822,11 +1819,8 @@
               "async": true
             },
             {
-              "command": "workbench.action.toggleMaximizedPanel",
+              "command": "workbench.action.focusPanel",
               "delay": 250
-            },
-            {
-              "command": "workbench.action.focusPanel"
             }
           ]
         }
