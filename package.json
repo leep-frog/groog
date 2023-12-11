@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.61",
+  "version": "1.0.62",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -221,6 +221,14 @@
       {
         "command": "groog.reverseFind",
         "title": "Groog reverse find"
+      },
+      {
+        "command": "groog.script.replaceNewlineStringsWithQuotes",
+        "title": "Groog Script: Replace Newline Strings with Quotes"
+      },
+      {
+        "command": "groog.script.replaceNewlineStringsWithTicks",
+        "title": "Groog Script: Replace Newline Strings with Ticks"
       },
       {
         "command": "groog.terminal.find",

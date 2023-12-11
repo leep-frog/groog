@@ -10,6 +10,7 @@ import { miscCommands, multiCommand } from './misc-command';
 import { Recorder } from './record';
 import { Settings } from './settings';
 import { TerminalFindHandler } from './terminal-find';
+import { Scripts } from './scripts';
 
 export class GlobalBoolTracker {
   private stateTracker: GlobalStateTracker<boolean>;
@@ -62,6 +63,7 @@ export class Emacs {
   typeHandlers: TypeHandler[];
   cm: ColorMode;
   typoFixer: TypoFixer;
+  scripts: Scripts;
 
   constructor() {
     this.cm = new ColorMode();
@@ -78,6 +80,7 @@ export class Emacs {
       new TerminalFindHandler(this.cm),
       this.recorder,
     ];
+    this.scripts = new Scripts();
   }
 
   private static registerables(): Registerable[] {
@@ -132,6 +135,8 @@ export class Emacs {
     for (var r of Emacs.registerables()) {
       r.register(context, this.recorder);
     }
+
+    this.scripts.register(context, this.recorder);
 
     miscCommands.forEach(mc => this.recorder.registerCommand(context, mc.name, mc.f, mc.noLock));
 

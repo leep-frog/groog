@@ -85,5 +85,8 @@ var (
 		cc("groog.redo", "Groog Redo"),
 		cc("groog.updateSettings", "Groog update settings"),
 		cc("groog.yank", "Emacs Yank"),
+
+		cc("groog.script.replaceNewlineStringsWithQuotes", "Groog Script: Replace Newline Strings with Quotes"),
+		cc("groog.script.replaceNewlineStringsWithTicks", "Groog Script: Replace Newline Strings with Ticks"),
 	}
 )
