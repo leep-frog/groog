@@ -183,7 +183,7 @@ class FindContextCache {
       await cursorToFront();
       await this.nextMatch(!!disallowPreviousContext);
       if (prevSel && vscode.window.activeTextEditor && !prevSel.start.isEqual(vscode.window.activeTextEditor.selection.start)) {
-        await this.prevMatch();
+        await this.prevMatch(!!disallowPreviousContext);
       }
 
       // Finally, check if we didn't need to move the screen
@@ -202,33 +202,15 @@ class FindContextCache {
     return ranges.reduce((prev: boolean, r: vscode.Range) => prev || r.contains(selection), false);
   }
 
-  /*private manualCheck(queryText: string) {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) {
-      return;
-    }
-
-    let docText = ""; //editor.document.getText()
-
-    if (this.caseToggle) {
-      queryText = queryText.toLowerCase();
-      docText = docText.toLowerCase();
-    }
-
-    let matchesFirst = false;
-    if (this.regexToggle) {
-      let r = new RegExp(queryText);
-      if (this.wholeWordToggle) {
-        r = new RegExp(`^${queryText}\b`);
-      }
-    } else {
-      if (this.wholeWordToggle) {
-
-      }
-    }
-  }*/
-
   async nextMatch(disallowPreviousContext: boolean) {
+    this.nextOrPrevMatch(disallowPreviousContext, "editor.action.nextMatchFindAction");
+  }
+
+  async prevMatch(disallowPreviousContext: boolean) {
+    this.nextOrPrevMatch(disallowPreviousContext, "editor.action.previousMatchFindAction");
+  }
+
+  private async nextOrPrevMatch(disallowPreviousContext: boolean, cmd: string) {
     // Most recent one will be empty
     const prevCache = this.cache.at(-2);
     const curCache = this.cache.at(-1);
@@ -237,12 +219,8 @@ class FindContextCache {
       this.cacheIdx--;
       this.findWithArgs();
     } else {
-      return vscode.commands.executeCommand("editor.action.nextMatchFindAction");
+      return vscode.commands.executeCommand(cmd);
     }
-  }
-
-  async prevMatch() {
-    await vscode.commands.executeCommand("editor.action.previousMatchFindAction");
   }
 }
 
@@ -276,7 +254,7 @@ export class FindHandler extends TypeHandler {
     });
     recorder.registerCommand(context, 'reverseFind', () => {
       if (this.isActive()) {
-        return this.cache.prevMatch();
+        return this.cache.prevMatch(false);
       }
       this.findPrevOnType = true;
       return this.activate();
