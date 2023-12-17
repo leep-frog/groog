@@ -5,6 +5,11 @@ import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './inte
 import { Emacs } from './emacs';
 import AwaitLock from 'await-lock';
 
+export interface registerCommandOptionalProps {
+  noLock?: boolean;
+  noTimeout?: boolean;
+}
+
 export class Recorder extends TypeHandler {
   // baseCommand ensures we don't infinite loop a command. For example,
   // if groog.CommandOne calls groog.CommandTwo, then we would record
@@ -45,12 +50,10 @@ export class Recorder extends TypeHandler {
   // that their order would become mixed up due to the parallel nature of commands (which run async).
   // The initialization of command executions, however, are well ordered, so requiring a lock
   // immediately has proven to be a great solution to this problem.
-  public lockWrap<T>(name: string, f: (t: T) => Thenable<void>): (t: T) => Thenable<void> {
+  public lockWrap<T>(name: string, f: (t: T) => Thenable<void>, noTimeout?: boolean): (t: T) => Thenable<void> {
     return async (t: T) => await this.typeLock.acquireAsync()
-      .then(() => setTimeout(() => {
-        vscode.window.showErrorMessage(`LockWrap "${name}" is taking too long`);
-      }, 1000))
-      .then((timeoutRef) => f(t).then(() => clearTimeout(timeoutRef)))
+      .then(() => noTimeout ? undefined : setTimeout(() => vscode.window.showErrorMessage(`LockWrap "${name}" is taking too long`), 5_000))
+      .then((timeoutRef) => f(t).then(() => noTimeout ? undefined : clearTimeout(timeoutRef)))
       .finally(() => this.typeLock.release());
   }
 
@@ -59,19 +62,19 @@ export class Recorder extends TypeHandler {
     recorder.registerCommand(context, "record.endRecording", () => recorder.endRecording());
     recorder.registerCommand(context, "record.saveRecordingAs", () => recorder.saveRecordingAs());
     recorder.registerCommand(context, "record.deleteRecording", () => recorder.deleteRecording());
-    recorder.registerCommand(context, "record.find", () => recorder.find());
+    recorder.registerCommand(context, "record.find", () => recorder.find(), {noTimeout: true});
     // This needs to have noLock true because it runs simultaneously with the record.find command
     // when pressing ctrl+s twice.
-    recorder.registerCommand(context, "record.findNext", () => recorder.findNext(), true);
+    recorder.registerCommand(context, "record.findNext", () => recorder.findNext(), {noLock: true});
 
     // We don't lock on playbacks because they are nested commands.
-    recorder.registerCommand(context, "record.playRecording", () => recorder.playback(), true);
-    recorder.registerCommand(context, "record.playNamedRecording", () => recorder.playbackNamedRecording(), true);
+    recorder.registerCommand(context, "record.playRecording", () => recorder.playback(), {noLock: true});
+    recorder.registerCommand(context, "record.playNamedRecording", () => recorder.playbackNamedRecording(), {noLock: true});
   }
 
-  registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => Thenable<any>, noLock?: boolean) {
+  registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => Thenable<any>, optionalProps?: registerCommandOptionalProps) {
     context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName,
-      noLock ? (...args: any) => this.execute("groog." + commandName, args, callback) : this.lockWrap("groog." + commandName, (...args: any) => this.execute("groog." + commandName, args, callback))
+      optionalProps?.noLock ? (...args: any) => this.execute("groog." + commandName, args, callback) : this.lockWrap("groog." + commandName, (...args: any) => this.execute("groog." + commandName, args, callback), optionalProps?.noTimeout)
     ));
   }
 
