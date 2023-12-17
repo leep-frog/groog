@@ -69,6 +69,7 @@ var (
 	groogFindMode           = wc(groogContext("find"))
 	groogQMK                = wc(groogContext("qmk"))
 	groogRecording          = wc(groogContext("record"))
+	groogRecordingFind      = wc(groogContext("record.find"))
 	groogTerminalFindMode   = wc(groogContext("terminal.find"))
 	inQuickOpen             = wc("inQuickOpen")
 	inSearchEditor          = wc("inSearchEditor")
@@ -189,8 +190,9 @@ var (
 	kbDefinitions = map[Key]map[string]*KB{
 		// Find bindings
 		ctrl("f"): {
-			groogQMK.and(terminalVisible).value:                           kb("groog.terminal.find"),
-			groogQMK.and(terminalVisible.not()).and(groogRecording).value: kb("groog.record.findNext"),
+			groogQMK.and(terminalVisible).value: kb("groog.terminal.find"),
+			groogQMK.and(terminalVisible.not()).and(groogRecording).and(groogRecordingFind.not()).value: kb("groog.record.find"),
+			groogQMK.and(terminalVisible.not()).and(groogRecording).and(groogRecordingFind).value:       kb("groog.record.findNext"),
 			// This is mostly relevant for Find Simple Mode (so `ctrl+s; ctrl+s` results in redoing previous find)
 			groogQMK.and(terminalVisible.not()).and(groogRecording.not()).and(inQuickOpen).value:       kb("workbench.action.acceptSelectedQuickOpenItem"),
 			groogQMK.and(terminalVisible.not()).and(groogRecording.not()).and(inQuickOpen.not()).value: kb("groog.find"),
@@ -200,8 +202,9 @@ var (
 		ctrl("s"): {
 			// "workbench.action.acceptSelectedQuickOpenItem",
 			groogQMK.value: kb("groog.cursorRight"),
-			groogQMK.not().and(terminalVisible).value:                           kb("groog.terminal.find"),
-			groogQMK.not().and(terminalVisible.not()).and(groogRecording).value: kb("groog.record.findNext"),
+			groogQMK.not().and(terminalVisible).value:                                                         kb("groog.terminal.find"),
+			groogQMK.not().and(terminalVisible.not()).and(groogRecording).and(groogRecordingFind.not()).value: kb("groog.record.find"),
+			groogQMK.not().and(terminalVisible.not()).and(groogRecording).and(groogRecordingFind).value:       kb("groog.record.findNext"),
 			// This is mostly relevant for Find Simple Mode (so `ctrl+s; ctrl+s` results in redoing previous find)
 			groogQMK.not().and(terminalVisible.not()).and(groogRecording.not()).and(inQuickOpen).value:       kb("workbench.action.acceptSelectedQuickOpenItem"),
 			groogQMK.not().and(terminalVisible.not()).and(groogRecording.not()).and(inQuickOpen.not()).value: kb("groog.find"),
@@ -393,15 +396,9 @@ var (
 			kb("groog.record.saveRecordingAs"),
 			kb("groog.record.playNamedRecording"),
 		),
-		alt(shift("d")): only("groog.record.deleteRecording"),
-		ctrl(shift("s")): {
-			groogQMK.not().and(groogRecording).value:       kb("groog.record.find"),
-			groogQMK.not().and(groogRecording.not()).value: kb("workbench.action.findInFiles"),
-		},
-		ctrl(shift("f")): {
-			groogQMK.and(groogRecording).value:       kb("groog.record.find"),
-			groogQMK.and(groogRecording.not()).value: kb("workbench.action.findInFiles"),
-		},
+		alt(shift("d")):  only("groog.record.deleteRecording"),
+		ctrl(shift("s")): onlyWhen("workbench.action.findInFiles", groogQMK.not()),
+		ctrl(shift("f")): onlyWhen("workbench.action.findInFiles", groogQMK),
 		shift(backspace): { // This is basically ctrl+shift+h
 			groogQMK.value: kb("workbench.action.replaceInFiles"),
 		},

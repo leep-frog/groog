@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ColorMode, ModeColor } from './color_mode';
 import { TypeHandler } from './handler';
-import { CursorMove, DeleteCommand } from './interfaces';
+import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { Emacs } from './emacs';
 import AwaitLock from 'await-lock';
 
@@ -22,7 +22,14 @@ export class Recorder extends TypeHandler {
   private emacs: Emacs;
   private readonly typeLock: AwaitLock;
 
+  // TODO: Make readonly
   whenContext: string = "record";
+  private readonly recordFindContext = "record.find";
+  private recordFindContextLocal = false;
+
+  async setFindContext(to: boolean) {
+    return setGroogContext(this.recordFindContext, to).then(() => { this.recordFindContextLocal = to; });
+  }
 
   constructor(cm: ColorMode, emacs: Emacs) {
     super(cm, ModeColor.record);
@@ -53,7 +60,9 @@ export class Recorder extends TypeHandler {
     recorder.registerCommand(context, "record.saveRecordingAs", () => recorder.saveRecordingAs());
     recorder.registerCommand(context, "record.deleteRecording", () => recorder.deleteRecording());
     recorder.registerCommand(context, "record.find", () => recorder.find());
-    recorder.registerCommand(context, "record.findNext", () => recorder.findNext());
+    // This needs to have noLock true because it runs simultaneously with the record.find command
+    // when pressing ctrl+s twice.
+    recorder.registerCommand(context, "record.findNext", () => recorder.findNext(), true);
 
     // We don't lock on playbacks because they are nested commands.
     recorder.registerCommand(context, "record.playRecording", () => recorder.playback(), true);
@@ -83,23 +92,32 @@ export class Recorder extends TypeHandler {
 
   async findNext() {
     if (!this.lastFind) {
-      this.find();
+      vscode.window.showErrorMessage(`This recording hasn't executed a find command yet.`);
       return;
     }
-    await this.lastFind.playback();
-    this.addRecord(this.lastFind);
+    await this.lastFind.playback().then(() => {
+      if (this.lastFind) {
+        return this.addRecord(this.lastFind!);
+      };
+    });
   }
 
   async find() {
-    const searchQuery = await vscode.window.showInputBox({
+    return await this.setFindContext(true).then(() => vscode.window.showInputBox({
       placeHolder: "Search query",
       prompt: "Search text",
       // value: selectedText
-    });
-    if (searchQuery) {
-      this.lastFind = new FindNextRecord(searchQuery);
-      await this.findNext();
-    }
+    }).then(
+      (searchQuery) => {
+        if (searchQuery) {
+          this.lastFind = new FindNextRecord(searchQuery);
+          return this.findNext();
+        }
+      },
+    )).then(
+      () => {}, // Do nothing on fulfilled
+      () => this.setFindContext(false),
+    );
   }
 
   async startRecording() {
@@ -223,6 +241,11 @@ export class Recorder extends TypeHandler {
   }
 
   async textHandler(s: string): Promise<boolean> {
+    if (this.recordFindContextLocal) {
+      await this.setFindContext(false);
+      await vscode.commands.executeCommand(CtrlGCommand.closeFindWidget);
+      this.addRecord(new CommandRecord(CtrlGCommand.closeFindWidget));
+    }
     this.addRecord(new TypeRecord(s));
     return true;
   }
@@ -231,7 +254,9 @@ export class Recorder extends TypeHandler {
   // already added to the record book via the "type" command handling
   async onKill(s: string | undefined) { }
   alwaysOnKill: boolean = false;
-  async ctrlG() { }
+  async ctrlG() {
+    await setGroogContext(this.recordFindContext, false);
+  }
   async onYank() { }
   alwaysOnYank: boolean = false;
   async delHandler(s: DeleteCommand): Promise<boolean> {
@@ -271,9 +296,9 @@ class CommandRecord implements Record {
   command: string;
   args: any[];
 
-  constructor(command: string, args: any[]) {
+  constructor(command: string, args?: any[]) {
     this.command = command;
-    this.args = args;
+    this.args = args || [];
   }
 
   async playback(): Promise<boolean> {

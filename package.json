@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "1.0.64",
+  "version": "1.0.65",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -997,8 +997,13 @@
       },
       {
         "key": "ctrl+f",
+        "command": "groog.record.find",
+        "when": "groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.context.recordMode \u0026\u0026 !groog.context.record.findMode"
+      },
+      {
+        "key": "ctrl+f",
         "command": "groog.record.findNext",
-        "when": "groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.context.recordMode"
+        "when": "groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.context.recordMode \u0026\u0026 groog.context.record.findMode"
       },
       {
         "key": "ctrl+f",
@@ -1268,8 +1273,13 @@
       },
       {
         "key": "ctrl+s",
+        "command": "groog.record.find",
+        "when": "!groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.context.recordMode \u0026\u0026 !groog.context.record.findMode"
+      },
+      {
+        "key": "ctrl+s",
         "command": "groog.record.findNext",
-        "when": "!groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.context.recordMode"
+        "when": "!groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.context.recordMode \u0026\u0026 groog.context.record.findMode"
       },
       {
         "key": "ctrl+s",
@@ -1307,12 +1317,7 @@
       {
         "key": "ctrl+shift+f",
         "command": "workbench.action.findInFiles",
-        "when": "groog.context.qmkMode \u0026\u0026 !groog.context.recordMode"
-      },
-      {
-        "key": "ctrl+shift+f",
-        "command": "groog.record.find",
-        "when": "groog.context.qmkMode \u0026\u0026 groog.context.recordMode"
+        "when": "groog.context.qmkMode"
       },
       {
         "key": "ctrl+shift+home",
@@ -1348,12 +1353,7 @@
       {
         "key": "ctrl+shift+s",
         "command": "workbench.action.findInFiles",
-        "when": "!groog.context.qmkMode \u0026\u0026 !groog.context.recordMode"
-      },
-      {
-        "key": "ctrl+shift+s",
-        "command": "groog.record.find",
-        "when": "!groog.context.qmkMode \u0026\u0026 groog.context.recordMode"
+        "when": "!groog.context.qmkMode"
       },
       {
         "key": "ctrl+shift+t",
