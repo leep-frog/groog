@@ -14,6 +14,11 @@ interface FindContext {
   replaceText : string;
 }
 
+interface FindWithArgsProps {
+  viaActivation?: boolean;
+  disallowPreviousContext?: boolean;
+}
+
 interface FindWithArgs {
   searchString : string;
   replaceString? : string;
@@ -69,7 +74,10 @@ class FindContextCache {
     }
     this.cacheIdx = this.cache.length-1;
     this.findPrevOnType = findPrevOnType;
-    await this.findWithArgs(disallowPreviousContext);
+    await this.findWithArgs({
+      viaActivation: true,
+      disallowPreviousContext: disallowPreviousContext,
+    });
   }
 
   public async end(): Promise<void> {
@@ -143,7 +151,9 @@ class FindContextCache {
     }
   }
 
-  private async findWithArgs(disallowPreviousContext?: boolean) {
+  // disallowPreviousContext is whether this current action should check
+  // if the current cache is empty (in which case we use the previous cache).
+  private async findWithArgs(props?: FindWithArgsProps) {
     let ctx : FindContext = this.currentContext();
     let ft : string = ctx.findText;
     if (ft.length === 0) {
@@ -167,6 +177,11 @@ class FindContextCache {
     });
 
     if (this.findPrevOnType) {
+      // If just pressed ctrl+r on start, then just enter the mode with nothing
+      if (!!props?.viaActivation) {
+        await this.prevMatch(!!(props?.disallowPreviousContext));
+        return;
+      }
       // Finding previous is tricky because sometimes if inserting two characters in
       // quick succession, then the selection.end character isn't updated in the second
       // character's execution, causing weird behavior here. Additionally, if adding
@@ -181,9 +196,9 @@ class FindContextCache {
       const prevSel = (vscode.window.activeTextEditor?.selection);
       const prevRange = (vscode.window.activeTextEditor?.visibleRanges);
       await cursorToFront();
-      await this.nextMatch(!!disallowPreviousContext);
+      await this.nextMatch(!!(props?.disallowPreviousContext));
       if (prevSel && vscode.window.activeTextEditor && !prevSel.start.isEqual(vscode.window.activeTextEditor.selection.start)) {
-        await this.prevMatch(!!disallowPreviousContext);
+        await this.prevMatch(!!(props?.disallowPreviousContext));
       }
 
       // Finally, check if we didn't need to move the screen
@@ -194,7 +209,7 @@ class FindContextCache {
       }
     } else {
       await cursorToFront();
-      await this.nextMatch(!!disallowPreviousContext);
+      await this.nextMatch(!!(props?.disallowPreviousContext));
     }
   }
 
@@ -203,11 +218,11 @@ class FindContextCache {
   }
 
   async nextMatch(disallowPreviousContext: boolean) {
-    this.nextOrPrevMatch(disallowPreviousContext, "editor.action.nextMatchFindAction");
+    return this.nextOrPrevMatch(disallowPreviousContext, "editor.action.nextMatchFindAction");
   }
 
   async prevMatch(disallowPreviousContext: boolean) {
-    this.nextOrPrevMatch(disallowPreviousContext, "editor.action.previousMatchFindAction");
+    return this.nextOrPrevMatch(disallowPreviousContext, "editor.action.previousMatchFindAction");
   }
 
   private async nextOrPrevMatch(disallowPreviousContext: boolean, cmd: string) {
@@ -217,7 +232,7 @@ class FindContextCache {
     if (curCache && prevCache && !disallowPreviousContext && !curCache.modified) {
       this.cache.pop();
       this.cacheIdx--;
-      this.findWithArgs();
+      return this.findWithArgs();
     } else {
       return vscode.commands.executeCommand(cmd);
     }
