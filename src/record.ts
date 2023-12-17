@@ -5,7 +5,7 @@ import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './inte
 import { Emacs } from './emacs';
 import AwaitLock from 'await-lock';
 
-export interface registerCommandOptionalProps {
+export interface RegisterCommandOptionalProps {
   noLock?: boolean;
   noTimeout?: boolean;
 }
@@ -72,7 +72,7 @@ export class Recorder extends TypeHandler {
     recorder.registerCommand(context, "record.playNamedRecording", () => recorder.playbackNamedRecording(), {noLock: true});
   }
 
-  registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => Thenable<any>, optionalProps?: registerCommandOptionalProps) {
+  registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => Thenable<any>, optionalProps?: RegisterCommandOptionalProps) {
     context.subscriptions.push(vscode.commands.registerCommand("groog." + commandName,
       optionalProps?.noLock ? (...args: any) => this.execute("groog." + commandName, args, callback) : this.lockWrap("groog." + commandName, (...args: any) => this.execute("groog." + commandName, args, callback), optionalProps?.noTimeout)
     ));
