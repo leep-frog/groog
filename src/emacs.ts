@@ -138,7 +138,7 @@ export class Emacs {
 
     this.scripts.register(context, this.recorder);
 
-    miscCommands.forEach(mc => this.recorder.registerCommand(context, mc.name, mc.f, mc.noLock));
+    miscCommands.forEach(mc => this.recorder.registerCommand(context, mc.name, mc.f, {noLock: mc.noLock}));
 
     // After all commands have been registered, check persistent data for qmk setting.
     this.qmkTracker.initialize(context);
