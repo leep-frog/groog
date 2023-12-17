@@ -6,7 +6,7 @@ import { Recorder } from './record';
 import { Emacs } from './emacs';
 
 export class TerminalFindHandler extends TypeHandler {
-  whenContext: string = "terminal.find";
+  readonly whenContext: string = "terminal.find";
 
   constructor(cm : ColorMode) {
     super(cm);

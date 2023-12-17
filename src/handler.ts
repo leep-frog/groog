@@ -12,7 +12,7 @@ export abstract class TypeHandler implements Registerable {
   private active: boolean;
   cm: ColorMode;
   mc?: ModeColor;
-  abstract whenContext : string;
+  abstract readonly whenContext : string;
 
   constructor(cm: ColorMode, mc?: ModeColor) {
     this.active = false;

@@ -8,7 +8,7 @@ import { Emacs } from './emacs';
 export class MarkHandler extends TypeHandler {
   yanked: string;
   yankedPrefix: string;
-  whenContext: string = "mark";
+  readonly whenContext: string = "mark";
 
   constructor(cm: ColorMode, emacs: Emacs) {
     super(cm, ModeColor.mark);

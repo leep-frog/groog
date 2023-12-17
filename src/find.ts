@@ -248,7 +248,7 @@ class FindContextCache {
 
 
 export class FindHandler extends TypeHandler {
-  whenContext: string = "find";
+  readonly whenContext: string = "find";
   cache : FindContextCache;
   // If true, go to the previous match when typing
   findPrevOnType : boolean;

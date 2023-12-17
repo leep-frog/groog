@@ -27,8 +27,7 @@ export class Recorder extends TypeHandler {
   private emacs: Emacs;
   private readonly typeLock: AwaitLock;
 
-  // TODO: Make readonly
-  whenContext: string = "record";
+  readonly whenContext: string = "record";
   private readonly recordFindContext = "record.find";
   private recordFindContextLocal = false;
 
