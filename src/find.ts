@@ -5,6 +5,32 @@ import { CursorMove, DeleteCommand } from './interfaces';
 import { Recorder } from './record';
 import { Emacs, GlobalBoolTracker, GlobalStateTracker } from './emacs';
 import { Glob } from 'glob';
+import { match } from 'assert';
+
+// TODO: decorate matched position.
+
+const decorationType = vscode.window.createTextEditorDecorationType({
+  overviewRulerColor: "yellow",
+  border: '1px solid yellow',
+});
+
+// This import was causing problems in `npm test`, so I just copied the function from: https://www.npmjs.com/package/escape-string-regexp?activeTab=code
+// import escapeStringRegexp from 'escape-string-regexp';
+function escapeStringRegexp(s: string) {
+  // Escape characters with special meaning either inside or outside character sets.
+  // Use a simple backslash escape when it’s always valid, and a `\xnn` escape when the simpler form would be disallowed by Unicode patterns’ stricter grammar.
+  return s
+    .replace(/[|\\{}()[\]^$+*?.]/g, '\\$&')
+    .replace(/-/g, '\\x2d');
+}
+
+// _sorted because the type-wrapped functions below should be used
+const _sorted = require('sorted-array-functions');
+// This just type wraps sorted.gte (since sorted.gte is in javascript)
+function sortedGTE<T>(list: T[], value: T, cmp?: (a: T, b: T) => number) : number {
+  return _sorted.gte(list, value, cmp);
+}
+
 
 const maxFindCacheSize : number = 100;
 
@@ -14,22 +40,162 @@ interface FindContext {
   replaceText : string;
 }
 
-interface FindWithArgsProps {
-  viaActivation?: boolean;
-  disallowPreviousContext?: boolean;
+interface DocumentMatchProps {
+  queryText: string;
+  caseInsensitive: boolean;
+  regex: boolean;
+  wholeWord: boolean;
 }
 
-interface FindWithArgs {
-  searchString : string;
-  replaceString? : string;
-  // Intellisense recommendations are wrong.
-  // See: https://github.com/microsoft/vscode/issues/138365
-  isRegex: boolean;
-  matchWholeWord: boolean;
-  isCaseSensitive: boolean;
+export class Document {
+  documentText: string;
+  caseInsensitiveDocumentText: string;
+
+  // The indices of all newline characters;
+  newlineIndices: number[];
+
+  constructor(documentText: string) {
+    this.documentText = documentText;
+    this.caseInsensitiveDocumentText = documentText.toLowerCase();
+    this.newlineIndices = []; // TODO;
+    for (let i = 0; i < this.documentText.length; i++) {
+      if (this.documentText.charAt(i) === "\n") {
+        this.newlineIndices.push(i);
+      }
+    }
+    this.newlineIndices.push(this.documentText.length);
+  }
+
+  public matches(props: DocumentMatchProps): vscode.Range[] {
+    if (props.queryText.length === 0) {
+      return [];
+    }
+
+    const text = props.caseInsensitive ? this.caseInsensitiveDocumentText : this.documentText;
+
+    if (props.caseInsensitive) {
+      props.queryText = props.queryText.toLowerCase();
+    }
+    // "g" is the global flag which is required here.
+    const rgx = new RegExp(props.regex ? props.queryText : escapeStringRegexp(props.queryText), "g");
+
+    const matches = Array.from(text.matchAll(rgx));
+    return matches.map(m => {
+      const startIndex = m.index!;
+      const endIndex = startIndex + m[0].length;
+      return new vscode.Range(
+        this.posFromIndex(startIndex),
+        this.posFromIndex(endIndex),
+      );
+    });
+  }
+
+  private posFromIndex(index: number): vscode.Position {
+    const line = sortedGTE(this.newlineIndices, index);
+    const lineStartIndex = line === 0 ? 0 : this.newlineIndices[line-1] + 1;
+    const char = index - lineStartIndex;
+    return new vscode.Position(line, char);
+  }
 }
 
-class FindContextCache {
+interface RefreshMatchesProps extends DocumentMatchProps {
+  prevMatchOnChange: boolean;
+}
+
+class MatchTracker {
+  private matches: vscode.Range[];
+  private matchIdx?: number;
+  private editor?: vscode.TextEditor;
+  private lastCursorPos?: vscode.Position;
+
+  constructor() {
+    this.matches = [];
+  }
+
+  public setNewEditor(editor: vscode.TextEditor) {
+    this.editor = editor;
+    this.lastCursorPos = editor.selection.start;
+  }
+
+  public setMatchIndex(idx: number) {
+    if (idx < 0 || idx >= this.matches.length) {
+      return;
+    }
+    this.matchIdx = idx;
+  }
+
+  public getMatch() : vscode.Range | undefined {
+    return this.matchIdx === undefined ? undefined : this.matches[this.matchIdx];
+  }
+
+  public getMatchIndex() : number | undefined {
+    return this.matchIdx;
+  }
+
+  public nextMatch() {
+    if (this.matchIdx !== undefined) {
+      this.matchIdx = (this.matchIdx + 1) % this.matches.length;
+    }
+  }
+
+  public prevMatch() {
+    if (this.matchIdx !== undefined) {
+      this.matchIdx = (this.matchIdx + this.matches.length - 1) % this.matches.length;
+    }
+  }
+
+  public refreshMatches(props: RefreshMatchesProps): void {
+    // The first check implies the second, but include here so we don't need an exclamation point throughout the
+    // rest of the function.
+    if (!this.editor || !this.lastCursorPos) {
+      vscode.window.showErrorMessage(`Cannot refresh find matches when not in an editor`);
+      return;
+    }
+
+    this.matches = new Document(this.editor.document.getText()).matches(props);
+
+    // Update the decorations (always want these changes to be applied, hence why we do this first).
+    this.editor.setDecorations(decorationType, this.matches.map(m => new vscode.Selection(m.start, m.end)));
+
+    // Update the matchIdx
+    this.matchIdx = this.matches.length === 0 ? undefined : sortedGTE(this.matches, new vscode.Range(this.lastCursorPos, this.lastCursorPos), (a: vscode.Range, b: vscode.Range) => {
+      if (a.start.isEqual(b.start)) {
+        return 0;
+      }
+      return a.start.isBeforeOrEqual(b.start) ? -1 : 1;
+    });
+
+    // If (potentially) no matches, just stay where we are (also check undefined so we don't need exclamation point in 'this.matchIdx!' after this if block)
+    if (this.matchIdx === -1 || this.matchIdx === undefined) {
+      // No match at all
+      if (this.matches.length === 0) {
+        this.matchIdx = undefined;
+        return;
+      }
+
+      // Otherwise, cursor was after the last match, in which case we just need to wrap
+      // around to the top of the file.
+      this.matchIdx = 0;
+    }
+
+    const matchToFocus = this.matches[this.matchIdx];
+    // We're at the same match, so don't do anything
+    if (this.lastCursorPos.isEqual(matchToFocus.start)) {
+      return;
+    }
+
+    // We're at a different match.
+    if (props.prevMatchOnChange) {
+      // Decrement the match
+      this.matchIdx = (this.matchIdx + this.matches.length - 1) % this.matches.length;
+    }
+
+    // Update the beginning of this match.
+    this.lastCursorPos = this.matches[this.matchIdx].start;
+  }
+}
+
+class FindContextCache implements vscode.InlineCompletionItemProvider {
   private cache: FindContext[];
   private cacheIdx: number;
   private cursorStack: CursorStack;
@@ -38,6 +204,8 @@ class FindContextCache {
   private regexToggle: boolean;
   private caseToggle: boolean;
   private wholeWordToggle: boolean;
+  private active: boolean;
+  private matchTracker: MatchTracker;
 
   constructor() {
     this.cache = [];
@@ -48,21 +216,43 @@ class FindContextCache {
     this.regexToggle = false;
     this.caseToggle = false;
     this.wholeWordToggle = false;
+    this.active = false;
+    this.matchTracker = new MatchTracker();
   }
 
   public toggleRegex() {
     this.regexToggle = !this.regexToggle;
+    this.refreshMatches();
+    this.focusMatch();
   }
 
   public toggleCase() {
     this.caseToggle = !this.caseToggle;
+    this.refreshMatches();
+    this.focusMatch();
   }
 
   public toggleWholeWord() {
     this.wholeWordToggle = !this.wholeWordToggle;
+    this.refreshMatches();
+    this.focusMatch();
   }
 
-  public async startNew(findPrevOnType: boolean, disallowPreviousContext: boolean, initText?: string) : Promise<void> {
+  public async toggleReplaceMode() {
+    this.replaceMode = !this.replaceMode;
+    this.refreshMatches();
+    this.focusMatch();
+  }
+
+  public async startNew(findPrevOnType: boolean, initText?: string) : Promise<void> {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showErrorMessage(`Cannot activate find mode from outside an editor`);
+      return;
+    }
+    this.matchTracker.setNewEditor(editor);
+
+    this.active = true;
     this.cursorStack.clear();
     this.cache.push({
       modified: !!initText,
@@ -74,13 +264,12 @@ class FindContextCache {
     }
     this.cacheIdx = this.cache.length-1;
     this.findPrevOnType = findPrevOnType;
-    await this.findWithArgs({
-      viaActivation: true,
-      disallowPreviousContext: disallowPreviousContext,
-    });
+    this.refreshMatches();
+    return this.focusMatch();
   }
 
   public async end(): Promise<void> {
+    this.active = false;
     let lastCtx = this.cache.at(-1);
     if (lastCtx && lastCtx.findText.length === 0 && lastCtx.replaceText.length === 0) {
       this.cache.pop();
@@ -92,9 +281,28 @@ class FindContextCache {
     this.replaceMode = false;
   }
 
-  public async toggleReplaceMode() {
-    this.replaceMode = !this.replaceMode;
-    await this.findWithArgs();
+  // This function is called by the registerInlineCompletionItemProvider handler.
+  // It is not responsible for moving the cursor and instead will simply add the inline insertions
+  // at the cursor's current position.
+  async provideInlineCompletionItems(document: vscode.TextDocument, position: vscode.Position): Promise<vscode.InlineCompletionList> {
+    if (!this.active) {
+      return { items: [] };
+    }
+
+    // Same order as find widget
+    const codes = [];
+    if (this.caseToggle) { codes.push("c"); }
+    if (this.wholeWordToggle) { codes.push("w"); }
+    if (this.regexToggle) { codes.push("r"); }
+
+    let ctx = this.currentContext();
+    const txt = this.replaceMode ? `\nFlags: [${codes.join("")}]\nText: ${ctx.findText}\nRepl: ${ctx.replaceText}` : `\nFlags: [${codes.join("")}]\nText: ${ctx.findText}`;
+    return { items: [
+      {
+        insertText: txt,
+        range: new vscode.Range(position, position),
+      }
+    ]};
   }
 
   private currentContext() : FindContext {
@@ -108,7 +316,8 @@ class FindContextCache {
     }
     this.cacheIdx++;
     this.cursorStack.clear();
-    await this.findWithArgs();
+    this.refreshMatches();
+    return this.focusMatch();
   }
 
   public async prevContext(): Promise<void> {
@@ -118,7 +327,8 @@ class FindContextCache {
     }
     this.cacheIdx--;
     this.cursorStack.clear();
-    await this.findWithArgs();
+    this.refreshMatches();
+    return this.focusMatch();
   }
 
   public async insertText(s: string): Promise<void> {
@@ -126,11 +336,15 @@ class FindContextCache {
     ctx.modified = true;
     if (this.replaceMode) {
       ctx.replaceText = ctx.replaceText.concat(s);
+      // Don't need to refreshMatches because the matches don't change
+      // when the replaceText is modified
     } else {
       ctx.findText = ctx.findText.concat(s);
-      this.cursorStack.push();
+      // Only refreshMatches when updating find text
+      this.refreshMatches();
+      this.cursorStack.push(this.matchTracker.getMatchIndex());
     }
-    await this.findWithArgs();
+    return this.focusMatch();
   }
 
   public async deleteLeft(): Promise<void> {
@@ -139,103 +353,84 @@ class FindContextCache {
       if (ctx.replaceText.length > 0) {
         ctx.modified = true;
         ctx.replaceText = ctx.replaceText.slice(0, ctx.replaceText.length - 1);
-        await this.findWithArgs();
+        // Don't need to refreshMatches because the matches don't change
+        // when the replaceText is modified
       }
     } else {
       if (ctx.findText.length > 0) {
         ctx.modified = true;
         ctx.findText = ctx.findText.slice(0, ctx.findText.length - 1);
-        this.cursorStack.popAndSet(this.findPrevOnType);
-        await this.findWithArgs();
-      }
-    }
-  }
 
-  // disallowPreviousContext is whether this current action should check
-  // if the current cache is empty (in which case we use the previous cache).
-  private async findWithArgs(props?: FindWithArgsProps) {
-    let ctx : FindContext = this.currentContext();
-    let ft : string = ctx.findText;
-    if (ft.length === 0) {
-      // Plus sign so not annoying when searching in this file.
-      ft = "ENTER_" + "TEXT";
-    }
-
-    let args : FindWithArgs = {
-      searchString: ft,
-      isRegex: this.regexToggle,
-      matchWholeWord: this.wholeWordToggle,
-      isCaseSensitive: this.caseToggle,
-    };
-    if (this.replaceMode) {
-      args.replaceString = ctx.replaceText;
-    }
-    await vscode.commands.executeCommand("editor.actions.findWithArgs", args).then(async () => {
-      await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
-    }, async () => {
-      await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
-    });
-
-    if (this.findPrevOnType) {
-      // If just pressed ctrl+r on start, then just enter the mode with nothing
-      if (!!props?.viaActivation) {
-        await this.prevMatch(!!(props?.disallowPreviousContext));
-        return;
-      }
-      // Finding previous is tricky because sometimes if inserting two characters in
-      // quick succession, then the selection.end character isn't updated in the second
-      // character's execution, causing weird behavior here. Additionally, if adding
-      // a '*' character in a regex, then the end cursor will be in the match text,
-      // so we will jump to the previous match even though the current match might
-      // still be valid. So, we do the following:
-      // - Move cursor to the front
-      // - Run next match
-      // - See if the cursor position changed.
-      //   - If it did, then the current selection no longer matches, so find previous one
-      //   - Otherwise, it matches, so nothing else required.
-      const prevSel = (vscode.window.activeTextEditor?.selection);
-      const prevRange = (vscode.window.activeTextEditor?.visibleRanges);
-      await cursorToFront();
-      await this.nextMatch(!!(props?.disallowPreviousContext));
-      if (prevSel && vscode.window.activeTextEditor && !prevSel.start.isEqual(vscode.window.activeTextEditor.selection.start)) {
-        await this.prevMatch(!!(props?.disallowPreviousContext));
-      }
-
-      // Finally, check if we didn't need to move the screen
-      if (prevRange && vscode.window.activeTextEditor) {
-        if (this.rangesContains(prevRange, vscode.window.activeTextEditor.selection)) {
-          vscode.window.activeTextEditor.revealRange(prevRange[0]);
+        this.refreshMatches();
+        const popIdx = this.cursorStack.pop();
+        if (popIdx !== undefined) {
+          this.matchTracker.setMatchIndex(popIdx);
         }
+        return this.focusMatch();
       }
-    } else {
-      await cursorToFront();
-      await this.nextMatch(!!(props?.disallowPreviousContext));
     }
   }
 
-  private rangesContains(ranges: readonly vscode.Range[], selection: vscode.Selection) : boolean {
-    return ranges.reduce((prev: boolean, r: vscode.Range) => prev || r.contains(selection), false);
+  private refreshMatches() {
+    this.matchTracker.refreshMatches({
+      queryText: this.currentContext().findText,
+      caseInsensitive: !this.caseToggle,
+      regex: this.regexToggle,
+      wholeWord: this.wholeWordToggle,
+      prevMatchOnChange: this.findPrevOnType,
+    });
   }
 
-  async nextMatch(disallowPreviousContext: boolean) {
-    return this.nextOrPrevMatch(disallowPreviousContext, "editor.action.nextMatchFindAction");
+  private async focusMatch(): Promise<void> {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showErrorMessage(`Editor must have focus for find`);
+      return;
+    }
+
+    const match = this.matchTracker.getMatch();
+
+    // Move the cursor if necessary
+    if (match) {
+      // Put cursor at the end of the line that the match range ends at.
+      const endLine = match.end.line;
+      const newCursorPos = new vscode.Position(endLine, editor.document.lineAt(endLine).range.end.character);
+      editor.selection = new vscode.Selection(newCursorPos, newCursorPos);
+
+      // Update the editor focus
+      editor.revealRange(editor.selection, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+    }
+
+    // Regardless of cursor move, update the inline suggestion.
+    return vscode.commands.executeCommand("editor.action.inlineSuggest.hide").then(
+      () => vscode.commands.executeCommand("editor.action.inlineSuggest.trigger"));
   }
 
-  async prevMatch(disallowPreviousContext: boolean) {
-    return this.nextOrPrevMatch(disallowPreviousContext, "editor.action.previousMatchFindAction");
+  async prevMatch() {
+    return this.nextOrPrevMatch(true);
   }
 
-  private async nextOrPrevMatch(disallowPreviousContext: boolean, cmd: string) {
+  async nextMatch() {
+    return this.nextOrPrevMatch(false);
+  }
+
+  private async nextOrPrevMatch(prev: boolean) {
     // Most recent one will be empty
     const prevCache = this.cache.at(-2);
     const curCache = this.cache.at(-1);
-    if (curCache && prevCache && !disallowPreviousContext && !curCache.modified) {
+    if (curCache && prevCache && !curCache.modified) {
       this.cache.pop();
       this.cacheIdx--;
-      return this.findWithArgs();
-    } else {
-      return vscode.commands.executeCommand(cmd);
+      this.refreshMatches();
+      return this.focusMatch();
     }
+
+    if (prev) {
+      this.matchTracker.prevMatch();
+    } else {
+      this.matchTracker.nextMatch();
+    };
+    this.focusMatch();
   }
 }
 
@@ -246,7 +441,7 @@ export class FindHandler extends TypeHandler {
   // If true, go to the previous match when typing
   findPrevOnType : boolean;
   // If true, we have a simpler find interaction (specifically, don't
-  // findWithArgs on every type).
+  // refreshMatches on every type).
   simpleModeTracker : GlobalBoolTracker;
 
   constructor(cm: ColorMode) {
@@ -261,15 +456,16 @@ export class FindHandler extends TypeHandler {
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
+    context.subscriptions.push(vscode.languages.registerInlineCompletionItemProvider({ scheme: 'file' }, this.cache));
     recorder.registerCommand(context, 'find', () => {
       if (this.isActive()) {
-        return this.cache.nextMatch(false);
+        return this.cache.nextMatch();
       }
       return this.activate();
     });
     recorder.registerCommand(context, 'reverseFind', () => {
       if (this.isActive()) {
-        return this.cache.prevMatch(false);
+        return this.cache.prevMatch();
       }
       this.findPrevOnType = true;
       return this.activate();
@@ -277,6 +473,7 @@ export class FindHandler extends TypeHandler {
 
     recorder.registerCommand(context, 'find.toggleReplaceMode', async (): Promise<void> => {
       if (!this.isActive()) {
+        vscode.window.showInformationMessage("groog.find.toggleReplaceMode can only be executed in find mode");
         return;
       }
       return this.cache.toggleReplaceMode();
@@ -333,16 +530,17 @@ export class FindHandler extends TypeHandler {
         placeHolder: "Search query",
         prompt: "Search text",
       });
-      await this.cache.startNew(this.findPrevOnType, false, searchQuery);
+      await this.cache.startNew(this.findPrevOnType, searchQuery);
     } else {
-      await this.cache.startNew(this.findPrevOnType, true);
+      await this.cache.startNew(this.findPrevOnType);
     }
 
   }
 
   async deactivateCommands() {
     await vscode.commands.executeCommand("cancelSelection");
-    await vscode.commands.executeCommand("closeFindWidget");
+    await vscode.commands.executeCommand("editor.action.inlineSuggest.hide");
+    vscode.window.activeTextEditor?.setDecorations(decorationType, []);
   }
 
   async handleDeactivation() {
@@ -380,53 +578,25 @@ export class FindHandler extends TypeHandler {
 }
 
 class CursorStack {
-  selections: vscode.Selection[];
+  matchIndexes: (number | undefined)[];
 
   constructor() {
-    this.selections = [];
+    this.matchIndexes = [];
   }
 
-  push() {
-    let editor = vscode.window.activeTextEditor;
-    if (!editor) {
-      vscode.window.showErrorMessage("Couldn't find active editor");
-      this.selections.push(new vscode.Selection(new vscode.Position(0, 0), new vscode.Position(0, 0)));
-      return;
-    }
-    this.selections.push(editor.selection);
+  // Note: using the matchIdx as the way to get cursor position isn't perfect
+  // because if we replace a value, then when we backspace, it'll go to the wrong
+  // spot. However, it beats the alternative where we use cursor, but a multi-line
+  // replacement happens, and then we just go to some random spot in the code.
+  push(matchIdx?: number) {
+    this.matchIndexes.push(matchIdx);
   }
 
-  popAndSet(rev: boolean) {
-    let p = this.selections.pop();
-    if (!p) {
-      // No longer error here since we can run out of cursor positions if
-      // we start a search with a non-empty findText.
-      return;
-    }
-    let editor = vscode.window.activeTextEditor;
-    if (!editor) {
-      vscode.window.showErrorMessage("Undefined editor");
-      return;
-    }
-    // https://github.com/microsoft/vscode/issues/111#issuecomment-157998910
-    if (rev) {
-      editor.selection = new vscode.Selection(p.end, p.end);
-    } else {
-      editor.selection = new vscode.Selection(p.start, p.start);
-    }
-
+  pop(): number | undefined {
+    return this.matchIndexes.pop();
   }
 
   clear() {
-    this.selections = [];
-  }
-}
-
-export async function cursorToFront() {
-  // Move cursor to beginning of selection
-  const editor = vscode.window.activeTextEditor;
-  if (editor) {
-    const startPos = editor.selection.start;
-    editor.selection = new vscode.Selection(startPos, startPos);
+    this.matchIndexes = [];
   }
 }
