@@ -254,8 +254,6 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     /*} else {
       return vscode.commands.executeCommand("editor.actions.findWithArgs", {
         "searchString": "ENTER_TEXT",
-
-
       });*/
     }
   }
@@ -312,6 +310,16 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
   }
 
   public async end(): Promise<void> {
+    // Focus on the last match (if relevant)
+    const match = this.matchTracker.getMatch();
+    if (match) {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        vscode.window.showErrorMessage(`Cannot select text from outside the editor.`);
+      } else {
+        editor.selection = new vscode.Selection(match.start, match.end);
+      }
+    }
     this.active = false;
     let lastCtx = this.cache.at(-1);
     if (lastCtx && lastCtx.findText.length === 0 && lastCtx.replaceText.length === 0) {
@@ -614,7 +622,7 @@ export class FindHandler extends TypeHandler {
   }
 
   async deactivateCommands() {
-    await vscode.commands.executeCommand("cancelSelection");
+    // Don't `cancelSelection` as we select the previously matched text.
     await vscode.commands.executeCommand("editor.action.inlineSuggest.hide");
     vscode.window.activeTextEditor?.setDecorations(allMatchDecorationType, []);
     vscode.window.activeTextEditor?.setDecorations(currentMatchDecorationType, []);

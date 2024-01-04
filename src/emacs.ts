@@ -207,11 +207,17 @@ export class Emacs {
   }
 
   async ctrlG() {
+    let handled = false;
     for (var th of this.typeHandlers) {
       if (th.isActive()) {
+        handled = true;
         await th.ctrlG();
       }
     }
+    if (handled) {
+      return;
+    }
+
     for (var cmd of Object.values(CtrlGCommand)) {
       // TODO: Maybe don't await if this starts to take too long.
       await vscode.commands.executeCommand(cmd);
