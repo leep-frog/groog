@@ -56,6 +56,8 @@ var (
 		cc("groog.find.toggleWholeWord", "Groog toggle whole word"),
 		cc("groog.find.previous", "Groog go to previous find context"),
 		cc("groog.find.next", "Groog go to next find context"),
+		cc("groog.find.replaceOne", "Replace single match"),
+		cc("groog.find.replaceAll", "Replace all matches"),
 		cc("groog.format", "Groog format"),
 		cc("groog.indentToPreviousLine", "Indent to match previous line"),
 		cc("groog.indentToNextLine", "Indent to match next line"),

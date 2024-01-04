@@ -9,9 +9,18 @@ import { match } from 'assert';
 
 // TODO: decorate matched position.
 
-const decorationType = vscode.window.createTextEditorDecorationType({
-  overviewRulerColor: "yellow",
-  border: '1px solid yellow',
+function findColor(opacity?: number): string{
+  return `rgba(200, 120, 0, ${opacity ?? 1})`;
+}
+
+const allMatchDecorationType = vscode.window.createTextEditorDecorationType({
+  overviewRulerColor: findColor(),
+  backgroundColor: findColor(0.3),
+});
+
+const currentMatchDecorationType = vscode.window.createTextEditorDecorationType({
+  overviewRulerColor: findColor(),
+  backgroundColor: findColor(0.7),
 });
 
 // This import was causing problems in `npm test`, so I just copied the function from: https://www.npmjs.com/package/escape-string-regexp?activeTab=code
@@ -57,7 +66,7 @@ export class Document {
   constructor(documentText: string) {
     this.documentText = documentText;
     this.caseInsensitiveDocumentText = documentText.toLowerCase();
-    this.newlineIndices = []; // TODO;
+    this.newlineIndices = [];
     for (let i = 0; i < this.documentText.length; i++) {
       if (this.documentText.charAt(i) === "\n") {
         this.newlineIndices.push(i);
@@ -124,6 +133,10 @@ class MatchTracker {
     this.matchIdx = idx;
   }
 
+  public getMatches() : vscode.Range[] {
+    return this.matches;
+  }
+
   public getMatch() : vscode.Range | undefined {
     return this.matchIdx === undefined ? undefined : this.matches[this.matchIdx];
   }
@@ -153,9 +166,6 @@ class MatchTracker {
     }
 
     this.matches = new Document(this.editor.document.getText()).matches(props);
-
-    // Update the decorations (always want these changes to be applied, hence why we do this first).
-    this.editor.setDecorations(decorationType, this.matches.map(m => new vscode.Selection(m.start, m.end)));
 
     // Update the matchIdx
     this.matchIdx = this.matches.length === 0 ? undefined : sortedGTE(this.matches, new vscode.Range(this.lastCursorPos, this.lastCursorPos), (a: vscode.Range, b: vscode.Range) => {
@@ -222,26 +232,59 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
 
   public toggleRegex() {
     this.regexToggle = !this.regexToggle;
-    this.refreshMatches();
-    this.focusMatch();
+    if (this.active) {
+      this.refreshMatches();
+      this.focusMatch();
+    }
   }
 
   public toggleCase() {
     this.caseToggle = !this.caseToggle;
-    this.refreshMatches();
-    this.focusMatch();
+    if (this.active) {
+      this.refreshMatches();
+      this.focusMatch();
+    }
   }
 
   public toggleWholeWord() {
     this.wholeWordToggle = !this.wholeWordToggle;
-    this.refreshMatches();
-    this.focusMatch();
+    if (this.active) {
+      this.refreshMatches();
+      this.focusMatch();
+    /*} else {
+      return vscode.commands.executeCommand("editor.actions.findWithArgs", {
+        "searchString": "ENTER_TEXT",
+
+
+      });*/
+    }
   }
 
   public async toggleReplaceMode() {
     this.replaceMode = !this.replaceMode;
-    this.refreshMatches();
-    this.focusMatch();
+    if (this.active) {
+      this.refreshMatches();
+      this.focusMatch();
+    }
+  }
+
+  public async replace(all: boolean) {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showErrorMessage(`Cannot replace matches from outside an editor`);
+      return;
+    }
+
+    const m = this.matchTracker.getMatch();
+    const toReplace = all ? this.matchTracker.getMatches() : (m ? [m] : []);
+    return editor.edit(eb => {
+      toReplace.forEach((r) => {
+        eb.replace(r, this.currentContext().replaceText);
+      });
+    }).then(() => {
+      this.refreshMatches();
+      return this.focusMatch();
+    });
   }
 
   public async startNew(findPrevOnType: boolean, initText?: string) : Promise<void> {
@@ -291,15 +334,27 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
 
     // Same order as find widget
     const codes = [];
-    if (this.caseToggle) { codes.push("c"); }
-    if (this.wholeWordToggle) { codes.push("w"); }
-    if (this.regexToggle) { codes.push("r"); }
+    if (this.caseToggle) { codes.push("C"); }
+    if (this.wholeWordToggle) { codes.push("W"); }
+    if (this.regexToggle) { codes.push("R"); }
+
+    const m = this.matchTracker.getMatch();
+    const whitespaceJoin = "\n" + (m ? document.getText(new vscode.Range(new vscode.Position(m.start.line, 0), new vscode.Position(m.start.line, m.start.character))).replace(/[^\t]/g, " ") : "");
 
     let ctx = this.currentContext();
-    const txt = this.replaceMode ? `\nFlags: [${codes.join("")}]\nText: ${ctx.findText}\nRepl: ${ctx.replaceText}` : `\nFlags: [${codes.join("")}]\nText: ${ctx.findText}`;
+    const txtParts = [
+      ``,
+      `Flags: [${codes.join("")}]`,
+      `Text: ${ctx.findText}`,
+    ];
+    if (this.replaceMode) {
+      txtParts.push(`Repl: ${ctx.replaceText}`);
+    }
+    const it = txtParts.join(whitespaceJoin);
+    console.log(`it:\n${it}`);
     return { items: [
       {
-        insertText: txt,
+        insertText: it,
         range: new vscode.Range(position, position),
       }
     ]};
@@ -366,9 +421,10 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
         if (popIdx !== undefined) {
           this.matchTracker.setMatchIndex(popIdx);
         }
-        return this.focusMatch();
       }
     }
+    // Always focusMatch because that regenerates the inline text.
+    return this.focusMatch();
   }
 
   private refreshMatches() {
@@ -389,6 +445,11 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     }
 
     const match = this.matchTracker.getMatch();
+    const matches = this.matchTracker.getMatches();
+
+    // Update the decorations (always want these changes to be applied, hence why we do this first).
+    editor.setDecorations(allMatchDecorationType, matches.filter((m) => !match || !m.isEqual(match)).map(m => new vscode.Selection(m.start, m.end)));
+    editor.setDecorations(currentMatchDecorationType, match ? [match] : []);
 
     // Move the cursor if necessary
     if (match) {
@@ -471,6 +532,21 @@ export class FindHandler extends TypeHandler {
       return this.activate();
     });
 
+    recorder.registerCommand(context, 'find.replaceOne', async () => {
+      if (!this.isActive()) {
+        vscode.window.showErrorMessage(`Cannot replace matches when not in groog.find mode`);
+        return;
+      }
+      return this.cache.replace(false);
+    });
+    recorder.registerCommand(context, 'find.replaceAll', async () => {
+      if (!this.isActive()) {
+        vscode.window.showErrorMessage(`Cannot replace matches when not in groog.find mode`);
+        return;
+      }
+      return this.cache.replace(true);
+    });
+
     recorder.registerCommand(context, 'find.toggleReplaceMode', async (): Promise<void> => {
       if (!this.isActive()) {
         vscode.window.showInformationMessage("groog.find.toggleReplaceMode can only be executed in find mode");
@@ -540,7 +616,8 @@ export class FindHandler extends TypeHandler {
   async deactivateCommands() {
     await vscode.commands.executeCommand("cancelSelection");
     await vscode.commands.executeCommand("editor.action.inlineSuggest.hide");
-    vscode.window.activeTextEditor?.setDecorations(decorationType, []);
+    vscode.window.activeTextEditor?.setDecorations(allMatchDecorationType, []);
+    vscode.window.activeTextEditor?.setDecorations(currentMatchDecorationType, []);
   }
 
   async handleDeactivation() {

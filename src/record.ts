@@ -321,7 +321,9 @@ class FindNextRecord implements Record {
   }
 
   async playback(): Promise<boolean> {
-    await vscode.commands.executeCommand("editor.actions.findWithArgs", { "searchString": this.findText });
+    await vscode.commands.executeCommand("editor.actions.findWithArgs", {
+      "searchString": this.findText,
+    });
     await vscode.commands.executeCommand("editor.action.nextMatchFindAction");
     // Can also do the following command instead of focusActiveEditorGroup:
     // await vscode.commands.executeCommand("closeFindWidget");

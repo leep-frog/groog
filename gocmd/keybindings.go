@@ -259,10 +259,10 @@ var (
 			groogFindMode.not().and(activePanel.not()).value: kb("groog.toggleMarkMode"),
 		},
 		ctrl("y"):        only("groog.emacsPaste"),
-		ctrl(shift("k")): only("editor.action.replaceAll"),
+		ctrl(shift("k")): onlyWhen("groog.find.replaceAll", groogFindMode),
 		ctrl("k"): {
 			// Replace in find mode
-			groogFindMode.value: kb("editor.action.replaceOne"),
+			groogFindMode.value: kb("groog.find.replaceOne"),
 			// Kill in editor
 			groogFindMode.not().value: kb("groog.kill"),
 		},
