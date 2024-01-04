@@ -3,11 +3,7 @@ import { ColorMode, ModeColor } from './color_mode';
 import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand } from './interfaces';
 import { Recorder } from './record';
-import { Emacs, GlobalBoolTracker, GlobalStateTracker } from './emacs';
-import { Glob } from 'glob';
-import { match } from 'assert';
-
-// TODO: decorate matched position.
+import { GlobalBoolTracker } from './emacs';
 
 function findColor(opacity?: number): string{
   return `rgba(200, 120, 0, ${opacity ?? 1})`;
