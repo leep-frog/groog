@@ -925,7 +925,12 @@
       {
         "key": "ctrl+/",
         "command": "groog.undo",
-        "when": "!activePanel"
+        "when": "!activePanel \u0026\u0026 !groog.context.recordMode"
+      },
+      {
+        "key": "ctrl+/",
+        "command": "groog.record.undo",
+        "when": "!activePanel \u0026\u0026 groog.context.recordMode"
       },
       {
         "key": "ctrl+;",
@@ -1302,7 +1307,7 @@
       {
         "key": "ctrl+shift+/",
         "command": "groog.redo",
-        "when": "!activePanel"
+        "when": "!activePanel \u0026\u0026 !groog.context.recordMode"
       },
       {
         "key": "ctrl+shift+a",

@@ -61,6 +61,7 @@ export class Recorder extends TypeHandler {
     recorder.registerCommand(context, "record.endRecording", () => recorder.endRecording());
     recorder.registerCommand(context, "record.saveRecordingAs", () => recorder.saveRecordingAs());
     recorder.registerCommand(context, "record.deleteRecording", () => recorder.deleteRecording());
+    recorder.registerCommand(context, "record.undo", () => recorder.undo());
     recorder.registerCommand(context, "record.find", () => recorder.find(), {noTimeout: true});
     // This needs to have noLock true because it runs simultaneously with the record.find command
     // when pressing ctrl+s twice.
@@ -120,6 +121,23 @@ export class Recorder extends TypeHandler {
       () => {}, // Do nothing on fulfilled
       () => this.setFindContext(false),
     );
+  }
+
+  async undo() {
+    const lastRecord = this.recordBook.at(-1);
+
+    if (!lastRecord) {
+      vscode.window.showInformationMessage(`nope`);
+      return;
+    }
+
+    lastRecord.undo().then(succeeded => {
+      if (!succeeded) {
+        vscode.window.showInformationMessage(`Undo failed`);
+      } else {
+        this.recordBook.pop();
+      }
+    });
   }
 
   async startRecording() {
@@ -272,6 +290,8 @@ export class Recorder extends TypeHandler {
 interface Record {
   name(): string;
   playback(emacs: Emacs): Promise<boolean>;
+  // undo undoes the record and returns a boolean indicating if the undo operation was successful.
+  undo(): Promise<boolean>;
 }
 
 class TypeRecord implements Record {
@@ -292,6 +312,10 @@ class TypeRecord implements Record {
   name(): string {
     return "TR: " + this.text;
   }
+
+  async undo() {
+    return vscode.commands.executeCommand('deleteLeft').then(() => true, () => false);
+  }
 }
 
 class CommandRecord implements Record {
@@ -311,6 +335,13 @@ class CommandRecord implements Record {
   name(): string {
     return "CR: " + this.command;
   }
+
+  async undo() {
+    // TODO: Map from command to command that reverts (e.g. groog.jump, groog.fall?)
+    // Maybe not cuz jump at the end of a file won't behave properly, but still
+    // an approach for other commands?
+    return false;
+  }
 }
 
 class FindNextRecord implements Record {
@@ -323,6 +354,7 @@ class FindNextRecord implements Record {
   async playback(): Promise<boolean> {
     await vscode.commands.executeCommand("editor.actions.findWithArgs", {
       "searchString": this.findText,
+      // TODO: Use flags set by find handler
     });
     await vscode.commands.executeCommand("editor.action.nextMatchFindAction");
     // Can also do the following command instead of focusActiveEditorGroup:
@@ -344,5 +376,9 @@ class FindNextRecord implements Record {
 
   name(): string {
     return "FNR: " + this.findText;
+  }
+
+  async undo() {
+    return false;
   }
 }
