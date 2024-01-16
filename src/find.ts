@@ -463,7 +463,7 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       editor.selection = new vscode.Selection(newCursorPos, newCursorPos);
 
       // Update the editor focus
-      editor.revealRange(editor.selection, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+      editor.revealRange(match, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
     }
 
     // Regardless of cursor move, update the inline suggestion.
