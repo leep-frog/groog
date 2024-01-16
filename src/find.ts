@@ -4,6 +4,8 @@ import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { Recorder } from './record';
 import { GlobalBoolTracker } from './emacs';
+import { getWordSeparators } from './settings';
+import { isRegExp } from 'util/types';
 
 function findColor(opacity?: number): string{
   return `rgba(200, 120, 0, ${opacity ?? 1})`;
@@ -82,17 +84,45 @@ export class Document {
       props.queryText = props.queryText.toLowerCase();
     }
     // "g" is the global flag which is required here.
+    // TODO: if (!isRegExp(...)) { ... }
     const rgx = new RegExp(props.regex ? props.queryText : escapeStringRegexp(props.queryText), "g");
 
     const matches = Array.from(text.matchAll(rgx));
-    return matches.map(m => {
-      const startIndex = m.index!;
-      const endIndex = startIndex + m[0].length;
-      return new vscode.Range(
-        this.posFromIndex(startIndex),
-        this.posFromIndex(endIndex),
-      );
-    });
+    return matches
+      .map(m => {
+        return {
+          startIndex: m.index!,
+          // Note: end index is exclusive
+          endIndex: m.index! + m[0].length,
+        };
+      })
+      .filter(m => {
+        if (!props.wholeWord) {
+          return true;
+        }
+
+        // If this element is a word character than the preceding one must not be.
+        if (WORD_PARTS.test(this.documentText[m.startIndex])) {
+          if (m.startIndex > 0 && WORD_PARTS.test(this.documentText[m.startIndex - 1])) {
+            return false;
+          }
+        }
+
+        if (WORD_PARTS.test(this.documentText[m.endIndex-1])) {
+          if (m.endIndex < this.documentText.length && WORD_PARTS.test(this.documentText[m.endIndex])) {
+            return false;
+          }
+        }
+
+        return true;
+      })
+      .map(m => {
+        return new vscode.Range(
+          this.posFromIndex(m.startIndex),
+          this.posFromIndex(m.endIndex),
+        );
+      }
+    );
   }
 
   private posFromIndex(index: number): vscode.Position {
@@ -106,6 +136,10 @@ export class Document {
 interface RefreshMatchesProps extends DocumentMatchProps {
   prevMatchOnChange: boolean;
 }
+
+// WORD_PARTS is the set of characters that constituted part of a word
+// (and the inverse set is the set of characters that end a word for whole word toggle).
+const WORD_PARTS = new RegExp("[a-z0-9]");
 
 class MatchTracker {
   private matches: vscode.Range[];
@@ -247,10 +281,6 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     if (this.active) {
       this.refreshMatches();
       this.focusMatch();
-    /*} else {
-      return vscode.commands.executeCommand("editor.actions.findWithArgs", {
-        "searchString": "ENTER_TEXT",
-      });*/
     }
   }
 
