@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ColorMode, ModeColor } from './color_mode';
 import { TypeHandler } from './handler';
-import { CursorMove, DeleteCommand } from './interfaces';
+import { CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { Recorder } from './record';
 import { GlobalBoolTracker } from './emacs';
 
@@ -445,6 +445,18 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     });
   }
 
+
+  /**
+   * appendVerticalLine appends a `|` character if the string ends with a space.
+   * Note: not relevant if the string ends with newline, tab, etc. as those are
+   * expected to be irrelevant for quick pick.
+   *
+   * @param s the
+   */
+  private appendVerticalLine(s: string): string {
+    return s.endsWith(" ") ? s + "|" : s;
+  }
+
   private async focusMatch(): Promise<void> {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -470,9 +482,37 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       editor.revealRange(match, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
     }
 
-    // Regardless of cursor move, update the inline suggestion.
-    return vscode.commands.executeCommand("editor.action.inlineSuggest.hide").then(
-      () => vscode.commands.executeCommand("editor.action.inlineSuggest.trigger"));
+    // Regardless of cursor move, update the find display.
+
+    // Set codes
+    const codes = [];
+    if (this.caseToggle) { codes.push("C"); }
+    if (this.wholeWordToggle) { codes.push("W"); }
+    if (this.regexToggle) { codes.push("R"); }
+
+    // Create items (find info)
+    const ms = this.matchTracker.getMatches();
+    const matchText = ms.length === 0 ? `No results` : `${this.matchTracker.getMatchIndex()! + 1} of ${this.matchTracker.getMatches().length}`;
+    const ctx = this.currentContext();
+    const detail = this.replaceMode ? (ctx.replaceText.length === 0 ? "No replace text set" : this.appendVerticalLine(ctx.replaceText)) : undefined;
+    const items: vscode.QuickPickItem[] = [
+      {
+        label: this.appendVerticalLine(ctx.findText) || " ",
+        detail: detail,
+      },
+      {
+        label: matchText,
+      },
+    ];
+    const flagText = `Flags: [${codes.join("")}]`;
+
+    // Display the find info
+    vscode.window.showQuickPick(
+      items,
+      {
+        placeHolder: flagText,
+      },
+    );
   }
 
   async prevMatch() {
@@ -519,8 +559,10 @@ export class FindHandler extends TypeHandler {
     this.findPrevOnType = false;
     this.simpleModeTracker = new GlobalBoolTracker("find.simpleMode", () => {
       vscode.window.showInformationMessage(`Simple Find Mode activated`);
+      return setGroogContext("find.simple", true);
     }, () => {
       vscode.window.showInformationMessage(`Regular Find Mode activated`);
+      return setGroogContext("find.simple", false);
     });
   }
 
