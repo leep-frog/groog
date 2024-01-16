@@ -342,12 +342,16 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     if (this.wholeWordToggle) { codes.push("W"); }
     if (this.regexToggle) { codes.push("R"); }
 
+    const ms = this.matchTracker.getMatches();
     const m = this.matchTracker.getMatch();
     const whitespaceJoin = "\n" + (m ? document.getText(new vscode.Range(new vscode.Position(m.start.line, 0), new vscode.Position(m.start.line, m.start.character))).replace(/[^\t]/g, " ") : "");
+
+    const matchText = ms.length === 0 ? `No results` : `${this.matchTracker.getMatchIndex()! + 1} of ${this.matchTracker.getMatches().length}`;
 
     let ctx = this.currentContext();
     const txtParts = [
       ``,
+      matchText,
       `Flags: [${codes.join("")}]`,
       `Text: ${ctx.findText}`,
     ];
