@@ -564,18 +564,15 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
         description: matchError ? matchError : undefined,
       },
       {
+        label: `Flags: [${codes.join("")}]`,
+      },
+      {
         label: matchText,
       },
     ];
-    const flagText = `Flags: [${codes.join("")}]`;
 
     // Display the find info
-    vscode.window.showQuickPick(
-      items,
-      {
-        placeHolder: flagText,
-      },
-    );
+    vscode.window.showQuickPick(items);
   }
 
   async prevMatch() {
