@@ -4,7 +4,6 @@ import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { Recorder } from './record';
 import { GlobalBoolTracker } from './emacs';
-import { isRegExp } from 'util/types';
 
 function findColor(opacity?: number): string{
   return `rgba(200, 120, 0, ${opacity ?? 1})`;
@@ -74,7 +73,7 @@ export class Document {
 
   private createRegex(s: string): [RegExp, string | undefined] {
     try {
-      return [new RegExp(s, "g"), undefined];
+      return [new RegExp(s, "gm"), undefined];
     } catch (error) {
       return [new RegExp("."), (error as SyntaxError).message];
     }
