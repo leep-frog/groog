@@ -4,7 +4,6 @@ import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { Recorder } from './record';
 import { GlobalBoolTracker } from './emacs';
-import { getWordSeparators } from './settings';
 import { isRegExp } from 'util/types';
 
 function findColor(opacity?: number): string{
@@ -73,9 +72,17 @@ export class Document {
     this.newlineIndices.push(this.documentText.length);
   }
 
-  public matches(props: DocumentMatchProps): vscode.Range[] {
+  private createRegex(s: string): [RegExp, string | undefined] {
+    try {
+      return [new RegExp(s, "g"), undefined];
+    } catch (error) {
+      return [new RegExp("."), (error as SyntaxError).message];
+    }
+  }
+
+  public matches(props: DocumentMatchProps): [vscode.Range[], string | undefined] {
     if (props.queryText.length === 0) {
-      return [];
+      return [[], undefined];
     }
 
     const text = props.caseInsensitive ? this.caseInsensitiveDocumentText : this.documentText;
@@ -84,11 +91,14 @@ export class Document {
       props.queryText = props.queryText.toLowerCase();
     }
     // "g" is the global flag which is required here.
-    // TODO: if (!isRegExp(...)) { ... }
-    const rgx = new RegExp(props.regex ? props.queryText : escapeStringRegexp(props.queryText), "g");
+    const rgxTxt = props.regex ? props.queryText : escapeStringRegexp(props.queryText);
+    const [rgx, err] = this.createRegex(rgxTxt);
+    if (err) {
+      return [[], err];
+    }
 
     const matches = Array.from(text.matchAll(rgx));
-    return matches
+    return [matches
       .map(m => {
         return {
           startIndex: m.index!,
@@ -122,7 +132,7 @@ export class Document {
           this.posFromIndex(m.endIndex),
         );
       }
-    );
+    ), undefined];
   }
 
   private posFromIndex(index: number): vscode.Position {
@@ -141,11 +151,19 @@ interface RefreshMatchesProps extends DocumentMatchProps {
 // (and the inverse set is the set of characters that end a word for whole word toggle).
 const WORD_PARTS = new RegExp("[a-z0-9]");
 
+interface MatchInfo {
+  matches: vscode.Range[];
+  match?: vscode.Range;
+  matchIdx?: number;
+  matchError?: string;
+}
+
 class MatchTracker {
   private matches: vscode.Range[];
   private matchIdx?: number;
   private editor?: vscode.TextEditor;
   private lastCursorPos?: vscode.Position;
+  private matchError?: string;
 
   constructor() {
     this.matches = [];
@@ -163,16 +181,13 @@ class MatchTracker {
     this.matchIdx = idx;
   }
 
-  public getMatches() : vscode.Range[] {
-    return this.matches;
-  }
-
-  public getMatch() : vscode.Range | undefined {
-    return this.matchIdx === undefined ? undefined : this.matches[this.matchIdx];
-  }
-
-  public getMatchIndex() : number | undefined {
-    return this.matchIdx;
+  public getMatchInfo(): MatchInfo {
+    return {
+      matches: this.matches,
+      match: this.matchIdx === undefined ? undefined : this.matches[this.matchIdx],
+      matchIdx: this.matchIdx,
+      matchError: this.matchError,
+    };
   }
 
   public nextMatch() {
@@ -195,7 +210,7 @@ class MatchTracker {
       return;
     }
 
-    this.matches = new Document(this.editor.document.getText()).matches(props);
+    [this.matches, this.matchError] = new Document(this.editor.document.getText()).matches(props);
 
     // Update the matchIdx
     this.matchIdx = this.matches.length === 0 ? undefined : sortedGTE(this.matches, new vscode.Range(this.lastCursorPos, this.lastCursorPos), (a: vscode.Range, b: vscode.Range) => {
@@ -299,8 +314,9 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       return;
     }
 
-    const m = this.matchTracker.getMatch();
-    const toReplace = all ? this.matchTracker.getMatches() : (m ? [m] : []);
+    const matchInfo = this.matchTracker.getMatchInfo();
+    const m = matchInfo.match;
+    const toReplace = all ? matchInfo.matches : (m ? [m] : []);
     return editor.edit(eb => {
       toReplace.forEach((r) => {
         eb.replace(r, this.currentContext().replaceText);
@@ -337,7 +353,7 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
 
   public async end(): Promise<void> {
     // Focus on the last match (if relevant)
-    const match = this.matchTracker.getMatch();
+    const match = this.matchTracker.getMatchInfo().match;
     if (match) {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
@@ -372,11 +388,12 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     if (this.wholeWordToggle) { codes.push("W"); }
     if (this.regexToggle) { codes.push("R"); }
 
-    const ms = this.matchTracker.getMatches();
-    const m = this.matchTracker.getMatch();
+    const matchInfo = this.matchTracker.getMatchInfo();
+    const ms = matchInfo.matches;
+    const m = matchInfo.match;
     const whitespaceJoin = "\n" + (m ? document.getText(new vscode.Range(new vscode.Position(m.start.line, 0), new vscode.Position(m.start.line, m.start.character))).replace(/[^\t]/g, " ") : "");
 
-    const matchText = ms.length === 0 ? `No results` : `${this.matchTracker.getMatchIndex()! + 1} of ${this.matchTracker.getMatches().length}`;
+    const matchText = ms.length === 0 ? `No results` : `${matchInfo.matchIdx! + 1} of ${ms.length}`;
 
     let ctx = this.currentContext();
     const txtParts = [
@@ -435,7 +452,7 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       ctx.findText = ctx.findText.concat(s);
       // Only refreshMatches when updating find text
       this.refreshMatches();
-      this.cursorStack.push(this.matchTracker.getMatchIndex());
+      this.cursorStack.push(this.matchTracker.getMatchInfo().matchIdx);
     }
     return this.focusMatch();
   }
@@ -494,8 +511,11 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       return;
     }
 
-    const match = this.matchTracker.getMatch();
-    const matches = this.matchTracker.getMatches();
+    const matchInfo = this.matchTracker.getMatchInfo();
+    const match = matchInfo.match;
+    const matches = matchInfo.matches;
+    const matchIndex = matchInfo.matchIdx;
+    const matchError = matchInfo.matchError;
 
     // Update the decorations (always want these changes to be applied, hence why we do this first).
     editor.setDecorations(allMatchDecorationType, matches.filter((m) => !match || !m.isEqual(match)).map(m => new vscode.Selection(m.start, m.end)));
@@ -521,14 +541,14 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     if (this.regexToggle) { codes.push("R"); }
 
     // Create items (find info)
-    const ms = this.matchTracker.getMatches();
-    const matchText = ms.length === 0 ? `No results` : `${this.matchTracker.getMatchIndex()! + 1} of ${this.matchTracker.getMatches().length}`;
+    const matchText = matches.length === 0 ? `No results` : `${matchIndex! + 1} of ${matches.length}`;
     const ctx = this.currentContext();
     const detail = this.replaceMode ? (ctx.replaceText.length === 0 ? "No replace text set" : this.appendVerticalLine(ctx.replaceText)) : undefined;
     const items: vscode.QuickPickItem[] = [
       {
         label: this.appendVerticalLine(ctx.findText) || " ",
         detail: detail,
+        description: matchError ? matchError : undefined,
       },
       {
         label: matchText,
