@@ -52,6 +52,12 @@ interface DocumentMatchProps {
   wholeWord: boolean;
 }
 
+interface Match {
+  range: vscode.Range;
+  text: string;
+  pattern: RegExp;
+}
+
 export class Document {
   documentText: string;
   caseInsensitiveDocumentText: string;
@@ -79,7 +85,7 @@ export class Document {
     }
   }
 
-  public matches(props: DocumentMatchProps): [vscode.Range[], string | undefined] {
+  public matches(props: DocumentMatchProps): [Match[], string | undefined] {
     if (props.queryText.length === 0) {
       return [[], undefined];
     }
@@ -103,6 +109,7 @@ export class Document {
           startIndex: m.index!,
           // Note: end index is exclusive
           endIndex: m.index! + m[0].length,
+          text: m[0],
         };
       })
       .filter(m => {
@@ -126,10 +133,14 @@ export class Document {
         return true;
       })
       .map(m => {
-        return new vscode.Range(
-          this.posFromIndex(m.startIndex),
-          this.posFromIndex(m.endIndex),
-        );
+        return {
+          text: m.text,
+          range: new vscode.Range(
+            this.posFromIndex(m.startIndex),
+            this.posFromIndex(m.endIndex),
+          ),
+          pattern: rgx,
+        };
       }
     ), undefined];
   }
@@ -151,14 +162,14 @@ interface RefreshMatchesProps extends DocumentMatchProps {
 const WORD_PARTS = new RegExp("[a-z0-9]");
 
 interface MatchInfo {
-  matches: vscode.Range[];
-  match?: vscode.Range;
+  matches: Match[];
+  match?: Match;
   matchIdx?: number;
   matchError?: string;
 }
 
 class MatchTracker {
-  private matches: vscode.Range[];
+  private matches: Match[];
   private matchIdx?: number;
   private editor?: vscode.TextEditor;
   private lastCursorPos?: vscode.Position;
@@ -212,7 +223,7 @@ class MatchTracker {
     [this.matches, this.matchError] = new Document(this.editor.document.getText()).matches(props);
 
     // Update the matchIdx
-    this.matchIdx = this.matches.length === 0 ? undefined : sortedGTE(this.matches, new vscode.Range(this.lastCursorPos, this.lastCursorPos), (a: vscode.Range, b: vscode.Range) => {
+    this.matchIdx = this.matches.length === 0 ? undefined : sortedGTE(this.matches.map(m => m.range), new vscode.Range(this.lastCursorPos, this.lastCursorPos), (a: vscode.Range, b: vscode.Range) => {
       if (a.start.isEqual(b.start)) {
         return 0;
       }
@@ -234,7 +245,7 @@ class MatchTracker {
 
     const matchToFocus = this.matches[this.matchIdx];
     // We're at the same match, so don't do anything
-    if (this.lastCursorPos.isEqual(matchToFocus.start)) {
+    if (this.lastCursorPos.isEqual(matchToFocus.range.start)) {
       return;
     }
 
@@ -245,7 +256,7 @@ class MatchTracker {
     }
 
     // Update the beginning of this match.
-    this.lastCursorPos = this.matches[this.matchIdx].start;
+    this.lastCursorPos = this.matches[this.matchIdx].range.start;
   }
 }
 
@@ -318,7 +329,10 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     const toReplace = all ? matchInfo.matches : (m ? [m] : []);
     return editor.edit(eb => {
       toReplace.forEach((r) => {
-        eb.replace(r, this.currentContext().replaceText);
+        // If regex mode, than replace using string.replace so that
+        // group replacements are made.
+        const ctx = this.currentContext();
+        eb.replace(r.range, this.regexToggle ? r.text.replace(r.pattern, ctx.replaceText) : ctx.replaceText);
       });
     }).then(() => {
       this.refreshMatches();
@@ -358,7 +372,7 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       if (!editor) {
         vscode.window.showErrorMessage(`Cannot select text from outside the editor.`);
       } else {
-        editor.selection = new vscode.Selection(match.start, match.end);
+        editor.selection = new vscode.Selection(match.range.start, match.range.end);
       }
     }
     this.active = false;
@@ -390,7 +404,7 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     const matchInfo = this.matchTracker.getMatchInfo();
     const ms = matchInfo.matches;
     const m = matchInfo.match;
-    const whitespaceJoin = "\n" + (m ? document.getText(new vscode.Range(new vscode.Position(m.start.line, 0), new vscode.Position(m.start.line, m.start.character))).replace(/[^\t]/g, " ") : "");
+    const whitespaceJoin = "\n" + (m ? document.getText(new vscode.Range(new vscode.Position(m.range.start.line, 0), new vscode.Position(m.range.start.line, m.range.start.character))).replace(/[^\t]/g, " ") : "");
 
     const matchText = ms.length === 0 ? `No results` : `${matchInfo.matchIdx! + 1} of ${ms.length}`;
 
@@ -517,18 +531,18 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     const matchError = matchInfo.matchError;
 
     // Update the decorations (always want these changes to be applied, hence why we do this first).
-    editor.setDecorations(allMatchDecorationType, matches.filter((m) => !match || !m.isEqual(match)).map(m => new vscode.Selection(m.start, m.end)));
+    editor.setDecorations(allMatchDecorationType, matches.filter((m) => !match || !m.range.isEqual(match.range)).map(m => new vscode.Selection(m.range.start, m.range.end)));
     editor.setDecorations(currentMatchDecorationType, match ? [match] : []);
 
     // Move the cursor if necessary
     if (match) {
       // Put cursor at the end of the line that the match range ends at.
-      const endLine = match.end.line;
+      const endLine = match.range.end.line;
       const newCursorPos = new vscode.Position(endLine, editor.document.lineAt(endLine).range.end.character);
       editor.selection = new vscode.Selection(newCursorPos, newCursorPos);
 
       // Update the editor focus
-      editor.revealRange(match, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+      editor.revealRange(match.range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
     }
 
     // Regardless of cursor move, update the find display.
