@@ -295,10 +295,10 @@ var (
 		ctrl("e"):         only("groog.cursorEnd"),
 		alt("f"):          only("groog.cursorWordRight"),
 		ctrl("g"): {
-			sideBarFocus.not().and(inQuickOpen.not().and(suggestWidgetVisible.not())).value: kb("groog.ctrlG"),
-			sideBarFocus.and(inQuickOpen.not().and(suggestWidgetVisible.not())).value:       kb("workbench.action.focusActiveEditorGroup"),
-			inQuickOpen.and(suggestWidgetVisible.not()).value:                               kb("workbench.action.closeQuickOpen"),
+			sideBarFocus.and(inQuickOpen.not().and(suggestWidgetVisible.not())).value:  kb("workbench.action.focusActiveEditorGroup"),
+			inQuickOpen.and(suggestWidgetVisible.not()).and(groogFindMode.not()).value: kb("workbench.action.closeQuickOpen"),
 			suggestWidgetVisible.value: kb("hideSuggestWidget"),
+			always.value:               kb("groog.ctrlG"),
 		},
 		ctrl("/"): {
 			activePanel.value: nil,

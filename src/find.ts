@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ColorMode, ModeColor } from './color_mode';
 import { TypeHandler } from './handler';
-import { CursorMove, DeleteCommand, setGroogContext } from './interfaces';
+import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { Recorder } from './record';
 import { GlobalBoolTracker } from './emacs';
 
@@ -725,7 +725,7 @@ export class FindHandler extends TypeHandler {
 
   async deactivateCommands() {
     // Don't `cancelSelection` as we select the previously matched text.
-    await vscode.commands.executeCommand("editor.action.inlineSuggest.hide");
+    vscode.commands.executeCommand("workbench.action.closeQuickOpen");
     vscode.window.activeTextEditor?.setDecorations(allMatchDecorationType, []);
     vscode.window.activeTextEditor?.setDecorations(currentMatchDecorationType, []);
   }

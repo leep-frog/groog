@@ -1025,13 +1025,12 @@
       },
       {
         "key": "ctrl+g",
-        "command": "groog.ctrlG",
-        "when": "!sideBarFocus \u0026\u0026 !inQuickOpen \u0026\u0026 !suggestWidgetVisible"
+        "command": "groog.ctrlG"
       },
       {
         "key": "ctrl+g",
         "command": "workbench.action.closeQuickOpen",
-        "when": "inQuickOpen \u0026\u0026 !suggestWidgetVisible"
+        "when": "inQuickOpen \u0026\u0026 !suggestWidgetVisible \u0026\u0026 !groog.context.findMode"
       },
       {
         "key": "ctrl+g",
