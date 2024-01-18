@@ -159,7 +159,7 @@ interface RefreshMatchesProps extends DocumentMatchProps {
 
 // WORD_PARTS is the set of characters that constituted part of a word
 // (and the inverse set is the set of characters that end a word for whole word toggle).
-const WORD_PARTS = new RegExp("[a-z0-9]");
+const WORD_PARTS = new RegExp("[a-zA-Z0-9]");
 
 interface MatchInfo {
   matches: Match[];
