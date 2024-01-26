@@ -10,7 +10,8 @@ export interface RegisterCommandOptionalProps {
   noTimeout?: boolean;
 }
 
-const MOST_RECENT_RECORDING_KEY = "Most recent recording";
+const RECENT_RECORDING_PREFIX = "Recent recording";
+const MAX_RECORDINGS = 3;
 
 export class Recorder extends TypeHandler {
   // baseCommand ensures we don't infinite loop a command. For example,
@@ -20,7 +21,7 @@ export class Recorder extends TypeHandler {
   // groog.CommandTwo would be executed twice in the replay even though it only
   // happened once during recording.
   private baseCommand: boolean;
-  private recordBook: Record[];
+  private recordBooks: Record[][];
   private lastFind: FindNextRecord | undefined;
   // Note: we would never need these in persistent memory
   // because any recording I'd want public I could
@@ -40,7 +41,7 @@ export class Recorder extends TypeHandler {
   constructor(cm: ColorMode, emacs: Emacs) {
     super(cm, ModeColor.record);
     this.baseCommand = true;
-    this.recordBook = [];
+    this.recordBooks = [];
     this.namedRecordings = new Map<string, Record[]>();
     this.emacs = emacs;
     this.typeLock = new AwaitLock();
@@ -125,8 +126,12 @@ export class Recorder extends TypeHandler {
     );
   }
 
+  getRecordBook(): Record[] { return this.recordBooks.at(-1)!; }
+
+  setRecordBook(newBook: Record[]) { this.recordBooks[this.recordBooks.length-1] = newBook; }
+
   async undo() {
-    const lastRecord = this.recordBook.at(-1);
+    const lastRecord = this.getRecordBook().at(-1);
 
     if (!lastRecord) {
       vscode.window.showInformationMessage(`nope`);
@@ -137,7 +142,7 @@ export class Recorder extends TypeHandler {
       if (!succeeded) {
         vscode.window.showInformationMessage(`Undo failed`);
       } else {
-        this.recordBook.pop();
+        this.getRecordBook().pop();
       }
     });
   }
@@ -147,7 +152,7 @@ export class Recorder extends TypeHandler {
       vscode.window.showErrorMessage("Already recording!");
     } else {
       this.activate();
-      this.recordBook = [];
+      this.recordBooks.push([]);
       vscode.window.showInformationMessage("Recording started!");
     }
   }
@@ -157,16 +162,16 @@ export class Recorder extends TypeHandler {
       vscode.window.showErrorMessage("Not recording!");
       return;
     }
-    this.recordBook = trimRecords(this.recordBook);
+    this.setRecordBook(trimRecords(this.getRecordBook()));
 
     const searchQuery = await vscode.window.showInputBox({
       placeHolder: "Recording name",
       prompt: "Save recording as...",
       title: "Save recording as:",
       validateInput: (input: string) => {
-        if (input === MOST_RECENT_RECORDING_KEY) {
+        if (input.startsWith(RECENT_RECORDING_PREFIX)) {
           return {
-            message: "This is a reserved name",
+            message: "This is a reserved prefix",
             severity: vscode.InputBoxValidationSeverity.Error,
           };
         }
@@ -176,7 +181,7 @@ export class Recorder extends TypeHandler {
 
     // Save recording as if a name was provided.
     if (searchQuery) {
-      this.namedRecordings.set(searchQuery, this.recordBook);
+      this.namedRecordings.set(searchQuery, this.getRecordBook());
       vscode.window.showInformationMessage(`Recording saved as "${searchQuery}"!`);
     } else {
       vscode.window.showErrorMessage("No recording name provided");
@@ -189,7 +194,7 @@ export class Recorder extends TypeHandler {
     if (!this.isActive()) {
       vscode.window.showInformationMessage("Not recording!");
     } else {
-      this.recordBook = trimRecords(this.recordBook);
+      this.setRecordBook(trimRecords(this.getRecordBook()));
       this.deactivate();
       vscode.window.showInformationMessage("Recording ended!");
     }
@@ -210,7 +215,6 @@ export class Recorder extends TypeHandler {
       },
     );
     if (!result) {
-      vscode.window.showErrorMessage("No recording chosen");
       return;
     }
     this.namedRecordings.delete(result);
@@ -221,26 +225,33 @@ export class Recorder extends TypeHandler {
       vscode.window.showInformationMessage("Still recording!");
       return;
     }
+
+    const recentItems: RecordBookQuickPick[] = this.recordBooks.map((recordBook, idx) => { return {
+      recordBook: recordBook,
+      label: `${RECENT_RECORDING_PREFIX} ${this.recordBooks.length - 1 - idx}`,
+    };}).reverse();
+
+    const items: RecordBookQuickPick[] = [...this.namedRecordings.entries()]
+      .map((a: [string, Record[]]): RecordBookQuickPick => { return {
+        recordBook: a[1],
+        label: a[0],
+      };})
+      .sort((a, b) => a.label < b.label ? -1 : 1);
+
     const result = await vscode.window.showQuickPick(
-      [...this.namedRecordings.keys()].concat(MOST_RECENT_RECORDING_KEY).sort((a: string, b: string): number => {
-        return a < b ? -1 : 1;
-      }),
+      [
+        ...recentItems,
+        ...items,
+      ],
       {
         placeHolder: "Recording name",
         title: "Choose Recording to play",
       },
     );
     if (!result) {
-      vscode.window.showErrorMessage("No recording chosen");
       return;
     }
-    let nr = result === MOST_RECENT_RECORDING_KEY ? this.recordBook : this.namedRecordings.get(result);
-    if (!nr) {
-      vscode.window.showErrorMessage(`Unknown recording "${result}"`);
-      return;
-    }
-    vscode.window.showInformationMessage(`Playing back "${result}"`);
-    this.playRecords(nr);
+    this.playRecords(result.recordBook);
   }
 
   async playRecords(records : Record[]) {
@@ -257,19 +268,22 @@ export class Recorder extends TypeHandler {
       return;
     }
     vscode.window.showInformationMessage("Playing recording!");
-    return this.playRecords(this.recordBook);
+    return this.playRecords(this.getRecordBook());
   }
 
   async handleActivation() {}
 
   async handleDeactivation() {
     this.lastFind = undefined;
+    if (this.recordBooks.length > MAX_RECORDINGS) {
+      this.recordBooks = this.recordBooks.slice(this.recordBooks.length - MAX_RECORDINGS);
+    }
     await vscode.commands.executeCommand("closeFindWidget");
   }
 
   addRecord(r: Record) {
     if (this.baseCommand) {
-      this.recordBook = this.recordBook.concat(r);
+      this.setRecordBook(this.getRecordBook().concat(r));
     }
   }
 
@@ -468,4 +482,8 @@ class FindNextRecord implements Record {
   async undo() {
     return false;
   }
+}
+
+interface RecordBookQuickPick extends vscode.QuickPickItem {
+  recordBook: Record[];
 }
