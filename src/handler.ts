@@ -8,6 +8,10 @@ export interface Registerable {
   register(context: vscode.ExtensionContext, recorder: Recorder): void;
 }
 
+function delay(ms: number) {
+  return new Promise( resolve => setTimeout(resolve, ms) );
+}
+
 export abstract class TypeHandler implements Registerable {
   private active: boolean;
   cm: ColorMode;

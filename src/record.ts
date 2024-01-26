@@ -155,6 +155,7 @@ export class Recorder extends TypeHandler {
       vscode.window.showErrorMessage("Not recording!");
       return;
     }
+    this.recordBook = trimRecords(this.recordBook);
 
     const searchQuery = await vscode.window.showInputBox({
       placeHolder: "Recording name",
@@ -177,6 +178,7 @@ export class Recorder extends TypeHandler {
     if (!this.isActive()) {
       vscode.window.showInformationMessage("Not recording!");
     } else {
+      this.recordBook = trimRecords(this.recordBook);
       this.deactivate();
       vscode.window.showInformationMessage("Recording ended!");
     }
@@ -287,11 +289,44 @@ export class Recorder extends TypeHandler {
   }
 }
 
+function trimRecords(records: Record[]): Record[] {
+  if (records.length === 0) {
+    return [];
+  }
+
+  const newRecords: Record[] = [];
+  for (const record of records) {
+    const lastRecord = newRecords.at(-1);
+
+    // If no previous records, or the next record can't be eaten, then add to the array.
+    if (!lastRecord || !lastRecord.eat(record)) {
+      newRecords.push(record);
+      continue;
+    }
+
+    // If the next record was eaten and resulted in a no-op record, then pop that.
+    if (lastRecord.noop()) {
+      newRecords.pop();
+    }
+  }
+
+  return newRecords;
+}
+
 interface Record {
   name(): string;
+
   playback(emacs: Emacs): Promise<boolean>;
+
   // undo undoes the record and returns a boolean indicating if the undo operation was successful.
   undo(): Promise<boolean>;
+
+  // eat attempts to eat the next record and returns whether it did or not.
+  eat(next: Record): boolean;
+
+  // Whenever a record is eaten, we check if it has become an effectively no-op (in which
+  // case it will be removed)
+  noop(): boolean;
 }
 
 class TypeRecord implements Record {
@@ -311,6 +346,31 @@ class TypeRecord implements Record {
 
   name(): string {
     return "TR: " + this.text;
+  }
+
+  noop(): boolean {
+    return this.text.length === 0;
+  }
+
+  eat(next: Record): boolean {
+    switch (next.constructor) {
+    case TypeRecord:
+      const tr = <TypeRecord>next;
+      this.text += tr.text;
+      return true;
+
+    case CommandRecord:
+      const cr = <CommandRecord>next;
+      // TODO "groog." prefix to helper method
+      if (cr.command === `groog.${DeleteCommand.left}`) {
+        // Length will not be zero because it will be popped by the noop check.
+        this.text = this.text.slice(0, this.text.length-1);
+        return true;
+      }
+      return false;
+    }
+
+    return false;
   }
 
   async undo() {
@@ -334,6 +394,14 @@ class CommandRecord implements Record {
 
   name(): string {
     return "CR: " + this.command;
+  }
+
+  noop(): boolean {
+    return false;
+  }
+
+  eat(next: Record): boolean {
+    return false;
   }
 
   async undo() {
@@ -376,6 +444,14 @@ class FindNextRecord implements Record {
 
   name(): string {
     return "FNR: " + this.findText;
+  }
+
+  noop(): boolean {
+    return false;
+  }
+
+  eat(next: Record): boolean {
+    return false;
   }
 
   async undo() {
