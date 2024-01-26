@@ -11,7 +11,7 @@ export interface RegisterCommandOptionalProps {
 }
 
 const RECENT_RECORDING_PREFIX = "Recent recording";
-const MAX_RECORDINGS = 5;
+const MAX_RECORDINGS = 3;
 
 export class Recorder extends TypeHandler {
   // baseCommand ensures we don't infinite loop a command. For example,
@@ -157,6 +157,37 @@ export class Recorder extends TypeHandler {
     }
   }
 
+  recordNameValidator(name: string): vscode.InputBoxValidationMessage | undefined {
+    if (name.startsWith(RECENT_RECORDING_PREFIX)) {
+      return {
+        message: "This is a reserved prefix",
+        severity: vscode.InputBoxValidationSeverity.Error,
+      };
+    }
+
+    if (this.namedRecordings.has(name)) {
+      return {
+        message: "This record already exists",
+        severity: vscode.InputBoxValidationSeverity.Error,
+      };
+    }
+  }
+
+  async saveNewRec(recordBook: Record[]): Promise<void> {
+    const recordingName = await vscode.window.showInputBox({
+      title: "Save recording as:",
+      placeHolder: "Recording name",
+      // Need the wrapping, otherwise hangs for some reason.
+      validateInput: (name => this.recordNameValidator(name)),
+    });
+    if (recordingName) {
+      this.namedRecordings.set(recordingName, recordBook);
+      vscode.window.showInformationMessage(`Recording saved as "${recordingName}"!`);
+    } else {
+      vscode.window.showErrorMessage("No recording name provided");
+    }
+  }
+
   async saveRecordingAs() {
     if (!this.isActive()) {
       vscode.window.showErrorMessage("Not recording!");
@@ -164,28 +195,7 @@ export class Recorder extends TypeHandler {
     }
     this.setRecordBook(trimRecords(this.getRecordBook()));
 
-    const searchQuery = await vscode.window.showInputBox({
-      placeHolder: "Recording name",
-      prompt: "Save recording as...",
-      title: "Save recording as:",
-      validateInput: (input: string) => {
-        if (input.startsWith(RECENT_RECORDING_PREFIX)) {
-          return {
-            message: "This is a reserved prefix",
-            severity: vscode.InputBoxValidationSeverity.Error,
-          };
-        }
-        return;
-      }
-    });
-
-    // Save recording as if a name was provided.
-    if (searchQuery) {
-      this.namedRecordings.set(searchQuery, this.getRecordBook());
-      vscode.window.showInformationMessage(`Recording saved as "${searchQuery}"!`);
-    } else {
-      vscode.window.showErrorMessage("No recording name provided");
-    }
+    this.saveNewRec(this.getRecordBook());
     this.deactivate();
     vscode.window.showInformationMessage("Recording ended!");
   }
@@ -226,32 +236,58 @@ export class Recorder extends TypeHandler {
       return;
     }
 
-    const recentItems: RecordBookQuickPick[] = this.recordBooks.map((recordBook, idx) => { return {
+    // Create items
+    const recentItems: RecordBookQuickPickItem[] = this.recordBooks.map((recordBook, idx) => { return {
       recordBook: recordBook,
+      buttons: [new SaveRecentRecordingButton()],
       label: `${RECENT_RECORDING_PREFIX} ${this.recordBooks.length - 1 - idx}`,
     };}).reverse();
 
-    const items: RecordBookQuickPick[] = [...this.namedRecordings.entries()]
-      .map((a: [string, Record[]]): RecordBookQuickPick => { return {
+    const items: RecordBookQuickPickItem[] = [...this.namedRecordings.entries()]
+      .map((a: [string, Record[]]): RecordBookQuickPickItem => { return {
         recordBook: a[1],
         label: a[0],
       };})
       .sort((a, b) => a.label < b.label ? -1 : 1);
 
-    const result = await vscode.window.showQuickPick(
-      [
-        ...recentItems,
-        ...items,
-      ],
-      {
-        placeHolder: "Recording name",
-        title: "Choose Recording to play",
-      },
+    // Create quick pick
+    const disposables: vscode.Disposable[] = [];
+    const input = vscode.window.createQuickPick<RecordBookQuickPickItem>();
+    input.items = [
+      ...recentItems,
+      ...items,
+    ];
+    input.title = "Choose Recording to play";
+    input.placeholder = "Recording name";
+
+    disposables.push(
+      // Dispose of events when leaving the widget.
+      input.onDidHide(e => {
+        disposables.forEach(d => d.dispose);
+      }),
+      // When pressing a button
+      input.onDidTriggerItemButton(event => {
+        input.dispose();
+        this.saveNewRec(event.item.recordBook);
+      }),
+      // When accepting an event, run the record book!
+      input.onDidAccept(e => {
+        switch (input.selectedItems.length) {
+        case 0:
+          vscode.window.showInformationMessage("No selection made");
+          break;
+        case 1:
+          this.playRecords(input.selectedItems[0].recordBook);
+          break;
+        default:
+          vscode.window.showErrorMessage(`Multiple selections made somehow?!`);
+          break;
+        };
+        input.dispose();
+      }),
     );
-    if (!result) {
-      return;
-    }
-    this.playRecords(result.recordBook);
+
+    return input.show();
   }
 
   async playRecords(records : Record[]) {
@@ -484,6 +520,15 @@ class FindNextRecord implements Record {
   }
 }
 
-interface RecordBookQuickPick extends vscode.QuickPickItem {
+interface RecordBookQuickPickItem extends vscode.QuickPickItem {
   recordBook: Record[];
+}
+
+class SaveRecentRecordingButton implements vscode.QuickInputButton {
+  readonly iconPath: vscode.ThemeIcon;
+  readonly tooltip?: string;
+  constructor() {
+    this.iconPath = new vscode.ThemeIcon("save");
+    this.tooltip = "Save recording as...";
+  }
 }
