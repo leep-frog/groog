@@ -10,6 +10,8 @@ export interface RegisterCommandOptionalProps {
   noTimeout?: boolean;
 }
 
+const MOST_RECENT_RECORDING_KEY = "Most recent recording";
+
 export class Recorder extends TypeHandler {
   // baseCommand ensures we don't infinite loop a command. For example,
   // if groog.CommandOne calls groog.CommandTwo, then we would record
@@ -161,6 +163,15 @@ export class Recorder extends TypeHandler {
       placeHolder: "Recording name",
       prompt: "Save recording as...",
       title: "Save recording as:",
+      validateInput: (input: string) => {
+        if (input === MOST_RECENT_RECORDING_KEY) {
+          return {
+            message: "This is a reserved name",
+            severity: vscode.InputBoxValidationSeverity.Error,
+          };
+        }
+        return;
+      }
     });
 
     // Save recording as if a name was provided.
@@ -211,7 +222,7 @@ export class Recorder extends TypeHandler {
       return;
     }
     const result = await vscode.window.showQuickPick(
-      [...this.namedRecordings.keys()].sort((a: string, b: string): number => {
+      [...this.namedRecordings.keys()].concat(MOST_RECENT_RECORDING_KEY).sort((a: string, b: string): number => {
         return a < b ? -1 : 1;
       }),
       {
@@ -223,7 +234,7 @@ export class Recorder extends TypeHandler {
       vscode.window.showErrorMessage("No recording chosen");
       return;
     }
-    let nr = this.namedRecordings.get(result);
+    let nr = result === MOST_RECENT_RECORDING_KEY ? this.recordBook : this.namedRecordings.get(result);
     if (!nr) {
       vscode.window.showErrorMessage(`Unknown recording "${result}"`);
       return;
