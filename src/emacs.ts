@@ -213,21 +213,15 @@ export class Emacs {
   }
 
   async ctrlG() {
-    let handled = false;
-    for (var th of this.typeHandlers) {
-      if (th.isActive()) {
-        handled = true;
-        await th.ctrlG();
-      }
-    }
-    if (handled) {
-      return;
-    }
-
-    for (var cmd of Object.values(CtrlGCommand)) {
-      // TODO: Maybe don't await if this starts to take too long.
-      await vscode.commands.executeCommand(cmd);
-    }
+    return this.runHandlers(
+      async (th: TypeHandler): Promise<boolean> => th.ctrlG(),
+      async () => {
+        for (var cmd of Object.values(CtrlGCommand)) {
+          // TODO: Maybe don't await if this starts to take too long.
+          await vscode.commands.executeCommand(cmd);
+        }
+      },
+    );
   }
 
   async kill(deleteSelection: boolean) {

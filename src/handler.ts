@@ -69,7 +69,8 @@ export abstract class TypeHandler implements Registerable {
     }
   }
 
-  abstract ctrlG(): Thenable<void>;
+  // ctrlG should return true if ctrlG commands should still be run; false otherwise.
+  abstract ctrlG(): Thenable<boolean>;
 
   abstract onYank(prefixText: string | undefined, text: string | undefined): Thenable<void>;
   abstract alwaysOnYank: boolean;

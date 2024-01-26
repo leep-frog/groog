@@ -736,8 +736,9 @@ export class FindHandler extends TypeHandler {
     this.findPrevOnType = false;
   }
 
-  async ctrlG() {
-    await this.deactivate();
+  async ctrlG(): Promise<boolean> {
+    // Don't run ctrl+g commands.
+    return this.deactivate().then(() => false);
   }
 
   async textHandler(s: string): Promise<boolean> {

@@ -339,6 +339,7 @@ export class Recorder extends TypeHandler {
   alwaysOnKill: boolean = false;
   async ctrlG() {
     await setGroogContext(this.recordFindContext, false);
+    return true;
   }
   async onYank() { }
   alwaysOnYank: boolean = false;

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ColorMode, ModeColor } from './color_mode';
 import { TypeHandler, getPrefixText } from './handler';
-import { CursorMove, DeleteCommand } from './interfaces';
+import { CtrlGCommand, CursorMove, DeleteCommand } from './interfaces';
 import { Recorder } from './record';
 import { Emacs } from './emacs';
 
@@ -66,10 +66,13 @@ export class MarkHandler extends TypeHandler {
 
   async handleActivation() {}
 
-  async handleDeactivation() {}
+  async handleDeactivation() {
+    vscode.commands.executeCommand(CtrlGCommand.cancelSelection);
+  }
 
-  async ctrlG() {
-    await this.deactivate();
+  async ctrlG(): Promise<boolean> {
+    // Don't run ctrl+g commands.
+    return this.deactivate().then(() => false);
   }
 
   async textHandler(s: string): Promise<boolean> {
