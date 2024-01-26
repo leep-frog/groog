@@ -11,7 +11,7 @@ export interface RegisterCommandOptionalProps {
 }
 
 const RECENT_RECORDING_PREFIX = "Recent recording";
-const MAX_RECORDINGS = 3;
+const MAX_RECORDINGS = 5;
 
 export class Recorder extends TypeHandler {
   // baseCommand ensures we don't infinite loop a command. For example,
