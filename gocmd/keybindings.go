@@ -250,7 +250,8 @@ var (
 		alt(shift("f4")): only("workbench.action.closeWindow"),
 
 		// Emacs bindings
-		ctrl("w"): only("groog.yank"),
+		ctrl("w"):  only("groog.yank"),
+		ctrlX("w"): only("groog.tug"),
 		ctrl("j"): {
 			// Jumps to other input box in find mode
 			groogFindMode.value: kb("groog.find.toggleReplaceMode"),
@@ -261,6 +262,7 @@ var (
 		},
 		ctrl("y"):        only("groog.emacsPaste"),
 		ctrl(shift("k")): onlyWhen("groog.find.replaceAll", groogFindMode),
+		ctrlX("k"):       only("groog.maim"),
 		ctrl("k"): {
 			// Replace in find mode
 			groogFindMode.value: kb("groog.find.replaceOne"),
@@ -543,7 +545,7 @@ var (
 		shift(pageup): {
 			editorFocus.value: kb("editor.action.selectHighlights"),
 		},
-		ctrlX("k"): only("groog.toggleQMK"),
+		ctrlZ("k"): only("groog.toggleQMK"),
 		ctrlX("e"): onlyMC(
 			"workbench.view.extensions",
 			"workbench.extensions.action.checkForUpdates",

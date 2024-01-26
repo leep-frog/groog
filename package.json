@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -175,6 +175,10 @@
         "title": "Emacs Kill Line"
       },
       {
+        "command": "groog.maim",
+        "title": "Emacs Kill Line (copy only)"
+      },
+      {
         "command": "groog.message.info",
         "title": "Groog Info Message"
       },
@@ -253,6 +257,10 @@
       {
         "command": "groog.toggleQMK",
         "title": "Emacs Toggle QMK"
+      },
+      {
+        "command": "groog.tug",
+        "title": "Emacs Yank (copy only)"
       },
       {
         "command": "groog.type",
@@ -1727,11 +1735,11 @@
       },
       {
         "key": "ctrl+x k",
-        "command": "groog.toggleQMK"
+        "command": "groog.maim"
       },
       {
         "key": "ctrl+x ctrl+k",
-        "command": "groog.toggleQMK"
+        "command": "groog.maim"
       },
       {
         "key": "ctrl+x l",
@@ -1894,6 +1902,14 @@
         }
       },
       {
+        "key": "ctrl+x w",
+        "command": "groog.tug"
+      },
+      {
+        "key": "ctrl+x ctrl+w",
+        "command": "groog.tug"
+      },
+      {
         "key": "ctrl+x x",
         "command": "groog.record.startRecording"
       },
@@ -1956,6 +1972,14 @@
       {
         "key": "ctrl+z ctrl+f",
         "command": "faves.search"
+      },
+      {
+        "key": "ctrl+z k",
+        "command": "groog.toggleQMK"
+      },
+      {
+        "key": "ctrl+z ctrl+k",
+        "command": "groog.toggleQMK"
       },
       {
         "key": "ctrl+z pagedown",

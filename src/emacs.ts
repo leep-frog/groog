@@ -108,8 +108,10 @@ export class Emacs {
     this.recorder.registerCommand(context, 'format', () => this.format());
 
     this.recorder.registerCommand(context, 'toggleQMK', () => this.qmkTracker.toggle(context));
-    this.recorder.registerCommand(context, 'yank', () => this.yank());
-    this.recorder.registerCommand(context, 'kill', () => this.kill());
+    this.recorder.registerCommand(context, 'yank', () => this.yank(true));
+    this.recorder.registerCommand(context, 'tug', () => this.yank(false));
+    this.recorder.registerCommand(context, 'kill', () => this.kill(true));
+    this.recorder.registerCommand(context, 'maim', () => this.kill(false));
     this.recorder.registerCommand(context, 'ctrlG', () => this.ctrlG());
 
     // Make an explicit command so it is visible in "alt+x".
@@ -183,7 +185,7 @@ export class Emacs {
     );
   }
 
-  async yank() {
+  async yank(deleteSelection: boolean) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       return;
@@ -200,9 +202,13 @@ export class Emacs {
     }
 
     if (range.active.compareTo(range.anchor)) {
-      await vscode.window.activeTextEditor?.edit(editBuilder => {
-        editBuilder.delete(range);
-      });
+      if (deleteSelection) {
+        await vscode.window.activeTextEditor?.edit(editBuilder => {
+          editBuilder.delete(range);
+        });
+      } else {
+        editor.selection = new vscode.Selection(editor.selection.active, editor.selection.active);
+      }
     }
   }
 
@@ -224,7 +230,7 @@ export class Emacs {
     }
   }
 
-  async kill() {
+  async kill(deleteSelection: boolean) {
     let editor = vscode.window.activeTextEditor;
     if (!editor) {
       return;
@@ -247,9 +253,11 @@ export class Emacs {
         th.onKill(text);
       }
     }
-    await vscode.window.activeTextEditor?.edit(editBuilder => {
-      editBuilder.delete(range);
-    });
+    if (deleteSelection) {
+      await vscode.window.activeTextEditor?.edit(editBuilder => {
+        editBuilder.delete(range);
+      });
+    }
   }
 
   async indentToPrevLine(offset: number) {

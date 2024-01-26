@@ -63,6 +63,7 @@ var (
 		cc("groog.indentToNextLine", "Indent to match next line"),
 		cc("groog.jump", "Emacs Jump"),
 		cc("groog.kill", "Emacs Kill Line"),
+		cc("groog.maim", "Emacs Kill Line (copy only)"),
 		cc("groog.message.info", "Groog Info Message"),
 		cc("groog.multiCommand.execute", "Groog MultiCommand"),
 		cc("groog.emacsPaste", "Emacs Paste"),
@@ -87,6 +88,7 @@ var (
 		cc("groog.redo", "Groog Redo"),
 		cc("groog.updateSettings", "Groog update settings"),
 		cc("groog.yank", "Emacs Yank"),
+		cc("groog.tug", "Emacs Yank (copy only)"),
 
 		cc("groog.script.replaceNewlineStringsWithQuotes", "Groog Script: Replace Newline Strings with Quotes"),
 		cc("groog.script.replaceNewlineStringsWithTicks", "Groog Script: Replace Newline Strings with Ticks"),
