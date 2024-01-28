@@ -4,6 +4,7 @@ import { TypeHandler } from './handler';
 import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { Recorder } from './record';
 import { GlobalBoolTracker } from './emacs';
+import { deactivate } from './extension';
 
 function findColor(opacity?: number): string{
   return `rgba(200, 120, 0, ${opacity ?? 1})`;
@@ -171,16 +172,12 @@ interface MatchInfo {
 class MatchTracker {
   private matches: Match[];
   private matchIdx?: number;
-  // TODO: Make MatchTracker require these and just create a new MatchTracker on each startNew
-  private editor?: vscode.TextEditor;
-  lastCursorPos?: vscode.Position;
+  private editor: vscode.TextEditor;
+  lastCursorPos: vscode.Position;
   private matchError?: string;
 
-  constructor() {
+  constructor(editor: vscode.TextEditor) {
     this.matches = [];
-  }
-
-  public setNewEditor(editor: vscode.TextEditor) {
     this.editor = editor;
     this.lastCursorPos = editor.selection.start;
   }
@@ -214,13 +211,6 @@ class MatchTracker {
   }
 
   public refreshMatches(props: RefreshMatchesProps): void {
-    // The first check implies the second, but include here so we don't need an exclamation point throughout the
-    // rest of the function.
-    if (!this.editor || !this.lastCursorPos) {
-      vscode.window.showErrorMessage(`Cannot refresh find matches when not in an editor`);
-      return;
-    }
-
     [this.matches, this.matchError] = new Document(this.editor.document.getText()).matches(props);
 
     // Update the matchIdx
@@ -271,7 +261,9 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
   private caseToggle: boolean;
   private wholeWordToggle: boolean;
   private active: boolean;
-  private matchTracker: MatchTracker;
+  // This is only undefined on extension initialization, but it is forced to be set on
+  // all find mode activations, so all calls of it can force it's presence (`matchTracker!.`)
+  private matchTracker?: MatchTracker;
 
   constructor() {
     this.cache = [];
@@ -283,7 +275,6 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     this.caseToggle = false;
     this.wholeWordToggle = false;
     this.active = false;
-    this.matchTracker = new MatchTracker();
   }
 
   public toggleRegex() {
@@ -325,7 +316,7 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       return;
     }
 
-    const matchInfo = this.matchTracker.getMatchInfo();
+    const matchInfo = this.matchTracker!.getMatchInfo();
     const m = matchInfo.match;
     const toReplace = all ? matchInfo.matches : (m ? [m] : []);
     return editor.edit(eb => {
@@ -341,13 +332,13 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     });
   }
 
-  public async startNew(findPrevOnType: boolean, initText?: string) : Promise<void> {
+  public async startNew(findPrevOnType: boolean, initText?: string) : Promise<boolean> {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage(`Cannot activate find mode from outside an editor`);
-      return;
+      return false;
     }
-    this.matchTracker.setNewEditor(editor);
+    this.matchTracker = new MatchTracker(editor);
 
     this.active = true;
     this.cursorStack.clear();
@@ -362,12 +353,12 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     this.cacheIdx = this.cache.length-1;
     this.findPrevOnType = findPrevOnType;
     this.refreshMatches();
-    return this.focusMatch();
+    return this.focusMatch().then(() => true);
   }
 
   public async end(): Promise<void> {
     // Focus on the last match (if relevant)
-    const match = this.matchTracker.getMatchInfo().match;
+    const match = this.matchTracker!.getMatchInfo().match;
     if (match) {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
@@ -402,7 +393,7 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     if (this.wholeWordToggle) { codes.push("W"); }
     if (this.regexToggle) { codes.push("R"); }
 
-    const matchInfo = this.matchTracker.getMatchInfo();
+    const matchInfo = this.matchTracker!.getMatchInfo();
     const ms = matchInfo.matches;
     const m = matchInfo.match;
     const whitespaceJoin = "\n" + (m ? document.getText(new vscode.Range(new vscode.Position(m.range.start.line, 0), new vscode.Position(m.range.start.line, m.range.start.character))).replace(/[^\t]/g, " ") : "");
@@ -466,7 +457,7 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       ctx.findText = ctx.findText.concat(s);
       // Only refreshMatches when updating find text
       this.refreshMatches();
-      this.cursorStack.push(this.matchTracker.getMatchInfo().matchIdx);
+      this.cursorStack.push(this.matchTracker!.getMatchInfo().matchIdx);
     }
     return this.focusMatch();
   }
@@ -492,7 +483,7 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
         // See the previous one
         const newMatchIdx = this.cursorStack.peek();
         if (newMatchIdx !== undefined) {
-          this.matchTracker.setMatchIndex(newMatchIdx);
+          this.matchTracker!.setMatchIndex(newMatchIdx);
         }
       }
     }
@@ -501,7 +492,7 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
   }
 
   private refreshMatches() {
-    this.matchTracker.refreshMatches({
+    this.matchTracker!.refreshMatches({
       queryText: this.currentContext().findText,
       caseInsensitive: !this.caseToggle,
       regex: this.regexToggle,
@@ -529,7 +520,7 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       return;
     }
 
-    const matchInfo = this.matchTracker.getMatchInfo();
+    const matchInfo = this.matchTracker!.getMatchInfo();
     const match = matchInfo.match;
     const matches = matchInfo.matches;
     const matchIndex = matchInfo.matchIdx;
@@ -544,8 +535,8 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       // Update the cursor and editor focus
       editor.selection = new vscode.Selection(match.range.start, match.range.end);
       editor.revealRange(match.range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
-    } else if (this.matchTracker.lastCursorPos) {
-      editor.selection = new vscode.Selection(this.matchTracker.lastCursorPos, this.matchTracker.lastCursorPos);
+    } else if (this.matchTracker!.lastCursorPos) {
+      editor.selection = new vscode.Selection(this.matchTracker!.lastCursorPos, this.matchTracker!.lastCursorPos);
     }
 
     // Regardless of cursor move, update the find display.
@@ -598,9 +589,9 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     }
 
     if (prev) {
-      this.matchTracker.prevMatch();
+      this.matchTracker!.prevMatch();
     } else {
-      this.matchTracker.nextMatch();
+      this.matchTracker!.nextMatch();
     };
     this.focusMatch();
   }
@@ -714,16 +705,19 @@ export class FindHandler extends TypeHandler {
   }
 
   async handleActivation() {
+    let started = false;
     if (this.simpleModeTracker.get()) {
       const searchQuery = await vscode.window.showInputBox({
         placeHolder: "Search query",
         prompt: "Search text",
       });
-      await this.cache.startNew(this.findPrevOnType, searchQuery);
+      started = await this.cache.startNew(this.findPrevOnType, searchQuery);
     } else {
-      await this.cache.startNew(this.findPrevOnType);
+      started = await this.cache.startNew(this.findPrevOnType);
     }
-
+    if (!started) {
+      return deactivate();
+    }
   }
 
   async deactivateCommands() {
