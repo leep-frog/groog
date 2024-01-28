@@ -171,8 +171,9 @@ interface MatchInfo {
 class MatchTracker {
   private matches: Match[];
   private matchIdx?: number;
+  // TODO: Make MatchTracker require these and just create a new MatchTracker on each startNew
   private editor?: vscode.TextEditor;
-  private lastCursorPos?: vscode.Position;
+  lastCursorPos?: vscode.Position;
   private matchError?: string;
 
   constructor() {
@@ -256,7 +257,7 @@ class MatchTracker {
     }
 
     // Update the beginning of this match.
-    this.lastCursorPos = this.matches[this.matchIdx].range.start;
+    // this.lastCursorPos = this.matches[this.matchIdx].range.start;
   }
 }
 
@@ -465,7 +466,6 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       ctx.findText = ctx.findText.concat(s);
       // Only refreshMatches when updating find text
       this.refreshMatches();
-      vscode.window.showInformationMessage(`Pushing: ${this.matchTracker.getMatchInfo().matchIdx}`);
       this.cursorStack.push(this.matchTracker.getMatchInfo().matchIdx);
     }
     return this.focusMatch();
@@ -544,6 +544,8 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       // Update the cursor and editor focus
       editor.selection = new vscode.Selection(match.range.start, match.range.end);
       editor.revealRange(match.range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+    } else if (this.matchTracker.lastCursorPos) {
+      editor.selection = new vscode.Selection(this.matchTracker.lastCursorPos, this.matchTracker.lastCursorPos);
     }
 
     // Regardless of cursor move, update the find display.
