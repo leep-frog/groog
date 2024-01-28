@@ -465,6 +465,7 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       ctx.findText = ctx.findText.concat(s);
       // Only refreshMatches when updating find text
       this.refreshMatches();
+      vscode.window.showInformationMessage(`Pushing: ${this.matchTracker.getMatchInfo().matchIdx}`);
       this.cursorStack.push(this.matchTracker.getMatchInfo().matchIdx);
     }
     return this.focusMatch();
@@ -485,9 +486,13 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
         ctx.findText = ctx.findText.slice(0, ctx.findText.length - 1);
 
         this.refreshMatches();
-        const popIdx = this.cursorStack.pop();
-        if (popIdx !== undefined) {
-          this.matchTracker.setMatchIndex(popIdx);
+
+        // Pop the one for this letter
+        this.cursorStack.pop();
+        // See the previous one
+        const newMatchIdx = this.cursorStack.peek();
+        if (newMatchIdx !== undefined) {
+          this.matchTracker.setMatchIndex(newMatchIdx);
         }
       }
     }
@@ -536,12 +541,8 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
 
     // Move the cursor if necessary
     if (match) {
-      // Put cursor at the end of the line that the match range ends at.
-      const endLine = match.range.end.line;
-      const newCursorPos = new vscode.Position(endLine, editor.document.lineAt(endLine).range.end.character);
-      editor.selection = new vscode.Selection(newCursorPos, newCursorPos);
-
-      // Update the editor focus
+      // Update the cursor and editor focus
+      editor.selection = new vscode.Selection(match.range.start, match.range.end);
       editor.revealRange(match.range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
     }
 
@@ -782,6 +783,10 @@ class CursorStack {
 
   pop(): number | undefined {
     return this.matchIndexes.pop();
+  }
+
+  peek(): number | undefined {
+    return this.matchIndexes.at(-1);
   }
 
   clear() {
