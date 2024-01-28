@@ -173,13 +173,13 @@ class MatchTracker {
   private matches: Match[];
   private matchIdx?: number;
   private editor: vscode.TextEditor;
-  lastCursorPos: vscode.Position;
+  cursorReferencePosition: vscode.Position;
   private matchError?: string;
 
   constructor(editor: vscode.TextEditor) {
     this.matches = [];
     this.editor = editor;
-    this.lastCursorPos = editor.selection.start;
+    this.cursorReferencePosition = editor.selection.start;
   }
 
   public setMatchIndex(idx: number) {
@@ -199,22 +199,29 @@ class MatchTracker {
   }
 
   public nextMatch() {
-    if (this.matchIdx !== undefined) {
-      this.matchIdx = (this.matchIdx + 1) % this.matches.length;
-    }
+    this.nextOrPrevMatch(1);
   }
 
   public prevMatch() {
+    this.nextOrPrevMatch(-1);
+  }
+
+  private nextOrPrevMatch(offset: number) {
     if (this.matchIdx !== undefined) {
-      this.matchIdx = (this.matchIdx + this.matches.length - 1) % this.matches.length;
+      this.matchIdx = (this.matchIdx + this.matches.length + offset) % this.matches.length;
     }
+  }
+
+  public updateCursor() {
+    this.cursorReferencePosition = this.editor.selection.anchor;
+    vscode.window.showInformationMessage(`new pos: ${this.cursorReferencePosition.line}, ${this.cursorReferencePosition.character}`);
   }
 
   public refreshMatches(props: RefreshMatchesProps): void {
     [this.matches, this.matchError] = new Document(this.editor.document.getText()).matches(props);
 
     // Update the matchIdx
-    this.matchIdx = this.matches.length === 0 ? undefined : sortedGTE(this.matches.map(m => m.range), new vscode.Range(this.lastCursorPos, this.lastCursorPos), (a: vscode.Range, b: vscode.Range) => {
+    this.matchIdx = this.matches.length === 0 ? undefined : sortedGTE(this.matches.map(m => m.range), new vscode.Range(this.cursorReferencePosition, this.cursorReferencePosition), (a: vscode.Range, b: vscode.Range) => {
       if (a.start.isEqual(b.start)) {
         return 0;
       }
@@ -236,7 +243,7 @@ class MatchTracker {
 
     const matchToFocus = this.matches[this.matchIdx];
     // We're at the same match, so don't do anything
-    if (this.lastCursorPos.isEqual(matchToFocus.range.start)) {
+    if (this.cursorReferencePosition.isEqual(matchToFocus.range.start)) {
       return;
     }
 
@@ -245,16 +252,12 @@ class MatchTracker {
       // Decrement the match
       this.matchIdx = (this.matchIdx + this.matches.length - 1) % this.matches.length;
     }
-
-    // Update the beginning of this match.
-    // this.lastCursorPos = this.matches[this.matchIdx].range.start;
   }
 }
 
 class FindContextCache implements vscode.InlineCompletionItemProvider {
   private cache: FindContext[];
   private cacheIdx: number;
-  private cursorStack: CursorStack;
   private replaceMode: boolean;
   private findPrevOnType: boolean;
   private regexToggle: boolean;
@@ -268,7 +271,6 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
   constructor() {
     this.cache = [];
     this.cacheIdx = 0;
-    this.cursorStack = new CursorStack();
     this.replaceMode = false;
     this.findPrevOnType = false;
     this.regexToggle = false;
@@ -341,7 +343,6 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     this.matchTracker = new MatchTracker(editor);
 
     this.active = true;
-    this.cursorStack.clear();
     this.cache.push({
       modified: !!initText,
       findText: initText || "",
@@ -430,7 +431,6 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       return;
     }
     this.cacheIdx++;
-    this.cursorStack.clear();
     this.refreshMatches();
     return this.focusMatch();
   }
@@ -441,7 +441,6 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       return;
     }
     this.cacheIdx--;
-    this.cursorStack.clear();
     this.refreshMatches();
     return this.focusMatch();
   }
@@ -457,7 +456,6 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       ctx.findText = ctx.findText.concat(s);
       // Only refreshMatches when updating find text
       this.refreshMatches();
-      this.cursorStack.push(this.matchTracker!.getMatchInfo().matchIdx);
     }
     return this.focusMatch();
   }
@@ -477,14 +475,6 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
         ctx.findText = ctx.findText.slice(0, ctx.findText.length - 1);
 
         this.refreshMatches();
-
-        // Pop the one for this letter
-        this.cursorStack.pop();
-        // See the previous one
-        const newMatchIdx = this.cursorStack.peek();
-        if (newMatchIdx !== undefined) {
-          this.matchTracker!.setMatchIndex(newMatchIdx);
-        }
       }
     }
     // Always focusMatch because that regenerates the inline text.
@@ -535,8 +525,8 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       // Update the cursor and editor focus
       editor.selection = new vscode.Selection(match.range.start, match.range.end);
       editor.revealRange(match.range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
-    } else if (this.matchTracker!.lastCursorPos) {
-      editor.selection = new vscode.Selection(this.matchTracker!.lastCursorPos, this.matchTracker!.lastCursorPos);
+    } else if (this.matchTracker!.cursorReferencePosition) {
+      editor.selection = new vscode.Selection(this.matchTracker!.cursorReferencePosition, this.matchTracker!.cursorReferencePosition);
     }
 
     // Regardless of cursor move, update the find display.
@@ -594,6 +584,7 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       this.matchTracker!.nextMatch();
     };
     this.focusMatch();
+    this.matchTracker!.updateCursor();
   }
 }
 
@@ -760,32 +751,4 @@ export class FindHandler extends TypeHandler {
   alwaysOnYank: boolean = false;
   async onKill(s: string | undefined) { }
   alwaysOnKill: boolean = false;
-}
-
-class CursorStack {
-  matchIndexes: (number | undefined)[];
-
-  constructor() {
-    this.matchIndexes = [];
-  }
-
-  // Note: using the matchIdx as the way to get cursor position isn't perfect
-  // because if we replace a value, then when we backspace, it'll go to the wrong
-  // spot. However, it beats the alternative where we use cursor, but a multi-line
-  // replacement happens, and then we just go to some random spot in the code.
-  push(matchIdx?: number) {
-    this.matchIndexes.push(matchIdx);
-  }
-
-  pop(): number | undefined {
-    return this.matchIndexes.pop();
-  }
-
-  peek(): number | undefined {
-    return this.matchIndexes.at(-1);
-  }
-
-  clear() {
-    this.matchIndexes = [];
-  }
 }
