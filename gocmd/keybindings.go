@@ -70,7 +70,6 @@ var (
 	groogSimpleFindMode     = wc(groogContext("find.simple"))
 	groogQMK                = wc(groogContext("qmk"))
 	groogRecording          = wc(groogContext("record"))
-	groogRecordingFind      = wc(groogContext("record.find"))
 	groogTerminalFindMode   = wc(groogContext("terminal.find"))
 	inQuickOpen             = wc("inQuickOpen")
 	inSearchEditor          = wc("inSearchEditor")
@@ -192,23 +191,19 @@ var (
 		// Find bindings
 		ctrl("f"): {
 			groogQMK.and(terminalVisible).value: kb("groog.terminal.find"),
-			groogQMK.and(terminalVisible.not()).and(groogRecording).and(groogRecordingFind.not()).value: kb("groog.record.find"),
-			groogQMK.and(terminalVisible.not()).and(groogRecording).and(groogRecordingFind).value:       kb("groog.record.findNext"),
 			// This is mostly relevant for Find Simple Mode (so `ctrl+s; ctrl+s` results in redoing previous find)
-			groogQMK.and(terminalVisible.not()).and(groogRecording.not()).and(inQuickOpen).and(groogSimpleFindMode).value: kb("workbench.action.acceptSelectedQuickOpenItem"),
-			groogQMK.and(terminalVisible.not()).and(groogRecording.not()).value:                                           kb("groog.find"),
-			groogQMK.not().and(editorTextFocus.and(inQuickOpen.not())).value:                                              kb("groog.cursorRight"),
+			groogQMK.and(terminalVisible.not()).and(inQuickOpen).and(groogSimpleFindMode).value: kb("workbench.action.acceptSelectedQuickOpenItem"),
+			groogQMK.and(terminalVisible.not()).value:                                           kb("groog.find"),
+			groogQMK.not().and(editorTextFocus.and(inQuickOpen.not())).value:                    kb("groog.cursorRight"),
 			always.value: kb("-workbench.action.terminal.focusFind"),
 		},
 		ctrl("s"): {
 			// "workbench.action.acceptSelectedQuickOpenItem",
 			groogQMK.value: kb("groog.cursorRight"),
-			groogQMK.not().and(terminalVisible).value:                                                         kb("groog.terminal.find"),
-			groogQMK.not().and(terminalVisible.not()).and(groogRecording).and(groogRecordingFind.not()).value: kb("groog.record.find"),
-			groogQMK.not().and(terminalVisible.not()).and(groogRecording).and(groogRecordingFind).value:       kb("groog.record.findNext"),
+			groogQMK.not().and(terminalVisible).value: kb("groog.terminal.find"),
 			// This is mostly relevant for Find Simple Mode (so `ctrl+s; ctrl+s` results in redoing previous find)
-			groogQMK.not().and(terminalVisible.not()).and(groogRecording.not()).and(inQuickOpen).and(groogSimpleFindMode).value: kb("workbench.action.acceptSelectedQuickOpenItem"),
-			groogQMK.not().and(terminalVisible.not()).and(groogRecording.not()).value:                                           kb("groog.find"),
+			groogQMK.not().and(terminalVisible.not()).and(inQuickOpen).and(groogSimpleFindMode).value: kb("workbench.action.acceptSelectedQuickOpenItem"),
+			groogQMK.not().and(terminalVisible.not()).value:                                           kb("groog.find"),
 		},
 		// Don't use 'terminalVisible' here because we don't want ctrl+r to activate terminal find mode.
 		// Instead, we want ctrl+r in non-find mode to search for matching bash commands (as it normally would)
@@ -806,9 +801,9 @@ func upBindings() map[string]*KB {
 		always.value:                kb("-workbench.action.quickOpen"),
 		editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorUp"),
 		editorTextFocus.and(suggestWidgetVisible).value:       kb("selectPrevSuggestion"),
-		inQuickOpen.value:        kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
-		groogFindMode.value:      kb("editor.action.previousMatchFindAction"),
-		searchViewletFocus.value: kb("list.focusUp"),
+		inQuickOpen.and(groogFindMode.not()).value:            kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
+		groogFindMode.value:                                   kb("groog.reverseFind"),
+		searchViewletFocus.value:                              kb("list.focusUp"),
 	}
 }
 
@@ -816,11 +811,11 @@ func downBindings() map[string]*KB {
 	return map[string]*KB{
 		groogTerminalFindMode.value: kb("groog.terminal.find"),
 		always.value:                kb("-workbench.action.files.newUntitledFile"),
-		editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorDown"),
-		editorTextFocus.and(suggestWidgetVisible).value:       kb("selectNextSuggestion"),
-		inQuickOpen.value:         kb("workbench.action.quickOpenNavigateNextInFilePicker"),
-		groogFindMode.value:       kb("editor.action.nextMatchFindAction"),
-		searchInputBoxFocus.value: kb("search.action.focusSearchList"),
+		editorTextFocus.and(suggestWidgetVisible.not()).value:   kb("groog.cursorDown"),
+		editorTextFocus.and(suggestWidgetVisible).value:         kb("selectNextSuggestion"),
+		inQuickOpen.and(groogFindMode.not()).value:              kb("workbench.action.quickOpenNavigateNextInFilePicker"),
+		groogFindMode.value:                                     kb("groog.find"),
+		searchInputBoxFocus.value:                               kb("search.action.focusSearchList"),
 		searchInputBoxFocus.not().and(searchViewletFocus).value: kb("list.focusDown"),
 	}
 }

@@ -74,8 +74,10 @@ export class Emacs {
     });
     this.recorder = new Recorder(this.cm, this);
     this.typoFixer = new TypoFixer();
+    const finder = new FindHandler(this.cm, this.recorder);
+    this.recorder.setFinder(finder);
     this.typeHandlers = [
-      new FindHandler(this.cm),
+      finder,
       new MarkHandler(this.cm, this),
       new TerminalFindHandler(this.cm),
       this.recorder,

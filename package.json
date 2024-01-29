@@ -199,14 +199,6 @@
         "title": "Groog End Recording"
       },
       {
-        "command": "groog.record.find",
-        "title": "Find selection during recording"
-      },
-      {
-        "command": "groog.record.findNext",
-        "title": "Find the next selection during recording"
-      },
-      {
         "command": "groog.record.playNamedRecording",
         "title": "Groog Play Named Recording..."
       },
@@ -1009,22 +1001,12 @@
       {
         "key": "ctrl+f",
         "command": "groog.find",
-        "when": "groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.context.recordMode"
+        "when": "groog.context.qmkMode \u0026\u0026 !view.terminal.visible"
       },
       {
         "key": "ctrl+f",
         "command": "workbench.action.acceptSelectedQuickOpenItem",
-        "when": "groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.context.recordMode \u0026\u0026 inQuickOpen \u0026\u0026 groog.context.find.simpleMode"
-      },
-      {
-        "key": "ctrl+f",
-        "command": "groog.record.find",
-        "when": "groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.context.recordMode \u0026\u0026 !groog.context.record.findMode"
-      },
-      {
-        "key": "ctrl+f",
-        "command": "groog.record.findNext",
-        "when": "groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.context.recordMode \u0026\u0026 groog.context.record.findMode"
+        "when": "groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 inQuickOpen \u0026\u0026 groog.context.find.simpleMode"
       },
       {
         "key": "ctrl+f",
@@ -1156,7 +1138,7 @@
       },
       {
         "key": "ctrl+n",
-        "command": "editor.action.nextMatchFindAction",
+        "command": "groog.find",
         "when": "groog.context.findMode"
       },
       {
@@ -1167,7 +1149,7 @@
       {
         "key": "ctrl+n",
         "command": "workbench.action.quickOpenNavigateNextInFilePicker",
-        "when": "inQuickOpen"
+        "when": "inQuickOpen \u0026\u0026 !groog.context.findMode"
       },
       {
         "key": "ctrl+n",
@@ -1205,7 +1187,7 @@
       },
       {
         "key": "ctrl+p",
-        "command": "editor.action.previousMatchFindAction",
+        "command": "groog.reverseFind",
         "when": "groog.context.findMode"
       },
       {
@@ -1216,7 +1198,7 @@
       {
         "key": "ctrl+p",
         "command": "workbench.action.quickOpenNavigatePreviousInFilePicker",
-        "when": "inQuickOpen"
+        "when": "inQuickOpen \u0026\u0026 !groog.context.findMode"
       },
       {
         "key": "ctrl+p",
@@ -1284,22 +1266,12 @@
       {
         "key": "ctrl+s",
         "command": "groog.find",
-        "when": "!groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.context.recordMode"
+        "when": "!groog.context.qmkMode \u0026\u0026 !view.terminal.visible"
       },
       {
         "key": "ctrl+s",
         "command": "workbench.action.acceptSelectedQuickOpenItem",
-        "when": "!groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 !groog.context.recordMode \u0026\u0026 inQuickOpen \u0026\u0026 groog.context.find.simpleMode"
-      },
-      {
-        "key": "ctrl+s",
-        "command": "groog.record.find",
-        "when": "!groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.context.recordMode \u0026\u0026 !groog.context.record.findMode"
-      },
-      {
-        "key": "ctrl+s",
-        "command": "groog.record.findNext",
-        "when": "!groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 groog.context.recordMode \u0026\u0026 groog.context.record.findMode"
+        "when": "!groog.context.qmkMode \u0026\u0026 !view.terminal.visible \u0026\u0026 inQuickOpen \u0026\u0026 groog.context.find.simpleMode"
       },
       {
         "key": "ctrl+s",
@@ -2048,7 +2020,7 @@
       },
       {
         "key": "down",
-        "command": "editor.action.nextMatchFindAction",
+        "command": "groog.find",
         "when": "groog.context.findMode"
       },
       {
@@ -2059,7 +2031,7 @@
       {
         "key": "down",
         "command": "workbench.action.quickOpenNavigateNextInFilePicker",
-        "when": "inQuickOpen"
+        "when": "inQuickOpen \u0026\u0026 !groog.context.findMode"
       },
       {
         "key": "down",
@@ -2775,7 +2747,7 @@
       },
       {
         "key": "up",
-        "command": "editor.action.previousMatchFindAction",
+        "command": "groog.reverseFind",
         "when": "groog.context.findMode"
       },
       {
@@ -2786,7 +2758,7 @@
       {
         "key": "up",
         "command": "workbench.action.quickOpenNavigatePreviousInFilePicker",
-        "when": "inQuickOpen"
+        "when": "inQuickOpen \u0026\u0026 !groog.context.findMode"
       },
       {
         "key": "up",

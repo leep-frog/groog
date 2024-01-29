@@ -69,8 +69,6 @@ var (
 		cc("groog.emacsPaste", "Emacs Paste"),
 		cc("groog.paste", "Groog Paste"),
 		cc("groog.record.endRecording", "Groog End Recording"),
-		cc("groog.record.find", "Find selection during recording"),
-		cc("groog.record.findNext", "Find the next selection during recording"),
 		cc("groog.record.playNamedRecording", "Groog Play Named Recording..."),
 		cc("groog.record.playRecording", "Groog Play Recording"),
 		cc("groog.record.deleteRecording", "Groog Delete Recording"),

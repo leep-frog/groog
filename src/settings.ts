@@ -4,6 +4,11 @@ import { Recorder } from './record';
 
 export class Settings implements Registerable {
 
+  // In order to work on Windows Remote Desktop (with QMK specifically),
+  // you need to modify some settings. See the below links for more details:
+  // https://docs.qmk.fm/#/mod_tap?id=caveats
+  // https://www.reddit.com/r/olkb/comments/125kjh0/qmk_issues_on_remote_desktop_protocol/
+
   private static settings(): Setting[] {
     let ics = [
       "workbench.action.terminal.sendSequence",

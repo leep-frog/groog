@@ -4,6 +4,7 @@ import { TypeHandler } from './handler';
 import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { Emacs } from './emacs';
 import AwaitLock from 'await-lock';
+import { FindHandler } from './find';
 
 export interface RegisterCommandOptionalProps {
   noLock?: boolean;
@@ -22,21 +23,15 @@ export class Recorder extends TypeHandler {
   // happened once during recording.
   private baseCommand: boolean;
   private recordBooks: Record[][];
-  private lastFind: FindNextRecord | undefined;
   // Note: we would never need these in persistent memory
   // because any recording I'd want public I could
   // just create an equivalent vscode function.
   private namedRecordings: Map<string, Record[]>;
   private emacs: Emacs;
   private readonly typeLock: AwaitLock;
+  private finder?: FindHandler;
 
   readonly whenContext: string = "record";
-  private readonly recordFindContext = "record.find";
-  private recordFindContextLocal = false;
-
-  async setFindContext(to: boolean) {
-    return setGroogContext(this.recordFindContext, to).then(() => { this.recordFindContextLocal = to; });
-  }
 
   constructor(cm: ColorMode, emacs: Emacs) {
     super(cm, ModeColor.record);
@@ -45,6 +40,10 @@ export class Recorder extends TypeHandler {
     this.namedRecordings = new Map<string, Record[]>();
     this.emacs = emacs;
     this.typeLock = new AwaitLock();
+  }
+
+  public setFinder(finder: FindHandler) {
+    this.finder = finder;
   }
 
   // I encountered an issue when coding with VSCode + SSH + QMK keyboard setup. Basically,
@@ -65,10 +64,6 @@ export class Recorder extends TypeHandler {
     recorder.registerCommand(context, "record.saveRecordingAs", () => recorder.saveRecordingAs());
     recorder.registerCommand(context, "record.deleteRecording", () => recorder.deleteRecording());
     recorder.registerCommand(context, "record.undo", () => recorder.undo());
-    recorder.registerCommand(context, "record.find", () => recorder.find(), {noTimeout: true});
-    // This needs to have noLock true because it runs simultaneously with the record.find command
-    // when pressing ctrl+s twice.
-    recorder.registerCommand(context, "record.findNext", () => recorder.findNext(), {noLock: true});
 
     // We don't lock on playbacks because they are nested commands.
     recorder.registerCommand(context, "record.playRecording", () => recorder.playback(), {noLock: true});
@@ -86,7 +81,7 @@ export class Recorder extends TypeHandler {
   }
 
   async execute(command: string, args: any[], callback: (...args: any[]) => any) {
-    if (command.includes("groog.record") || !this.isActive() || !this.baseCommand) {
+    if (command.startsWith("groog.record") || command.startsWith("groog.find") || this.finder?.isActive() || !this.isActive() || !this.baseCommand) {
       await callback(...args);
       return;
     }
@@ -94,36 +89,6 @@ export class Recorder extends TypeHandler {
     this.baseCommand = false;
     await callback(...args);
     this.baseCommand = true;
-  }
-
-  async findNext() {
-    if (!this.lastFind) {
-      vscode.window.showErrorMessage(`This recording hasn't executed a find command yet.`);
-      return;
-    }
-    await this.lastFind.playback().then(() => {
-      if (this.lastFind) {
-        return this.addRecord(this.lastFind!);
-      };
-    });
-  }
-
-  async find() {
-    return await this.setFindContext(true).then(() => vscode.window.showInputBox({
-      placeHolder: "Search query",
-      prompt: "Search text",
-      // value: selectedText
-    }).then(
-      (searchQuery) => {
-        if (searchQuery) {
-          this.lastFind = new FindNextRecord(searchQuery);
-          return this.findNext();
-        }
-      },
-    )).then(
-      () => {}, // Do nothing on fulfilled
-      () => this.setFindContext(false),
-    );
   }
 
   getRecordBook(): Record[] { return this.recordBooks.at(-1)!; }
@@ -310,7 +275,6 @@ export class Recorder extends TypeHandler {
   async handleActivation() {}
 
   async handleDeactivation() {
-    this.lastFind = undefined;
     if (this.recordBooks.length > MAX_RECORDINGS) {
       this.recordBooks = this.recordBooks.slice(this.recordBooks.length - MAX_RECORDINGS);
     }
@@ -318,17 +282,12 @@ export class Recorder extends TypeHandler {
   }
 
   addRecord(r: Record) {
-    if (this.baseCommand) {
+    if (this.baseCommand && !this.finder?.isActive()) {
       this.setRecordBook(this.getRecordBook().concat(r));
     }
   }
 
   async textHandler(s: string): Promise<boolean> {
-    if (this.recordFindContextLocal) {
-      await this.setFindContext(false);
-      await vscode.commands.executeCommand(CtrlGCommand.closeFindWidget);
-      this.addRecord(new CommandRecord(CtrlGCommand.closeFindWidget));
-    }
     this.addRecord(new TypeRecord(s));
     return true;
   }
@@ -338,7 +297,6 @@ export class Recorder extends TypeHandler {
   async onKill(s: string | undefined) { }
   alwaysOnKill: boolean = false;
   async ctrlG() {
-    await setGroogContext(this.recordFindContext, false);
     return true;
   }
   async onYank() { }
@@ -375,7 +333,7 @@ function trimRecords(records: Record[]): Record[] {
   return newRecords;
 }
 
-interface Record {
+export interface Record {
   name(): string;
 
   playback(emacs: Emacs): Promise<boolean>;
@@ -470,53 +428,6 @@ class CommandRecord implements Record {
     // TODO: Map from command to command that reverts (e.g. groog.jump, groog.fall?)
     // Maybe not cuz jump at the end of a file won't behave properly, but still
     // an approach for other commands?
-    return false;
-  }
-}
-
-class FindNextRecord implements Record {
-  findText: string;
-
-  constructor(findText: string) {
-    this.findText = findText;
-  }
-
-  async playback(): Promise<boolean> {
-    await vscode.commands.executeCommand("editor.actions.findWithArgs", {
-      "searchString": this.findText,
-      // TODO: Use flags set by find handler
-    });
-    await vscode.commands.executeCommand("editor.action.nextMatchFindAction");
-    // Can also do the following command instead of focusActiveEditorGroup:
-    // await vscode.commands.executeCommand("closeFindWidget");
-    await vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
-
-    let editor = vscode.window.activeTextEditor;
-    if (!editor) {
-      vscode.window.showErrorMessage("Cannot get active text editor for find playback");
-      return false;
-    }
-
-    if (editor.selection.isEmpty) {
-      vscode.window.showErrorMessage("No match found in find playback");
-      return false;
-    }
-    return true;
-  }
-
-  name(): string {
-    return "FNR: " + this.findText;
-  }
-
-  noop(): boolean {
-    return false;
-  }
-
-  eat(next: Record): boolean {
-    return false;
-  }
-
-  async undo() {
     return false;
   }
 }

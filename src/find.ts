@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
 import { ColorMode, ModeColor } from './color_mode';
-import { TypeHandler } from './handler';
-import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './interfaces';
-import { Recorder } from './record';
-import { GlobalBoolTracker } from './emacs';
+import { Emacs, GlobalBoolTracker } from './emacs';
 import { deactivate } from './extension';
+import { TypeHandler } from './handler';
+import { CursorMove, DeleteCommand, setGroogContext } from './interfaces';
+import { Record, Recorder } from './record';
+import { positiveMod } from './misc-command';
 
 function findColor(opacity?: number): string{
   return `rgba(200, 120, 0, ${opacity ?? 1})`;
@@ -206,15 +207,14 @@ class MatchTracker {
     this.nextOrPrevMatch(-1);
   }
 
-  private nextOrPrevMatch(offset: number) {
+  public nextOrPrevMatch(offset: number) {
     if (this.matchIdx !== undefined) {
-      this.matchIdx = (this.matchIdx + this.matches.length + offset) % this.matches.length;
+      this.matchIdx = positiveMod(this.matchIdx + offset, this.matches.length);
     }
   }
 
   public updateCursor() {
     this.cursorReferencePosition = this.editor.selection.anchor;
-    vscode.window.showInformationMessage(`new pos: ${this.cursorReferencePosition.line}, ${this.cursorReferencePosition.character}`);
   }
 
   public refreshMatches(props: RefreshMatchesProps): void {
@@ -267,6 +267,8 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
   // This is only undefined on extension initialization, but it is forced to be set on
   // all find mode activations, so all calls of it can force it's presence (`matchTracker!.`)
   private matchTracker?: MatchTracker;
+  public nexts: number;
+  public lastRefreshProps: RefreshMatchesProps;
 
   constructor() {
     this.cache = [];
@@ -277,6 +279,14 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     this.caseToggle = false;
     this.wholeWordToggle = false;
     this.active = false;
+    this.nexts = 0;
+    this.lastRefreshProps = {
+      queryText: "",
+      caseInsensitive: false,
+      prevMatchOnChange: false,
+      regex: false,
+      wholeWord: false,
+    };
   }
 
   public toggleRegex() {
@@ -336,6 +346,14 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
 
   public async startNew(findPrevOnType: boolean, initText?: string) : Promise<boolean> {
     const editor = vscode.window.activeTextEditor;
+    this.nexts = 0;
+    this.lastRefreshProps = {
+      queryText: "",
+      caseInsensitive: false,
+      prevMatchOnChange: false,
+      regex: false,
+      wholeWord: false,
+    };
     if (!editor) {
       vscode.window.showErrorMessage(`Cannot activate find mode from outside an editor`);
       return false;
@@ -411,11 +429,9 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     if (this.replaceMode) {
       txtParts.push(`Repl: ${ctx.replaceText}`);
     }
-    const it = txtParts.join(whitespaceJoin);
-    console.log(`it:\n${it}`);
     return { items: [
       {
-        insertText: it,
+        insertText: txtParts.join(whitespaceJoin),
         range: new vscode.Range(position, position),
       }
     ]};
@@ -482,13 +498,14 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
   }
 
   private refreshMatches() {
-    this.matchTracker!.refreshMatches({
+    this.lastRefreshProps = {
       queryText: this.currentContext().findText,
       caseInsensitive: !this.caseToggle,
       regex: this.regexToggle,
       wholeWord: this.wholeWordToggle,
       prevMatchOnChange: this.findPrevOnType,
-    });
+    };
+    this.matchTracker!.refreshMatches(this.lastRefreshProps);
   }
 
 
@@ -579,8 +596,10 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     }
 
     if (prev) {
+      this.nexts--;
       this.matchTracker!.prevMatch();
     } else {
+      this.nexts++;
       this.matchTracker!.nextMatch();
     };
     this.focusMatch();
@@ -597,8 +616,9 @@ export class FindHandler extends TypeHandler {
   // If true, we have a simpler find interaction (specifically, don't
   // refreshMatches on every type).
   simpleModeTracker : GlobalBoolTracker;
+  recorder: Recorder;
 
-  constructor(cm: ColorMode) {
+  constructor(cm: ColorMode, recorder: Recorder) {
     super(cm, ModeColor.find);
     this.cache = new FindContextCache();
     this.findPrevOnType = false;
@@ -609,6 +629,7 @@ export class FindHandler extends TypeHandler {
       vscode.window.showInformationMessage(`Regular Find Mode activated`);
       return setGroogContext("find.simple", false);
     });
+    this.recorder = recorder;
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
@@ -722,6 +743,9 @@ export class FindHandler extends TypeHandler {
     await this.cache.end();
     await this.deactivateCommands();
     this.findPrevOnType = false;
+    if (this.recorder.isActive()) {
+      this.recorder.addRecord(new FindRecord(this.cache.nexts, this.cache.lastRefreshProps));
+    }
   }
 
   async ctrlG(): Promise<boolean> {
@@ -751,4 +775,61 @@ export class FindHandler extends TypeHandler {
   alwaysOnYank: boolean = false;
   async onKill(s: string | undefined) { }
   alwaysOnKill: boolean = false;
+}
+
+class FindRecord implements Record {
+  private nexts: number;
+  private matchProps: RefreshMatchesProps;
+
+  constructor(nexts: number, props: RefreshMatchesProps) {
+    this.nexts = nexts;
+    this.matchProps = props;
+  }
+
+  public name(): string {
+    return "RecordFind";
+  }
+
+  // TODO: Change this to return Promise<string | undefined>
+  async playback(emacs: Emacs): Promise<boolean> {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showErrorMessage(`Cannot find without an active editor`);
+      return false;
+    }
+    const matchTracker = new MatchTracker(editor);
+    matchTracker.refreshMatches(this.matchProps);
+    matchTracker.nextOrPrevMatch(this.nexts);
+    const matchInfo = matchTracker.getMatchInfo();
+    if (Math.abs(this.nexts) >= matchInfo.matches.length) {
+      vscode.window.showErrorMessage(`There are ${matchInfo.matches.length}, but the FindRecord requires at least ${Math.abs(this.nexts)+1}`);
+      return false;
+    }
+    if (matchInfo.matchError) {
+      vscode.window.showErrorMessage(`Failed to playback find recording: ${matchInfo.matchError}`);
+      return false;
+    }
+
+    const match = matchInfo.match;
+    if (!match) {
+      vscode.window.showErrorMessage(`No match found during recording playback`);
+      return false;
+    }
+
+    editor.selection = new vscode.Selection(match.range.start, match.range.end);
+
+    return true;
+  }
+
+  noop(): boolean {
+    return false;
+  }
+
+  eat(next: Record): boolean {
+    return false;
+  }
+
+  async undo(): Promise<boolean> {
+    return false;
+  }
 }

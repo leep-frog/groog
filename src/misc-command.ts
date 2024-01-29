@@ -67,3 +67,11 @@ async function copyFileName() {
     vscode.window.showErrorMessage(`No active editor`);
   }
 }
+
+export function positiveMod(k: number, mod: number) {
+  const modded = k % mod;
+  if (modded >= 0) {
+    return modded;
+  }
+  return modded + mod;
+}
