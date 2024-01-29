@@ -1813,7 +1813,22 @@
       },
       {
         "key": "ctrl+x t",
+        "command": "groog.message.info",
+        "args": {
+          "message": "ctrl+x ctrl+t is not supported for this file type"
+        }
+      },
+      {
+        "key": "ctrl+x ctrl+t",
+        "command": "groog.message.info",
+        "args": {
+          "message": "ctrl+x ctrl+t is not supported for this file type"
+        }
+      },
+      {
+        "key": "ctrl+x t",
         "command": "groog.multiCommand.execute",
+        "when": "resourceLangId == go",
         "args": {
           "sequence": [
             {
@@ -1830,6 +1845,7 @@
       {
         "key": "ctrl+x ctrl+t",
         "command": "groog.multiCommand.execute",
+        "when": "resourceLangId == go",
         "args": {
           "sequence": [
             {

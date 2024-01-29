@@ -9,16 +9,16 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-type WC string
-
 type WhenContext struct {
-	value       string
-	singleValue bool
+	value           string
+	singleValue     bool
+	comparisonValue bool
 }
 
 func (wc *WhenContext) and(that *WhenContext) *WhenContext {
 	return &WhenContext{
 		fmt.Sprintf("%s && %s", wc.value, that.value),
+		false,
 		false,
 	}
 }
@@ -27,6 +27,7 @@ func (wc *WhenContext) or(that *WhenContext) *WhenContext {
 	return &WhenContext{
 		fmt.Sprintf("%s || %s", wc.value, that.value),
 		false,
+		false,
 	}
 }
 
@@ -34,14 +35,31 @@ func (wc *WhenContext) not() *WhenContext {
 	if !wc.singleValue {
 		panic("Can only negate a single when context")
 	}
+	if wc.comparisonValue {
+		panic("Can't negate a comparison context")
+	}
 	return &WhenContext{
 		fmt.Sprintf("!%s", wc.value),
+		false,
 		false,
 	}
 }
 
 func wc(s string) *WhenContext {
-	return &WhenContext{s, true}
+	return &WhenContext{s, true, false}
+}
+
+// See the following link for language codes: https://code.visualstudio.com/docs/languages/identifiers
+func whenFileType(languageId string) *WhenContext {
+	return wcEql("resourceLangId", languageId)
+}
+
+func wcEql(key string, value string) *WhenContext {
+	return &WhenContext{
+		fmt.Sprintf("%s == %v", key, value),
+		false,
+		true,
+	}
 }
 
 func groogContext(mode string) string {
@@ -84,6 +102,9 @@ var (
 	// hence why we need to use view.terminal.visible here.
 	terminalVisible     = wc("view.terminal.visible")
 	searchInputBoxFocus = wc("searchInputBoxFocus")
+
+	// When comparison contexts
+	goFile = whenFileType("go")
 
 	// Ignore typing when in find widget
 	characters = strings.Join([]string{
@@ -516,7 +537,7 @@ var (
 
 		// Go
 		ctrlX("t"): {
-			always.value: mcWithArgs(
+			goFile.value: mcWithArgs(
 				// go.test.package only brings focus to the panel after
 				// the test copletes so ctrl+o doesn't work
 				&KB{
@@ -528,6 +549,7 @@ var (
 					Delay:   delay(250),
 				},
 			),
+			always.value: notification("ctrl+x ctrl+t is not supported for this file type"),
 		},
 
 		// Miscellaneous
@@ -606,6 +628,7 @@ func onlyMC(cmds ...string) map[string]*KB {
 	return onlyKB(mc(cmds...))
 }
 
+// TODO: Severity
 func notification(message string) *KB {
 	return kbArgs("groog.message.info", map[string]interface{}{
 		"message": message,
