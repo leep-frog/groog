@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.1.11",
+  "version": "2.1.12",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -545,6 +545,7 @@
         "command": "groog.message.info",
         "when": "!groog.context.qmkMode",
         "args": {
+          "error": true,
           "message": "Run alt+shift+f4 to close the window"
         }
       },
@@ -1245,6 +1246,7 @@
         "command": "groog.message.info",
         "when": "activePanel",
         "args": {
+          "error": true,
           "message": "Run ctrl+shift+q to kill the terminal"
         }
       },
@@ -1815,6 +1817,7 @@
         "key": "ctrl+x t",
         "command": "groog.message.info",
         "args": {
+          "error": true,
           "message": "ctrl+x ctrl+t is not supported for this file type"
         }
       },
@@ -1822,6 +1825,7 @@
         "key": "ctrl+x ctrl+t",
         "command": "groog.message.info",
         "args": {
+          "error": true,
           "message": "ctrl+x ctrl+t is not supported for this file type"
         }
       },

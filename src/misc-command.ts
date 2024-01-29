@@ -47,14 +47,20 @@ export async function multiCommand(mc: MultiCommand) {
 }
 
 interface Message {
-  message: string
+  message: string;
+  error?: boolean;
 }
 
 async function infoMessage(msg: Message | undefined) {
-  if (msg) {
-    vscode.window.showInformationMessage(msg.message);
-  } else {
+  if (!msg) {
     vscode.window.showErrorMessage("No message set");
+    return;
+  }
+
+  if (msg.error) {
+    vscode.window.showErrorMessage(msg.message);
+  } else {
+    vscode.window.showInformationMessage(msg.message);
   }
 }
 

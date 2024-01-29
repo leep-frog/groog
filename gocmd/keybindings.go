@@ -261,7 +261,7 @@ var (
 		alt("w"):        findToggler("WholeWord", nil, nil),
 		alt(shift("c")): only("togglePreserveCase"),
 		alt("f4"): findToggler("WholeWord", groogQMK, map[string]*KB{
-			groogQMK.not().value: notification("Run alt+shift+f4 to close the window"),
+			groogQMK.not().value: errorNotification("Run alt+shift+f4 to close the window"),
 		}),
 		alt(shift("f4")): only("workbench.action.closeWindow"),
 
@@ -436,7 +436,7 @@ var (
 		// Really want to make sure we want to kill a terminal
 		// so we notify on ctrl+q and actually delete on ctrl+shift+q.
 		ctrl("q"): panelSplit(
-			notification("Run ctrl+shift+q to kill the terminal"),
+			errorNotification("Run ctrl+shift+q to kill the terminal"),
 			kb("workbench.action.closeEditorsAndGroup"),
 		),
 		ctrl(shift("q")): panelSplit(kb("workbench.action.terminal.kill"), nil),
@@ -549,7 +549,7 @@ var (
 					Delay:   delay(250),
 				},
 			),
-			always.value: notification("ctrl+x ctrl+t is not supported for this file type"),
+			always.value: errorNotification("ctrl+x ctrl+t is not supported for this file type"),
 		},
 
 		// Miscellaneous
@@ -628,10 +628,16 @@ func onlyMC(cmds ...string) map[string]*KB {
 	return onlyKB(mc(cmds...))
 }
 
-// TODO: Severity
 func notification(message string) *KB {
 	return kbArgs("groog.message.info", map[string]interface{}{
 		"message": message,
+	})
+}
+
+func errorNotification(message string) *KB {
+	return kbArgs("groog.message.info", map[string]interface{}{
+		"message": message,
+		"error":   true,
 	})
 }
 
