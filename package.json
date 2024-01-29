@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.1.12",
+  "version": "2.1.13",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -1859,6 +1859,42 @@
             {
               "command": "workbench.action.focusPanel",
               "delay": 250
+            }
+          ]
+        }
+      },
+      {
+        "key": "ctrl+x t",
+        "command": "groog.multiCommand.execute",
+        "when": "resourceLangId == java",
+        "args": {
+          "sequence": [
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "zts ${fileBasenameNoExtension}\n"
+              }
+            },
+            {
+              "command": "workbench.action.terminal.focus"
+            }
+          ]
+        }
+      },
+      {
+        "key": "ctrl+x ctrl+t",
+        "command": "groog.multiCommand.execute",
+        "when": "resourceLangId == java",
+        "args": {
+          "sequence": [
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "zts ${fileBasenameNoExtension}\n"
+              }
+            },
+            {
+              "command": "workbench.action.terminal.focus"
             }
           ]
         }

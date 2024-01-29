@@ -104,7 +104,8 @@ var (
 	searchInputBoxFocus = wc("searchInputBoxFocus")
 
 	// When comparison contexts
-	goFile = whenFileType("go")
+	goFile   = whenFileType("go")
+	javaFile = whenFileType("java")
 
 	// Ignore typing when in find widget
 	characters = strings.Join([]string{
@@ -548,6 +549,13 @@ var (
 					Command: "workbench.action.focusPanel",
 					Delay:   delay(250),
 				},
+			),
+			javaFile.value: mcWithArgs(
+				// It's also possible to remove the `Test` suffix using [Command variables](https://code.visualstudio.com/docs/editor/variables-reference#_command-variables)
+				// but adding a new command just for that is excessive. Instead,
+				// just update the CLI to remove the `Test` suffix if present.
+				sendSequence("zts ${fileBasenameNoExtension}\n"),
+				kb("workbench.action.terminal.focus"),
 			),
 			always.value: errorNotification("ctrl+x ctrl+t is not supported for this file type"),
 		},
