@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.1.10",
+  "version": "2.1.11",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -850,7 +850,7 @@
       {
         "key": "alt+y",
         "command": "groog.paste",
-        "when": "editorTextFocus"
+        "when": "editorTextFocus || groog.context.findMode"
       },
       {
         "key": "alt+z",
@@ -1804,12 +1804,12 @@
       {
         "key": "ctrl+x shift+insert",
         "command": "groog.paste",
-        "when": "editorTextFocus"
+        "when": "editorTextFocus || groog.context.findMode"
       },
       {
         "key": "ctrl+x ctrl+shift+insert",
         "command": "groog.paste",
-        "when": "editorTextFocus"
+        "when": "editorTextFocus || groog.context.findMode"
       },
       {
         "key": "ctrl+x t",
@@ -1902,12 +1902,12 @@
       {
         "key": "ctrl+x y",
         "command": "groog.paste",
-        "when": "editorTextFocus"
+        "when": "editorTextFocus || groog.context.findMode"
       },
       {
         "key": "ctrl+x ctrl+y",
         "command": "groog.paste",
-        "when": "editorTextFocus"
+        "when": "editorTextFocus || groog.context.findMode"
       },
       {
         "key": "ctrl+x z",

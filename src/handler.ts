@@ -72,6 +72,14 @@ export abstract class TypeHandler implements Registerable {
   // ctrlG should return true if ctrlG commands should still be run; false otherwise.
   abstract ctrlG(): Thenable<boolean>;
 
+  // onPaste should return false if the handler took care of the paste action.
+  // This will only be run if the handler is active.
+  abstract onPaste(text: string): Thenable<boolean>;
+
+  // onEmacsPaste should return false if the handler took care of the emacs paste action.
+  // This will only be run if the handler is active.
+  abstract onEmacsPaste(text: string): Thenable<boolean>;
+
   abstract onYank(prefixText: string | undefined, text: string | undefined): Thenable<void>;
   abstract alwaysOnYank: boolean;
   abstract onKill(text: string | undefined): Thenable<void>;

@@ -41,6 +41,9 @@ export class TerminalFindHandler extends TypeHandler {
       }
       return this.activate();
     });
+
+    // Note: this handler is deactivated by ctrlG and that is activated whenever
+    // we close or open the panel.
   }
 
   async ctrlG(): Promise<boolean> {
@@ -74,4 +77,14 @@ export class TerminalFindHandler extends TypeHandler {
   alwaysOnYank: boolean = false;
   async onKill() { }
   alwaysOnKill: boolean = false;
+
+  // To paste in the terminal find, we need to right+click and paste
+  async onPaste(text: string): Promise<boolean> {
+    this.deactivate();
+    return true;
+  }
+  async onEmacsPaste(text: string): Promise<boolean> {
+    this.deactivate();
+    return true;
+  }
 }

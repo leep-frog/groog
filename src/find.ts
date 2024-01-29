@@ -728,7 +728,7 @@ export class FindHandler extends TypeHandler {
       started = await this.cache.startNew(this.findPrevOnType);
     }
     if (!started) {
-      return deactivate();
+      return this.deactivate();
     }
   }
 
@@ -775,6 +775,13 @@ export class FindHandler extends TypeHandler {
   alwaysOnYank: boolean = false;
   async onKill(s: string | undefined) { }
   alwaysOnKill: boolean = false;
+
+  async onPaste(text: string): Promise<boolean> {
+    return this.cache.insertText(text).then(() => false);
+  }
+  async onEmacsPaste(text: string): Promise<boolean> {
+    return this.cache.insertText(text).then(() => false);
+  }
 }
 
 class FindRecord implements Record {

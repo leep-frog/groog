@@ -830,8 +830,8 @@ func leftBindings() map[string]*KB {
 
 func paste() map[string]*KB {
 	return map[string]*KB{
-		editorTextFocus.value:       kb("groog.paste"),
-		editorTextFocus.not().value: kb("editor.action.clipboardPasteAction"),
+		editorTextFocus.or(groogFindMode).value: kb("groog.paste"),
+		editorTextFocus.not().value:             kb("editor.action.clipboardPasteAction"),
 	}
 }
 

@@ -9,11 +9,13 @@ export class MarkHandler extends TypeHandler {
   yanked: string;
   yankedPrefix: string;
   readonly whenContext: string = "mark";
+  private emacs: Emacs;
 
   constructor(cm: ColorMode, emacs: Emacs) {
     super(cm, ModeColor.mark);
     this.yanked = "";
     this.yankedPrefix = "";
+    this.emacs = emacs;
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder) {
@@ -24,24 +26,37 @@ export class MarkHandler extends TypeHandler {
       return this.activate();
     });
     recorder.registerCommand(context, 'emacsPaste', async (): Promise<any> => {
-      return this.deactivate().then(() => this.paste(this.yankedPrefix, this.yanked));
+      return this.deactivate().then(() => {
+        // Use runHandlers to check if other handlers should handle the pasting instead.
+        return this.emacs.runHandlers(
+          async (th: TypeHandler) => th.onEmacsPaste(this.yanked),
+          async () => this.paste(this.yankedPrefix, this.yanked),
+        );
+      });
     });
     recorder.registerCommand(context, 'paste', async (): Promise<any> => {
       // For paste, we assume that the first and second line are indented the same amount
-      vscode.env.clipboard.readText().then(text => {
-        const prefixRegex = /^(\s*)/;
-        let prefix: string = prefixRegex.exec(text)?.[0] || "";
+      return vscode.env.clipboard.readText().then(text => {
 
-        // If no prefix, then check the second line of the copied text (if it exists)
-        if (!prefix) {
-          const lines: string[] = text.split("\n");
-          if (lines.length > 1) {
-            prefix = prefixRegex.exec(lines[1])?.[0] || "";
+        // Use runHandlers to check if other handlers should handle the pasting isntead.
+        this.emacs.runHandlers(
+          async (th: TypeHandler) => th.onPaste(text),
+          async () => {
+            const prefixRegex = /^(\s*)/;
+            let prefix: string = prefixRegex.exec(text)?.[0] || "";
+
+            // If no prefix, then check the second line of the copied text (if it exists)
+            if (!prefix) {
+              const lines: string[] = text.split("\n");
+              if (lines.length > 1) {
+                prefix = prefixRegex.exec(lines[1])?.[0] || "";
+              }
+            }
+
+            const pasteText: string = text.replace(prefixRegex, "");
+            return this.paste(prefix, pasteText).then(pasted => pasted ? false : vscode.commands.executeCommand("editor.action.clipboardPasteAction"));
           }
-        }
-
-        const pasteText: string = text.replace(prefixRegex, "");
-        return this.paste(prefix, pasteText).then(pasted => pasted ? false : vscode.commands.executeCommand("editor.action.clipboardPasteAction"));
+        );
       });
     });
   }
@@ -109,6 +124,13 @@ export class MarkHandler extends TypeHandler {
   }
 
   alwaysOnKill: boolean = true;
+
+  async onPaste(text: string): Promise<boolean> {
+    return true;
+  }
+  async onEmacsPaste(text: string): Promise<boolean> {
+    return true;
+  }
 }
 
 function replaceAll(str: string, remove: string, replace: string): string {
