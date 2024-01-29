@@ -268,7 +268,6 @@ export class Recorder extends TypeHandler {
       vscode.window.showInformationMessage("Still recording!");
       return;
     }
-    vscode.window.showInformationMessage("Playing recording!");
     return this.playRecords(this.getRecordBook());
   }
 
