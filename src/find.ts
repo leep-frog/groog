@@ -1,11 +1,10 @@
 import * as vscode from 'vscode';
-import { ColorMode } from './color_mode';
+import { ColorMode, HandlerColoring, gutterHandlerColoring } from './color_mode';
 import { Emacs, GlobalBoolTracker } from './emacs';
-import { deactivate } from './extension';
 import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand, setGroogContext } from './interfaces';
-import { Record, Recorder } from './record';
 import { positiveMod } from './misc-command';
+import { Record, Recorder } from './record';
 
 function findColor(opacity?: number): string{
   return `rgba(200, 120, 0, ${opacity ?? 1})`;
@@ -632,7 +631,11 @@ export class FindHandler extends TypeHandler {
     this.recorder = recorder;
   }
 
-  register(context: vscode.ExtensionContext, recorder: Recorder) {
+  getColoring(context: vscode.ExtensionContext): HandlerColoring {
+    return gutterHandlerColoring(context, "find");
+  }
+
+  registerHandler(context: vscode.ExtensionContext, recorder: Recorder) {
     context.subscriptions.push(vscode.languages.registerInlineCompletionItemProvider({ scheme: 'file' }, this.cache));
     recorder.registerCommand(context, 'find', () => {
       if (this.isActive()) {

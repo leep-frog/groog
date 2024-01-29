@@ -8,9 +8,9 @@ import { TypoFixer } from './internal-typos';
 import { MarkHandler } from './mark';
 import { miscCommands, multiCommand } from './misc-command';
 import { Recorder } from './record';
+import { Scripts } from './scripts';
 import { Settings } from './settings';
 import { TerminalFindHandler } from './terminal-find';
-import { Scripts } from './scripts';
 
 export class GlobalBoolTracker {
   private stateTracker: GlobalStateTracker<boolean>;

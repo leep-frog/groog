@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import { ColorMode } from './color_mode';
+import { ColorMode, HandlerColoring, gutterHandlerColoring } from './color_mode';
+import { Emacs } from './emacs';
 import { TypeHandler, getPrefixText } from './handler';
 import { CtrlGCommand, CursorMove, DeleteCommand } from './interfaces';
 import { Recorder } from './record';
-import { Emacs } from './emacs';
 
 export class MarkHandler extends TypeHandler {
   yanked: string;
@@ -13,14 +13,18 @@ export class MarkHandler extends TypeHandler {
   private delHandlerDeactivation: boolean;
 
   constructor(cm: ColorMode, emacs: Emacs) {
-    super(cm, "#0050cc");
+    super(cm);
     this.yanked = "";
     this.yankedPrefix = "";
     this.emacs = emacs;
     this.delHandlerDeactivation = false;
   }
 
-  register(context: vscode.ExtensionContext, recorder: Recorder) {
+  getColoring(context: vscode.ExtensionContext): HandlerColoring {
+    return gutterHandlerColoring(context, "mark");
+  }
+
+  registerHandler(context: vscode.ExtensionContext, recorder: Recorder) {
     recorder.registerCommand(context, 'toggleMarkMode', () => {
       if (this.isActive()) {
         return this.deactivate();

@@ -1,9 +1,8 @@
 import * as vscode from 'vscode';
-import { ColorMode } from './color_mode';
+import { ColorMode, HandlerColoring } from './color_mode';
 
 import { CursorMove, DeleteCommand, setGroogContext } from "./interfaces";
 import { Recorder } from "./record";
-import { GroogSetting, colorCustomizationSetting } from './settings';
 
 export interface Registerable {
   register(context: vscode.ExtensionContext, recorder: Recorder): void;
@@ -13,16 +12,16 @@ function delay(ms: number) {
   return new Promise( resolve => setTimeout(resolve, ms) );
 }
 
+
 export abstract class TypeHandler implements Registerable {
   private active: boolean;
   private cm: ColorMode;
   abstract readonly whenContext : string;
-  private readonly color? : string;
+  private coloring? : HandlerColoring;
 
-  constructor(cm: ColorMode, color?: string) {
+  constructor(cm: ColorMode) {
     this.active = false;
     this.cm = cm;
-    this.color = color;
   }
 
   isActive() : boolean {
@@ -30,7 +29,14 @@ export abstract class TypeHandler implements Registerable {
   }
 
   // Needed for Registerable interface
-  abstract register(context: vscode.ExtensionContext, recorder: Recorder): void;
+  register(context: vscode.ExtensionContext, recorder: Recorder): void {
+    this.registerHandler(context, recorder);
+    this.coloring = this.getColoring(context);
+  };
+  abstract registerHandler(context: vscode.ExtensionContext, recorder: Recorder): void;
+
+  // Get the decoration setting for activate/deactivate
+  abstract getColoring(context: vscode.ExtensionContext): HandlerColoring;
 
   // Any handler-specific logic that should run on activation.
   abstract handleActivation() : Promise<void>;
@@ -46,7 +52,7 @@ export abstract class TypeHandler implements Registerable {
       // Update when clause context
       await setGroogContext(this.whenContext, true);
 
-      await this.cm.add(this.color);
+      await this.cm.add(this.coloring);
     }
   }
 
@@ -61,7 +67,7 @@ export abstract class TypeHandler implements Registerable {
       await setGroogContext(this.whenContext, false);
 
       // Update color if relevant
-      await this.cm.remove(this.color);
+      await this.cm.remove(this.coloring);
     }
   }
 

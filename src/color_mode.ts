@@ -1,44 +1,49 @@
 import * as vscode from 'vscode';
-import { colorCustomizationSetting } from './settings';
 
 const workbench = "workbench";
 const colorCustomizations = "colorCustomizations";
 
+export function gutterHandlerColoring(context: vscode.ExtensionContext, key: string): HandlerColoring {
+  return {
+    decoration: vscode.window.createTextEditorDecorationType({
+      gutterIconPath: context.asAbsolutePath(`src/images/${key}-gutter-icon.jpg`),
+    }),
+  };
+}
+
+export interface HandlerColoring {
+  decoration: vscode.TextEditorDecorationType;
+}
+
 export class ColorMode {
-  private activeModes: Map<string, Date>;
-  private top?: string;
+  constructor() {}
 
-  constructor() {
-    this.activeModes = new Map<string, Date>();
-  }
-
-  async add(color?: string) {
-    if (!color) {
-      return;
-    }
-    this.activeModes.set(color, new Date());
-    console.log(this.activeModes);
-    return this.updateColors();
-  }
-
-  async remove(color?: string) {
-    if (!color) {
-      return;
-    }
-    this.activeModes.delete(color);
-    return this.updateColors();
-  }
-
-  private async updateColors() {
-    const sorted = [...this.activeModes.entries()].sort((a, b) => a[1] < b[1] ? -1 : 1).map(pair => pair[0]);
-    const newTop = sorted.pop();
-
-    if (newTop === this.top) {
+  async add(coloring?: HandlerColoring) {
+    if (!coloring) {
       return;
     }
 
-    this.top = newTop;
-    const newSetting = colorCustomizationSetting(this.top, true);
-    newSetting.update();
+    // Add the decoration
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      return;
+    }
+    editor.setDecorations(coloring.decoration, [new vscode.Range(
+      new vscode.Position(0, 0),
+      new vscode.Position(editor.document.lineCount, 0),
+    )]);
+  }
+
+  async remove(coloring?: HandlerColoring) {
+    if (!coloring) {
+      return;
+    }
+
+    // Remove the decoration
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      return;
+    }
+    editor.setDecorations(coloring.decoration, []);
   }
 }

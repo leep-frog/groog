@@ -1,6 +1,6 @@
 import AwaitLock from 'await-lock';
 import * as vscode from 'vscode';
-import { ColorMode } from './color_mode';
+import { ColorMode, HandlerColoring, gutterHandlerColoring } from './color_mode';
 import { Emacs } from './emacs';
 import { FindHandler } from './find';
 import { TypeHandler } from './handler';
@@ -34,12 +34,16 @@ export class Recorder extends TypeHandler {
   readonly whenContext: string = "record";
 
   constructor(cm: ColorMode, emacs: Emacs) {
-    super(cm, "#ff7777");
+    super(cm);
     this.baseCommand = true;
     this.recordBooks = [];
     this.namedRecordings = new Map<string, Record[]>();
     this.emacs = emacs;
     this.typeLock = new AwaitLock();
+  }
+
+  getColoring(context: vscode.ExtensionContext): HandlerColoring {
+    return gutterHandlerColoring(context, "record");
   }
 
   public setFinder(finder: FindHandler) {
@@ -58,7 +62,7 @@ export class Recorder extends TypeHandler {
       .finally(() => this.typeLock.release());
   }
 
-  register(context: vscode.ExtensionContext, recorder: Recorder) {
+  registerHandler(context: vscode.ExtensionContext, recorder: Recorder) {
     recorder.registerCommand(context, "record.startRecording", () => recorder.startRecording());
     recorder.registerCommand(context, "record.endRecording", () => recorder.endRecording());
     recorder.registerCommand(context, "record.saveRecordingAs", () => recorder.saveRecordingAs());
