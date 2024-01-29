@@ -36,7 +36,7 @@ export abstract class TypeHandler implements Registerable {
   abstract registerHandler(context: vscode.ExtensionContext, recorder: Recorder): void;
 
   // Get the decoration setting for activate/deactivate
-  abstract getColoring(context: vscode.ExtensionContext): HandlerColoring;
+  abstract getColoring(context: vscode.ExtensionContext): HandlerColoring | undefined;
 
   // Any handler-specific logic that should run on activation.
   abstract handleActivation() : Promise<void>;

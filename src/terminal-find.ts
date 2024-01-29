@@ -1,9 +1,8 @@
 import * as vscode from 'vscode';
-import { ColorMode } from './color_mode';
+import { ColorMode, HandlerColoring } from './color_mode';
 import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand } from './interfaces';
 import { Recorder } from './record';
-import { Emacs } from './emacs';
 
 export class TerminalFindHandler extends TypeHandler {
   readonly whenContext: string = "terminal.find";
@@ -28,7 +27,11 @@ export class TerminalFindHandler extends TypeHandler {
     return vscode.commands.executeCommand("workbench.action.terminal.hideFind");
   }
 
-  register(context: vscode.ExtensionContext, recorder: Recorder) {
+  getColoring(context: vscode.ExtensionContext): HandlerColoring | undefined {
+    return undefined;
+  }
+
+  registerHandler(context: vscode.ExtensionContext, recorder: Recorder) {
     recorder.registerCommand(context, 'terminal.find', () => {
       if (this.isActive()) {
         return this.nextMatch();
