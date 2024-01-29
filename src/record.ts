@@ -1,10 +1,10 @@
-import * as vscode from 'vscode';
-import { ColorMode, ModeColor } from './color_mode';
-import { TypeHandler } from './handler';
-import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './interfaces';
-import { Emacs } from './emacs';
 import AwaitLock from 'await-lock';
+import * as vscode from 'vscode';
+import { ColorMode } from './color_mode';
+import { Emacs } from './emacs';
 import { FindHandler } from './find';
+import { TypeHandler } from './handler';
+import { CursorMove, DeleteCommand } from './interfaces';
 
 export interface RegisterCommandOptionalProps {
   noLock?: boolean;
@@ -34,7 +34,7 @@ export class Recorder extends TypeHandler {
   readonly whenContext: string = "record";
 
   constructor(cm: ColorMode, emacs: Emacs) {
-    super(cm, ModeColor.record);
+    super(cm, "#ff7777");
     this.baseCommand = true;
     this.recordBooks = [];
     this.namedRecordings = new Map<string, Record[]>();

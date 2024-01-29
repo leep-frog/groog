@@ -2,6 +2,17 @@ import * as vscode from 'vscode';
 import { Registerable } from './handler';
 import { Recorder } from './record';
 
+export function colorCustomizationSetting(color?: string, workspaceSetting?: boolean): GroogSetting {
+  const value = color === undefined ? undefined : {
+    "editorGutter.background": "#000000",
+    "editorLineNumber.activeForeground": "#00ffff",
+    "editor.lineHighlightBorder": color,
+    "terminal.findMatchHighlightBackground": "#00bbbb",
+    "terminal.findMatchBackground": "#bb00bb",
+  };
+  return new GroogSetting("workbench", "colorCustomizations", value, workspaceSetting);
+}
+
 export class Settings implements Registerable {
 
   // In order to work on Windows Remote Desktop (with QMK specifically),
@@ -27,57 +38,50 @@ export class Settings implements Registerable {
       "termin-all-or-nothing.closePanel",
     ];
     return [
-      new GlobalSetting("editor", "autoClosingQuotes", "never"),
+      new GroogSetting("editor", "autoClosingQuotes", "never"),
       // My preference is to only auto-close curly brackets, but this auto-closes (), [], and {}.
       // So, we disable this, and manually implement auto-close for curly brackets ourselves.
       // See keybindings.json behavior for the "{" character for implementation details.
-      new GlobalSetting("editor", "autoClosingBrackets", "never"),
-      new GlobalSetting("editor", "codeActionsOnSave", {
+      new GroogSetting("editor", "autoClosingBrackets", "never"),
+      new GroogSetting("editor", "codeActionsOnSave", {
         "source.organizeImports": true,
         "source.fixAll.eslint": true,
       }),
-      new GlobalSetting("window", "newWindowDimensions", "maximized"),
-      new GlobalSetting("editor", "cursorSurroundingLines", 6),
-      new GlobalSetting("editor", "detectIndentation", false),
-      new GlobalSetting("editor", "insertSpaces", true),
-      new GlobalSetting("editor", "rulers", [80, 200]),
-      new GlobalSetting("editor", "tabSize", 2),
-      new GlobalSetting("files", "eol", "\n"),
-      new GlobalSetting("files", "insertFinalNewline", true),
-      new GlobalSetting("files", "trimFinalNewlines", true),
-      new GlobalSetting("files", "trimTrailingWhitespace", true),
+      new GroogSetting("window", "newWindowDimensions", "maximized"),
+      new GroogSetting("editor", "cursorSurroundingLines", 6),
+      new GroogSetting("editor", "detectIndentation", false),
+      new GroogSetting("editor", "insertSpaces", true),
+      new GroogSetting("editor", "rulers", [80, 200]),
+      new GroogSetting("editor", "tabSize", 2),
+      new GroogSetting("files", "eol", "\n"),
+      new GroogSetting("files", "insertFinalNewline", true),
+      new GroogSetting("files", "trimFinalNewlines", true),
+      new GroogSetting("files", "trimTrailingWhitespace", true),
       // true is the default, but explicilty set it here to avoid potential issues.
-      new GlobalSetting("terminal", "integrated.allowChords", true),
-      new GlobalSetting("terminal", "integrated.commandsToSkipShell", ics),
-      new GlobalSetting("terminal", "integrated.copyOnSelection", true),
-      new GlobalSetting("terminal", "integrated.scrollback", 10_000),
-      new GlobalSetting("workbench", "colorCustomizations", {
-        "editorGutter.background": "#000000",
-        "editorLineNumber.activeForeground": "#00ffff",
-        //"editor.lineHighlightBackground": "#404040",
-        "editor.lineHighlightBorder": "#707070",
-        "terminal.findMatchHighlightBackground": "#00bbbb",
-        "terminal.findMatchBackground": "#bb00bb",
-      }),
-      new GlobalSetting("workbench", "editor.limit.enabled", true),
-      new GlobalSetting("workbench", "editor.limit.perEditorGroup", true),
-      new GlobalSetting("workbench", "editor.limit.value", 1),
-      new GlobalSetting("workbench", "editor.showTabs", false),
-      new GlobalSetting("workbench", "startupEditor", "none"),
+      new GroogSetting("terminal", "integrated.allowChords", true),
+      new GroogSetting("terminal", "integrated.commandsToSkipShell", ics),
+      new GroogSetting("terminal", "integrated.copyOnSelection", true),
+      new GroogSetting("terminal", "integrated.scrollback", 10_000),
+      colorCustomizationSetting("#707070"),
+      new GroogSetting("workbench", "editor.limit.enabled", true),
+      new GroogSetting("workbench", "editor.limit.perEditorGroup", true),
+      new GroogSetting("workbench", "editor.limit.value", 1),
+      new GroogSetting("workbench", "editor.showTabs", false),
+      new GroogSetting("workbench", "startupEditor", "none"),
       // TODO: How is this not set in linux (i.e. work computer)?
-      new GlobalSetting("terminal", "integrated.defaultProfile.windows", "PowerShell"),
-      new GlobalSetting("powershell", "startAutomatically", false), // Don't start a powershell terminal when opening a powershell script
-      new GlobalSetting("terminal", "integrated.automationProfile.windows", {
+      new GroogSetting("terminal", "integrated.defaultProfile.windows", "PowerShell"),
+      new GroogSetting("powershell", "startAutomatically", false), // Don't start a powershell terminal when opening a powershell script
+      new GroogSetting("terminal", "integrated.automationProfile.windows", {
         "path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
       }),
       // https://github.com/golang/vscode-go/issues/217
-      new GlobalSetting("gopls", "analyses", { "composites": false }),
+      new GroogSetting("gopls", "analyses", { "composites": false }),
       new WordSeparatorSetting("_"),
       new LanguageSetting("typescript", "editor", "formatOnSave", true),
       // MinGW terminal
       // https://dev.to/yumetodo/make-the-integrated-shell-of-visual-studio-code-to-bash-of-msys2-5eao
       // https://code.visualstudio.com/docs/terminal/basics#_terminal-profiles
-      new GlobalSetting("terminal", "integrated.profiles.windows", {
+      new GroogSetting("terminal", "integrated.profiles.windows", {
         // Add the following to settings to make this the default terminal
         // "terminal.integrated.defaultProfile.windows": "MinGW",
         "MinGW": {
@@ -120,20 +124,22 @@ interface Setting {
   update(): Promise<void>;
 }
 
-class GlobalSetting implements Setting {
+export class GroogSetting implements Setting {
 
   private configSection: string;
   private subsection: string;
   private value: string;
+  private global: boolean;
 
-  constructor(configSection: string, subsection: string, value: any) {
+  constructor(configSection: string, subsection: string, value: any, workspaceSetting?: boolean) {
     this.configSection = configSection;
     this.subsection = subsection;
     this.value = value;
+    this.global = !workspaceSetting;
   }
 
   async update(): Promise<void> {
-    await vscode.workspace.getConfiguration(this.configSection).update(this.subsection, this.value, true);
+    await vscode.workspace.getConfiguration(this.configSection).update(this.subsection, this.value, this.global);
   }
 }
 

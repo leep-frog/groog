@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
-import { ColorMode, ModeColor } from './color_mode';
+import { ColorMode } from './color_mode';
 
 import { CursorMove, DeleteCommand, setGroogContext } from "./interfaces";
 import { Recorder } from "./record";
+import { GroogSetting, colorCustomizationSetting } from './settings';
 
 export interface Registerable {
   register(context: vscode.ExtensionContext, recorder: Recorder): void;
@@ -14,14 +15,14 @@ function delay(ms: number) {
 
 export abstract class TypeHandler implements Registerable {
   private active: boolean;
-  cm: ColorMode;
-  mc?: ModeColor;
+  private cm: ColorMode;
   abstract readonly whenContext : string;
+  private readonly color? : string;
 
-  constructor(cm: ColorMode, mc?: ModeColor) {
+  constructor(cm: ColorMode, color?: string) {
     this.active = false;
     this.cm = cm;
-    this.mc = mc;
+    this.color = color;
   }
 
   isActive() : boolean {
@@ -45,10 +46,7 @@ export abstract class TypeHandler implements Registerable {
       // Update when clause context
       await setGroogContext(this.whenContext, true);
 
-      // Update color if relevant
-      if (this.mc !== undefined) {
-        this.cm.add(this.mc);
-      }
+      await this.cm.add(this.color);
     }
   }
 
@@ -63,9 +61,7 @@ export abstract class TypeHandler implements Registerable {
       await setGroogContext(this.whenContext, false);
 
       // Update color if relevant
-      if (this.mc !== undefined) {
-        this.cm.remove(this.mc);
-      }
+      await this.cm.remove(this.color);
     }
   }
 

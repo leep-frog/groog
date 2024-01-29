@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ColorMode, ModeColor } from './color_mode';
+import { ColorMode } from './color_mode';
 import { TypeHandler, getPrefixText } from './handler';
 import { CtrlGCommand, CursorMove, DeleteCommand } from './interfaces';
 import { Recorder } from './record';
@@ -13,7 +13,7 @@ export class MarkHandler extends TypeHandler {
   private delHandlerDeactivation: boolean;
 
   constructor(cm: ColorMode, emacs: Emacs) {
-    super(cm, ModeColor.mark);
+    super(cm, "#0050cc");
     this.yanked = "";
     this.yankedPrefix = "";
     this.emacs = emacs;

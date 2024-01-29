@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ColorMode, ModeColor } from './color_mode';
+import { ColorMode } from './color_mode';
 import { Emacs, GlobalBoolTracker } from './emacs';
 import { deactivate } from './extension';
 import { TypeHandler } from './handler';
@@ -619,7 +619,7 @@ export class FindHandler extends TypeHandler {
   recorder: Recorder;
 
   constructor(cm: ColorMode, recorder: Recorder) {
-    super(cm, ModeColor.find);
+    super(cm);
     this.cache = new FindContextCache();
     this.findPrevOnType = false;
     this.simpleModeTracker = new GlobalBoolTracker("find.simpleMode", () => {
