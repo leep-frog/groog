@@ -6,7 +6,7 @@ const colorCustomizations = "colorCustomizations";
 export function gutterHandlerColoring(context: vscode.ExtensionContext, key: string): HandlerColoring {
   return {
     decoration: vscode.window.createTextEditorDecorationType({
-      gutterIconPath: context.asAbsolutePath(`src/images/${key}-gutter-icon.jpg`),
+      gutterIconPath: context.asAbsolutePath(`media/${key}-gutter-icon.jpg`),
     }),
   };
 }

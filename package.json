@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -12,10 +12,6 @@
     "type": "git",
     "url": "https://github.com/leep-frog/vs-extension"
   },
-  "files": [
-    "src",
-    "src/images"
-  ],
   "categories": [
     "Other"
   ],
