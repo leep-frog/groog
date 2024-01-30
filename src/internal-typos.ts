@@ -3,8 +3,6 @@ import * as vscode from 'vscode';
 import { getWordSeparators } from './settings';
 import { Correction, defaultCorrections, globalLanguageKey } from './typos';
 
-// TODO: Case match?
-
 const whitespaceCharBreakKey = "WHITESPACE";
 
 // Types used internally
@@ -75,7 +73,6 @@ export class TypoFixer {
       return false;
     }
 
-    // TODO: what happens if this doesn't have focus?
     let editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage("Couldn't find active editor");
@@ -125,7 +122,6 @@ export class TypoFixer {
         );
       },
       {
-        // TODO: Do this in record.ts!!!
         undoStopAfter: false,
         undoStopBefore: false,
       }
