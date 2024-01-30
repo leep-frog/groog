@@ -173,7 +173,6 @@ export class Recorder extends TypeHandler {
     if (!this.isActive()) {
       vscode.window.showInformationMessage("Not recording!");
     } else {
-      this.setRecordBook(trimRecords(this.getRecordBook()));
       this.deactivate();
       vscode.window.showInformationMessage("Recording ended!");
     }
@@ -278,6 +277,7 @@ export class Recorder extends TypeHandler {
   async handleActivation() {}
 
   async handleDeactivation() {
+    this.setRecordBook(trimRecords(this.getRecordBook()));
     if (this.recordBooks.length > MAX_RECORDINGS) {
       this.recordBooks = this.recordBooks.slice(this.recordBooks.length - MAX_RECORDINGS);
     }

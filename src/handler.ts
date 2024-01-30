@@ -32,6 +32,7 @@ export abstract class TypeHandler implements Registerable {
   register(context: vscode.ExtensionContext, recorder: Recorder): void {
     this.registerHandler(context, recorder);
     this.coloring = this.getColoring(context);
+    vscode.window.onDidChangeActiveTextEditor(e => this.deactivate());
   };
   abstract registerHandler(context: vscode.ExtensionContext, recorder: Recorder): void;
 
