@@ -86,6 +86,7 @@ export class MarkHandler extends TypeHandler {
   }
 
   async handleActivation() {}
+  onRedundantActivate(): void {}
 
   async handleDeactivation() {
     // Don't cancel the selection on delete command

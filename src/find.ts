@@ -734,6 +734,7 @@ export class FindHandler extends TypeHandler {
       return this.deactivate();
     }
   }
+  onRedundantActivate(): void {}
 
   async deactivateCommands() {
     // Don't `cancelSelection` as we select the previously matched text.

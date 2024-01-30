@@ -46,7 +46,9 @@ export abstract class TypeHandler implements Registerable {
 
   // Returns whether or not it was actually activated
   async activate() {
-    if (!this.active) {
+    if (this.active) {
+      this.onRedundantActivate();
+    } else {
       this.active = true;
       await this.handleActivation();
 
@@ -56,6 +58,7 @@ export abstract class TypeHandler implements Registerable {
       await this.cm.add(this.coloring);
     }
   }
+  abstract onRedundantActivate(): void;
 
   // Returns whether or not it was actually deactivated
   async deactivate() {

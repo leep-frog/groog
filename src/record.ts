@@ -139,7 +139,7 @@ export class Recorder extends TypeHandler {
   }
 
   registerHandler(context: vscode.ExtensionContext, recorder: Recorder) {
-    recorder.registerCommand(context, "record.startRecording", () => recorder.startRecording());
+    recorder.registerCommand(context, "record.startRecording", () => this.activate());
     recorder.registerCommand(context, "record.endRecording", () => recorder.endRecording());
     recorder.registerCommand(context, "record.saveRecordingAs", () => recorder.saveRecordingAs());
     recorder.registerCommand(context, "record.deleteRecording", () => recorder.deleteRecording());
@@ -177,15 +177,6 @@ export class Recorder extends TypeHandler {
 
   async undo() {
     return this.getRecordBook().undo();
-  }
-
-  // TODO: Remove for activate command
-  async startRecording() {
-    if (this.isActive()) {
-      vscode.window.showErrorMessage("Already recording!");
-    } else {
-      this.activate();
-    }
   }
 
   recordNameValidator(name: string): vscode.InputBoxValidationMessage | undefined {
@@ -327,6 +318,9 @@ export class Recorder extends TypeHandler {
 
   async handleActivation() {
     this.recordBooks.push(new RecordBook());
+  }
+  onRedundantActivate(): void {
+    vscode.window.showErrorMessage(`Already recording!`);
   }
 
   async handleDeactivation() {

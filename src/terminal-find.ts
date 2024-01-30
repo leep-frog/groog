@@ -22,6 +22,7 @@ export class TerminalFindHandler extends TypeHandler {
   async handleActivation(): Promise<void> {
     return vscode.commands.executeCommand("workbench.action.terminal.focusFind");
   }
+  onRedundantActivate(): void {}
 
   async handleDeactivation(): Promise<void> {
     return vscode.commands.executeCommand("workbench.action.terminal.hideFind");
