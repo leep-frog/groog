@@ -14,6 +14,82 @@ export interface RegisterCommandOptionalProps {
 const RECENT_RECORDING_PREFIX = "Recent recording";
 const MAX_RECORDINGS = 3;
 
+class RecordBook {
+  records: Record[];
+  locked: boolean;
+
+  constructor() {
+    this.records = [];
+    this.locked = false;
+  }
+
+  async undo() {
+    if (this.locked) {
+      vscode.window.showErrorMessage(`Cannot undo a locked recording`);
+      return;
+    }
+
+    const lastRecord = this.records.at(-1);
+
+    if (!lastRecord) {
+      return;
+    }
+
+    return lastRecord.undo().then(succeeded => {
+      if (!succeeded) {
+        vscode.window.showInformationMessage(`Undo failed`);
+      } else {
+        this.records.pop();
+      }
+    });
+  }
+
+  addRecord(r: Record): void {
+    if (this.locked) {
+      vscode.window.showErrorMessage(`Cannot add to a locked recording`);
+    }
+    this.records.push(r);
+  }
+
+  async playback(emacs: Emacs): Promise<void> {
+    this.trimAndLock();
+    for (var r of this.records) {
+      if (!await r.playback(emacs)) {
+        break;
+      };
+    }
+  }
+
+  trimAndLock(): void {
+    if (this.locked) {
+      return;
+    }
+    this.locked = true;
+
+    if (this.records.length === 0) {
+      return;
+    }
+
+    const newRecords: Record[] = [];
+    for (const record of this.records) {
+      const lastRecord = newRecords.at(-1);
+
+      // If no previous records, or the next record can't be eaten, then add to the array.
+      if (!lastRecord || !lastRecord.eat(record)) {
+        newRecords.push(record);
+        continue;
+      }
+
+      // If the next record was eaten and resulted in a no-op record, then pop that.
+      if (lastRecord.noop()) {
+        newRecords.pop();
+      }
+    }
+
+    this.records = newRecords;
+  }
+}
+
 export class Recorder extends TypeHandler {
   // baseCommand ensures we don't infinite loop a command. For example,
   // if groog.CommandOne calls groog.CommandTwo, then we would record
@@ -22,11 +98,11 @@ export class Recorder extends TypeHandler {
   // groog.CommandTwo would be executed twice in the replay even though it only
   // happened once during recording.
   private baseCommand: boolean;
-  private recordBooks: Record[][];
+  private recordBooks: RecordBook[];
   // Note: we would never need these in persistent memory
   // because any recording I'd want public I could
   // just create an equivalent vscode function.
-  private namedRecordings: Map<string, Record[]>;
+  private namedRecordings: Map<string, RecordBook>;
   private emacs: Emacs;
   private readonly typeLock: AwaitLock;
   private finder?: FindHandler;
@@ -37,7 +113,7 @@ export class Recorder extends TypeHandler {
     super(cm);
     this.baseCommand = true;
     this.recordBooks = [];
-    this.namedRecordings = new Map<string, Record[]>();
+    this.namedRecordings = new Map<string, RecordBook>();
     this.emacs = emacs;
     this.typeLock = new AwaitLock();
   }
@@ -95,34 +171,20 @@ export class Recorder extends TypeHandler {
     this.baseCommand = true;
   }
 
-  getRecordBook(): Record[] { return this.recordBooks.at(-1)!; }
+  getRecordBook(): RecordBook { return this.recordBooks.at(-1)!; }
 
-  setRecordBook(newBook: Record[]) { this.recordBooks[this.recordBooks.length-1] = newBook; }
+  setRecordBook(newBook: RecordBook) { this.recordBooks[this.recordBooks.length-1] = newBook; }
 
   async undo() {
-    const lastRecord = this.getRecordBook().at(-1);
-
-    if (!lastRecord) {
-      vscode.window.showInformationMessage(`nope`);
-      return;
-    }
-
-    lastRecord.undo().then(succeeded => {
-      if (!succeeded) {
-        vscode.window.showInformationMessage(`Undo failed`);
-      } else {
-        this.getRecordBook().pop();
-      }
-    });
+    return this.getRecordBook().undo();
   }
 
+  // TODO: Remove for activate command
   async startRecording() {
     if (this.isActive()) {
       vscode.window.showErrorMessage("Already recording!");
     } else {
       this.activate();
-      this.recordBooks.push([]);
-      vscode.window.showInformationMessage("Recording started!");
     }
   }
 
@@ -142,7 +204,7 @@ export class Recorder extends TypeHandler {
     }
   }
 
-  async saveNewRec(recordBook: Record[]): Promise<void> {
+  async saveNewRec(recordBook: RecordBook): Promise<void> {
     const recordingName = await vscode.window.showInputBox({
       title: "Save recording as:",
       placeHolder: "Recording name",
@@ -162,11 +224,9 @@ export class Recorder extends TypeHandler {
       vscode.window.showErrorMessage("Not recording!");
       return;
     }
-    this.setRecordBook(trimRecords(this.getRecordBook()));
 
     this.saveNewRec(this.getRecordBook());
     this.deactivate();
-    vscode.window.showInformationMessage("Recording ended!");
   }
 
   async endRecording() {
@@ -174,7 +234,6 @@ export class Recorder extends TypeHandler {
       vscode.window.showInformationMessage("Not recording!");
     } else {
       this.deactivate();
-      vscode.window.showInformationMessage("Recording ended!");
     }
   }
 
@@ -212,7 +271,7 @@ export class Recorder extends TypeHandler {
     };}).reverse();
 
     const items: RecordBookQuickPickItem[] = [...this.namedRecordings.entries()]
-      .map((a: [string, Record[]]): RecordBookQuickPickItem => { return {
+      .map((a: [string, RecordBook]): RecordBookQuickPickItem => { return {
         recordBook: a[1],
         label: a[0],
       };})
@@ -245,7 +304,7 @@ export class Recorder extends TypeHandler {
           vscode.window.showInformationMessage("No selection made");
           break;
         case 1:
-          this.playRecords(input.selectedItems[0].recordBook);
+          input.selectedItems[0].recordBook.playback(this.emacs);
           break;
         default:
           vscode.window.showErrorMessage(`Multiple selections made somehow?!`);
@@ -258,26 +317,20 @@ export class Recorder extends TypeHandler {
     return input.show();
   }
 
-  async playRecords(records : Record[]) {
-    for (var r of records) {
-      if (!await r.playback(this.emacs)) {
-        break;
-      };
-    }
-  }
-
   async playback(): Promise<void> {
     if (this.isActive()) {
       vscode.window.showInformationMessage("Still recording!");
       return;
     }
-    return this.playRecords(this.getRecordBook());
+    return this.getRecordBook().playback(this.emacs);
   }
 
-  async handleActivation() {}
+  async handleActivation() {
+    this.recordBooks.push(new RecordBook());
+  }
 
   async handleDeactivation() {
-    this.setRecordBook(trimRecords(this.getRecordBook()));
+    this.getRecordBook().trimAndLock();
     if (this.recordBooks.length > MAX_RECORDINGS) {
       this.recordBooks = this.recordBooks.slice(this.recordBooks.length - MAX_RECORDINGS);
     }
@@ -286,7 +339,7 @@ export class Recorder extends TypeHandler {
 
   addRecord(r: Record) {
     if (this.baseCommand && !this.finder?.isActive()) {
-      this.setRecordBook(this.getRecordBook().concat(r));
+      this.getRecordBook().addRecord(r);
     }
   }
 
@@ -316,30 +369,6 @@ export class Recorder extends TypeHandler {
   async moveHandler(vsCommand: CursorMove, ...rest: any[]): Promise<boolean> {
     return true;
   }
-}
-
-function trimRecords(records: Record[]): Record[] {
-  if (records.length === 0) {
-    return [];
-  }
-
-  const newRecords: Record[] = [];
-  for (const record of records) {
-    const lastRecord = newRecords.at(-1);
-
-    // If no previous records, or the next record can't be eaten, then add to the array.
-    if (!lastRecord || !lastRecord.eat(record)) {
-      newRecords.push(record);
-      continue;
-    }
-
-    // If the next record was eaten and resulted in a no-op record, then pop that.
-    if (lastRecord.noop()) {
-      newRecords.pop();
-    }
-  }
-
-  return newRecords;
 }
 
 export interface Record {
@@ -442,7 +471,7 @@ class CommandRecord implements Record {
 }
 
 interface RecordBookQuickPickItem extends vscode.QuickPickItem {
-  recordBook: Record[];
+  recordBook: RecordBook;
 }
 
 class SaveRecentRecordingButton implements vscode.QuickInputButton {
