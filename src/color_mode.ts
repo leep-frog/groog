@@ -5,6 +5,7 @@ const colorCustomizations = "colorCustomizations";
 
 export function gutterHandlerColoring(context: vscode.ExtensionContext, key: string): HandlerColoring {
   return {
+    colorKey: key,
     decoration: vscode.window.createTextEditorDecorationType({
       gutterIconPath: context.asAbsolutePath(`media/${key}-gutter-icon.jpg`),
     }),
@@ -12,11 +13,22 @@ export function gutterHandlerColoring(context: vscode.ExtensionContext, key: str
 }
 
 export interface HandlerColoring {
+  colorKey: string;
   decoration: vscode.TextEditorDecorationType;
 }
 
+interface HandlerColoringContext {
+  coloring: HandlerColoring;
+  editor: vscode.TextEditor;
+}
+
 export class ColorMode {
-  constructor() {}
+
+  private activeColorings: Map<string, HandlerColoringContext>;
+
+  constructor() {
+    this.activeColorings = new Map<string, HandlerColoringContext>();
+  }
 
   async add(coloring?: HandlerColoring) {
     if (!coloring) {
@@ -32,6 +44,10 @@ export class ColorMode {
       new vscode.Position(0, 0),
       new vscode.Position(editor.document.lineCount, 0),
     )]);
+    this.activeColorings.set(coloring.colorKey, {
+      coloring,
+      editor,
+    });
   }
 
   async remove(coloring?: HandlerColoring) {
@@ -39,11 +55,11 @@ export class ColorMode {
       return;
     }
 
-    // Remove the decoration
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) {
+    const coloringCtx = this.activeColorings.get(coloring.colorKey);
+    if (!coloringCtx) {
       return;
     }
-    editor.setDecorations(coloring.decoration, []);
+    this.activeColorings.delete(coloring.colorKey);
+    coloringCtx.editor.setDecorations(coloring.decoration, []);
   }
 }
