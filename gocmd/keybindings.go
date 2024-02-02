@@ -424,6 +424,7 @@ var (
 			kb("groog.record.saveRecordingAs"),
 			kb("groog.record.playNamedRecording"),
 		),
+		alt(shift("r")):  only("groog.record.playRecordingRepeatedly"),
 		alt(shift("d")):  only("groog.record.deleteRecording"),
 		ctrl(shift("s")): onlyWhen("workbench.action.findInFiles", groogQMK.not()),
 		ctrl(shift("f")): onlyWhen("workbench.action.findInFiles", groogQMK),

@@ -217,6 +217,10 @@
         "title": "Groog Play Recording"
       },
       {
+        "command": "groog.record.playRecordingRepeatedly",
+        "title": "Groog Play Recording Repeatedly"
+      },
+      {
         "command": "groog.record.saveRecordingAs",
         "title": "Groog Save Recording As..."
       },
@@ -761,6 +765,10 @@
             }
           ]
         }
+      },
+      {
+        "key": "alt+shift+r",
+        "command": "groog.record.playRecordingRepeatedly"
       },
       {
         "key": "alt+shift+t",

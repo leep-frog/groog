@@ -191,6 +191,7 @@ export class Recorder extends TypeHandler {
 
     // We don't lock on playbacks because they are nested commands.
     recorder.registerCommand(context, "record.playRecording", () => recorder.playback(), {noLock: true});
+    recorder.registerCommand(context, "record.playRecordingRepeatedly", () => recorder.repeatPlayback(), {noLock: true});
     recorder.registerCommand(context, "record.playNamedRecording", () => recorder.playbackNamedRecording(), {noLock: true});
   }
 
@@ -365,6 +366,14 @@ export class Recorder extends TypeHandler {
     );
 
     return input.show();
+  }
+
+  async repeatPlayback(): Promise<void> {
+    if (this.isActive()) {
+      vscode.window.showInformationMessage("Still recording!");
+      return;
+    }
+    return this.getRecordBook().repeatedPlayback(this.emacs);
   }
 
   async playback(): Promise<void> {
