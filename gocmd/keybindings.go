@@ -171,11 +171,19 @@ func kbDefsToBindings() []*Keybinding {
 	}
 
 	// Then create all json values
-	keys := maps.Keys(kbDefinitions)
+	keys := append(maps.Keys(kbDefinitions), maps.Keys(removeKeybindings)...)
 	slices.Sort(keys)
 
 	var kbs []*Keybinding
+	visited := map[Key]bool{}
 	for _, key := range keys {
+		// Sometimes have duplicates due to append statement above
+		if visited[key] {
+			continue
+		}
+		visited[key] = true
+
+		// Add the new keybindings
 		m := kbDefinitions[key]
 		whens := maps.Keys(m)
 		slices.Sort(whens)
@@ -195,7 +203,18 @@ func kbDefsToBindings() []*Keybinding {
 				})
 			}
 		}
+
+		// Remove keybindings we don't want
+		for _, cmd := range removeKeybindings[key] {
+			for _, ka := range key.keyAliases() {
+				kbs = append(kbs, &Keybinding{
+					Key:     ka,
+					Command: fmt.Sprintf("-%s", cmd),
+				})
+			}
+		}
 	}
+
 	return kbs
 }
 
@@ -207,6 +226,17 @@ var (
 )
 
 var (
+	// Map from keybindings to command binding to remove
+	removeKeybindings = map[Key][]string{
+		alt(shift("r")): {
+			"revealFileInOS",
+			"remote-wsl.revealInExplorer",
+		},
+		// Added by git extension
+		ctrlLeader("l", "g"): {"extension.openInGitHub"},
+		ctrlLeader("l", "p"): {"extension.openPrGitProvider"},
+		ctrlLeader("l", "c"): {"extension.copyGitHubLinkToClipboard"},
+	}
 	// Map from key to "when context" to command to run in that context
 	// TODO: logic to ensure unique keys (not guaranteed by compiler or runtime since using functions to generate keys)
 	kbDefinitions = map[Key]map[string]*KB{
@@ -693,11 +723,9 @@ func (k Key) keyAliases() []string {
 		k.ToString(),
 	}
 
-	// Ctrl+x duplication
-	for _, prefix := range prefixes {
-		if strings.HasPrefix(k.ToString(), prefix) {
-			kas = append(kas, fmt.Sprintf("%sctrl+%s", prefix, k.ToString()[len(prefix):]))
-		}
+	// Leader key duplication ([ctrl+x n] => [ctrl+x n]; [ctrl+x ctrl+n])
+	if alias, ok := popLeader(k); ok {
+		kas = append(kas, alias)
 	}
 
 	return kas
@@ -786,19 +814,28 @@ func recordingSplit(recordingKB, otherKB *KB) map[string]*KB {
 	return contextualKB(groogRecording, recordingKB, otherKB)
 }
 
-var (
-	prefixes = []string{
-		"ctrl+x ",
-		"ctrl+z ",
-	}
-)
-
 func ctrlX(c string) Key {
-	return Key(fmt.Sprintf("ctrl+x %s", c))
+	return ctrlLeader("x", c)
 }
 
 func ctrlZ(c string) Key {
-	return Key(fmt.Sprintf("ctrl+z %s", c))
+	return ctrlLeader("z", c)
+}
+
+func ctrlLeader(leader, c string) Key {
+	return Key(fmt.Sprintf("ctrl+%s %s", leader, c))
+}
+
+var (
+	leaderRgx = regexp.MustCompile(`^(ctrl\+[a-z0-9]) (.+)$`)
+)
+
+func popLeader(k Key) (string, bool) {
+	m := leaderRgx.FindStringSubmatch(k.ToString())
+	if len(m) == 0 {
+		return "", false
+	}
+	return fmt.Sprintf("%s ctrl+%s", m[1], m[2]), true
 }
 
 func repeat(c string, times int) []string {

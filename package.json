@@ -771,6 +771,14 @@
         "command": "groog.record.playRecordingRepeatedly"
       },
       {
+        "key": "alt+shift+r",
+        "command": "-revealFileInOS"
+      },
+      {
+        "key": "alt+shift+r",
+        "command": "-remote-wsl.revealInExplorer"
+      },
+      {
         "key": "alt+shift+t",
         "command": "workbench.action.terminal.newWithProfile"
       },
@@ -1126,6 +1134,30 @@
             }
           ]
         }
+      },
+      {
+        "key": "ctrl+l c",
+        "command": "-extension.copyGitHubLinkToClipboard"
+      },
+      {
+        "key": "ctrl+l ctrl+c",
+        "command": "-extension.copyGitHubLinkToClipboard"
+      },
+      {
+        "key": "ctrl+l g",
+        "command": "-extension.openInGitHub"
+      },
+      {
+        "key": "ctrl+l ctrl+g",
+        "command": "-extension.openInGitHub"
+      },
+      {
+        "key": "ctrl+l p",
+        "command": "-extension.openPrGitProvider"
+      },
+      {
+        "key": "ctrl+l ctrl+p",
+        "command": "-extension.openPrGitProvider"
       },
       {
         "key": "ctrl+left",
