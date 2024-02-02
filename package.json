@@ -23,6 +23,11 @@
     "vscode:prepublish": "npm run compile",
     "watch": "tsc -watch -p ./"
   },
+  "dependencies": {
+    "await-lock": "^2.2.2",
+    "escape-string-regexp": "^5.0.0",
+    "sorted-array-functions": "^1.3.0"
+  },
   "devDependencies": {
     "@types/mocha": "^10.0.1",
     "@types/node": "16.x",

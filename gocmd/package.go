@@ -28,6 +28,11 @@ func groogPackage(versionOverride string) *Package {
 			"lint":              "eslint src --ext ts",
 			"test":              "node ./out/test/runTest.js",
 		},
+		Dependencies: map[string]string{
+			"await-lock":             "^2.2.2",
+			"escape-string-regexp":   "^5.0.0",
+			"sorted-array-functions": "^1.3.0",
+		},
 		DevDependencies: map[string]string{
 			"@types/vscode":                    "^1.81.0",
 			"@types/mocha":                     "^10.0.1",
@@ -81,6 +86,7 @@ type Package struct {
 	Repository       *Repository       `json:"repository"`
 	Categories       []string          `json:"categories"`
 	Scripts          map[string]string `json:"scripts"`
+	Dependencies     map[string]string `json:"dependencies"`
 	DevDependencies  map[string]string `json:"devDependencies"`
 	ActivationEvents []string          `json:"activationEvents"`
 	Contributes      *Contribution     `json:"contributes"`
