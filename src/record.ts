@@ -2,7 +2,7 @@ import AwaitLock from 'await-lock';
 import * as vscode from 'vscode';
 import { ColorMode, HandlerColoring, gutterHandlerColoring } from './color_mode';
 import { Emacs } from './emacs';
-import { FindHandler } from './find';
+import { FindHandler, FindRecord } from './find';
 import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand } from './interfaces';
 
@@ -57,6 +57,50 @@ class RecordBook {
       if (!await r.playback(emacs)) {
         break;
       };
+    }
+  }
+
+  private checkRepeatable(): FindRecord | undefined {
+    this.trimAndLock();
+    const firstRecord = this.records.at(0);
+    return (firstRecord && (firstRecord.constructor === FindRecord)) ? firstRecord : undefined;
+  }
+
+  repeatable(): boolean {
+    return !!this.checkRepeatable();
+  }
+
+  async repeatedPlayback(emacs: Emacs) {
+    // Get the starting FindRecord
+    const findRecord = this.checkRepeatable();
+    if (!findRecord) {
+      vscode.window.showErrorMessage(`This record isn't repeatable`);
+      return;
+    }
+
+    // Function that runs the FindRecord
+    const runFindRecord = async (prevCount?: number): Promise<boolean> => {
+      const success = await findRecord.playback(emacs);
+      if (!success) {
+        return false;
+      }
+
+      if (prevCount !== undefined && findRecord.numMatches >= prevCount) {
+        vscode.window.showErrorMessage(`Number of matches did not decrease, ending repeat playback`);
+        return false;
+      }
+
+      return true;
+    };
+
+    // Repeatedly run the FindRecord and then the rest of the records until we run out of matches or fail (and ensure that the number of matches is always decreasing)
+    const nextRecords = this.records.slice(1);
+    for (let success = await runFindRecord(); success; success = await runFindRecord(findRecord.numMatches)) {
+      for (var r of nextRecords) {
+        if (!await r.playback(emacs)) {
+          return;
+        };
+      }
     }
   }
 
@@ -257,14 +301,21 @@ export class Recorder extends TypeHandler {
     // Create items
     const recentItems: RecordBookQuickPickItem[] = this.recordBooks.map((recordBook, idx) => { return {
       recordBook: recordBook,
-      buttons: [new SaveRecentRecordingButton()],
+      buttons: [
+        new SaveRecentRecordingButton(),
+        recordBook.repeatable() ? new RepeatRecordingButton() : undefined,
+      ].filter(btn => btn) as vscode.QuickInputButton[],
       label: `${RECENT_RECORDING_PREFIX} ${this.recordBooks.length - 1 - idx}`,
-    };}).reverse();
+      };
+    }).reverse();
 
     const items: RecordBookQuickPickItem[] = [...this.namedRecordings.entries()]
       .map((a: [string, RecordBook]): RecordBookQuickPickItem => { return {
         recordBook: a[1],
         label: a[0],
+        buttons: [
+          a[1].repeatable() ? new RepeatRecordingButton() : undefined,
+        ].filter(btn => btn) as vscode.QuickInputButton[],
       };})
       .sort((a, b) => a.label < b.label ? -1 : 1);
 
@@ -285,8 +336,16 @@ export class Recorder extends TypeHandler {
       }),
       // When pressing a button
       input.onDidTriggerItemButton(event => {
-        input.dispose();
-        this.saveNewRec(event.item.recordBook);
+        switch (event.button.constructor) {
+        case RepeatRecordingButton:
+          input.dispose();
+          event.item.recordBook.repeatedPlayback(this.emacs);
+          break;
+        case SaveRecentRecordingButton:
+          input.dispose();
+          this.saveNewRec(event.item.recordBook);
+          break;
+        }
       }),
       // When accepting an event, run the record book!
       input.onDidAccept(e => {
@@ -474,5 +533,15 @@ class SaveRecentRecordingButton implements vscode.QuickInputButton {
   constructor() {
     this.iconPath = new vscode.ThemeIcon("save");
     this.tooltip = "Save recording as...";
+  }
+}
+
+class RepeatRecordingButton implements vscode.QuickInputButton {
+  readonly iconPath: vscode.ThemeIcon;
+  readonly tooltip?: string;
+  constructor() {
+    // Considered options for this were `sync`, `debug-rerun`, `run-all`
+    this.iconPath = new vscode.ThemeIcon("debug-rerun");
+    this.tooltip = "Run repeatedly";
   }
 }

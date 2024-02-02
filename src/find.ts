@@ -788,13 +788,15 @@ export class FindHandler extends TypeHandler {
   }
 }
 
-class FindRecord implements Record {
+export class FindRecord implements Record {
   private nexts: number;
   private matchProps: RefreshMatchesProps;
+  numMatches: number;
 
   constructor(nexts: number, props: RefreshMatchesProps) {
     this.nexts = nexts;
     this.matchProps = props;
+    this.numMatches = 0;
   }
 
   public name(): string {
@@ -828,6 +830,8 @@ class FindRecord implements Record {
     }
 
     editor.selection = new vscode.Selection(match.range.start, match.range.end);
+
+    this.numMatches = matchInfo.matches.length;
 
     return true;
   }
