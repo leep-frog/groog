@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -20,7 +20,7 @@
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
-    "lint": "eslint src --ext ts --fix",
+    "lint": "eslint src --ext ts",
     "pretest": "npm run compile \u0026\u0026 npm run lint",
     "test": "vscode-test",
     "test-compile": "tsc -p ./",
@@ -1942,6 +1942,42 @@
               "command": "workbench.action.terminal.sendSequence",
               "args": {
                 "text": "zts ${fileBasenameNoExtension}\n"
+              }
+            },
+            {
+              "command": "workbench.action.terminal.focus"
+            }
+          ]
+        }
+      },
+      {
+        "key": "ctrl+x t",
+        "command": "groog.multiCommand.execute",
+        "when": "resourceLangId == typescript",
+        "args": {
+          "sequence": [
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "npm run test\n"
+              }
+            },
+            {
+              "command": "workbench.action.terminal.focus"
+            }
+          ]
+        }
+      },
+      {
+        "key": "ctrl+x ctrl+t",
+        "command": "groog.multiCommand.execute",
+        "when": "resourceLangId == typescript",
+        "args": {
+          "sequence": [
+            {
+              "command": "workbench.action.terminal.sendSequence",
+              "args": {
+                "text": "npm run test\n"
               }
             },
             {
