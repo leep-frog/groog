@@ -53,7 +53,7 @@ interface DocumentMatchProps {
   wholeWord: boolean;
 }
 
-interface Match {
+export interface Match {
   range: vscode.Range;
   text: string;
   pattern: RegExp;
@@ -61,14 +61,12 @@ interface Match {
 
 export class Document {
   documentText: string;
-  caseInsensitiveDocumentText: string;
 
   // The indices of all newline characters;
   newlineIndices: number[];
 
   constructor(documentText: string) {
     this.documentText = documentText;
-    this.caseInsensitiveDocumentText = documentText.toLowerCase();
     this.newlineIndices = [];
     for (let i = 0; i < this.documentText.length; i++) {
       if (this.documentText.charAt(i) === "\n") {
@@ -78,9 +76,9 @@ export class Document {
     this.newlineIndices.push(this.documentText.length);
   }
 
-  private createRegex(s: string): [RegExp, string | undefined] {
+  private createRegex(s: string, caseInsensitive: boolean): [RegExp, string | undefined] {
     try {
-      return [new RegExp(s, "gm"), undefined];
+      return [new RegExp(s, `gm${caseInsensitive ? "i" : ""}`), undefined];
     } catch (error) {
       return [new RegExp("."), (error as SyntaxError).message];
     }
@@ -91,14 +89,14 @@ export class Document {
       return [[], undefined];
     }
 
-    const text = props.caseInsensitive ? this.caseInsensitiveDocumentText : this.documentText;
+    const text = this.documentText;
 
     if (props.caseInsensitive) {
       props.queryText = props.queryText.toLowerCase();
     }
     // "g" is the global flag which is required here.
     const rgxTxt = props.regex ? props.queryText : escapeStringRegexp(props.queryText);
-    const [rgx, err] = this.createRegex(rgxTxt);
+    const [rgx, err] = this.createRegex(rgxTxt, props.caseInsensitive);
     if (err) {
       return [[], err];
     }
@@ -142,8 +140,7 @@ export class Document {
           ),
           pattern: rgx,
         };
-      }
-    ), undefined];
+      }), undefined];
   }
 
   private posFromIndex(index: number): vscode.Position {

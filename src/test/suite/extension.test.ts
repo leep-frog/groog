@@ -3,16 +3,31 @@ import * as assert from 'assert';
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import * as vscode from 'vscode';
+import { Document, Match } from '../../find';
 // import * as myExtension from '../../extension';
 
 suite('Extension Test Suite', () => {
-	vscode.window.showInformationMessage('Start all tests.');
+  vscode.window.showInformationMessage('Start all tests.');
 
-	test('Sample test', () => {
-		assert.strictEqual(-1, [1, 2, 3].indexOf(5));
-		assert.strictEqual(-1, [1, 2, 3].indexOf(0));
-	});
+  test('Sample test', () => {
+    assert.strictEqual(-1, [1, 2, 3].indexOf(5));
+    assert.strictEqual(-1, [1, 2, 3].indexOf(0));
+  });
 });
+
+interface TestMatch {
+  range: vscode.Range;
+  text: string;
+}
+
+function convertTestMatches(pattern : RegExp | undefined, testMatches: TestMatch[]): Match[] {
+  return testMatches.map(tm => {
+    return {
+      ...tm,
+      pattern: pattern!,
+    };
+  });
+}
 
 interface DocumentTest {
   name: string;
@@ -21,7 +36,9 @@ interface DocumentTest {
   caseInsensitive?: boolean;
   regex?: boolean;
   wholeWord?: boolean;
-  want: vscode.Range[];
+  want: TestMatch[];
+  wantPattern?: RegExp;
+  wantError?: string;
 }
 
 const documentTestCases: DocumentTest[] = [
@@ -39,11 +56,15 @@ const documentTestCases: DocumentTest[] = [
       "one two three",
     ],
     queryText: "two",
+    wantPattern: /two/gm,
     want: [
-      new vscode.Range(
-        new vscode.Position(1, 5),
-        new vscode.Position(1, 8),
-      ),
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 4),
+          new vscode.Position(0, 7),
+        ),
+        text: "two",
+      },
     ],
   },
   {
@@ -52,6 +73,7 @@ const documentTestCases: DocumentTest[] = [
       "one two three",
     ],
     queryText: "Two",
+    wantPattern: /Two/gm,
     want: [],
   },
   {
@@ -68,19 +90,29 @@ const documentTestCases: DocumentTest[] = [
       "one two three four five six seven",
     ],
     queryText: "e ",
+    wantPattern: /e /gm,
     want: [
-      new vscode.Range(
-        new vscode.Position(1, 3),
-        new vscode.Position(1, 5),
-      ),
-      new vscode.Range(
-        new vscode.Position(1, 13),
-        new vscode.Position(1, 15),
-      ),
-      new vscode.Range(
-        new vscode.Position(1, 23),
-        new vscode.Position(1, 25),
-      ),
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 2),
+          new vscode.Position(0, 4),
+        ),
+        text: "e ",
+      },
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 12),
+          new vscode.Position(0, 14),
+        ),
+        text: "e ",
+      },
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 22),
+          new vscode.Position(0, 24),
+        ),
+        text: "e ",
+      },
     ],
   },
   {
@@ -89,15 +121,22 @@ const documentTestCases: DocumentTest[] = [
       " abc abc abc abc abc ",
     ],
     queryText: " abc abc ",
+    wantPattern: / abc abc /gm,
     want: [
-      new vscode.Range(
-        new vscode.Position(1, 1),
-        new vscode.Position(1, 10),
-      ),
-      new vscode.Range(
-        new vscode.Position(1, 13),
-        new vscode.Position(1, 22),
-      ),
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 0),
+          new vscode.Position(0, 9),
+        ),
+        text: " abc abc ",
+      },
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 12),
+          new vscode.Position(0, 21),
+        ),
+        text: " abc abc ",
+      },
     ],
   },
   // Match case tests
@@ -108,11 +147,15 @@ const documentTestCases: DocumentTest[] = [
     ],
     caseInsensitive: true,
     queryText: "TWO",
+    wantPattern: /two/gim,
     want: [
-      new vscode.Range(
-        new vscode.Position(1, 5),
-        new vscode.Position(1, 8),
-      ),
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 4),
+          new vscode.Position(0, 7),
+        ),
+        text: "two",
+      },
     ],
   },
   {
@@ -122,19 +165,29 @@ const documentTestCases: DocumentTest[] = [
     ],
     caseInsensitive: true,
     queryText: "e ",
+    wantPattern: /e /gim,
     want: [
-      new vscode.Range(
-        new vscode.Position(1, 3),
-        new vscode.Position(1, 5),
-      ),
-      new vscode.Range(
-        new vscode.Position(1, 13),
-        new vscode.Position(1, 15),
-      ),
-      new vscode.Range(
-        new vscode.Position(1, 23),
-        new vscode.Position(1, 25),
-      ),
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 2),
+          new vscode.Position(0, 4),
+        ),
+        text: "e ",
+      },
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 12),
+          new vscode.Position(0, 14),
+        ),
+        text: "E ",
+      },
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 22),
+          new vscode.Position(0, 24),
+        ),
+        text: "e ",
+      },
     ],
   },
   // Regex tests
@@ -145,11 +198,15 @@ const documentTestCases: DocumentTest[] = [
     ],
     queryText: "[vwxyz]",
     regex: true,
+    wantPattern: /[vwxyz]/gm,
     want: [
-      new vscode.Range(
-        new vscode.Position(1, 6),
-        new vscode.Position(1, 7),
-      ),
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 5),
+          new vscode.Position(0, 6),
+        ),
+        text: "w",
+      },
     ],
   },
   {
@@ -159,11 +216,15 @@ const documentTestCases: DocumentTest[] = [
     ],
     queryText: "[vwxyz]",
     regex: true,
+    wantPattern: /[vwxyz]/gm,
     want: [
-      new vscode.Range(
-        new vscode.Position(1, 15),
-        new vscode.Position(1, 16),
-      ),
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 14),
+          new vscode.Position(0, 15),
+        ),
+        text: "w",
+      },
     ],
   },
   {
@@ -173,15 +234,22 @@ const documentTestCases: DocumentTest[] = [
     ],
     queryText: "o.. ",
     regex: true,
+    wantPattern: /o.. /gm,
     want: [
-      new vscode.Range(
-        new vscode.Position(1, 1),
-        new vscode.Position(1, 5),
-      ),
-      new vscode.Range(
-        new vscode.Position(1, 16),
-        new vscode.Position(1, 20),
-      ),
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 0),
+          new vscode.Position(0, 4),
+        ),
+        text: "one ",
+      },
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 15),
+          new vscode.Position(0, 19),
+        ),
+        text: "our ",
+      },
     ],
   },
   // Regex and case tests
@@ -193,11 +261,15 @@ const documentTestCases: DocumentTest[] = [
     queryText: "[vwxyz]",
     caseInsensitive: true,
     regex: true,
+    wantPattern: /[vwxyz]/gim,
     want: [
-      new vscode.Range(
-        new vscode.Position(1, 6),
-        new vscode.Position(1, 7),
-      ),
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 5),
+          new vscode.Position(0, 6),
+        ),
+        text: "w",
+      },
     ],
   },
   {
@@ -207,15 +279,22 @@ const documentTestCases: DocumentTest[] = [
     ],
     queryText: "o.. ",
     regex: true,
+    wantPattern: /o.. /gm,
     want: [
-      new vscode.Range(
-        new vscode.Position(1, 1),
-        new vscode.Position(1, 5),
-      ),
-      new vscode.Range(
-        new vscode.Position(1, 16),
-        new vscode.Position(1, 20),
-      ),
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 0),
+          new vscode.Position(0, 4),
+        ),
+        text: "one ",
+      },
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 15),
+          new vscode.Position(0, 19),
+        ),
+        text: "our ",
+      },
     ],
   },
   // Regex and newline character
@@ -230,23 +309,36 @@ const documentTestCases: DocumentTest[] = [
     ],
     queryText: "o.*",
     regex: true,
+    wantPattern: /o.*/gm,
     want: [
-      new vscode.Range(
-        new vscode.Position(1, 1),
-        new vscode.Position(1, 4),
-      ),
-      new vscode.Range(
-        new vscode.Position(2, 3),
-        new vscode.Position(2, 4),
-      ),
-      new vscode.Range(
-        new vscode.Position(4, 3),
-        new vscode.Position(4, 4),
-      ),
-      new vscode.Range(
-        new vscode.Position(5, 1),
-        new vscode.Position(5, 4),
-      ),
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 0),
+          new vscode.Position(0, 3),
+        ),
+        text: "one",
+      },
+      {
+        range: new vscode.Range(
+          new vscode.Position(1, 2),
+          new vscode.Position(1, 3),
+        ),
+        text: "o",
+      },
+      {
+        range: new vscode.Range(
+          new vscode.Position(3, 2),
+          new vscode.Position(3, 3),
+        ),
+        text: "o",
+      },
+      {
+        range: new vscode.Range(
+          new vscode.Position(4, 0),
+          new vscode.Position(4, 3),
+        ),
+        text: "one",
+      },
     ],
   },
   {
@@ -260,11 +352,15 @@ const documentTestCases: DocumentTest[] = [
     ],
     queryText: "o.*\nt.+\nth",
     regex: true,
+    wantPattern: /o.*\nt.+\nth/gm,
     want: [
-      new vscode.Range(
-        new vscode.Position(1, 1),
-        new vscode.Position(3, 3),
-      ),
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 0),
+          new vscode.Position(2, 2),
+        ),
+        text: "one\ntwo\nth",
+      },
     ],
   },
   {
@@ -277,11 +373,15 @@ const documentTestCases: DocumentTest[] = [
       "one",
     ],
     queryText: "one\ntwo\nth",
+    wantPattern: /one\ntwo\nth/gm,
     want: [
-      new vscode.Range(
-        new vscode.Position(1, 1),
-        new vscode.Position(3, 3),
-      ),
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 0),
+          new vscode.Position(2, 2),
+        ),
+        text: "one\ntwo\nth",
+      },
     ],
   },
   // Whole word match (TODO)
@@ -291,9 +391,14 @@ const documentTestCases: DocumentTest[] = [
 suite('Document.matches Test Suite', () => {
   documentTestCases.forEach(dtc => {
     test(dtc.name, () => {
-      // const doc = new Document(dtc.document.join("\n"));
-      // const got = doc.matches(dtc.queryText, !!dtc.caseInsensitive, !!dtc.regex, !!dtc.wholeWord);
-      // assert.deepStrictEqual(got, dtc.want);
+      const doc = new Document(dtc.document.join("\n"));
+      const got = doc.matches({
+        queryText: dtc.queryText,
+        caseInsensitive: !!dtc.caseInsensitive,
+        regex: !!dtc.regex,
+        wholeWord: !!dtc.wholeWord,
+      });
+      assert.deepStrictEqual(got, [convertTestMatches(dtc.wantPattern, dtc.want), dtc.wantError]);
     });
   });
 });
