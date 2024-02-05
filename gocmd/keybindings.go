@@ -104,8 +104,9 @@ var (
 	searchInputBoxFocus = wc("searchInputBoxFocus")
 
 	// When comparison contexts
-	goFile   = whenFileType("go")
-	javaFile = whenFileType("java")
+	goFile         = whenFileType("go")
+	javaFile       = whenFileType("java")
+	typescriptFile = whenFileType("typescript")
 
 	// Ignore typing when in find widget
 	characters = strings.Join([]string{
@@ -586,6 +587,10 @@ var (
 				// but adding a new command just for that is excessive. Instead,
 				// just update the CLI to remove the `Test` suffix if present.
 				sendSequence("zts ${fileBasenameNoExtension}\n"),
+				kb("workbench.action.terminal.focus"),
+			),
+			typescriptFile.value: mcWithArgs(
+				sendSequence("npm run test\n"),
 				kb("workbench.action.terminal.focus"),
 			),
 			always.value: errorNotification("ctrl+x ctrl+t is not supported for this file type"),

@@ -402,3 +402,41 @@ suite('Document.matches Test Suite', () => {
     });
   });
 });
+
+interface TestCase {
+  name: string
+}
+
+const testCases: TestCase[] = [
+  {
+    name: "first",
+  },
+];
+
+suite('Groog commands', () => {
+  testCases.forEach(tc => {
+    test(tc.name, async () => {
+      await vscode.commands.executeCommand("workbench.action.files.newUntitledFile");
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        assert_defined(editor);
+        return;
+      }
+
+      editor.edit(eb => {
+        eb.insert(new vscode.Position(0, 0), "abc");
+      });
+
+      await vscode.commands.executeCommand("groog.fall");
+      // editor.selection
+      assert.deepStrictEqual(editor.selection, new vscode.Selection(
+        new vscode.Position(0, 3),
+        new vscode.Position(0, 3),
+      ));
+    });
+  });
+});
+
+function assert_defined<T>(t: T) {
+  assert.notEqual(t, undefined, "Expected object to be defined, but it was undefined");
+}
