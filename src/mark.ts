@@ -93,7 +93,7 @@ export class MarkHandler extends TypeHandler {
     if (this.delHandlerDeactivation) {
       this.delHandlerDeactivation = false;
     } else {
-    vscode.commands.executeCommand(CtrlGCommand.cancelSelection);
+      vscode.commands.executeCommand(CtrlGCommand.cancelSelection);
     }
   }
 

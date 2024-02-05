@@ -61,12 +61,12 @@ export class TerminalFindHandler extends TypeHandler {
 
   async moveHandler(cm: CursorMove): Promise<boolean> {
     switch (cm) {
-      case CursorMove.up:
-        this.nextMatch();
-        break;
-      case CursorMove.down:
-        this.prevMatch();
-        break;
+    case CursorMove.up:
+      this.nextMatch();
+      break;
+    case CursorMove.down:
+      this.prevMatch();
+      break;
     }
     await this.deactivate();
     return true;

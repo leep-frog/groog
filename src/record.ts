@@ -307,7 +307,7 @@ export class Recorder extends TypeHandler {
         recordBook.repeatable() ? new RepeatRecordingButton() : undefined,
       ].filter(btn => btn) as vscode.QuickInputButton[],
       label: `${RECENT_RECORDING_PREFIX} ${this.recordBooks.length - 1 - idx}`,
-      };
+    };
     }).reverse();
 
     const items: RecordBookQuickPickItem[] = [...this.namedRecordings.entries()]
