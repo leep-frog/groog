@@ -64,6 +64,7 @@ export class Emacs {
   cm: ColorMode;
   typoFixer: TypoFixer;
   scripts: Scripts;
+  lastVisitedFile?: vscode.Uri;
 
   constructor() {
     this.cm = new ColorMode();
@@ -83,6 +84,8 @@ export class Emacs {
       this.recorder,
     ];
     this.scripts = new Scripts();
+
+    this.lastVisitedFile = vscode.window.activeTextEditor?.document.uri;
   }
 
   private static registerables(): Registerable[] {
@@ -104,6 +107,12 @@ export class Emacs {
     this.typoFixer.register(context);
 
     context.subscriptions.push(vscode.commands.registerCommand('groog.type', this.recorder.lockWrap<TypeArg>('groog.type', (arg: TypeArg) => this.type(arg))));
+    context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(e => {
+      if (e && isFileUri(e.document.uri) && (!this.lastVisitedFile || (this.lastVisitedFile.toString() !== e.document.uri.toString()))) {
+        this.lastVisitedFile = e.document.uri;
+        vscode.window.showInformationMessage(`New file name: ${e?.document.fileName}`);
+      }
+    }));
 
     this.recorder.registerCommand(context, 'jump', (jd: JumpDist | undefined) => this.jump(jd || defaultJumpDist));
     this.recorder.registerCommand(context, 'fall', (jd: JumpDist | undefined) => this.fall(jd || defaultJumpDist));
@@ -335,3 +344,7 @@ interface JumpDist {
 const defaultJumpDist: JumpDist = {
   lines: 10,
 };
+
+function isFileUri(uri: vscode.Uri): boolean {
+  return uri.scheme === "file";
+}
