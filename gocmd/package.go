@@ -21,10 +21,10 @@ func groogPackage(versionOverride string) *Package {
 			"Other",
 		},
 		Scripts: map[string]string{
-			"vscode:prepublish": "npm run esbuild-base -- --minify",
+			"vscode:prepublish": "npm run lint && npm run test && npm run esbuild-base -- --minify",
 			"compile":           "tsc -p ./",
 			"watch":             "tsc -watch -p ./",
-			"pretest":           "npm run compile && npm run lint",
+			"pretest":           "npm run compile",
 			"lint":              "eslint src --ext ts",
 			"test":              "vscode-test",
 			"esbuild-base":      "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",

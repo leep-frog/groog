@@ -404,39 +404,78 @@ suite('Document.matches Test Suite', () => {
 });
 
 interface TestCase {
-  name: string
+  name: string;
+  edits?: (eb: vscode.TextEditor) => Promise<void>,
+  wantDocument: string[];
+  wantSelections: vscode.Selection[];
+  startingText?: string[];
 }
 
 const testCases: TestCase[] = [
   {
-    name: "first",
+    name: "Works for empty file and no changes",
+    wantDocument: [],
+    wantSelections: [
+      new vscode.Selection(
+        new vscode.Position(0, 0),
+        new vscode.Position(0, 0),
+      ),
+    ],
+  },
+  {
+    name: "Writes text to file",
+    startingText: [
+      "abc"
+    ],
+    wantDocument: [
+      "abc",
+    ],
+    wantSelections: [
+      new vscode.Selection(
+        new vscode.Position(0, 3),
+        new vscode.Position(0, 3),
+      ),
+    ],
   },
 ];
 
 suite('Groog commands', () => {
   testCases.forEach(tc => {
     test(tc.name, async () => {
-      await vscode.commands.executeCommand("workbench.action.files.newUntitledFile");
-      const editor = vscode.window.activeTextEditor;
-      if (!editor) {
-        assert_defined(editor);
-        return;
-      }
 
-      editor.edit(eb => {
-        eb.insert(new vscode.Position(0, 0), "abc");
+      // Create or clear the editor
+      if (!vscode.window.activeTextEditor) {
+        await vscode.commands.executeCommand("workbench.action.files.newUntitledFile");
+      }
+      const editor = assert_defined(vscode.window.activeTextEditor);
+      await editor.edit(eb => {
+        const line = editor.document.lineAt(editor.document.lineCount-1);
+        eb.delete(new vscode.Range(
+          new vscode.Position(0, 0),
+          new vscode.Position(line.lineNumber, line.text.length),
+        ));
       });
 
-      await vscode.commands.executeCommand("groog.fall");
-      // editor.selection
-      assert.deepStrictEqual(editor.selection, new vscode.Selection(
-        new vscode.Position(0, 3),
-        new vscode.Position(0, 3),
-      ));
+      // Create the document if relevant
+      if (tc.startingText) {
+        await editor.edit(eb => {
+          eb.insert(new vscode.Position(0, 0), tc.startingText!.join("\n"));
+        });
+      }
+
+      // Run the test
+      if (tc.edits) {
+        await tc.edits(editor);
+      }
+
+      // Verify the test
+      assert.deepStrictEqual(editor.document.getText(), tc.wantDocument.join("\n"));
+      assert.deepStrictEqual(editor.selections, tc.wantSelections);
     });
   });
 });
 
-function assert_defined<T>(t: T) {
+function assert_defined<T>(t?: T): T {
   assert.notEqual(t, undefined, "Expected object to be defined, but it was undefined");
+  return t!;
 }
