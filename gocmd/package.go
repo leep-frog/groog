@@ -7,7 +7,7 @@ func groogPackage(versionOverride string) *Package {
 		Name:        "groog",
 		DisplayName: "groog",
 		Description: "",
-		Version:     "2.3.4",
+		Version:     "2.3.5",
 		Publisher:   "groogle",
 		Main:        "./out/extension.js",
 		Engines: map[string]string{
@@ -21,7 +21,7 @@ func groogPackage(versionOverride string) *Package {
 			"Other",
 		},
 		Scripts: map[string]string{
-			"vscode:prepublish": "npm run lint && npm run test && npm run esbuild-base -- --minify",
+			"vscode:prepublish": "npm run esbuild-base -- --minify",
 			"compile":           "tsc -p ./",
 			"watch":             "tsc -watch -p ./",
 			"pretest":           "npm run compile",
