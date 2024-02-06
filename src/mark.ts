@@ -10,14 +10,14 @@ export class MarkHandler extends TypeHandler {
   yankedPrefix: string;
   readonly whenContext: string = "mark";
   private emacs: Emacs;
-  private delHandlerDeactivation: boolean;
+  private keepSelectionOnDeactivation: boolean;
 
   constructor(cm: ColorMode, emacs: Emacs) {
     super(cm);
     this.yanked = "";
     this.yankedPrefix = "";
     this.emacs = emacs;
-    this.delHandlerDeactivation = false;
+    this.keepSelectionOnDeactivation = false;
   }
 
   getColoring(context: vscode.ExtensionContext): HandlerColoring {
@@ -90,8 +90,8 @@ export class MarkHandler extends TypeHandler {
 
   async handleDeactivation() {
     // Don't cancel the selection on delete command
-    if (this.delHandlerDeactivation) {
-      this.delHandlerDeactivation = false;
+    if (this.keepSelectionOnDeactivation) {
+      this.keepSelectionOnDeactivation = false;
     } else {
       vscode.commands.executeCommand(CtrlGCommand.cancelSelection);
     }
@@ -103,6 +103,7 @@ export class MarkHandler extends TypeHandler {
   }
 
   async textHandler(s: string): Promise<boolean> {
+    this.keepSelectionOnDeactivation = true;
     return this.deactivate().then(() => true);
   }
 
@@ -117,7 +118,7 @@ export class MarkHandler extends TypeHandler {
   }
 
   async delHandler(s: DeleteCommand): Promise<boolean> {
-    this.delHandlerDeactivation = true;
+    this.keepSelectionOnDeactivation = true;
     return this.deactivate().then(() => true);
   }
 
