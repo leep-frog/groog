@@ -16,7 +16,7 @@ const characterFnMap: Map<string, TypedCharacterHandlerFunction> = new Map<strin
   ...typeOverFunctions(
     "]",
     "}",
-    ")",
+    // ")",
     "'",
     "\"",
     '`',
