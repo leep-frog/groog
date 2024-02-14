@@ -110,7 +110,6 @@ export class Emacs {
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(e => {
       if (e && isFileUri(e.document.uri) && (!this.lastVisitedFile || (this.lastVisitedFile.toString() !== e.document.uri.toString()))) {
         this.lastVisitedFile = e.document.uri;
-        vscode.window.showInformationMessage(`New file name: ${e?.document.fileName}`);
       }
     }));
 
