@@ -44,7 +44,7 @@ func groogPackage(versionOverride string) *Package {
 			"@typescript-eslint/eslint-plugin": "^6.4.1",
 			"@typescript-eslint/parser":        "^6.4.1",
 			"eslint":                           "^8.47.0",
-			"esbuild":                          "^0.20.0",
+			"esbuild":                          "^0.20.1",
 			"glob":                             "^10.3.3",
 			"mocha":                            "^10.2.0",
 			"typescript":                       "^5.1.6",
