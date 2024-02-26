@@ -10,13 +10,15 @@ interface TypedCharacterHandlerFunction {
 const characterFnMap: Map<string, TypedCharacterHandlerFunction> = new Map<string, TypedCharacterHandlerFunction>([
   // We only want the type-over feature of the autoClose* settings of vs code
   // i.e. we don't want the closing character to be automatically added, except for brackets
+
+  // Removed parens because that wasn't becoming bothersome:
+  // - type-over was annoying for nested parens (e.g. '(((...|)))' )
+  // - without type-over, the auto-close was also super annoying: typing '()' resulted in '())'
   ["{", openBracketFunction("{}")],
   ["[", openBracketFunction("[]")],
-  ["(", openBracketFunction("()")],
   ...typeOverFunctions(
     "]",
     "}",
-    // ")",
     "'",
     "\"",
     '`',
