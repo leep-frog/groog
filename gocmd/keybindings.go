@@ -568,33 +568,7 @@ var (
 		alt(shift("p")): onlyMC("editor.action.marker.prevInFiles", "closeMarkersNavigation"),
 		alt(shift("n")): onlyMC("editor.action.marker.nextInFiles", "closeMarkersNavigation"),
 
-		// Go
-		ctrlX("t"): {
-			goFile.value: mcWithArgs(
-				// go.test.package only brings focus to the panel after
-				// the test copletes so ctrl+o doesn't work
-				&KB{
-					Command: "go.test.package",
-					Async:   async(true),
-				},
-				&KB{
-					Command: "workbench.action.focusPanel",
-					Delay:   delay(250),
-				},
-			),
-			javaFile.value: mcWithArgs(
-				// It's also possible to remove the `Test` suffix using [Command variables](https://code.visualstudio.com/docs/editor/variables-reference#_command-variables)
-				// but adding a new command just for that is excessive. Instead,
-				// just update the CLI to remove the `Test` suffix if present.
-				sendSequence("zts ${fileBasenameNoExtension}\n"),
-				kb("workbench.action.terminal.focus"),
-			),
-			typescriptFile.value: mcWithArgs(
-				sendSequence("npm run test\n"),
-				kb("workbench.action.terminal.focus"),
-			),
-			always.value: errorNotification("ctrl+x ctrl+t is not supported for this file type"),
-		},
+		ctrlX("t"): only("groog.testFile"),
 
 		// Miscellaneous
 		ctrlX("r"): only("workbench.action.reloadWindow"),

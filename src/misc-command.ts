@@ -46,6 +46,38 @@ export async function multiCommand(mc: MultiCommand) {
   }
 }
 
+function testFileTerminal(command: string) {
+  const terminal = vscode.window.activeTerminal ?? vscode.window.createTerminal();
+  terminal.show();
+  terminal.sendText(command);
+}
+
+export async function testFile(file?: vscode.Uri) {
+  if (!file) {
+    vscode.window.showErrorMessage(`Previous file not set`);
+    return;
+  }
+
+  const suffix = file.fsPath.split(".").pop();
+  switch (suffix) {
+  case "go":
+    vscode.commands.executeCommand(`go.test.package`, {
+      background: true,
+    });
+    // Note: don't use a then chain after go.test.package because then this isn't run until tests are done running!
+    vscode.commands.executeCommand("termin-all-or-nothing.openPanel");
+    break;
+  case "ts":
+    testFileTerminal(`npm run test`);
+    break;
+  case "java":
+    testFileTerminal(`zts ${basename(file.fsPath)}`);
+    break;
+  default:
+    vscode.window.showErrorMessage(`Unknown file suffix: ${suffix}`);
+  }
+}
+
 interface Message {
   message: string;
   error?: boolean;
