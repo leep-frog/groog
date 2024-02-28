@@ -21,6 +21,7 @@ func groogPackage(versionOverride string) *Package {
 			"Other",
 		},
 		Scripts: map[string]string{
+
 			"vscode:prepublish": "npm run esbuild-base -- --minify",
 			"esbuild-base":      "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
 			"esbuild":           "npm run esbuild-base -- --sourcemap",
