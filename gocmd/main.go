@@ -123,7 +123,10 @@ func (c *cli) regeneratePackageJson(o command.Output, d *command.Data, versionOv
 		return fmt.Errorf("failed to marshal json: %v", err)
 	}
 
-	if err := os.WriteFile(filename, append(j, byte('\n')), 0644); err != nil {
+	// For some reason, sometimes go writes u0026 and sometimes it writes `&`.
+	// This line ensures we always write the actual ampersand character.
+	fileContents := strings.ReplaceAll(string(j)+"\n", `\u0026`, "&")
+	if err := os.WriteFile(filename, []byte(fileContents), 0644); err != nil {
 		return fmt.Errorf("failed to write json to output file: %v", err)
 	}
 
