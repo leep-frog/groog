@@ -7,7 +7,7 @@ func groogPackage(versionOverride string) *Package {
 		Name:        "groog",
 		DisplayName: "groog",
 		Description: "",
-		Version:     "2.4.5",
+		Version:     "2.4.6",
 		Publisher:   "groogle",
 		Main:        "./out/extension.js",
 		Engines: map[string]string{
@@ -22,15 +22,16 @@ func groogPackage(versionOverride string) *Package {
 		},
 		Scripts: map[string]string{
 			"vscode:prepublish": "npm run esbuild-base -- --minify",
-			"compile":           "tsc -p ./",
-			"watch":             "tsc -watch -p ./",
-			"pretest":           "npm run compile",
-			"lint":              "eslint src --ext ts",
-			"test":              "vscode-test",
-			"esbuild-base":      "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+			"esbuild-base":      "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
 			"esbuild":           "npm run esbuild-base -- --sourcemap",
 			"esbuild-watch":     "npm run esbuild-base -- --sourcemap --watch",
 			"test-compile":      "tsc -p ./",
+
+			"compile": "tsc -p ./",
+			"watch":   "tsc -watch -p ./",
+			"pretest": "npm run compile",
+			"lint":    "eslint src --ext ts",
+			"test":    "vscode-test",
 		},
 		Dependencies: map[string]string{
 			"await-lock":             "^2.2.2",
