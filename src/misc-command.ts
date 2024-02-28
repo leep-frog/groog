@@ -1,4 +1,5 @@
 import { basename } from 'path';
+import path = require('path');
 import * as vscode from 'vscode';
 
 export interface MiscCommand {
@@ -71,7 +72,7 @@ export async function testFile(file?: vscode.Uri) {
     testFileTerminal(`npm run test`);
     break;
   case "java":
-    testFileTerminal(`zts ${basename(file.fsPath)}`);
+    testFileTerminal(`zts ${path.parse(file.fsPath).name}`);
     break;
   default:
     vscode.window.showErrorMessage(`Unknown file suffix: ${suffix}`);
