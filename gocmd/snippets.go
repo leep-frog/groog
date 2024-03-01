@@ -11,5 +11,9 @@ var (
 			"snippets/go-test.json",
 			"go",
 		},
+		{
+			"snippets/java-parameterized-test.json",
+			"java",
+		},
 	}
 )

@@ -1,6 +1,9 @@
 {
   "Go Test": {
-    "prefix": ["gt", "goTest"],
+    "prefix": [
+      "gt",
+      "goTest"
+    ],
     "body": [
       "func Test${1:Name}(t *testing.T) {",
       "  for _, test := range []struct {",
@@ -15,6 +18,6 @@
       "  }",
       "}"
     ],
-    "description": "Go test function."
+    "description": "Go test function"
   }
 }

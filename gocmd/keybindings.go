@@ -91,6 +91,7 @@ var (
 	groogTerminalFindMode   = wc(groogContext("terminal.find"))
 	inQuickOpen             = wc("inQuickOpen")
 	inSearchEditor          = wc("inSearchEditor")
+	inSnippetMode           = wc("inSnippetMode")
 	panelFocus              = wc("panelFocus")
 	listFocus               = wc("listFocus")
 	listSupportsMultiselect = wc("listSupportsMultiselect")
@@ -266,6 +267,7 @@ var (
 			groogTerminalFindMode.value: kb("groog.terminal.reverseFind"),
 		},
 		enter: {
+			inSnippetMode.value:         kb("jumpToNextSnippetPlaceholder"),
 			groogTerminalFindMode.value: kb("groog.terminal.find"),
 			groogFindMode.value:         kb("editor.action.nextMatchFindAction"),
 			// This is needed so enter hits are recorded

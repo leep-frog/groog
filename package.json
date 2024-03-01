@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.4.7",
+  "version": "2.4.8",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -2099,6 +2099,11 @@
         "when": "groog.context.terminal.findMode"
       },
       {
+        "key": "enter",
+        "command": "jumpToNextSnippetPlaceholder",
+        "when": "inSnippetMode"
+      },
+      {
         "key": "f",
         "command": "groog.type",
         "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
@@ -2896,6 +2901,10 @@
       {
         "path": "snippets/go-test.json",
         "language": "go"
+      },
+      {
+        "path": "snippets/java-parameterized-test.json",
+        "language": "java"
       }
     ]
   }
