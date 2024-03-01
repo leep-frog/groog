@@ -47,10 +47,15 @@ export async function multiCommand(mc: MultiCommand) {
   }
 }
 
+// https://en.wikipedia.org/wiki/List_of_Unicode_characters
+const HOME_UNICODE_CHAR = "\u0001";
+const TERMINAL_KILL_CHAR = "\u000B";
+
 function testFileTerminal(command: string) {
   const terminal = vscode.window.activeTerminal ?? vscode.window.createTerminal();
   terminal.show();
-  terminal.sendText(command);
+  // Move cursor to the beginning, write the command, and remove whatever was already there
+  terminal.sendText(HOME_UNICODE_CHAR + command + TERMINAL_KILL_CHAR);
 }
 
 export async function testFile(file?: vscode.Uri) {
