@@ -570,7 +570,21 @@ var (
 		alt(shift("p")): onlyMC("editor.action.marker.prevInFiles", "closeMarkersNavigation"),
 		alt(shift("n")): onlyMC("editor.action.marker.nextInFiles", "closeMarkersNavigation"),
 
-		ctrlX("t"): only("groog.testFile"),
+		ctrlX("t"): onlyKB(mcWithArgs(
+			&KB{
+				Command: "groog.testFile",
+				Args: map[string]interface{}{
+					"part": 0,
+				},
+			},
+			&KB{
+				Command: "groog.testFile",
+				Delay:   delay(25),
+				Args: map[string]interface{}{
+					"part": 1,
+				},
+			},
+		)),
 
 		// Miscellaneous
 		ctrlX("r"): only("workbench.action.reloadWindow"),

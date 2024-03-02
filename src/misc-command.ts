@@ -1,27 +1,32 @@
 import { basename } from 'path';
 import path = require('path');
 import * as vscode from 'vscode';
+import { Emacs } from './emacs';
 
-export interface MiscCommand {
+interface MiscCommand {
   name: string;
-  f: (...args: any[]) => Thenable<any>;
+  f: (emacs: Emacs, ...args: any[]) => Thenable<any>;
   noLock?: boolean;
 }
 
 export const miscCommands: MiscCommand[] = [
   {
     name: "multiCommand.execute",
-    f: (mc: MultiCommand) => multiCommand(mc),
+    f: (e: Emacs, mc: MultiCommand) => multiCommand(mc),
     noLock: true,
   },
   {
     name: "message.info",
-    f: (msg: Message | undefined) => infoMessage(msg),
+    f: (e: Emacs, msg: Message | undefined) => infoMessage(msg),
   },
   {
     name: "copyFilename",
     f: () => copyFileName(),
   },
+  {
+    name: "testFile",
+    f: (e: Emacs, mc: TestFileArgs) => testFile(mc, e.lastVisitedFile),
+  }
 ];
 
 interface SingleCommand {
@@ -51,14 +56,29 @@ export async function multiCommand(mc: MultiCommand) {
 const HOME_UNICODE_CHAR = "\u0001";
 const TERMINAL_KILL_CHAR = "\u000B";
 
-function testFileTerminal(command: string) {
+function sendTerminalCommand(args: TestFileArgs, command: string) {
   const terminal = vscode.window.activeTerminal ?? vscode.window.createTerminal();
-  terminal.show();
-  // Move cursor to the beginning, write the command, and remove whatever was already there
-  terminal.sendText(HOME_UNICODE_CHAR + command + TERMINAL_KILL_CHAR);
+
+  const text = args.part === 0 ? [
+    // Exit git diff view (or any file terminal view)
+    "q",
+    // Move cursor to the beginning
+    HOME_UNICODE_CHAR,
+    // Remove any characters after the command we just added
+    TERMINAL_KILL_CHAR,
+  ] : [command];
+  terminal.sendText(text.join(""), args.part !== 0);
+
+  if (args.part === 1) {
+    terminal.show();
+  }
 }
 
-export async function testFile(file?: vscode.Uri) {
+interface TestFileArgs {
+  part: number;
+}
+
+async function testFile(args: TestFileArgs, file?: vscode.Uri) {
   if (!file) {
     vscode.window.showErrorMessage(`Previous file not set`);
     return;
@@ -67,20 +87,24 @@ export async function testFile(file?: vscode.Uri) {
   const suffix = file.fsPath.split(".").pop();
   switch (suffix) {
   case "go":
-    vscode.commands.executeCommand(`go.test.package`, {
-      background: true,
-    });
-    // Note: don't use a then chain after go.test.package because then this isn't run until tests are done running!
-    vscode.commands.executeCommand("termin-all-or-nothing.openPanel");
+    if (args.part === 0) { // Run in first pass so it's immediate
+      vscode.commands.executeCommand(`go.test.package`, {
+        background: true,
+      });
+      // Note: don't use a then chain after go.test.package because then this isn't run until tests are done running!
+      vscode.commands.executeCommand("termin-all-or-nothing.openPanel");
+    }
     break;
   case "ts":
-    testFileTerminal(`npm run test`);
+    sendTerminalCommand(args, `npm run test`);
     break;
   case "java":
-    testFileTerminal(`zts ${path.parse(file.fsPath).name}`);
+    sendTerminalCommand(args, `zts ${path.parse(file.fsPath).name}`);
     break;
   default:
-    vscode.window.showErrorMessage(`Unknown file suffix: ${suffix}`);
+    if (args.part === 0) {
+      vscode.window.showErrorMessage(`Unknown file suffix: ${suffix}`);
+    }
   }
 }
 

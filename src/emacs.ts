@@ -6,7 +6,7 @@ import { Registerable, TypeHandler, getPrefixText } from './handler';
 import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { TypoFixer } from './internal-typos';
 import { MarkHandler } from './mark';
-import { miscCommands, multiCommand, testFile } from './misc-command';
+import { miscCommands, multiCommand } from './misc-command';
 import { Recorder } from './record';
 import { Scripts } from './scripts';
 import { Settings } from './settings';
@@ -124,8 +124,6 @@ export class Emacs {
     this.recorder.registerCommand(context, 'maim', () => this.kill(false));
     this.recorder.registerCommand(context, 'ctrlG', () => this.ctrlG());
 
-    this.recorder.registerCommand(context, 'testFile', () => testFile(this.lastVisitedFile));
-
     // Make an explicit command so it is visible in "alt+x".
     this.recorder.registerCommand(context, 'renameFile', () => {
       return multiCommand({
@@ -152,7 +150,7 @@ export class Emacs {
 
     this.scripts.register(context, this.recorder);
 
-    miscCommands.forEach(mc => this.recorder.registerCommand(context, mc.name, mc.f, {noLock: mc.noLock}));
+    miscCommands.forEach(mc => this.recorder.registerCommand(context, mc.name, (args) => mc.f(this, args), {noLock: mc.noLock}));
 
     // After all commands have been registered, check persistent data for qmk setting.
     this.qmkTracker.initialize(context);
