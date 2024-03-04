@@ -510,6 +510,8 @@ class FindContextCache {
       editor.revealRange(match.range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
     } else if (this.matchTracker!.cursorReferencePosition) {
       editor.selection = new vscode.Selection(this.matchTracker!.cursorReferencePosition, this.matchTracker!.cursorReferencePosition);
+      // Focus back on initial cursor position
+      editor.revealRange(editor.selection, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
     }
 
     // Regardless of cursor move, update the find display.
