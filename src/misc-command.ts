@@ -87,13 +87,7 @@ async function testFile(args: TestFileArgs, file?: vscode.Uri) {
   const suffix = file.fsPath.split(".").pop();
   switch (suffix) {
   case "go":
-    if (args.part === 0) { // Run in first pass so it's immediate
-      vscode.commands.executeCommand(`go.test.package`, {
-        background: true,
-      });
-      // Note: don't use a then chain after go.test.package because then this isn't run until tests are done running!
-      vscode.commands.executeCommand("termin-all-or-nothing.openPanel");
-    }
+    vscode.window.showErrorMessage(`go testing should be routed to custom command in keybindings.go`);
     break;
   case "ts":
     sendTerminalCommand(args, `npm run test`);
@@ -102,9 +96,7 @@ async function testFile(args: TestFileArgs, file?: vscode.Uri) {
     sendTerminalCommand(args, `zts ${path.parse(file.fsPath).name}`);
     break;
   default:
-    if (args.part === 0) {
-      vscode.window.showErrorMessage(`Unknown file suffix: ${suffix}`);
-    }
+    vscode.window.showErrorMessage(`Unknown file suffix: ${suffix}`);
   }
 }
 

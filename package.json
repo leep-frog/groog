@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -1867,6 +1867,7 @@
       {
         "key": "ctrl+x t",
         "command": "groog.multiCommand.execute",
+        "when": "resourceLangId != go",
         "args": {
           "sequence": [
             {
@@ -1888,6 +1889,7 @@
       {
         "key": "ctrl+x ctrl+t",
         "command": "groog.multiCommand.execute",
+        "when": "resourceLangId != go",
         "args": {
           "sequence": [
             {
@@ -1902,6 +1904,54 @@
                 "part": 1
               },
               "delay": 25
+            }
+          ]
+        }
+      },
+      {
+        "key": "ctrl+x t",
+        "command": "groog.multiCommand.execute",
+        "when": "resourceLangId == go",
+        "args": {
+          "sequence": [
+            {
+              "command": "go.test.package",
+              "args": {
+                "background": true
+              },
+              "async": true
+            },
+            {
+              "command": "termin-all-or-nothing.openPanel",
+              "delay": 50
+            },
+            {
+              "command": "workbench.action.output.show.extension-output-golang.go-#2-Go Tests",
+              "delay": 50
+            }
+          ]
+        }
+      },
+      {
+        "key": "ctrl+x ctrl+t",
+        "command": "groog.multiCommand.execute",
+        "when": "resourceLangId == go",
+        "args": {
+          "sequence": [
+            {
+              "command": "go.test.package",
+              "args": {
+                "background": true
+              },
+              "async": true
+            },
+            {
+              "command": "termin-all-or-nothing.openPanel",
+              "delay": 50
+            },
+            {
+              "command": "workbench.action.output.show.extension-output-golang.go-#2-Go Tests",
+              "delay": 50
             }
           ]
         }

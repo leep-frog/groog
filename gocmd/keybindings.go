@@ -51,12 +51,20 @@ func wc(s string) *WhenContext {
 
 // See the following link for language codes: https://code.visualstudio.com/docs/languages/identifiers
 func whenFileType(languageId string) *WhenContext {
-	return wcEql("resourceLangId", languageId)
+	return wcCmp("resourceLangId", languageId, true)
 }
 
-func wcEql(key string, value string) *WhenContext {
+func whenNotFileType(languageId string) *WhenContext {
+	return wcCmp("resourceLangId", languageId, false)
+}
+
+func wcCmp(key, value string, eql bool) *WhenContext {
+	op := "!="
+	if eql {
+		op = "=="
+	}
 	return &WhenContext{
-		fmt.Sprintf("%s == %v", key, value),
+		fmt.Sprintf("%s %s %v", key, op, value),
 		false,
 		true,
 	}
@@ -106,6 +114,7 @@ var (
 
 	// When comparison contexts
 	goFile         = whenFileType("go")
+	notGoFile      = whenNotFileType("go")
 	javaFile       = whenFileType("java")
 	typescriptFile = whenFileType("typescript")
 
@@ -570,21 +579,41 @@ var (
 		alt(shift("p")): onlyMC("editor.action.marker.prevInFiles", "closeMarkersNavigation"),
 		alt(shift("n")): onlyMC("editor.action.marker.nextInFiles", "closeMarkersNavigation"),
 
-		ctrlX("t"): onlyKB(mcWithArgs(
-			&KB{
-				Command: "groog.testFile",
-				Args: map[string]interface{}{
-					"part": 0,
+		ctrlX("t"): {
+			goFile.value: mcWithArgs(
+				&KB{
+					Command: "go.test.package",
+					Async:   async(true),
+					Args: map[string]interface{}{
+						"background": true,
+					},
 				},
-			},
-			&KB{
-				Command: "groog.testFile",
-				Delay:   delay(25),
-				Args: map[string]interface{}{
-					"part": 1,
+				&KB{
+					Command: "termin-all-or-nothing.openPanel",
+					Delay:   delay(50),
 				},
-			},
-		)),
+				&KB{
+					Command: "workbench.action.output.show.extension-output-golang.go-#2-Go Tests",
+					Delay:   delay(50),
+				},
+			),
+			// For all other file types, use the custom function
+			notGoFile.value: mcWithArgs(
+				&KB{
+					Command: "groog.testFile",
+					Args: map[string]interface{}{
+						"part": 0,
+					},
+				},
+				&KB{
+					Command: "groog.testFile",
+					Delay:   delay(25),
+					Args: map[string]interface{}{
+						"part": 1,
+					},
+				},
+			),
+		},
 
 		// Miscellaneous
 		ctrlX("r"): only("workbench.action.reloadWindow"),
