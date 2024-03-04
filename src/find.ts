@@ -57,6 +57,7 @@ export interface Match {
   range: vscode.Range;
   text: string;
   pattern: RegExp;
+  index: number;
 }
 
 export class Document {
@@ -131,7 +132,7 @@ export class Document {
 
         return true;
       })
-      .map(m => {
+      .map((m, index) => {
         return {
           text: m.text,
           range: new vscode.Range(
@@ -139,6 +140,7 @@ export class Document {
             this.posFromIndex(m.endIndex),
           ),
           pattern: rgx,
+          index,
         };
       }), undefined];
   }
@@ -161,38 +163,34 @@ const WORD_PARTS = new RegExp("[a-zA-Z0-9]");
 
 interface MatchInfo {
   matches: Match[];
-  match?: Match;
-  matchIdx?: number;
-  matchError?: string;
+  match: Match;
 }
 
 class MatchTracker {
-  private matches: Match[];
-  private matchIdx?: number;
+  private matchInfo?: MatchInfo;
   private editor: vscode.TextEditor;
   cursorReferencePosition: vscode.Position;
   private matchError?: string;
 
   constructor(editor: vscode.TextEditor) {
-    this.matches = [];
     this.editor = editor;
     this.cursorReferencePosition = editor.selection.start;
   }
 
   public setMatchIndex(idx: number) {
-    if (idx < 0 || idx >= this.matches.length) {
+    if (this.matchInfo === undefined) {
       return;
     }
-    this.matchIdx = idx;
+
+    if (idx < 0 || idx >= this.matchInfo.matches.length) {
+      return;
+    }
+    this.matchInfo.match = this.matchInfo.matches[idx];
   }
 
-  public getMatchInfo(): MatchInfo {
-    return {
-      matches: this.matches,
-      match: this.matchIdx === undefined ? undefined : this.matches[this.matchIdx],
-      matchIdx: this.matchIdx,
-      matchError: this.matchError,
-    };
+  // Return (MatchInfo, error)
+  public getMatchInfo(): [MatchInfo | undefined, string | undefined] {
+    return [this.matchInfo, this.matchError];
   }
 
   public nextMatch() {
@@ -204,8 +202,8 @@ class MatchTracker {
   }
 
   public nextOrPrevMatch(offset: number) {
-    if (this.matchIdx !== undefined) {
-      this.matchIdx = positiveMod(this.matchIdx + offset, this.matches.length);
+    if (this.matchInfo !== undefined) {
+      this.setMatchIndex(positiveMod(this.matchInfo.match.index + offset, this.matchInfo.matches.length));
     }
   }
 
@@ -214,10 +212,11 @@ class MatchTracker {
   }
 
   public refreshMatches(props: RefreshMatchesProps): void {
-    [this.matches, this.matchError] = new Document(this.editor.document.getText()).matches(props);
+    const [matches, mErr] = new Document(this.editor.document.getText()).matches(props);
+    this.matchError = mErr;
 
     // Update the matchIdx
-    this.matchIdx = this.matches.length === 0 ? undefined : sortedGTE(this.matches.map(m => m.range), new vscode.Range(this.cursorReferencePosition, this.cursorReferencePosition), (a: vscode.Range, b: vscode.Range) => {
+    let matchIdx = matches.length === 0 ? undefined : sortedGTE(matches.map(m => m.range), new vscode.Range(this.cursorReferencePosition, this.cursorReferencePosition), (a: vscode.Range, b: vscode.Range) => {
       if (a.start.isEqual(b.start)) {
         return 0;
       }
@@ -225,33 +224,35 @@ class MatchTracker {
     });
 
     // If (potentially) no matches, just stay where we are (also check undefined so we don't need exclamation point in 'this.matchIdx!' after this if block)
-    if (this.matchIdx === -1 || this.matchIdx === undefined) {
+    if (matchIdx === -1 || matchIdx === undefined) {
       // No match at all
-      if (this.matches.length === 0) {
-        this.matchIdx = undefined;
+      if (matches.length === 0) {
+        this.matchInfo = undefined;
         return;
       }
 
       // Otherwise, cursor was after the last match, in which case we just need to wrap
       // around to the top of the file.
-      this.matchIdx = 0;
+      matchIdx = 0;
     }
 
-    const matchToFocus = this.matches[this.matchIdx];
+    const matchToFocus = matches[matchIdx];
     // We're at the same match, so don't do anything
     if (this.cursorReferencePosition.isEqual(matchToFocus.range.start)) {
-      return;
+      // Don't do anything
+    } else if (props.prevMatchOnChange) { // We're at a different match.
+      // Decrement the match
+      matchIdx = (matchIdx + matches.length - 1) % matches.length;
     }
 
-    // We're at a different match.
-    if (props.prevMatchOnChange) {
-      // Decrement the match
-      this.matchIdx = (this.matchIdx + this.matches.length - 1) % this.matches.length;
-    }
+    this.matchInfo = {
+      matches,
+      match: matches[matchIdx],
+    };
   }
 }
 
-class FindContextCache implements vscode.InlineCompletionItemProvider {
+class FindContextCache {
   private cache: FindContext[];
   private cacheIdx: number;
   private replaceMode: boolean;
@@ -324,9 +325,15 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       return;
     }
 
-    const matchInfo = this.matchTracker!.getMatchInfo();
-    const m = matchInfo.match;
-    const toReplace = all ? matchInfo.matches : (m ? [m] : []);
+    const [matchInfo, err] = this.matchTracker!.getMatchInfo();
+    if (err) {
+      vscode.window.showInformationMessage(`Failed to get match info: ${err}`);
+      return;
+    }
+    if (!matchInfo) {
+      return;
+    }
+    const toReplace = all ? matchInfo.matches : [matchInfo.match];
     return editor.edit(eb => {
       toReplace.forEach((r) => {
         // If regex mode, than replace using string.replace so that
@@ -373,13 +380,17 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
 
   public async end(): Promise<void> {
     // Focus on the last match (if relevant)
-    const match = this.matchTracker!.getMatchInfo().match;
-    if (match) {
+    const [matchInfo, err] = this.matchTracker!.getMatchInfo();
+    if (err) {
+      vscode.window.showInformationMessage(`Failed to get match info: ${err}`);
+      return;
+    }
+    if (matchInfo) {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
         vscode.window.showErrorMessage(`Cannot select text from outside the editor.`);
       } else {
-        editor.selection = new vscode.Selection(match.range.start, match.range.end);
+        editor.selection = new vscode.Selection(matchInfo.match.range.start, matchInfo.match.range.end);
       }
     }
     this.active = false;
@@ -392,45 +403,6 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       this.cache.pop();
     }
     this.replaceMode = false;
-  }
-
-  // This function is called by the registerInlineCompletionItemProvider handler.
-  // It is not responsible for moving the cursor and instead will simply add the inline insertions
-  // at the cursor's current position.
-  async provideInlineCompletionItems(document: vscode.TextDocument, position: vscode.Position): Promise<vscode.InlineCompletionList> {
-    if (!this.active) {
-      return { items: [] };
-    }
-
-    // Same order as find widget
-    const codes = [];
-    if (this.caseToggle) { codes.push("C"); }
-    if (this.wholeWordToggle) { codes.push("W"); }
-    if (this.regexToggle) { codes.push("R"); }
-
-    const matchInfo = this.matchTracker!.getMatchInfo();
-    const ms = matchInfo.matches;
-    const m = matchInfo.match;
-    const whitespaceJoin = "\n" + (m ? document.getText(new vscode.Range(new vscode.Position(m.range.start.line, 0), new vscode.Position(m.range.start.line, m.range.start.character))).replace(/[^\t]/g, " ") : "");
-
-    const matchText = ms.length === 0 ? `No results` : `${matchInfo.matchIdx! + 1} of ${ms.length}`;
-
-    let ctx = this.currentContext();
-    const txtParts = [
-      ``,
-      matchText,
-      `Flags: [${codes.join("")}]`,
-      `Text: ${ctx.findText}`,
-    ];
-    if (this.replaceMode) {
-      txtParts.push(`Repl: ${ctx.replaceText}`);
-    }
-    return { items: [
-      {
-        insertText: txtParts.join(whitespaceJoin),
-        range: new vscode.Range(position, position),
-      }
-    ]};
   }
 
   private currentContext() : FindContext {
@@ -523,11 +495,9 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
       return;
     }
 
-    const matchInfo = this.matchTracker!.getMatchInfo();
-    const match = matchInfo.match;
-    const matches = matchInfo.matches;
-    const matchIndex = matchInfo.matchIdx;
-    const matchError = matchInfo.matchError;
+    const [matchInfo, matchError] = this.matchTracker!.getMatchInfo();
+    const match = matchInfo?.match;
+    const matches = matchInfo ? matchInfo.matches : [];
 
     // Update the decorations (always want these changes to be applied, hence why we do this first).
     editor.setDecorations(allMatchDecorationType, matches.filter((m) => !match || !m.range.isEqual(match.range)).map(m => new vscode.Selection(m.range.start, m.range.end)));
@@ -551,7 +521,7 @@ class FindContextCache implements vscode.InlineCompletionItemProvider {
     if (this.regexToggle) { codes.push("R"); }
 
     // Create items (find info)
-    const matchText = matches.length === 0 ? `No results` : `${matchIndex! + 1} of ${matches.length}`;
+    const matchText = !matchInfo ? `No results` : `${matchInfo.match.index + 1} of ${matches.length}`;
     const ctx = this.currentContext();
     const detail = this.replaceMode ? (ctx.replaceText.length === 0 ? "No replace text set" : this.appendVerticalLine(ctx.replaceText)) : undefined;
     const items: vscode.QuickPickItem[] = [
@@ -633,7 +603,6 @@ export class FindHandler extends TypeHandler {
   }
 
   registerHandler(context: vscode.ExtensionContext, recorder: Recorder) {
-    context.subscriptions.push(vscode.languages.registerInlineCompletionItemProvider({ scheme: 'file' }, this.cache));
     recorder.registerCommand(context, 'find', () => {
       if (this.isActive()) {
         return this.cache.nextMatch();
@@ -812,30 +781,31 @@ export class FindRecord implements Record {
     const matchTracker = new MatchTracker(editor);
     matchTracker.refreshMatches(this.matchProps);
     matchTracker.nextOrPrevMatch(this.nexts);
-    const matchInfo = matchTracker.getMatchInfo();
+    const [matchInfo, matchError] = matchTracker.getMatchInfo();
+    if (matchError) {
+      vscode.window.showErrorMessage(`Failed to playback find recording: ${matchError}`);
+      return false;
+    }
+
+    if (!matchInfo) {
+      vscode.window.showErrorMessage(`No match found during recording playback`);
+      return false;
+    }
+
     if (Math.abs(this.nexts) >= matchInfo.matches.length) {
       if (!repeatMode) {
         vscode.window.showErrorMessage(`There are ${matchInfo.matches.length} matches, but the FindRecord requires at least ${Math.abs(this.nexts)+1}`);
       }
       return false;
     }
-    if (matchInfo.matchError) {
-      vscode.window.showErrorMessage(`Failed to playback find recording: ${matchInfo.matchError}`);
-      return false;
-    }
 
     const match = matchInfo.match;
-    if (!match) {
-      vscode.window.showErrorMessage(`No match found during recording playback`);
-      return false;
-    }
 
     editor.selection = new vscode.Selection(match.range.start, match.range.end);
 
     this.numMatches = matchInfo.matches.length;
     // This will be set due to !match check above
-    // TODO: Encapsulate in object so no ! needed
-    this.matchIdx = matchInfo.matchIdx!;
+    this.matchIdx = matchInfo.match.index;
 
     return true;
   }
