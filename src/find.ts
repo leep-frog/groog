@@ -789,11 +789,13 @@ export class FindRecord implements Record {
   private nexts: number;
   private matchProps: RefreshMatchesProps;
   numMatches: number;
+  matchIdx: number;
 
   constructor(nexts: number, props: RefreshMatchesProps) {
     this.nexts = nexts;
     this.matchProps = props;
     this.numMatches = 0;
+    this.matchIdx = -1;
   }
 
   public name(): string {
@@ -801,7 +803,7 @@ export class FindRecord implements Record {
   }
 
   // TODO: Change this to return Promise<string | undefined>
-  async playback(emacs: Emacs): Promise<boolean> {
+  async playback(emacs: Emacs, repeatMode?: boolean): Promise<boolean> {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       vscode.window.showErrorMessage(`Cannot find without an active editor`);
@@ -812,7 +814,9 @@ export class FindRecord implements Record {
     matchTracker.nextOrPrevMatch(this.nexts);
     const matchInfo = matchTracker.getMatchInfo();
     if (Math.abs(this.nexts) >= matchInfo.matches.length) {
-      vscode.window.showErrorMessage(`There are ${matchInfo.matches.length}, but the FindRecord requires at least ${Math.abs(this.nexts)+1}`);
+      if (!repeatMode) {
+        vscode.window.showErrorMessage(`There are ${matchInfo.matches.length} matches, but the FindRecord requires at least ${Math.abs(this.nexts)+1}`);
+      }
       return false;
     }
     if (matchInfo.matchError) {
@@ -829,6 +833,9 @@ export class FindRecord implements Record {
     editor.selection = new vscode.Selection(match.range.start, match.range.end);
 
     this.numMatches = matchInfo.matches.length;
+    // This will be set due to !match check above
+    // TODO: Encapsulate in object so no ! needed
+    this.matchIdx = matchInfo.matchIdx!;
 
     return true;
   }

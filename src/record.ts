@@ -5,6 +5,7 @@ import { Emacs } from './emacs';
 import { FindHandler, FindRecord } from './find';
 import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand } from './interfaces';
+import { MatchRecord } from 'glob/dist/commonjs/processor';
 
 export interface RegisterCommandOptionalProps {
   noLock?: boolean;
@@ -77,24 +78,47 @@ class RecordBook {
       vscode.window.showErrorMessage(`This record isn't repeatable`);
       return;
     }
+    // All records after the findRecord.
+    const nextRecords = this.records.slice(1);
 
     // Function that runs the FindRecord
+    const alreadyChecked = new Set<number>();
+    const totalNumMatches = -1;
+    let decreaseMode: boolean | undefined = undefined;
+
     const runFindRecord = async (prevCount?: number): Promise<boolean> => {
-      const success = await findRecord.playback(emacs);
+      const success = await findRecord.playback(emacs, prevCount !== undefined /* Only display error on issue with first run */);
       if (!success) {
         return false;
       }
 
-      if (prevCount !== undefined && findRecord.numMatches >= prevCount) {
-        vscode.window.showErrorMessage(`Number of matches did not decrease, ending repeat playback`);
-        return false;
-      }
+      if (prevCount !== undefined) {
+        // Set decreaseMode if it is not set.
+        if (decreaseMode === undefined) {
+          decreaseMode = findRecord.numMatches < prevCount;
+        }
 
+        if (decreaseMode && findRecord.numMatches >= prevCount) {
+          vscode.window.showErrorMessage(`Number of matches did not decrease, ending repeat playback`);
+          return false;
+        }
+
+        if (!decreaseMode && findRecord.numMatches !== prevCount) {
+          vscode.window.showErrorMessage(`Number of matches changed (${prevCount} -> ${findRecord.numMatches}), ending repeat playback`);
+          return false;
+        }
+
+        if (!decreaseMode && alreadyChecked.has(findRecord.matchIdx)) {
+          vscode.window.showErrorMessage(`Landed on same match index, ending repeat playback`);
+          return false;
+        }
+      }
+      alreadyChecked.add(findRecord.matchIdx);
       return true;
     };
 
     // Repeatedly run the FindRecord and then the rest of the records until we run out of matches or fail (and ensure that the number of matches is always decreasing)
-    const nextRecords = this.records.slice(1);
+
     for (let success = await runFindRecord(); success; success = await runFindRecord(findRecord.numMatches)) {
       for (var r of nextRecords) {
         if (!await r.playback(emacs)) {
@@ -217,6 +241,7 @@ export class Recorder extends TypeHandler {
   }
 
   getRecordBook(): RecordBook { return this.recordBooks.at(-1)!; }
+  getOptionalRecordBook(): RecordBook | undefined { return this.recordBooks.at(-1); }
 
   setRecordBook(newBook: RecordBook) { this.recordBooks[this.recordBooks.length-1] = newBook; }
 
@@ -373,7 +398,12 @@ export class Recorder extends TypeHandler {
       vscode.window.showInformationMessage("Still recording!");
       return;
     }
-    return this.getRecordBook().repeatedPlayback(this.emacs);
+    const recordBook = this.getOptionalRecordBook();
+    if (!recordBook) {
+      vscode.window.showErrorMessage(`No recordings exist yet!`);
+      return;
+    }
+    return recordBook.repeatedPlayback(this.emacs);
   }
 
   async playback(): Promise<void> {
@@ -381,7 +411,12 @@ export class Recorder extends TypeHandler {
       vscode.window.showInformationMessage("Still recording!");
       return;
     }
-    return this.getRecordBook().playback(this.emacs);
+    const recordBook = this.getOptionalRecordBook();
+    if (!recordBook) {
+      vscode.window.showErrorMessage(`No recordings exist yet!`);
+      return;
+    }
+    return recordBook.playback(this.emacs);
   }
 
   async handleActivation() {
