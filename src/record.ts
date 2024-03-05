@@ -109,7 +109,11 @@ class RecordBook {
         }
 
         if (!decreaseMode && alreadyChecked.has(findRecord.matchIdx)) {
-          vscode.window.showErrorMessage(`Landed on same match index, ending repeat playback`);
+          if (alreadyChecked.size === findRecord.numMatches) {
+            vscode.window.showInformationMessage(`Successfully ran recording on all matches`);
+          } else {
+            vscode.window.showErrorMessage(`Landed on same match index, ending repeat playback`);
+          }
           return false;
         }
       }
