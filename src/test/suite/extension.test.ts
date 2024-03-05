@@ -21,10 +21,11 @@ interface TestMatch {
 }
 
 function convertTestMatches(pattern : RegExp | undefined, testMatches: TestMatch[]): Match[] {
-  return testMatches.map(tm => {
+  return testMatches.map((tm, index) => {
     return {
       ...tm,
       pattern: pattern!,
+      index,
     };
   });
 }
