@@ -428,7 +428,7 @@ interface TestCase {
   name: string;
   startingText?: string[];
   commands?: CommandExecution[];
-  wantDocument: string[];
+  wantDocument?: string[];
   wantSelections: vscode.Selection[];
   wantInfoMessages?: string[];
   wantErrorMessages?: string[];
@@ -438,8 +438,6 @@ const testCases: TestCase[] = [
   // Basic/setup tests
   {
     name: "Captures opening info message",
-    startingText: [],
-    wantDocument: [],
     wantSelections: [
       selection(0, 0),
     ],
@@ -452,7 +450,6 @@ const testCases: TestCase[] = [
   },
   {
     name: "Works for empty file and no changes",
-    wantDocument: [],
     wantSelections: [
       selection(0, 0),
     ],
@@ -478,12 +475,6 @@ const testCases: TestCase[] = [
       "defabc",
       "2",
     ],
-    wantDocument: [
-      "abc",
-      "1",
-      "defabc",
-      "2",
-    ],
     wantSelections: [
       selection(0, 0),
     ],
@@ -492,6 +483,18 @@ const testCases: TestCase[] = [
     ],
     wantErrorMessages: [
       `No recordings exist yet!`,
+    ],
+  },
+  {
+    name: "End recording fails if not recording",
+    wantSelections: [
+      selection(0, 0),
+    ],
+    commands: [
+      cmd("groog.record.endRecording"),
+    ],
+    wantInfoMessages: [
+      `Not recording!`,
     ],
   },
   {
@@ -528,6 +531,9 @@ suite('Groog commands', () => {
   testCases.forEach(tc => {
     test(tc.name, async () => {
 
+      const startText = (tc.startingText || []).join("\n");
+      const wantText = tc.wantDocument?.join("\n") || startText;
+
       // Create or clear the editor
       if (!vscode.window.activeTextEditor) {
         await vscode.commands.executeCommand("workbench.action.files.newUntitledFile");
@@ -542,12 +548,10 @@ suite('Groog commands', () => {
       });
 
       // Create the document if relevant
-      if (tc.startingText) {
-        await editor.edit(eb => {
-          eb.insert(new vscode.Position(0, 0), tc.startingText!.join("\n"));
-        });
-        editor.selection = new vscode.Selection(0, 0, 0, 0);
-      }
+      await editor.edit(eb => {
+        eb.insert(new vscode.Position(0, 0), startText);
+      });
+      editor.selection = new vscode.Selection(0, 0, 0, 0);
 
       const gotInfoMessages : string[] = [];
       vscode.window.showInformationMessage = async (s: string) => {
@@ -564,7 +568,7 @@ suite('Groog commands', () => {
       }
 
       // Verify the outcome
-      assert.deepStrictEqual(editor.document.getText(), tc.wantDocument.join("\n"));
+      assert.deepStrictEqual(editor.document.getText(), wantText);
       assert.deepStrictEqual(editor.selections, tc.wantSelections);
       assert.deepStrictEqual(gotInfoMessages, tc.wantInfoMessages || [], "Expected info messages to be exactly equal");
       assert.deepStrictEqual(gotErrorMessages, tc.wantErrorMessages || [], "Expected error messages to be exactly equal");
