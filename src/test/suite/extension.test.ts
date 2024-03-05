@@ -426,13 +426,30 @@ function selection(line: number, char: number) : vscode.Selection {
 
 interface TestCase {
   name: string;
-  wantDocument: string[];
-  wantSelections: vscode.Selection[];
   startingText?: string[];
   commands?: CommandExecution[];
+  wantDocument: string[];
+  wantSelections: vscode.Selection[];
+  wantInfoMessages?: string[];
+  wantErrorMessages?: string[];
 }
 
 const testCases: TestCase[] = [
+  // Basic/setup tests
+  {
+    name: "Captures opening info message",
+    startingText: [],
+    wantDocument: [],
+    wantSelections: [
+      selection(0, 0),
+    ],
+    commands: [
+      cmd("groog.cursorRight"),
+    ],
+    wantInfoMessages: [
+      `Basic keyboard mode activated`,
+    ],
+  },
   {
     name: "Works for empty file and no changes",
     wantDocument: [],
@@ -454,7 +471,31 @@ const testCases: TestCase[] = [
   },
   // Record tests
   {
-    name: "Records text",
+    name: "Record playback fails if no recording set",
+    startingText: [
+      "abc",
+      "1",
+      "defabc",
+      "2",
+    ],
+    wantDocument: [
+      "abc",
+      "1",
+      "defabc",
+      "2",
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+    commands: [
+      cmd("groog.record.playRecording"),
+    ],
+    wantErrorMessages: [
+      `No recordings exist yet!`,
+    ],
+  },
+  {
+    name: "Records and plays back",
     startingText: [
       "abc",
       "1",
@@ -482,7 +523,7 @@ const testCases: TestCase[] = [
   },
 ];
 
-// To run these tests, run the `Extension Tests` configurations from `.vscode/launch.json`
+// To run these tests, run the `Extension Tests` configurations from `.vscode/launch.json` // TODO: Make an npm target that does this?
 suite('Groog commands', () => {
   testCases.forEach(tc => {
     test(tc.name, async () => {
@@ -508,6 +549,15 @@ suite('Groog commands', () => {
         editor.selection = new vscode.Selection(0, 0, 0, 0);
       }
 
+      const gotInfoMessages : string[] = [];
+      vscode.window.showInformationMessage = async (s: string) => {
+        gotInfoMessages.push(s);
+      };
+      const gotErrorMessages : string[] = [];
+      vscode.window.showErrorMessage = async (s: string) => {
+        gotErrorMessages.push(s);
+      };
+
       // Run the commands
       for (const cmd of (tc.commands || [])) {
         await vscode.commands.executeCommand(cmd.command, ...(cmd.args || []));
@@ -516,6 +566,8 @@ suite('Groog commands', () => {
       // Verify the outcome
       assert.deepStrictEqual(editor.document.getText(), tc.wantDocument.join("\n"));
       assert.deepStrictEqual(editor.selections, tc.wantSelections);
+      assert.deepStrictEqual(gotInfoMessages, tc.wantInfoMessages || [], "Expected info messages to be exactly equal");
+      assert.deepStrictEqual(gotErrorMessages, tc.wantErrorMessages || [], "Expected error messages to be exactly equal");
     });
   });
 });
