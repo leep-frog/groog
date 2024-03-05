@@ -404,12 +404,32 @@ suite('Document.matches Test Suite', () => {
   });
 });
 
+interface CommandExecution {
+  command: string;
+  args?: any[];
+}
+
+function cmd(command: string, ...args: any[]) : CommandExecution {
+  return {
+    command,
+    args,
+  };
+}
+
+function type(text: string) : CommandExecution {
+  return cmd("groog.type", { "text": text });
+}
+
+function selection(line: number, char: number) : vscode.Selection {
+  return new vscode.Selection(line, char, line, char);
+}
+
 interface TestCase {
   name: string;
-  edits?: (eb: vscode.TextEditor) => Promise<void>,
   wantDocument: string[];
   wantSelections: vscode.Selection[];
   startingText?: string[];
+  commands?: CommandExecution[];
 }
 
 const testCases: TestCase[] = [
@@ -417,29 +437,52 @@ const testCases: TestCase[] = [
     name: "Works for empty file and no changes",
     wantDocument: [],
     wantSelections: [
-      new vscode.Selection(
-        new vscode.Position(0, 0),
-        new vscode.Position(0, 0),
-      ),
+      selection(0, 0),
     ],
   },
   {
     name: "Writes text to file",
     startingText: [
-      "abc"
+      "abc",
     ],
     wantDocument: [
       "abc",
     ],
     wantSelections: [
-      new vscode.Selection(
-        new vscode.Position(0, 3),
-        new vscode.Position(0, 3),
-      ),
+      selection(0, 0),
+    ],
+  },
+  // Record tests
+  {
+    name: "Records text",
+    startingText: [
+      "abc",
+      "1",
+      "defabc",
+      "2",
+    ],
+    wantDocument: [
+      "abcx",
+      "1yx",
+      "defyabc",
+      "2",
+    ],
+    wantSelections: [
+      selection(2, 4),
+    ],
+    commands: [
+      cmd("groog.record.startRecording"),
+      cmd("groog.cursorEnd"),
+      type("x"),
+      cmd("groog.cursorDown"),
+      type("y"),
+      cmd("groog.record.endRecording"),
+      cmd("groog.record.playRecording"),
     ],
   },
 ];
 
+// To run these tests, run the `Extension Tests` configurations from `.vscode/launch.json`
 suite('Groog commands', () => {
   testCases.forEach(tc => {
     test(tc.name, async () => {
@@ -448,7 +491,7 @@ suite('Groog commands', () => {
       if (!vscode.window.activeTextEditor) {
         await vscode.commands.executeCommand("workbench.action.files.newUntitledFile");
       }
-      const editor = assert_defined(vscode.window.activeTextEditor);
+      const editor = assertDefined(vscode.window.activeTextEditor);
       await editor.edit(eb => {
         const line = editor.document.lineAt(editor.document.lineCount-1);
         eb.delete(new vscode.Range(
@@ -462,21 +505,22 @@ suite('Groog commands', () => {
         await editor.edit(eb => {
           eb.insert(new vscode.Position(0, 0), tc.startingText!.join("\n"));
         });
+        editor.selection = new vscode.Selection(0, 0, 0, 0);
       }
 
-      // Run the test
-      if (tc.edits) {
-        await tc.edits(editor);
+      // Run the commands
+      for (const cmd of (tc.commands || [])) {
+        await vscode.commands.executeCommand(cmd.command, ...(cmd.args || []));
       }
 
-      // Verify the test
+      // Verify the outcome
       assert.deepStrictEqual(editor.document.getText(), tc.wantDocument.join("\n"));
       assert.deepStrictEqual(editor.selections, tc.wantSelections);
     });
   });
 });
 
-function assert_defined<T>(t?: T): T {
+function assertDefined<T>(t?: T): T {
   assert.notEqual(t, undefined, "Expected object to be defined, but it was undefined");
   return t!;
 }
