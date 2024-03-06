@@ -25,6 +25,7 @@
     "test": "vscode-test",
     "test-compile": "tsc -p ./",
     "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "coverage": "c8 --reporter lcov --check-coverage npm run test",
     "watch": "tsc -watch -p ./"
   },
   "dependencies": {
@@ -40,6 +41,7 @@
     "@typescript-eslint/parser": "^6.4.1",
     "@vscode/test-cli": "^0.0.4",
     "@vscode/test-electron": "^2.3.9",
+    "c8": "^9.1.0",
     "esbuild": "^0.20.1",
     "eslint": "^8.47.0",
     "glob": "^10.3.3",
@@ -995,7 +997,7 @@
         "command": "workbench.action.terminal.sendSequence",
         "when": "groog.context.qmkMode && panelFocus",
         "args": {
-          "text": "\u0018\u0008"
+          "text": "\u0018\b"
         }
       },
       {
@@ -2401,7 +2403,7 @@
         "command": "groog.type",
         "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
-          "text": "\u003c"
+          "text": "<"
         }
       },
       {
@@ -2417,7 +2419,7 @@
         "command": "groog.type",
         "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
-          "text": "\u003e"
+          "text": ">"
         }
       },
       {
