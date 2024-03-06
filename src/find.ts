@@ -170,7 +170,12 @@ const WORD_PARTS = new RegExp("[a-zA-Z0-9]");
 interface MatchInfo {
   matches: Match[];
   match: Match;
+}
+
+interface MatchInfoResponse {
+  info?: MatchInfo;
   suggestableMatches: string[];
+  error?: string;
 }
 
 class MatchTracker {
@@ -178,10 +183,12 @@ class MatchTracker {
   private editor: vscode.TextEditor;
   cursorReferencePosition: vscode.Position;
   private matchError?: string;
+  private suggestableMatches: string[];
 
   constructor(editor: vscode.TextEditor) {
     this.editor = editor;
     this.cursorReferencePosition = editor.selection.start;
+    this.suggestableMatches = [];
   }
 
   public setMatchIndex(idx: number) {
@@ -196,8 +203,12 @@ class MatchTracker {
   }
 
   // Return (MatchInfo, error)
-  public getMatchInfo(): [MatchInfo | undefined, string | undefined] {
-    return [this.matchInfo, this.matchError];
+  public getMatchInfo(): MatchInfoResponse {
+    return {
+      info: this.matchInfo,
+      error: this.matchError,
+      suggestableMatches: this.suggestableMatches,
+    };
   }
 
   public nextMatch() {
@@ -220,6 +231,7 @@ class MatchTracker {
 
   public refreshMatches(props: RefreshMatchesProps): void {
     const [matches, suggestableMatches, mErr] = new Document(this.editor.document.getText()).matches(props);
+    this.suggestableMatches = suggestableMatches;
     this.matchError = mErr;
 
     // Update the matchIdx
@@ -255,7 +267,6 @@ class MatchTracker {
     this.matchInfo = {
       matches,
       match: matches[matchIdx],
-      suggestableMatches,
     };
   }
 }
@@ -333,7 +344,9 @@ class FindContextCache {
       return;
     }
 
-    const [matchInfo, err] = this.matchTracker!.getMatchInfo();
+    const matchInfoResponse = this.matchTracker!.getMatchInfo();
+    const matchInfo = matchInfoResponse.info;
+    const err = matchInfoResponse.error;
     if (err) {
       vscode.window.showInformationMessage(`Failed to get match info: ${err}`);
       return;
@@ -388,7 +401,9 @@ class FindContextCache {
 
   public async end(): Promise<void> {
     // Focus on the last match (if relevant)
-    const [matchInfo, err] = this.matchTracker!.getMatchInfo();
+    const matchInfoResponse = this.matchTracker!.getMatchInfo();
+    const matchInfo = matchInfoResponse.info;
+    const err = matchInfoResponse.error;
     if (err) {
       vscode.window.showInformationMessage(`Failed to get match info: ${err}`);
       return;
@@ -503,7 +518,10 @@ class FindContextCache {
       return;
     }
 
-    const [matchInfo, matchError] = this.matchTracker!.getMatchInfo();
+    const matchInfoResponse = this.matchTracker!.getMatchInfo();
+    const matchInfo = matchInfoResponse.info;
+    const suggestableMatches = matchInfoResponse.suggestableMatches;
+    const matchError = matchInfoResponse.error;
     const match = matchInfo?.match;
     const matches = matchInfo ? matchInfo.matches : [];
 
@@ -546,9 +564,9 @@ class FindContextCache {
       {
         label: matchText,
       },
-      ...(matchInfo?.suggestableMatches.map(sm => {
+      ...(suggestableMatches.map(sm => {
         return {label: sm};
-      }) || []),
+      })),
     ];
 
     // Display the find info
@@ -794,7 +812,9 @@ export class FindRecord implements Record {
     const matchTracker = new MatchTracker(editor);
     matchTracker.refreshMatches(this.matchProps);
     matchTracker.nextOrPrevMatch(this.nexts);
-    const [matchInfo, matchError] = matchTracker.getMatchInfo();
+    const matchInfoResponse = matchTracker.getMatchInfo();
+    const matchInfo = matchInfoResponse.info;
+    const matchError = matchInfoResponse.error;
     if (matchError) {
       vscode.window.showErrorMessage(`Failed to playback find recording: ${matchError}`);
       return false;
