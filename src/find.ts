@@ -467,6 +467,14 @@ class FindContextCache {
     return this.focusMatch();
   }
 
+  public async setText(s: string): Promise<void> {
+    let ctx = this.currentContext();
+    ctx.modified = true;
+    ctx.findText = s;
+    this.refreshMatches();
+    return this.focusMatch();
+  }
+
   public async deleteLeft(): Promise<void> {
     let ctx = this.currentContext();
     if (this.replaceMode) {
@@ -552,7 +560,7 @@ class FindContextCache {
     const matchText = !matchInfo ? `No results` : `${matchInfo.match.index + 1} of ${matches.length}`;
     const ctx = this.currentContext();
     const detail = this.replaceMode ? (ctx.replaceText.length === 0 ? "No replace text set" : this.appendVerticalLine(ctx.replaceText)) : undefined;
-    const items: vscode.QuickPickItem[] = [
+    const items: FindQuickPickItem[] = [
       {
         label: this.appendVerticalLine(ctx.findText) || " ",
         detail: detail,
@@ -564,13 +572,43 @@ class FindContextCache {
       {
         label: matchText,
       },
-      ...(suggestableMatches.map(sm => {
-        return {label: sm};
+      ...(suggestableMatches.map((sm: string) : FindQuickPickItem => {
+        return {
+          label: sm,
+          pickable: true,
+        };
       })),
     ];
 
-    // Display the find info
-    vscode.window.showQuickPick(items);
+    const disposables: vscode.Disposable[] = [];
+    const input = vscode.window.createQuickPick<FindQuickPickItem>();
+    input.items = items;
+    input.title = "Find Mode";
+
+    disposables.push(
+      // Dispose of events when leaving the widget.
+      input.onDidHide(e => {
+        disposables.forEach(d => d.dispose);
+      }),
+      // When accepting an event, run the record book!
+      input.onDidAccept(e => {
+        if (input.selectedItems.length > 1) {
+          vscode.window.showErrorMessage(`Multiple selections made somehow?!`);
+        }
+        if (input.selectedItems.length === 0) {
+          return;
+        }
+
+        const item = input.selectedItems[0];
+        if (!item.pickable) {
+          return;
+        }
+
+        this.setText(item.label);
+        input.dispose();
+      }),
+    );
+    return input.show();
   }
 
   async prevMatch() {
@@ -854,4 +892,8 @@ export class FindRecord implements Record {
   async undo(): Promise<boolean> {
     return false;
   }
+}
+
+interface FindQuickPickItem extends vscode.QuickPickItem {
+  pickable?: boolean;
 }
