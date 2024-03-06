@@ -28,6 +28,7 @@ interface DocumentTest {
   regex?: boolean;
   wholeWord?: boolean;
   want: TestMatch[];
+  wantSuggestable?: string[];
   wantPattern?: RegExp;
   wantError?: string;
 }
@@ -375,7 +376,44 @@ const documentTestCases: DocumentTest[] = [
       },
     ],
   },
-  // Whole word match (TODO)
+  // Whole word match tests
+  {
+    name: "match whole word",
+    document: [
+      "one",
+      "onetwo",
+      "aoneb",
+      "twoone",
+      "prefix one suffix",
+      "prefix onethree",
+      "onefour suffix",
+      "onetwo again",
+    ],
+    queryText: "one",
+    wholeWord: true,
+    wantPattern: /one/gm,
+    wantSuggestable: [
+      "onefour",
+      "onethree",
+      "onetwo",
+    ],
+    want: [
+      {
+        range: new vscode.Range(
+          new vscode.Position(0, 0),
+          new vscode.Position(0, 3),
+        ),
+        text: "one",
+      },
+      {
+        range: new vscode.Range(
+          new vscode.Position(4, 7),
+          new vscode.Position(4, 10),
+        ),
+        text: "one",
+      },
+    ],
+  },
   /* Useful for commenting out tests. */
 ];
 
@@ -389,7 +427,7 @@ suite('Document.matches Test Suite', () => {
         regex: !!dtc.regex,
         wholeWord: !!dtc.wholeWord,
       });
-      assert.deepStrictEqual(got, [convertTestMatches(dtc.wantPattern, dtc.want), dtc.wantError]);
+      assert.deepStrictEqual(got, [convertTestMatches(dtc.wantPattern, dtc.want), dtc.wantSuggestable ?? [], dtc.wantError]);
     });
   });
 });

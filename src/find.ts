@@ -85,9 +85,10 @@ export class Document {
     }
   }
 
-  public matches(props: DocumentMatchProps): [Match[], string | undefined] {
+  // Returns matches, suggestable matches, and errors
+  public matches(props: DocumentMatchProps): [Match[], string[], string | undefined] {
     if (props.queryText.length === 0) {
-      return [[], undefined];
+      return [[], [], undefined];
     }
 
     const text = this.documentText;
@@ -99,10 +100,11 @@ export class Document {
     const rgxTxt = props.regex ? props.queryText : escapeStringRegexp(props.queryText);
     const [rgx, err] = this.createRegex(rgxTxt, props.caseInsensitive);
     if (err) {
-      return [[], err];
+      return [[], [], err];
     }
 
     const matches = Array.from(text.matchAll(rgx));
+    const suggestableMatches: Set<string> = new Set<string>();
     return [matches
       .map(m => {
         return {
@@ -117,15 +119,19 @@ export class Document {
           return true;
         }
 
-        // If this element is a word character than the preceding one must not be.
+        // If the first character is a word character than the preceding one must not be.
         if (WORD_PARTS.test(this.documentText[m.startIndex])) {
           if (m.startIndex > 0 && WORD_PARTS.test(this.documentText[m.startIndex - 1])) {
             return false;
           }
         }
 
+        // If the last character is a word character than the next one must not be.
         if (WORD_PARTS.test(this.documentText[m.endIndex-1])) {
           if (m.endIndex < this.documentText.length && WORD_PARTS.test(this.documentText[m.endIndex])) {
+            let lastIndex = m.endIndex;
+            for (; lastIndex < this.documentText.length && WORD_PARTS.test(this.documentText[lastIndex]); lastIndex++) {}
+            suggestableMatches.add(this.documentText.substring(m.startIndex, lastIndex));
             return false;
           }
         }
@@ -142,7 +148,7 @@ export class Document {
           pattern: rgx,
           index,
         };
-      }), undefined];
+      }), [...suggestableMatches].sort(), undefined];
   }
 
   private posFromIndex(index: number): vscode.Position {
@@ -164,6 +170,7 @@ const WORD_PARTS = new RegExp("[a-zA-Z0-9]");
 interface MatchInfo {
   matches: Match[];
   match: Match;
+  suggestableMatches: string[];
 }
 
 class MatchTracker {
@@ -212,7 +219,7 @@ class MatchTracker {
   }
 
   public refreshMatches(props: RefreshMatchesProps): void {
-    const [matches, mErr] = new Document(this.editor.document.getText()).matches(props);
+    const [matches, suggestableMatches, mErr] = new Document(this.editor.document.getText()).matches(props);
     this.matchError = mErr;
 
     // Update the matchIdx
@@ -248,6 +255,7 @@ class MatchTracker {
     this.matchInfo = {
       matches,
       match: matches[matchIdx],
+      suggestableMatches,
     };
   }
 }
@@ -538,6 +546,9 @@ class FindContextCache {
       {
         label: matchText,
       },
+      ...(matchInfo?.suggestableMatches.map(sm => {
+        return {label: sm};
+      }) || []),
     ];
 
     // Display the find info
