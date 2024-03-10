@@ -85,7 +85,7 @@ export class Document {
     }
   }
 
-  // Returns matches, suggestable matches, and errors
+  // Returns matches, suggestible matches, and errors
   public matches(props: DocumentMatchProps): [Match[], string[], string | undefined] {
     if (props.queryText.length === 0) {
       return [[], [], undefined];
@@ -104,7 +104,7 @@ export class Document {
     }
 
     const matches = Array.from(text.matchAll(rgx));
-    const suggestableMatches: Set<string> = new Set<string>();
+    const suggestibleMatches: Set<string> = new Set<string>();
     return [matches
       .map(m => {
         return {
@@ -131,7 +131,7 @@ export class Document {
           if (m.endIndex < this.documentText.length && WORD_PARTS.test(this.documentText[m.endIndex])) {
             let lastIndex = m.endIndex;
             for (; lastIndex < this.documentText.length && WORD_PARTS.test(this.documentText[lastIndex]); lastIndex++) {}
-            suggestableMatches.add(this.documentText.substring(m.startIndex, lastIndex));
+            suggestibleMatches.add(this.documentText.substring(m.startIndex, lastIndex));
             return false;
           }
         }
@@ -148,7 +148,7 @@ export class Document {
           pattern: rgx,
           index,
         };
-      }), [...suggestableMatches].sort(), undefined];
+      }), [...suggestibleMatches].sort(), undefined];
   }
 
   private posFromIndex(index: number): vscode.Position {
@@ -174,7 +174,7 @@ interface MatchInfo {
 
 interface MatchInfoResponse {
   info?: MatchInfo;
-  suggestableMatches: string[];
+  suggestibleMatches: string[];
   error?: string;
 }
 
@@ -183,12 +183,12 @@ class MatchTracker {
   private editor: vscode.TextEditor;
   cursorReferencePosition: vscode.Position;
   private matchError?: string;
-  private suggestableMatches: string[];
+  private suggestibleMatches: string[];
 
   constructor(editor: vscode.TextEditor) {
     this.editor = editor;
     this.cursorReferencePosition = editor.selection.start;
-    this.suggestableMatches = [];
+    this.suggestibleMatches = [];
   }
 
   public setMatchIndex(idx: number) {
@@ -207,7 +207,7 @@ class MatchTracker {
     return {
       info: this.matchInfo,
       error: this.matchError,
-      suggestableMatches: this.suggestableMatches,
+      suggestibleMatches: this.suggestibleMatches,
     };
   }
 
@@ -230,8 +230,8 @@ class MatchTracker {
   }
 
   public refreshMatches(props: RefreshMatchesProps): void {
-    const [matches, suggestableMatches, mErr] = new Document(this.editor.document.getText()).matches(props);
-    this.suggestableMatches = suggestableMatches;
+    const [matches, suggestibleMatches, mErr] = new Document(this.editor.document.getText()).matches(props);
+    this.suggestibleMatches = suggestibleMatches;
     this.matchError = mErr;
 
     // Update the matchIdx
@@ -528,7 +528,7 @@ class FindContextCache {
 
     const matchInfoResponse = this.matchTracker!.getMatchInfo();
     const matchInfo = matchInfoResponse.info;
-    const suggestableMatches = matchInfoResponse.suggestableMatches;
+    const suggestibleMatches = matchInfoResponse.suggestibleMatches;
     const matchError = matchInfoResponse.error;
     const match = matchInfo?.match;
     const matches = matchInfo ? matchInfo.matches : [];
@@ -572,7 +572,7 @@ class FindContextCache {
       {
         label: matchText,
       },
-      ...(suggestableMatches.map((sm: string) : FindQuickPickItem => {
+      ...(suggestibleMatches.map((sm: string) : FindQuickPickItem => {
         return {
           label: sm,
           pickable: true,

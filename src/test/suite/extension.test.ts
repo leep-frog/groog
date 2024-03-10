@@ -28,7 +28,7 @@ interface DocumentTest {
   regex?: boolean;
   wholeWord?: boolean;
   want: TestMatch[];
-  wantSuggestable?: string[];
+  wantSuggestible?: string[];
   wantPattern?: RegExp;
   wantError?: string;
 }
@@ -392,7 +392,7 @@ const documentTestCases: DocumentTest[] = [
     queryText: "one",
     wholeWord: true,
     wantPattern: /one/gm,
-    wantSuggestable: [
+    wantSuggestible: [
       "onefour",
       "onethree",
       "onetwo",
@@ -427,7 +427,7 @@ suite('Document.matches Test Suite', () => {
         regex: !!dtc.regex,
         wholeWord: !!dtc.wholeWord,
       });
-      assert.deepStrictEqual(got, [convertTestMatches(dtc.wantPattern, dtc.want), dtc.wantSuggestable ?? [], dtc.wantError]);
+      assert.deepStrictEqual(got, [convertTestMatches(dtc.wantPattern, dtc.want), dtc.wantSuggestible ?? [], dtc.wantError]);
     });
   });
 });
