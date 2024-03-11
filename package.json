@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.5.2",
+  "version": "2.6.0",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -17,6 +17,7 @@
   ],
   "scripts": {
     "compile": "tsc -p ./",
+    "coverage": "c8 --reporter lcov --check-coverage npm run test",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
@@ -25,7 +26,6 @@
     "test": "vscode-test",
     "test-compile": "tsc -p ./",
     "vscode:prepublish": "npm run esbuild-base -- --minify",
-    "coverage": "c8 --reporter lcov --check-coverage npm run test",
     "watch": "tsc -watch -p ./"
   },
   "dependencies": {
@@ -997,7 +997,7 @@
         "command": "workbench.action.terminal.sendSequence",
         "when": "groog.context.qmkMode && panelFocus",
         "args": {
-          "text": "\u0018\b"
+          "text": "\u0018\u0008"
         }
       },
       {

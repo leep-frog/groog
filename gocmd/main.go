@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -118,18 +119,35 @@ func (c *cli) regeneratePackageJson(o command.Output, d *command.Data, versionOv
 
 	p := groogPackage(versionOverride)
 
-	j, err := json.MarshalIndent(p, "", "  ")
+	b, err := marshalJson(p)
 	if err != nil {
-		return fmt.Errorf("failed to marshal json: %v", err)
+		return err
 	}
 
-	// For some reason, sometimes go writes u0026 and sometimes it writes `&`.
-	// This line ensures we always write the actual ampersand character.
-	fileContents := strings.ReplaceAll(string(j)+"\n", `\u0026`, "&")
-	if err := os.WriteFile(filename, []byte(fileContents), 0644); err != nil {
+	if err := os.WriteFile(filename, b, 0644); err != nil {
 		return fmt.Errorf("failed to write json to output file: %v", err)
 	}
 
 	o.Stdoutln("Successfully updated package.json")
 	return nil
+}
+
+// marhsalJson properly serializes html safe characters.
+// Without this, sometimes json marshaling writes \u0026 and sometimes
+// it writes `&` (for ampersand and other html characters like `<`)
+// This logic ensures we always write the actual characters and not their coded ones.
+func marshalJson(p *Package) ([]byte, error) {
+	unindentedBuffer := bytes.NewBuffer([]byte{})
+	unicodeLiteralEncoder := json.NewEncoder(unindentedBuffer)
+	unicodeLiteralEncoder.SetEscapeHTML(false)
+	if err := unicodeLiteralEncoder.Encode(p); err != nil {
+		return nil, fmt.Errorf("failed to marshal json: %v", err)
+	}
+
+	indentedBuffer := bytes.NewBuffer([]byte{})
+	if err := json.Indent(indentedBuffer, unindentedBuffer.Bytes(), "", "  "); err != nil {
+		return nil, fmt.Errorf("failed to indent json: %v", err)
+	}
+
+	return indentedBuffer.Bytes(), nil
 }
