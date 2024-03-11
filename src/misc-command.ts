@@ -90,6 +90,8 @@ async function testFile(args: TestFileArgs, file?: vscode.Uri) {
     vscode.window.showErrorMessage(`go testing should be routed to custom command in keybindings.go`);
     break;
   case "ts":
+    // It's possible to run launch.json configurations with `vscode.debug.startDebugging(fs, "Extension Tests");`
+    // But `npm run test` currently does everything we need, but an option to keep in mind if ever needed.
     sendTerminalCommand(args, `npm run test`);
     break;
   case "java":
