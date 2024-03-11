@@ -431,6 +431,8 @@ var (
 		),
 		ctrl(pagedown): only("groog.focusNextEditor"),
 		ctrl(pageup):   only("groog.focusPreviousEditor"),
+		// When there is a suggestible item highlighted, then accept it.
+		tab: onlyKBWhen(kb("workbench.action.acceptSelectedQuickOpenItem"), groogFindMode),
 		ctrl(shift("n")): {
 			groogFindMode.value:       kb("groog.find.next"),
 			groogFindMode.not().value: kb("workbench.action.files.newUntitledFile"),

@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -2842,6 +2842,11 @@
         "args": {
           "text": "t"
         }
+      },
+      {
+        "key": "tab",
+        "command": "workbench.action.acceptSelectedQuickOpenItem",
+        "when": "groog.context.findMode"
       },
       {
         "key": "u",

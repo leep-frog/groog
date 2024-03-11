@@ -560,6 +560,12 @@ class FindContextCache {
     const matchText = !matchInfo ? `No results` : `${matchInfo.match.index + 1} of ${matches.length}`;
     const ctx = this.currentContext();
     const detail = this.replaceMode ? (ctx.replaceText.length === 0 ? "No replace text set" : this.appendVerticalLine(ctx.replaceText)) : undefined;
+    const suggestibleItems = suggestibleMatches.map((sm: string) : FindQuickPickItem => {
+      return {
+        label: sm,
+        pickable: true,
+      };
+    });
     const items: FindQuickPickItem[] = [
       {
         label: this.appendVerticalLine(ctx.findText) || " ",
@@ -572,18 +578,17 @@ class FindContextCache {
       {
         label: matchText,
       },
-      ...(suggestibleMatches.map((sm: string) : FindQuickPickItem => {
-        return {
-          label: sm,
-          pickable: true,
-        };
-      })),
+      ...suggestibleItems,
     ];
 
     const disposables: vscode.Disposable[] = [];
     const input = vscode.window.createQuickPick<FindQuickPickItem>();
     input.items = items;
     input.title = "Find Mode";
+
+    if (suggestibleMatches.length > 0) {
+      input.activeItems = [suggestibleItems[0]];
+    }
 
     disposables.push(
       // Dispose of events when leaving the widget.
