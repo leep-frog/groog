@@ -432,20 +432,31 @@ suite('Document.matches Test Suite', () => {
   });
 });
 
-interface CommandExecution {
-  command: string;
-  args?: any[];
+interface UserInteraction {
+  do(): Promise<any>;
+}
+
+class CommandExecution implements UserInteraction {
+  constructor(
+    public command: string,
+    public args?: any[],
+  ) {}
+
+  async do() {
+    return vscode.commands.executeCommand(this.command, ...(this.args || []));
+  };
 }
 
 function cmd(command: string, ...args: any[]) : CommandExecution {
-  return {
-    command,
-    args,
-  };
+  return new CommandExecution(command, args);
 }
 
 function type(text: string) : CommandExecution {
   return cmd("groog.type", { "text": text });
+}
+
+function rawType(text: string) : CommandExecution {
+  return cmd("type", { "text": text });
 }
 
 function selection(line: number, char: number) : vscode.Selection {
@@ -455,7 +466,7 @@ function selection(line: number, char: number) : vscode.Selection {
 interface TestCase {
   name: string;
   startingText?: string[];
-  commands?: CommandExecution[];
+  userInteractions?: UserInteraction[];
   wantDocument?: string[];
   wantSelections: vscode.Selection[];
   wantInfoMessages?: string[];
@@ -469,7 +480,7 @@ const testCases: TestCase[] = [
     wantSelections: [
       selection(0, 0),
     ],
-    commands: [
+    userInteractions: [
       cmd("groog.cursorRight"),
     ],
     wantInfoMessages: [
@@ -503,7 +514,7 @@ const testCases: TestCase[] = [
     wantSelections: [
       selection(0, 0),
     ],
-    commands: [
+    userInteractions: [
       cmd("groog.record.playRecording"),
     ],
     wantErrorMessages: [
@@ -518,7 +529,7 @@ const testCases: TestCase[] = [
     wantSelections: [
       selection(0, 0),
     ],
-    commands: [
+    userInteractions: [
       cmd("groog.record.playRecordingRepeatedly"),
     ],
     wantErrorMessages: [
@@ -530,7 +541,7 @@ const testCases: TestCase[] = [
     wantSelections: [
       selection(0, 0),
     ],
-    commands: [
+    userInteractions: [
       cmd("groog.record.endRecording"),
     ],
     wantInfoMessages: [
@@ -549,7 +560,7 @@ const testCases: TestCase[] = [
     wantSelections: [
       selection(1, 2),
     ],
-    commands: [
+    userInteractions: [
       cmd("groog.record.startRecording"),
       type("x"),
       cmd("groog.record.playRecording"),
@@ -574,7 +585,7 @@ const testCases: TestCase[] = [
     wantSelections: [
       selection(1, 2),
     ],
-    commands: [
+    userInteractions: [
       cmd("groog.record.startRecording"),
       type("x"),
       cmd("groog.record.playRecordingRepeatedly"),
@@ -604,7 +615,7 @@ const testCases: TestCase[] = [
     wantSelections: [
       selection(2, 4),
     ],
-    commands: [
+    userInteractions: [
       cmd("groog.record.startRecording"),
       cmd("groog.cursorEnd"),
       type("x"),
@@ -614,6 +625,35 @@ const testCases: TestCase[] = [
       cmd("groog.record.playRecording"),
     ],
   },
+  /*{
+    name: "Saves recording as and plays back",
+    startingText: [
+      "abc",
+      "1",
+      "defabc",
+      "2",
+    ],
+    wantDocument: [
+      "abcx",
+      "1yx",
+      "defyabc",
+      "2",
+    ],
+    wantSelections: [
+      selection(2, 4),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      cmd("groog.cursorEnd"),
+      type("x"),
+      cmd("groog.cursorDown"),
+      type("y"),
+      cmd("groog.record.saveRecordingAs"),
+      rawType("some-name"),
+      rawType("\n"),
+      cmd("groog.record.playRecording"),
+    ],
+  },*/
   {
     name: "Records kill and paste",
     startingText: [
@@ -631,9 +671,38 @@ const testCases: TestCase[] = [
     wantSelections: [
       selection(2, 0),
     ],
-    commands: [
+    userInteractions: [
       cmd("groog.record.startRecording"),
       cmd("groog.kill"),
+      cmd("groog.emacsPaste"),
+      type("x"),
+      cmd("groog.emacsPaste"),
+      cmd("groog.cursorDown"),
+      cmd("groog.cursorHome"),
+      cmd("groog.record.endRecording"),
+      cmd("groog.record.playRecording"),
+    ],
+  },
+  {
+    name: "Records maim and paste",
+    startingText: [
+      "abc",
+      "1",
+      "defabc",
+      "2",
+    ],
+    wantDocument: [
+      "abcxabcabc",
+      "1x11",
+      "defabc",
+      "2",
+    ],
+    wantSelections: [
+      selection(2, 0),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      cmd("groog.maim"),
       cmd("groog.emacsPaste"),
       type("x"),
       cmd("groog.emacsPaste"),
@@ -668,7 +737,7 @@ const testCases: TestCase[] = [
     wantSelections: [
       selection(10, 0),
     ],
-    commands: [
+    userInteractions: [
       cmd("groog.record.startRecording"),
       cmd("groog.toggleMarkMode"),
       cmd("groog.cursorDown"),
@@ -700,7 +769,7 @@ const testCases: TestCase[] = [
     wantSelections: [
       selection(2, 6),
     ],
-    commands: [
+    userInteractions: [
       cmd("groog.record.startRecording"),
       cmd("groog.find"),
       type("abc"),
@@ -730,7 +799,7 @@ const testCases: TestCase[] = [
     wantSelections: [
       selection(4, 13),
     ],
-    commands: [
+    userInteractions: [
       cmd("groog.record.startRecording"),
       cmd("groog.find"),
       type("abc"),
@@ -764,7 +833,7 @@ const testCases: TestCase[] = [
     wantSelections: [
       new vscode.Selection(2, 3, 2, 6),
     ],
-    commands: [
+    userInteractions: [
       cmd("groog.record.startRecording"),
       cmd("groog.find"),
       type("abc"),
@@ -798,7 +867,7 @@ const testCases: TestCase[] = [
     wantSelections: [
       new vscode.Selection(4, 7, 4, 10),
     ],
-    commands: [
+    userInteractions: [
       cmd("groog.record.startRecording"),
       cmd("groog.find"),
       type("abc"),
@@ -836,7 +905,7 @@ const testCases: TestCase[] = [
     wantSelections: [
       new vscode.Selection(6, 0, 6, 3),
     ],
-    commands: [
+    userInteractions: [
       cmd("groog.record.startRecording"),
       cmd("groog.find"),
       type("abc"),
@@ -874,7 +943,7 @@ const testCases: TestCase[] = [
     wantSelections: [
       new vscode.Selection(6, 3, 6, 6),
     ],
-    commands: [
+    userInteractions: [
       cmd("groog.record.startRecording"),
       cmd("groog.find"),
       type("abc"),
@@ -889,6 +958,7 @@ const testCases: TestCase[] = [
       "Number of matches did not decrease, ending repeat playback",
     ],
   },
+  /* Useful for commenting out tests. */
 ];
 
 // To run these tests, run the `Extension Tests` configurations from `.vscode/launch.json` // TODO: Make an npm target that does this?
@@ -928,8 +998,8 @@ suite('Groog commands', () => {
       };
 
       // Run the commands
-      for (const cmd of (tc.commands || [])) {
-        await vscode.commands.executeCommand(cmd.command, ...(cmd.args || []));
+      for (const userInteraction of (tc.userInteractions || [])) {
+        await userInteraction.do();
       }
 
       // Verify the outcome

@@ -473,8 +473,6 @@ export class Recorder extends TypeHandler {
 }
 
 export interface Record {
-  name(): string;
-
   playback(emacs: Emacs): Promise<boolean>;
 
   // undo undoes the record and returns a boolean indicating if the undo operation was successful.
@@ -501,10 +499,6 @@ class TypeRecord implements Record {
       vscode.window.showErrorMessage("WUT: " + reason);
       return false;
     });
-  }
-
-  name(): string {
-    return "TR: " + this.text;
   }
 
   noop(): boolean {
@@ -549,10 +543,6 @@ class CommandRecord implements Record {
   async playback(): Promise<boolean> {
     await vscode.commands.executeCommand(this.command, ...this.args);
     return true;
-  }
-
-  name(): string {
-    return "CR: " + this.command;
   }
 
   noop(): boolean {
