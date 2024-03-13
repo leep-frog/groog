@@ -499,15 +499,27 @@ const testCases: TestCase[] = [
     name: "Record playback fails if no recording set",
     startingText: [
       "abc",
-      "1",
-      "defabc",
-      "2",
     ],
     wantSelections: [
       selection(0, 0),
     ],
     commands: [
       cmd("groog.record.playRecording"),
+    ],
+    wantErrorMessages: [
+      `No recordings exist yet!`,
+    ],
+  },
+  {
+    name: "Record playback fails if no recording set",
+    startingText: [
+      "abc",
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+    commands: [
+      cmd("groog.record.playRecordingRepeatedly"),
     ],
     wantErrorMessages: [
       `No recordings exist yet!`,
@@ -523,6 +535,56 @@ const testCases: TestCase[] = [
     ],
     wantInfoMessages: [
       `Not recording!`,
+    ],
+  },
+  {
+    name: "Fails to playback if actively recording",
+    startingText: [
+      "abc",
+    ],
+    wantDocument: [
+      "xy",
+      "xyabc",
+    ],
+    wantSelections: [
+      selection(1, 2),
+    ],
+    commands: [
+      cmd("groog.record.startRecording"),
+      type("x"),
+      cmd("groog.record.playRecording"),
+      type("y"),
+      cmd("groog.record.endRecording"),
+      type("\n"),
+      cmd("groog.record.playRecording"),
+    ],
+    wantErrorMessages: [
+      `Still recording!`,
+    ],
+  },
+  {
+    name: "Fails to repeatedly playback if actively recording",
+    startingText: [
+      "abc",
+    ],
+    wantDocument: [
+      "xy",
+      "xyabc",
+    ],
+    wantSelections: [
+      selection(1, 2),
+    ],
+    commands: [
+      cmd("groog.record.startRecording"),
+      type("x"),
+      cmd("groog.record.playRecordingRepeatedly"),
+      type("y"),
+      cmd("groog.record.endRecording"),
+      type("\n"),
+      cmd("groog.record.playRecording"),
+    ],
+    wantErrorMessages: [
+      `Still recording!`,
     ],
   },
   {
@@ -548,6 +610,75 @@ const testCases: TestCase[] = [
       type("x"),
       cmd("groog.cursorDown"),
       type("y"),
+      cmd("groog.record.endRecording"),
+      cmd("groog.record.playRecording"),
+    ],
+  },
+  {
+    name: "Records kill and paste",
+    startingText: [
+      "abc",
+      "1",
+      "defabc",
+      "2",
+    ],
+    wantDocument: [
+      "abcxabc",
+      "1x1",
+      "defabc",
+      "2",
+    ],
+    wantSelections: [
+      selection(2, 0),
+    ],
+    commands: [
+      cmd("groog.record.startRecording"),
+      cmd("groog.kill"),
+      cmd("groog.emacsPaste"),
+      type("x"),
+      cmd("groog.emacsPaste"),
+      cmd("groog.cursorDown"),
+      cmd("groog.cursorHome"),
+      cmd("groog.record.endRecording"),
+      cmd("groog.record.playRecording"),
+    ],
+  },
+  {
+    name: "Records mark and paste",
+    startingText: [
+      "abc",
+      "1",
+      "defabc",
+      "2",
+      "zzz",
+    ],
+    wantDocument: [
+      "abc",
+      "1 End line",
+      "Newline",
+      "abc",
+      "1",
+      "defabc",
+      "2 End line",
+      "Newline",
+      "defabc",
+      "2",
+      "zzz",
+    ],
+    wantSelections: [
+      selection(10, 0),
+    ],
+    commands: [
+      cmd("groog.record.startRecording"),
+      cmd("groog.toggleMarkMode"),
+      cmd("groog.cursorDown"),
+      cmd("groog.cursorEnd"),
+      cmd("groog.yank"),
+      cmd("groog.emacsPaste"),
+      type(" End line\nNewline\n"),
+      cmd("groog.emacsPaste"),
+      cmd("groog.cursorDown"),
+      cmd("groog.cursorHome"),
       cmd("groog.record.endRecording"),
       cmd("groog.record.playRecording"),
     ],

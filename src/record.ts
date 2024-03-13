@@ -399,7 +399,7 @@ export class Recorder extends TypeHandler {
 
   async repeatPlayback(): Promise<void> {
     if (this.isActive()) {
-      vscode.window.showInformationMessage("Still recording!");
+      vscode.window.showErrorMessage("Still recording!");
       return;
     }
     const recordBook = this.getOptionalRecordBook();
@@ -412,7 +412,7 @@ export class Recorder extends TypeHandler {
 
   async playback(): Promise<void> {
     if (this.isActive()) {
-      vscode.window.showInformationMessage("Still recording!");
+      vscode.window.showErrorMessage("Still recording!");
       return;
     }
     const recordBook = this.getOptionalRecordBook();
