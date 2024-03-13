@@ -22,6 +22,7 @@
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
     "lint": "eslint src --ext ts",
+    "posttest": "echo 'Open the following file for html coverage report:\nfile:///C:/Users/gleep/Desktop/Coding/vs-code/groog/coverage/Desktop/Coding/vs-code/groog/src/index.html'",
     "pretest": "npm run compile",
     "test": "vscode-test --coverage --coverageReporter lcov",
     "test-compile": "tsc -p ./",

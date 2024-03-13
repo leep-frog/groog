@@ -33,6 +33,7 @@ func groogPackage(versionOverride string) *Package {
 			"pretest":  "npm run compile",
 			"lint":     "eslint src --ext ts",
 			"test":     "vscode-test --coverage --coverageReporter lcov",
+			"posttest": "echo 'Open the following file for html coverage report:\nfile:///C:/Users/gleep/Desktop/Coding/vs-code/groog/coverage/Desktop/Coding/vs-code/groog/src/index.html'",
 			"coverage": "c8 --reporter lcov --check-coverage npm run test",
 		},
 		Dependencies: map[string]string{
