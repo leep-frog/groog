@@ -12,6 +12,27 @@ import { readFileSync, rmdirSync, unlinkSync, writeFileSync } from 'fs';
 // export const stubbableTestFile = path.resolve(".vscode-test", "stubbable-file.json");
 export const stubbableTestFile = `C:\\Users\\gleep\\Desktop\\Coding\\vs-code\\groog\\.vscode-test\\stubbable-file.json`;
 
+class DelayExecution implements UserInteraction {
+  constructor(
+    public waitMs: number,
+  ) {}
+
+  delay() {
+    return new Promise( resolve => setTimeout(resolve, this.waitMs) );
+  }
+
+  async do() {
+    await this.delay();
+  };
+}
+
+function delay(ms: number): UserInteraction {
+  return new DelayExecution(ms);
+}
+
+// Recording doesn't lock, so we need a delay to ensure the test totally completes.
+const postRecordingDelay = delay(100);
+
 interface TestMatch {
   range: vscode.Range;
   text: string;
@@ -443,20 +464,6 @@ interface UserInteraction {
   do(): Promise<any>;
 }
 
-class DelayExecution implements UserInteraction {
-  constructor(
-    public waitMs: number,
-  ) {}
-
-  delay() {
-    return new Promise( resolve => setTimeout(resolve, this.waitMs) );
-  }
-
-  async do() {
-    await this.delay();
-  };
-}
-
 class CommandExecution implements UserInteraction {
   constructor(
     public command: string,
@@ -488,6 +495,7 @@ interface TestCase {
   stubbablesConfig?: StubbablesConfig;
   wantDocument?: string[];
   wantSelections: vscode.Selection[];
+  wantInputBoxValidationMessages?: vscode.InputBoxValidationMessage[];
   wantInfoMessages?: string[];
   wantErrorMessages?: string[];
 }
@@ -556,7 +564,7 @@ const testCases: TestCase[] = [
     ],
   },
   {
-    name: "Save recording fails if not recording",
+    name: "Save named recording fails if not recording",
     wantSelections: [
       selection(0, 0),
     ],
@@ -738,6 +746,86 @@ const testCases: TestCase[] = [
     ],
   },
   {
+    name: "Fails to name recording if reserved prefix",
+    startingText: [
+      "start text",
+    ],
+    wantDocument: [
+      "abc",
+      "abc",
+      "start text",
+    ],
+    wantSelections: [
+      selection(2, 0),
+    ],
+    inputBoxResponses: [
+      "Recent recording bleh",
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      type("a"),
+      type("b"),
+      type("c"),
+      type("\n"),
+      cmd("groog.record.saveRecordingAs"),
+      cmd("groog.record.playRecording"),
+      postRecordingDelay,
+    ],
+    wantInputBoxValidationMessages: [
+      {
+        message: "This is a reserved prefix",
+        severity: vscode.InputBoxValidationSeverity.Error,
+      },
+    ],
+    wantErrorMessages: [
+      `No recording name provided`,
+    ],
+  },
+  {
+    name: "Fails to name recording if recording name already exists",
+    startingText: [
+      "start text",
+    ],
+    wantDocument: [
+      "abc",
+      "ABC",
+      "ABC",
+      "start text",
+    ],
+    wantSelections: [
+      selection(3, 0),
+    ],
+    inputBoxResponses: [
+      "ABC Recording",
+      "ABC Recording",
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      type("a"),
+      type("b"),
+      type("c"),
+      type("\n"),
+      cmd("groog.record.saveRecordingAs"),
+      cmd("groog.record.startRecording"),
+      type("ABC\n"),
+      cmd("groog.record.saveRecordingAs"),
+      cmd("groog.record.playRecording"),
+      postRecordingDelay,
+    ],
+    wantInputBoxValidationMessages: [
+      {
+        message: "This record name already exists",
+        severity: vscode.InputBoxValidationSeverity.Error,
+      },
+    ],
+    wantErrorMessages: [
+      `No recording name provided`,
+    ],
+    wantInfoMessages: [
+      `Recording saved as "ABC Recording"!`,
+    ]
+  },
+  {
     name: "Plays back named recording specified by name",
     startingText: [
       "start text",
@@ -775,8 +863,7 @@ const testCases: TestCase[] = [
       type("i\n"),
       cmd("groog.record.saveRecordingAs"),
       cmd("groog.record.playNamedRecording"),
-      // playNamedRecording doesn't lock, so delay to ensure the actual final text is obtained
-      new DelayExecution(25),
+      postRecordingDelay,
     ],
     wantInfoMessages: [
       `Recording saved as "ABC Recording"!`,
@@ -1093,8 +1180,12 @@ const testCases: TestCase[] = [
 
 // To run these tests, run the `Extension Tests` configurations from `.vscode/launch.json` // TODO: Make an npm target that does this?
 suite('Groog commands', () => {
-  testCases.forEach(tc => {
+  testCases.forEach((tc, idx) => {
     test(tc.name, async () => {
+
+      if (idx) {
+        await vscode.commands.executeCommand("groog.testReset");
+      }
 
       const startText = (tc.startingText || []).join("\n");
       const wantText = tc.wantDocument?.join("\n") || startText;
@@ -1134,8 +1225,23 @@ suite('Groog commands', () => {
       };
 
       // Stub out input box interactions
+      const gotInputBoxValidationMessages: (string | vscode.InputBoxValidationMessage)[] = [];
       vscode.window.showInputBox = async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken) => {
-        return tc.inputBoxResponses?.shift();
+        const response = tc.inputBoxResponses?.shift();
+        if (!response) {
+          return response;
+        }
+
+        if (options?.validateInput) {
+          const validationMessage = await options.validateInput(response);
+          if (validationMessage) {
+            gotInputBoxValidationMessages.push(validationMessage);
+            validationMessage;
+            return undefined;
+          }
+        }
+
+        return response;
       };
 
       writeFileSync(stubbableTestFile, JSON.stringify(tc.stubbablesConfig || {}));
@@ -1151,6 +1257,7 @@ suite('Groog commands', () => {
       assert.deepStrictEqual(finalConfig.quickPickSelections ?? [], []);
       assert.deepStrictEqual(gotErrorMessages, tc.wantErrorMessages || [], "Expected error messages to be exactly equal");
       assert.deepStrictEqual(gotInfoMessages, tc.wantInfoMessages || [], "Expected info messages to be exactly equal");
+      assert.deepStrictEqual(gotInputBoxValidationMessages, tc.wantInputBoxValidationMessages || []);
 
       assert.deepStrictEqual(editor.document.getText(), wantText);
       assert.deepStrictEqual(editor.selections, tc.wantSelections);

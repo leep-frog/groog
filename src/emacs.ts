@@ -11,6 +11,7 @@ import { Recorder } from './record';
 import { Scripts } from './scripts';
 import { Settings } from './settings';
 import { TerminalFindHandler } from './terminal-find';
+import { TEST_MODE } from './stubs';
 
 export class GlobalBoolTracker {
   private stateTracker: GlobalStateTracker<boolean>;
@@ -151,6 +152,16 @@ export class Emacs {
     this.scripts.register(context, this.recorder);
 
     miscCommands.forEach(mc => this.recorder.registerCommand(context, mc.name, (args) => mc.f(this, args), {noLock: mc.noLock}));
+
+    this.recorder.registerCommand(context, 'testReset', async () => {
+      if (TEST_MODE) {
+        for (const h of this.typeHandlers) {
+          await h.testReset();
+        }
+      } else {
+        vscode.window.showErrorMessage(`Cannot run testReset outside of test mode!`);
+      }
+    });
 
     // After all commands have been registered, check persistent data for qmk setting.
     this.qmkTracker.initialize(context);

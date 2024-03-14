@@ -826,6 +826,8 @@ export class FindHandler extends TypeHandler {
   async onEmacsPaste(text: string): Promise<boolean> {
     return this.cache.insertText(text).then(() => false);
   }
+
+  async testReset() {}
 }
 
 export class FindRecord implements Record {

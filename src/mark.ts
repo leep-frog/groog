@@ -145,6 +145,8 @@ export class MarkHandler extends TypeHandler {
   async onEmacsPaste(text: string): Promise<boolean> {
     return true;
   }
+
+  async testReset() {}
 }
 
 function replaceAll(str: string, remove: string, replace: string): string {

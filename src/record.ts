@@ -6,7 +6,7 @@ import { FindHandler, FindRecord } from './find';
 import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand } from './interfaces';
 import { MatchRecord } from 'glob/dist/commonjs/processor';
-import { stubbables } from './stubs';
+import { TEST_MODE, stubbables } from './stubs';
 
 export interface RegisterCommandOptionalProps {
   noLock?: boolean;
@@ -189,6 +189,11 @@ export class Recorder extends TypeHandler {
     this.namedRecordings = new Map<string, RecordBook>();
     this.emacs = emacs;
     this.typeLock = new AwaitLock();
+  }
+
+  async testReset() {
+    this.recordBooks = [];
+    this.namedRecordings.clear();
   }
 
   getColoring(context: vscode.ExtensionContext): HandlerColoring {

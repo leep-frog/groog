@@ -97,6 +97,9 @@ export abstract class TypeHandler implements Registerable {
   abstract moveHandler(cmd: CursorMove, ...rest: any[]): Thenable<boolean>;
 
   // TODO escape handler (or just same ctrl g?)
+
+  // Reset between tests
+  abstract testReset() : Promise<void>;
 }
 
 export function getPrefixText(editor: vscode.TextEditor | undefined, range: vscode.Range) : string | undefined {

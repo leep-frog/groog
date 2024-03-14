@@ -91,4 +91,6 @@ export class TerminalFindHandler extends TypeHandler {
     this.deactivate();
     return true;
   }
+
+  async testReset() {};
 }

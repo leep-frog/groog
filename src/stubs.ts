@@ -11,6 +11,8 @@ export interface StubbablesConfig {
   error?: string;
 }
 
+export const TEST_MODE: boolean = !!stubbableTestFilePath;
+
 export const stubbables = {
   showQuickPick: runStubbableMethod<vscode.QuickPick<vscode.QuickPickItem>, Thenable<void>>(
     async (qp: vscode.QuickPick<vscode.QuickPickItem>) => qp.show(),

@@ -14,4 +14,7 @@ export default defineConfig({
   env: {
     VSCODE_STUBBABLE_TEST_FILE: stubbableTestFile,
   },
+  mocha: {
+    timeout: 60000,
+  },
 });

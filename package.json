@@ -261,6 +261,10 @@
         "title": "Groog find in terminal"
       },
       {
+        "command": "groog.testReset",
+        "title": "Reset test setup"
+      },
+      {
         "command": "groog.toggleMarkMode",
         "title": "Emacs Toggle Mark Mode"
       },
