@@ -4,6 +4,13 @@ import * as assert from 'assert';
 // as well as import your extension to test it
 import * as vscode from 'vscode';
 import { Document, Match } from '../../find';
+import { StubbablesConfig } from '../../stubs';
+import path = require('path');
+import { readFileSync, rmdirSync, unlinkSync, writeFileSync } from 'fs';
+
+// Note: this needs to be identical to the value in .vscode-test.mjs (trying to have shared import there is awkward).
+// export const stubbableTestFile = path.resolve(".vscode-test", "stubbable-file.json");
+export const stubbableTestFile = `C:\\Users\\gleep\\Desktop\\Coding\\vs-code\\groog\\.vscode-test\\stubbable-file.json`;
 
 interface TestMatch {
   range: vscode.Range;
@@ -436,6 +443,20 @@ interface UserInteraction {
   do(): Promise<any>;
 }
 
+class DelayExecution implements UserInteraction {
+  constructor(
+    public waitMs: number,
+  ) {}
+
+  delay() {
+    return new Promise( resolve => setTimeout(resolve, this.waitMs) );
+  }
+
+  async do() {
+    await this.delay();
+  };
+}
+
 class CommandExecution implements UserInteraction {
   constructor(
     public command: string,
@@ -455,10 +476,6 @@ function type(text: string) : CommandExecution {
   return cmd("groog.type", { "text": text });
 }
 
-function rawType(text: string) : CommandExecution {
-  return cmd("type", { "text": text });
-}
-
 function selection(line: number, char: number) : vscode.Selection {
   return new vscode.Selection(line, char, line, char);
 }
@@ -467,6 +484,8 @@ interface TestCase {
   name: string;
   startingText?: string[];
   userInteractions?: UserInteraction[];
+  inputBoxResponses?: string[];
+  stubbablesConfig?: StubbablesConfig;
   wantDocument?: string[];
   wantSelections: vscode.Selection[];
   wantInfoMessages?: string[];
@@ -625,7 +644,7 @@ const testCases: TestCase[] = [
       cmd("groog.record.playRecording"),
     ],
   },
-  /*{
+  {
     name: "Saves recording as and plays back",
     startingText: [
       "abc",
@@ -642,6 +661,7 @@ const testCases: TestCase[] = [
     wantSelections: [
       selection(2, 4),
     ],
+    inputBoxResponses: ["some-name"],
     userInteractions: [
       cmd("groog.record.startRecording"),
       cmd("groog.cursorEnd"),
@@ -649,11 +669,59 @@ const testCases: TestCase[] = [
       cmd("groog.cursorDown"),
       type("y"),
       cmd("groog.record.saveRecordingAs"),
-      rawType("some-name"),
-      rawType("\n"),
       cmd("groog.record.playRecording"),
     ],
-  },*/
+    wantInfoMessages: [
+      `Recording saved as "some-name"!`,
+    ],
+  },
+  {
+    name: "Plays back named recording specified by name",
+    startingText: [
+      "start text",
+    ],
+    wantDocument: [
+      "abc",
+      "def",
+      "ghi",
+      "def",
+      "start text",
+    ],
+    wantSelections: [
+      selection(4, 0),
+    ],
+    inputBoxResponses: [
+      "ABC Recording",
+      "DEF Recording",
+      "GHI Recording",
+    ],
+    stubbablesConfig: {
+      quickPickSelections: ["DEF Recording"],
+    },
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      type("a"),
+      type("b"),
+      type("c"),
+      type("\n"),
+      cmd("groog.record.saveRecordingAs"),
+      cmd("groog.record.startRecording"),
+      type("def\n"),
+      cmd("groog.record.saveRecordingAs"),
+      cmd("groog.record.startRecording"),
+      type("gh"),
+      type("i\n"),
+      cmd("groog.record.saveRecordingAs"),
+      cmd("groog.record.playNamedRecording"),
+      // playNamedRecording doesn't lock, so delay to ensure the actual final text is obtained
+      new DelayExecution(25),
+    ],
+    wantInfoMessages: [
+      `Recording saved as "ABC Recording"!`,
+      `Recording saved as "DEF Recording"!`,
+      `Recording saved as "GHI Recording"!`,
+    ],
+  },
   {
     name: "Records kill and paste",
     startingText: [
@@ -973,7 +1041,7 @@ suite('Groog commands', () => {
       if (!vscode.window.activeTextEditor) {
         await vscode.commands.executeCommand("workbench.action.files.newUntitledFile");
       }
-      const editor = assertDefined(vscode.window.activeTextEditor);
+      const editor = assertDefined(vscode.window.activeTextEditor, "vscode.window.activeTextEditor");
       await editor.edit(eb => {
         const line = editor.document.lineAt(editor.document.lineCount-1);
         eb.delete(new vscode.Range(
@@ -988,30 +1056,52 @@ suite('Groog commands', () => {
       });
       editor.selection = new vscode.Selection(0, 0, 0, 0);
 
+      // Stub out message functions
+      // TODO: try/finally to ensure these are reset
       const gotInfoMessages : string[] = [];
+      const originalShowInfo = vscode.window.showInformationMessage;
       vscode.window.showInformationMessage = async (s: string) => {
         gotInfoMessages.push(s);
+        originalShowInfo(s);
       };
       const gotErrorMessages : string[] = [];
+      const originalShowError = vscode.window.showErrorMessage;
       vscode.window.showErrorMessage = async (s: string) => {
         gotErrorMessages.push(s);
+        originalShowError(s);
       };
+
+      // Stub out input box interactions
+      vscode.window.showInputBox = async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken) => {
+        return tc.inputBoxResponses?.shift();
+      };
+
+      writeFileSync(stubbableTestFile, JSON.stringify(tc.stubbablesConfig || {}));
 
       // Run the commands
       for (const userInteraction of (tc.userInteractions || [])) {
         await userInteraction.do();
       }
 
-      // Verify the outcome
+      // Verify the outcome (assert in order of information (e.g. mismatch in error messages in more useful than text being mismatched)).
+      const finalConfig: StubbablesConfig = JSON.parse(readFileSync(stubbableTestFile).toString());
+      assertUndefined(finalConfig.error, "StubbablesConfig.error");
+      assert.deepStrictEqual(finalConfig.quickPickSelections ?? [], []);
+      assert.deepStrictEqual(gotErrorMessages, tc.wantErrorMessages || [], "Expected error messages to be exactly equal");
+      assert.deepStrictEqual(gotInfoMessages, tc.wantInfoMessages || [], "Expected info messages to be exactly equal");
+
       assert.deepStrictEqual(editor.document.getText(), wantText);
       assert.deepStrictEqual(editor.selections, tc.wantSelections);
-      assert.deepStrictEqual(gotInfoMessages, tc.wantInfoMessages || [], "Expected info messages to be exactly equal");
-      assert.deepStrictEqual(gotErrorMessages, tc.wantErrorMessages || [], "Expected error messages to be exactly equal");
+
     });
   });
 });
 
-function assertDefined<T>(t?: T): T {
-  assert.notEqual(t, undefined, "Expected object to be defined, but it was undefined");
+function assertDefined<T>(t: T | undefined, objectName: string): T {
+  assert.notEqual(t, undefined, `Expected ${objectName} to be defined, but it was undefined`);
   return t!;
+}
+
+function assertUndefined<T>(t: T | undefined, objectName: string) {
+  assert.equal(t, undefined, `Expected ${objectName} to be undefined, but it was defined: ${t}`);
 }

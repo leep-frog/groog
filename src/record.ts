@@ -6,6 +6,7 @@ import { FindHandler, FindRecord } from './find';
 import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand } from './interfaces';
 import { MatchRecord } from 'glob/dist/commonjs/processor';
+import { stubbables } from './stubs';
 
 export interface RegisterCommandOptionalProps {
   noLock?: boolean;
@@ -394,7 +395,7 @@ export class Recorder extends TypeHandler {
       }),
     );
 
-    return input.show();
+    return stubbables.showQuickPick(input);
   }
 
   async repeatPlayback(): Promise<void> {
