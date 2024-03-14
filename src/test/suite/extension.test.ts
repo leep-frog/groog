@@ -593,6 +593,56 @@ const testCases: TestCase[] = [
     ],
   },
   {
+    name: "Fails to playback named recording if actively recording",
+    startingText: [
+      "abc",
+    ],
+    wantDocument: [
+      "xy",
+      "xyabc",
+    ],
+    wantSelections: [
+      selection(1, 2),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      type("x"),
+      cmd("groog.record.playNamedRecording"),
+      type("y"),
+      cmd("groog.record.endRecording"),
+      type("\n"),
+      cmd("groog.record.playRecording"),
+    ],
+    wantErrorMessages: [
+      `Still recording!`,
+    ],
+  },
+  {
+    name: "Fails to delete recording if actively recording",
+    startingText: [
+      "abc",
+    ],
+    wantDocument: [
+      "xy",
+      "xyabc",
+    ],
+    wantSelections: [
+      selection(1, 2),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      type("x"),
+      cmd("groog.record.deleteRecording"),
+      type("y"),
+      cmd("groog.record.endRecording"),
+      type("\n"),
+      cmd("groog.record.playRecording"),
+    ],
+    wantErrorMessages: [
+      `Still recording!`,
+    ],
+  },
+  {
     name: "Fails to repeatedly playback if actively recording",
     startingText: [
       "abc",

@@ -305,7 +305,7 @@ export class Recorder extends TypeHandler {
 
   async deleteRecording() {
     if (this.isActive()) {
-      vscode.window.showInformationMessage("Still recording!");
+      vscode.window.showErrorMessage("Still recording!");
       return;
     }
     const result = await vscode.window.showQuickPick(
@@ -325,7 +325,7 @@ export class Recorder extends TypeHandler {
 
   async playbackNamedRecording() {
     if (this.isActive()) {
-      vscode.window.showInformationMessage("Still recording!");
+      vscode.window.showErrorMessage("Still recording!");
       return;
     }
 
