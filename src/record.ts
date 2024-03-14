@@ -264,7 +264,7 @@ export class Recorder extends TypeHandler {
 
     if (this.namedRecordings.has(name)) {
       return {
-        message: "This record already exists",
+        message: "This record name already exists",
         severity: vscode.InputBoxValidationSeverity.Error,
       };
     }
