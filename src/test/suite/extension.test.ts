@@ -556,6 +556,18 @@ const testCases: TestCase[] = [
     ],
   },
   {
+    name: "Save recording fails if not recording",
+    wantSelections: [
+      selection(0, 0),
+    ],
+    userInteractions: [
+      cmd("groog.record.saveRecordingAs"),
+    ],
+    wantErrorMessages: [
+      `Not recording!`,
+    ],
+  },
+  {
     name: "End recording fails if not recording",
     wantSelections: [
       selection(0, 0),
@@ -563,7 +575,7 @@ const testCases: TestCase[] = [
     userInteractions: [
       cmd("groog.record.endRecording"),
     ],
-    wantInfoMessages: [
+    wantErrorMessages: [
       `Not recording!`,
     ],
   },

@@ -297,7 +297,7 @@ export class Recorder extends TypeHandler {
 
   async endRecording() {
     if (!this.isActive()) {
-      vscode.window.showInformationMessage("Not recording!");
+      vscode.window.showErrorMessage("Not recording!");
     } else {
       this.deactivate();
     }
