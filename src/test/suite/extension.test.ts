@@ -688,6 +688,20 @@ const testCases: TestCase[] = [
     ],
   },
   {
+    name: "Records and plays back empty recording",
+    startingText: [
+      "start text",
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      cmd("groog.record.endRecording"),
+      cmd("groog.record.playRecording"),
+    ],
+  },
+  {
     name: "Records and plays back",
     startingText: [
       "abc",
@@ -997,6 +1011,29 @@ const testCases: TestCase[] = [
       cmd("groog.record.playRecording"),
     ],
   },
+  // Repeat recording tests
+  {
+    name: "Repeat recording fails if doesn't start with find",
+    startingText: [
+      "start text",
+    ],
+    wantDocument: [
+      "xyz",
+      "start text",
+    ],
+    wantSelections: [
+      selection(1, 0),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      type("xyz\n"),
+      cmd("groog.record.endRecording"),
+      cmd("groog.record.playRecordingRepeatedly"),
+    ],
+    wantErrorMessages: [
+      `This recording isn't repeatable`,
+    ],
+  },
   {
     name: "Repeat record playback with decreasing find matches",
     startingText: [
@@ -1173,6 +1210,125 @@ const testCases: TestCase[] = [
     ],
     wantErrorMessages: [
       "Number of matches did not decrease, ending repeat playback",
+    ],
+  },
+  // Record undo tests
+  {
+    name: "Record undo fails if no recordings",
+    startingText: [
+      "start text",
+    ],
+    wantDocument: [
+      "start text",
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+    userInteractions: [
+      cmd("groog.record.undo"),
+    ],
+    wantErrorMessages: [
+      `No recordings exist yet!`,
+    ],
+  },
+  {
+    name: "Record undo fails if recording is locked",
+    startingText: [
+      "start text",
+    ],
+    wantDocument: [
+      "abc",
+      "start text",
+    ],
+    wantSelections: [
+      selection(1, 0),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      type("abc\n"),
+      cmd("groog.record.endRecording"),
+      cmd("groog.record.undo"),
+    ],
+    wantErrorMessages: [
+      `Cannot undo a locked recording`,
+    ],
+  },
+  {
+    name: "Record undo does nothing if empty record book",
+    startingText: [
+      "start text",
+    ],
+    wantDocument: [
+      "def",
+      "Xdef",
+      "start text",
+    ],
+    wantSelections: [
+      selection(2, 0),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      cmd("groog.record.undo"),
+      type("d"),
+      type("e"),
+      type("f"),
+      type("\n"),
+      cmd("groog.record.endRecording"),
+      type("X"),
+      cmd("groog.record.playRecording"),
+    ],
+  },
+  {
+    name: "Record undo works if recording is locked",
+    startingText: [
+      "start text",
+    ],
+    wantDocument: [
+      "abc",
+      "abc",
+      "start text",
+    ],
+    wantSelections: [
+      selection(2, 0),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      type("a"),
+      type("b"),
+      type("Z"),
+      cmd("groog.record.undo"),
+      type("c"),
+      type("\n"),
+      cmd("groog.record.endRecording"),
+      cmd("groog.record.playRecording"),
+    ],
+  },
+  {
+    name: "Record undo fails",
+    startingText: [
+      "start text",
+    ],
+    wantDocument: [
+      "ac",
+      "ac",
+      "bbstart text",
+    ],
+    wantSelections: [
+      selection(2, 0),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      type("a"),
+      type("b"),
+      cmd("groog.cursorLeft"),
+      cmd("groog.record.undo"),
+      type("c"),
+      type("\n"),
+      cmd("groog.record.endRecording"),
+      cmd("groog.record.playRecording"),
+    ],
+    wantInfoMessages: [
+      `Undo failed`,
     ],
   },
   /* Useful for commenting out tests. */

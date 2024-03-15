@@ -76,7 +76,7 @@ class RecordBook {
     // Get the starting FindRecord
     const findRecord = this.checkRepeatable();
     if (!findRecord) {
-      vscode.window.showErrorMessage(`This record isn't repeatable`);
+      vscode.window.showErrorMessage(`This recording isn't repeatable`);
       return;
     }
     // All records after the findRecord.
@@ -123,7 +123,6 @@ class RecordBook {
     };
 
     // Repeatedly run the FindRecord and then the rest of the records until we run out of matches or fail (and ensure that the number of matches is always decreasing)
-
     for (let success = await runFindRecord(); success; success = await runFindRecord(findRecord.numMatches)) {
       for (var r of nextRecords) {
         if (!await r.playback(emacs)) {
@@ -250,13 +249,19 @@ export class Recorder extends TypeHandler {
     this.baseCommand = true;
   }
 
-  getRecordBook(): RecordBook { return this.recordBooks.at(-1)!; }
+  getRecordBook(): RecordBook | undefined { return this.recordBooks.at(-1)!; }
+  forceGetRecordBook(): RecordBook { return this.getRecordBook()!; }
   getOptionalRecordBook(): RecordBook | undefined { return this.recordBooks.at(-1); }
 
   setRecordBook(newBook: RecordBook) { this.recordBooks[this.recordBooks.length-1] = newBook; }
 
   async undo() {
-    return this.getRecordBook().undo();
+    const recordBook = this.getRecordBook();
+    if (!recordBook) {
+      vscode.window.showErrorMessage(`No recordings exist yet!`);
+      return;
+    }
+    return recordBook.undo();
   }
 
   recordNameValidator(name: string): vscode.InputBoxValidationMessage | undefined {
@@ -296,7 +301,7 @@ export class Recorder extends TypeHandler {
       return;
     }
 
-    this.saveNewRec(this.getRecordBook());
+    this.saveNewRec(this.forceGetRecordBook());
     this.deactivate();
   }
 
@@ -437,7 +442,7 @@ export class Recorder extends TypeHandler {
   }
 
   async handleDeactivation() {
-    this.getRecordBook().trimAndLock();
+    this.forceGetRecordBook().trimAndLock();
     if (this.recordBooks.length > MAX_RECORDINGS) {
       this.recordBooks = this.recordBooks.slice(this.recordBooks.length - MAX_RECORDINGS);
     }
@@ -446,7 +451,7 @@ export class Recorder extends TypeHandler {
 
   addRecord(r: Record) {
     if (this.baseCommand && !this.finder?.isActive()) {
-      this.getRecordBook().addRecord(r);
+      this.forceGetRecordBook().addRecord(r);
     }
   }
 
@@ -502,7 +507,7 @@ class TypeRecord implements Record {
   async playback(emacs: Emacs): Promise<boolean> {
     // await vscode.commands.executeCommand("type", { "text": this.text });
     return emacs.typeBonusFeatures(this.text).then(() => true).catch((reason: any) => {
-      vscode.window.showErrorMessage("WUT: " + reason);
+      vscode.window.showErrorMessage(`TypeBonusFeatures failed: ${reason}`);
       return false;
     });
   }
