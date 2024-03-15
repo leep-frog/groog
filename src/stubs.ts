@@ -37,8 +37,6 @@ export const stubbables = {
         return vscode.commands.executeCommand("workbench.action.closeQuickOpen");
       }
 
-
-
       for (const item of qp.items) {
         if (item.label !== textSelection) {
           continue;
