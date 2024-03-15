@@ -319,7 +319,7 @@ export class Recorder extends TypeHandler {
       return;
     }
 
-    const input = stubbables.createQuickPick<vscode.QuickPickItem>();
+    const input = vscode.window.createQuickPick<vscode.QuickPickItem>();
     input.items = [...this.namedRecordings.keys()].sort((a: string, b: string): number => {
       return a < b ? -1 : 1;
     }).map(item => {
@@ -377,7 +377,7 @@ export class Recorder extends TypeHandler {
 
     // Create quick pick
     const disposables: vscode.Disposable[] = [];
-    const input = stubbables.createQuickPick<RecordBookQuickPickItem>();
+    const input = vscode.window.createQuickPick<RecordBookQuickPickItem>();
     input.items = [
       ...recentItems,
       ...items,
