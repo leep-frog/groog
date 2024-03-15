@@ -318,19 +318,34 @@ export class Recorder extends TypeHandler {
       vscode.window.showErrorMessage("Still recording!");
       return;
     }
-    const result = await vscode.window.showQuickPick(
-      [...this.namedRecordings.keys()].sort((a: string, b: string): number => {
-        return a < b ? -1 : 1;
+
+    const input = vscode.window.createQuickPick<vscode.QuickPickItem>();
+    input.items = [...this.namedRecordings.keys()].sort((a: string, b: string): number => {
+      return a < b ? -1 : 1;
+    }).map(item => {
+      return {
+        label: item,
+      };
+    });
+    input.placeholder = "Recording name";
+    input.title = "Choose recording to delete";
+
+    const disposables: vscode.Disposable[] = [];
+    disposables.push(
+      // Dispose of events when leaving the widget.
+      input.onDidHide(e => {
+        disposables.forEach(d => d.dispose);
       }),
-      {
-        placeHolder: "Recording name",
-        title: "Choose Recording to play",
-      },
+      // When accepting an event, delete the record book
+      input.onDidAccept(e => {
+        for (const item of input.selectedItems) {
+          this.namedRecordings.delete(item.label);
+        }
+        input.dispose();
+      }),
     );
-    if (!result) {
-      return;
-    }
-    this.namedRecordings.delete(result);
+
+    stubbables.showQuickPick(input);
   }
 
   async playbackNamedRecording() {

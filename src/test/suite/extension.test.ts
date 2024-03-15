@@ -489,6 +489,7 @@ function selection(line: number, char: number) : vscode.Selection {
 
 interface TestCase {
   name: string;
+  runSolo?: boolean
   startingText?: string[];
   userInteractions?: UserInteraction[];
   inputBoxResponses?: string[];
@@ -496,6 +497,7 @@ interface TestCase {
   wantDocument?: string[];
   wantSelections: vscode.Selection[];
   wantInputBoxValidationMessages?: vscode.InputBoxValidationMessage[];
+  wantQuickPickOptions?: string[][];
   wantInfoMessages?: string[];
   wantErrorMessages?: string[];
 }
@@ -862,6 +864,10 @@ const testCases: TestCase[] = [
     stubbablesConfig: {
       quickPickSelections: ["DEF Recording"],
     },
+    wantQuickPickOptions: [[
+      "Recent recording 0", "Recent recording 1", "Recent recording 2",
+      "ABC Recording", "DEF Recording", "GHI Recording",
+    ]],
     userInteractions: [
       cmd("groog.record.startRecording"),
       type("a"),
@@ -876,6 +882,69 @@ const testCases: TestCase[] = [
       type("gh"),
       type("i\n"),
       cmd("groog.record.saveRecordingAs"),
+      cmd("groog.record.playNamedRecording"),
+      postRecordingDelay,
+    ],
+    wantInfoMessages: [
+      `Recording saved as "ABC Recording"!`,
+      `Recording saved as "DEF Recording"!`,
+      `Recording saved as "GHI Recording"!`,
+    ],
+  },
+  {
+    name: "Deletes recording",
+    startingText: [
+      "start text",
+    ],
+    wantDocument: [
+      "abc",
+      "def",
+      "ghi",
+      "def",
+      "start text",
+    ],
+    wantSelections: [
+      selection(4, 0),
+    ],
+    inputBoxResponses: [
+      "ABC Recording",
+      "DEF Recording",
+      "GHI Recording",
+    ],
+    stubbablesConfig: {
+      quickPickSelections: [
+        "DEF Recording", // playNamedRecording (succeeds)
+        "DEF Recording", // deleteRecording
+        undefined,       // playNamedRecording (fails)
+      ],
+    },
+    wantQuickPickOptions: [
+      // playNamedRecording
+      [
+        "Recent recording 0", "Recent recording 1", "Recent recording 2",
+        "ABC Recording", "DEF Recording", "GHI Recording",
+      ],
+      // deleteRecording
+      ["ABC Recording", "DEF Recording", "GHI Recording"],
+      // playNamedRecording
+      [
+        "Recent recording 0", "Recent recording 1", "Recent recording 2",
+        "ABC Recording", "GHI Recording",
+      ],
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      type("abc\n"),
+      cmd("groog.record.saveRecordingAs"),
+      cmd("groog.record.startRecording"),
+      type("def\n"),
+      cmd("groog.record.saveRecordingAs"),
+      cmd("groog.record.startRecording"),
+      type("ghi\n"),
+      cmd("groog.record.saveRecordingAs"),
+      cmd("groog.record.playNamedRecording"),
+      cmd("groog.record.deleteRecording"),
+      postRecordingDelay,
       cmd("groog.record.playNamedRecording"),
       postRecordingDelay,
     ],
@@ -1336,7 +1405,13 @@ const testCases: TestCase[] = [
 
 // To run these tests, run the `Extension Tests` configurations from `.vscode/launch.json` // TODO: Make an npm target that does this?
 suite('Groog commands', () => {
+  const requireRunSolo = testCases.some(tc => tc.runSolo);
+
   testCases.forEach((tc, idx) => {
+    if (requireRunSolo && !tc.runSolo && idx !== 0) {
+      return;
+    }
+
     test(tc.name, async () => {
 
       if (idx) {
@@ -1411,6 +1486,7 @@ suite('Groog commands', () => {
       const finalConfig: StubbablesConfig = JSON.parse(readFileSync(stubbableTestFile).toString());
       assertUndefined(finalConfig.error, "StubbablesConfig.error");
       assert.deepStrictEqual(finalConfig.quickPickSelections ?? [], []);
+      assert.deepStrictEqual(finalConfig.wantQuickPickOptions ?? [], tc.wantQuickPickOptions ?? []);
       assert.deepStrictEqual(gotErrorMessages, tc.wantErrorMessages || [], "Expected error messages to be exactly equal");
       assert.deepStrictEqual(gotInfoMessages, tc.wantInfoMessages || [], "Expected info messages to be exactly equal");
       assert.deepStrictEqual(gotInputBoxValidationMessages, tc.wantInputBoxValidationMessages || []);

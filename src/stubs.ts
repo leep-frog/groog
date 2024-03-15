@@ -6,7 +6,9 @@ import { open, readFileSync, writeFileSync } from 'fs';
 const stubbableTestFilePath = process.env.VSCODE_STUBBABLE_TEST_FILE;
 
 export interface StubbablesConfig {
-  quickPickSelections?: string[];
+  // If a value is undefined, then return undefined.
+  quickPickSelections?: (string | undefined)[];
+  wantQuickPickOptions?: string[][];
   changed?: boolean;
   error?: string;
 }
@@ -17,13 +19,25 @@ export const stubbables = {
   showQuickPick: runStubbableMethod<vscode.QuickPick<vscode.QuickPickItem>, Thenable<void>>(
     async (qp: vscode.QuickPick<vscode.QuickPickItem>) => qp.show(),
     async (qp: vscode.QuickPick<vscode.QuickPickItem>, sc: StubbablesConfig) => {
-      const textSelection = sc.quickPickSelections?.shift();
-      sc.changed = true; // Always change, either error or shift text selections.
-
-      if (textSelection === undefined) {
-        sc.error = "Ran out of quickPickSelections";
-        return;
+      sc.changed = true;
+      if (sc.wantQuickPickOptions === undefined) {
+        sc.wantQuickPickOptions = [];
       }
+      sc.wantQuickPickOptions.push(qp.items.map(item => item.label));
+
+      if (!sc.quickPickSelections?.length) {
+        sc.error = "Ran out of quickPickSelections";
+        return vscode.commands.executeCommand("workbench.action.closeQuickOpen");
+      }
+
+      const textSelection = sc.quickPickSelections?.shift();
+      // json mapping makes textSelection populate as null, hence why we check that and not undefined.
+      if (textSelection === null) {
+        // Don't make any selection, just use this to populate wantQuickPickOptions
+        return vscode.commands.executeCommand("workbench.action.closeQuickOpen");
+      }
+
+
 
       for (const item of qp.items) {
         if (item.label !== textSelection) {
