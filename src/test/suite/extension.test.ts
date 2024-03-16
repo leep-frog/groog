@@ -2,11 +2,10 @@ import * as assert from 'assert';
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
+import { readFileSync, writeFileSync } from 'fs';
 import * as vscode from 'vscode';
 import { Document, Match } from '../../find';
 import { CloseQuickPickAction, SelectItemQuickPickAction, StubbablesConfig } from '../../stubs';
-import path = require('path');
-import { readFileSync, rmdirSync, unlinkSync, writeFileSync } from 'fs';
 
 // Note: this needs to be identical to the value in .vscode-test.mjs (trying to have shared import there is awkward).
 // export const stubbableTestFile = path.resolve(".vscode-test", "stubbable-file.json");

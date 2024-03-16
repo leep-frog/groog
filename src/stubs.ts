@@ -38,11 +38,11 @@ export const stubbables = {
       }
 
       const handler = handlerGenerator();
-
-      const errorMessage = await handler.run(qp, genericQuickPickAction.props);
+      const [errorMessage, promise] = handler.run(qp, genericQuickPickAction.props);
       if (errorMessage) {
         sc.error = errorMessage;
       }
+      return promise;
     },
   )
 };
@@ -97,12 +97,14 @@ enum QuickPickActionKind {
 
 export interface QuickPickAction {
   readonly kind: QuickPickActionKind;
-  readonly props: Record<string, any>;
+  readonly props: any;
 }
 
 interface QuickPickActionHandler {
   // Run the quick pick action, or return an error
-  run(qp: vscode.QuickPick<vscode.QuickPickItem>, props: Record<string, any>): Promise<string | undefined>;
+  // It returns [string|undefined, Thenable<any>] because when initially had Thenable<string | undefined>,
+  // the error wasn't being set properly in the stubbables method.
+  run(qp: vscode.QuickPick<vscode.QuickPickItem>, props: any): [string | undefined, Thenable<any>];
 }
 
 const quickPickActionHandlers = new Map<QuickPickActionKind, () => QuickPickActionHandler>([
@@ -115,34 +117,36 @@ const quickPickActionHandlers = new Map<QuickPickActionKind, () => QuickPickActi
  *****************************/
 
 interface SelectItemQuickPickActionProps {
-  textSelection: string;
+  itemLabels: string[];
 }
 
 export class SelectItemQuickPickAction implements QuickPickAction {
   readonly kind: QuickPickActionKind = QuickPickActionKind.selectItem;
   readonly props: SelectItemQuickPickActionProps;
-  constructor(textSelection: string) {
+  constructor(itemLabel: string) {
     this.props = {
-      textSelection: textSelection,
+      itemLabels: [itemLabel],
     };
   }
 }
 
 class SelectItemQuickPickActionHandler implements QuickPickActionHandler {
-  async run(qp: vscode.QuickPick<vscode.QuickPickItem>, genericProps: Record<string, any>): Promise<string | undefined> {
-    const props = genericProps as SelectItemQuickPickActionProps;
+  run(qp: vscode.QuickPick<vscode.QuickPickItem>, props: SelectItemQuickPickActionProps): [string | undefined, Thenable<any>] {
+    const matchedItems: vscode.QuickPickItem[] = [];
     for (const item of qp.items) {
-      if (item.label !== props.textSelection) {
-        continue;
+      if (props.itemLabels.includes(item.label)) {
+        matchedItems.push(item);
       }
-
-      qp.selectedItems = [item];
-      qp.activeItems = [item];
-      qp.show();
-      return vscode.commands.executeCommand("workbench.action.acceptSelectedQuickOpenItem");
     }
 
-    return `No items matched the provided text selection`;
+    if (matchedItems.length !== props.itemLabels.length) {
+      return [`All item labels were not matched. Found [${matchedItems.map(item => item.label)}]; wanted [${props.itemLabels}]`, Promise.resolve()];
+    }
+
+    qp.selectedItems = matchedItems;
+    qp.activeItems = matchedItems;
+    qp.show();
+    return [undefined, vscode.commands.executeCommand("workbench.action.acceptSelectedQuickOpenItem")];
   }
 }
 
@@ -153,7 +157,7 @@ class SelectItemQuickPickActionHandler implements QuickPickActionHandler {
 interface CloseQuickPickActionProps {}
 
 export class CloseQuickPickAction implements QuickPickAction {
-  readonly kind: QuickPickActionKind = QuickPickActionKind.selectItem;
+  readonly kind: QuickPickActionKind = QuickPickActionKind.close;
   readonly props: CloseQuickPickActionProps;
   constructor() {
     this.props = {};
@@ -161,7 +165,7 @@ export class CloseQuickPickAction implements QuickPickAction {
 }
 
 class CloseQuickPickActionHandler implements QuickPickActionHandler {
-  async run(): Promise<string | undefined> {
-    return vscode.commands.executeCommand("workbench.action.closeQuickOpen");
+  run(): [string | undefined, Thenable<any>] {
+    return [undefined, vscode.commands.executeCommand("workbench.action.closeQuickOpen")];
   }
 }
