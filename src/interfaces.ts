@@ -1,35 +1,35 @@
 import * as vscode from 'vscode';
 
 export enum CursorMove {
-  move = "cursorMove",
-  up = "cursorUp",
-  down = "cursorDown",
-  left = "cursorLeft",
-  right = "cursorRight",
-  home = "cursorHome",
-  end = "cursorEnd",
-  wordLeft = "cursorWordLeft",
-  wordRight = "cursorWordRight",
-  top = "cursorTop",
-  bottom = "cursorBottom",
+  Move = "cursorMove",
+  Up = "cursorUp",
+  Down = "cursorDown",
+  Left = "cursorLeft",
+  Right = "cursorRight",
+  Home = "cursorHome",
+  End = "cursorEnd",
+  WordLeft = "cursorWordLeft",
+  WordRight = "cursorWordRight",
+  Top = "cursorTop",
+  Bottom = "cursorBottom",
 };
 
 export enum CtrlGCommand {
-  cancelSelection = "cancelSelection",
-  closeFindWidget = "closeFindWidget",
-  closeParameterHints = "closeParameterHints",
-  removeSecondaryCursors = "removeSecondaryCursors",
-  notificationsclearAll = "notifications.clearAll",
-  workbenchActionTerminalHideFind = "workbench.action.terminal.hideFind",
-  closeReferenceSearch = "closeReferenceSearch",
-  closeMarkersNavigation = "closeMarkersNavigation",
+  CancelSelection = "cancelSelection",
+  CloseFindWidget = "closeFindWidget",
+  CloseParameterHints = "closeParameterHints",
+  RemoveSecondaryCursors = "removeSecondaryCursors",
+  NotificationsclearAll = "notifications.clearAll",
+  WorkbenchActionTerminalHideFind = "workbench.action.terminal.hideFind",
+  CloseReferenceSearch = "closeReferenceSearch",
+  CloseMarkersNavigation = "closeMarkersNavigation",
 }
 
 export enum DeleteCommand {
-  left = "deleteLeft",
-  right = "deleteRight",
-  wordLeft = "deleteWordLeft",
-  wordRight = "deleteWordRight",
+  Left = "deleteLeft",
+  Right = "deleteRight",
+  WordLeft = "deleteWordLeft",
+  WordRight = "deleteWordRight",
 }
 
 export async function setGroogContext(context : string, value : boolean) {

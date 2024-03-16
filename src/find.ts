@@ -807,7 +807,7 @@ export class FindHandler extends TypeHandler {
   }
 
   async delHandler(s: DeleteCommand): Promise<boolean> {
-    if (s === DeleteCommand.left) {
+    if (s === DeleteCommand.Left) {
       return this.cache.deleteLeft().then(() => false);
     }
     vscode.window.showInformationMessage("Unsupported find command: " + s);

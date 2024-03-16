@@ -310,12 +310,12 @@ export class Emacs {
 
   // C-l
   async jump(jd: JumpDist) {
-    await this.move(CursorMove.move, { "to": "up", "by": "line", "value": jd.lines });
+    await this.move(CursorMove.Move, { "to": "up", "by": "line", "value": jd.lines });
   }
 
   // C-v
   async fall(jd: JumpDist) {
-    await this.move(CursorMove.move, { "to": "down", "by": "line", "value": jd.lines });
+    await this.move(CursorMove.Move, { "to": "down", "by": "line", "value": jd.lines });
   }
 
   async move(vsCommand: CursorMove, ...rest: any[]): Promise<void> {

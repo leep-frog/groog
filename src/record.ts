@@ -541,7 +541,7 @@ class TypeRecord implements Record {
     case CommandRecord:
       const cr = <CommandRecord>next;
       // TODO "groog." prefix to helper method
-      if (cr.command === `groog.${DeleteCommand.left}`) {
+      if (cr.command === `groog.${DeleteCommand.Left}`) {
         // Length will not be zero because it will be popped by the noop check.
         this.text = this.text.slice(0, this.text.length-1);
         return true;

@@ -90,9 +90,9 @@ function runStubbableMethod<I, O>(nonTestLogic: (input: I) => O, testLogic: (inp
 // That is why we need the separation of the QuickPickAction types and the QuickPickActionHandler types.
 
 enum QuickPickActionKind {
-  close,
-  selectItem,
-  pressItemButton,
+  Close,
+  SelectItem,
+  PressItemButton,
 }
 
 interface QuickPickAction {
@@ -115,7 +115,7 @@ interface SelectItemQuickPickActionProps {
 }
 
 export class SelectItemQuickPickAction implements QuickPickAction {
-  readonly kind: QuickPickActionKind = QuickPickActionKind.selectItem;
+  readonly kind: QuickPickActionKind = QuickPickActionKind.SelectItem;
   readonly props: SelectItemQuickPickActionProps;
   constructor(itemLabel: string) {
     this.props = {
@@ -149,7 +149,7 @@ export class SelectItemQuickPickAction implements QuickPickAction {
 interface CloseQuickPickActionProps {}
 
 export class CloseQuickPickAction implements QuickPickAction {
-  kind = QuickPickActionKind.close;
+  kind = QuickPickActionKind.Close;
   readonly props: CloseQuickPickActionProps;
   constructor() {
     this.props = {};
@@ -164,27 +164,26 @@ export class CloseQuickPickAction implements QuickPickAction {
  * PressItemButtonQuickPickAction *
  **********************************/
 
-/*interface PressItemButtonQuickPickActionProps {
+interface PressItemButtonQuickPickActionProps {
   itemLabel: string;
   buttonIndex: number;
 }
 
 export class PressItemButtonQuickPickAction implements QuickPickAction {
-  readonly kind: QuickPickActionKind = QuickPickActionKind.pressItemButton;
-  readonly props: CloseQuickPickActionProps;
-  constructor() {
-    this.props = {};
+  kind = QuickPickActionKind.PressItemButton;
+  readonly props: PressItemButtonQuickPickActionProps;
+  constructor(itemLabel: string, buttonIndex: number) {
+    this.props = {
+      itemLabel,
+      buttonIndex,
+    };
   }
-}
 
-class PressItemButtonQuickPickActionHandler implements QuickPickActionHandler {
   run(qp: vscode.QuickPick<vscode.QuickPickItem>, props: PressItemButtonQuickPickActionProps): [string | undefined, Thenable<any>] {
     for (const item of qp.items) {
       if (item.label !== props.itemLabel) {
         continue;
       }
-
-      qp.show();
 
       const button = item.buttons?.at(props.buttonIndex);
       if (!button) {
@@ -194,36 +193,24 @@ class PressItemButtonQuickPickActionHandler implements QuickPickActionHandler {
         button,
         item,
       };
+
+      // qp.show();
       // qp.onDidTriggerItemButton(
-      // qp.;
       return [undefined, vscode.commands.executeCommand("workbench.action.acceptSelectedQuickOpenItem")];
     }
 
     return [`No items matched the provided text selection`, Promise.resolve()];
   }
-}*/
+}
 
-// const quickPickActionHandlers: QuickPickActionHandler[] = [
-//   new SelectItemQuickPickActionHandler(),
-//   new CloseQuickPickActionHandler(),
-// ];
-
-// // TODO: Generate this from a list to ensure Kind type isn't duplicated (and all enum Kinds are covered);
-// const quickPickActionHandlersByKind = new Map<QuickPickActionKind, QuickPickActionHandler>();
-
-// for (const handler of quickPickActionHandlers) {
-//   // const kind = handler.k
-//   // if (quickPickActionHandlersByKind.
-// }
-
-
-// [QuickPickActionKind.selectItem, () => new SelectItemQuickPickActionHandler()],
-// [QuickPickActionKind.close, () => new CloseQuickPickActionHandler()],
-// [QuickPickActionKind.pressItemButton, () => new PressItemButtonQuickPickActionHandler()]],);
+/*****************************
+ * Handler Aggregation Types *
+******************************/
 
 const quickPickActions: QuickPickAction[] = [
   new SelectItemQuickPickAction(""),
   new CloseQuickPickAction(),
+  new PressItemButtonQuickPickAction("", 0),
 ];
 
 const quickPickActionHandlers = new Map<QuickPickActionKind, QuickPickAction>();

@@ -26,8 +26,8 @@ const characterFnMap: Map<string, TypedCharacterHandlerFunction> = new Map<strin
 ]);
 
 const deleteFnMap: Map<DeleteCommand, TypedCharacterHandlerFunction> = new Map<DeleteCommand, TypedCharacterHandlerFunction>([
-  [DeleteCommand.right, deleteSpaceRight],
-  [DeleteCommand.wordRight, deleteSpaceRight],
+  [DeleteCommand.Right, deleteSpaceRight],
+  [DeleteCommand.WordRight, deleteSpaceRight],
 ]);
 
 export function handleTypedCharacter(s: string): Promise<boolean> {

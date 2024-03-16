@@ -93,7 +93,7 @@ export class MarkHandler extends TypeHandler {
     if (this.keepSelectionOnDeactivation) {
       this.keepSelectionOnDeactivation = false;
     } else {
-      vscode.commands.executeCommand(CtrlGCommand.cancelSelection);
+      vscode.commands.executeCommand(CtrlGCommand.CancelSelection);
     }
   }
 
@@ -110,7 +110,7 @@ export class MarkHandler extends TypeHandler {
   async moveHandler(vsCommand: CursorMove, ...rest: any[]): Promise<boolean> {
     // See below link for cusorMove args (including "select" keyword)
     // https://code.visualstudio.com/api/references/commands
-    if (vsCommand === CursorMove.move) {
+    if (vsCommand === CursorMove.Move) {
       rest[0].select = true;
       return vscode.commands.executeCommand(vsCommand, ...rest).then(() => false);
     }
