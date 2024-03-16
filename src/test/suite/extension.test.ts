@@ -861,7 +861,7 @@ const testCases: TestCase[] = [
       "GHI Recording",
     ],
     stubbablesConfig: {
-      quickPickActions: [new SelectItemQuickPickAction("DEF Recording")],
+      quickPickActions: [new SelectItemQuickPickAction(["DEF Recording"])],
     },
     wantQuickPickOptions: [[
       "Recent recording 0", "Recent recording 1", "Recent recording 2",
@@ -912,8 +912,8 @@ const testCases: TestCase[] = [
     ],
     stubbablesConfig: {
       quickPickActions: [
-        new SelectItemQuickPickAction("DEF Recording"), // playNamedRecording (succeeds)
-        new SelectItemQuickPickAction("DEF Recording"), // deleteRecording
+        new SelectItemQuickPickAction(["DEF Recording"]), // playNamedRecording (succeeds)
+        new SelectItemQuickPickAction(["DEF Recording"]), // deleteRecording
         new CloseQuickPickAction(),                     // playNamedRecording (fails)
       ],
     },
