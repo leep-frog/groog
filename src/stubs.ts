@@ -93,23 +93,23 @@ function runStubbableMethod<I, O>(nonTestLogic: (input: I) => O, testLogic: (inp
 enum QuickPickActionKind {
   close,
   selectItem,
+  pressItemButton,
 }
 
-export interface QuickPickAction {
+interface QuickPickAction {
   readonly kind: QuickPickActionKind;
   readonly props: any;
-}
-
-interface QuickPickActionHandler {
   // Run the quick pick action, or return an error
   // It returns [string|undefined, Thenable<any>] because when initially had Thenable<string | undefined>,
   // the error wasn't being set properly in the stubbables method.
+  //
+  // NOTE: the run method should use the provided props, *NOT* the props field
   run(qp: vscode.QuickPick<vscode.QuickPickItem>, props: any): [string | undefined, Thenable<any>];
 }
 
-const quickPickActionHandlers = new Map<QuickPickActionKind, () => QuickPickActionHandler>([
-  [QuickPickActionKind.selectItem, () => new SelectItemQuickPickActionHandler()],
-  [QuickPickActionKind.close, () => new CloseQuickPickActionHandler()],
+const quickPickActionHandlers = new Map<QuickPickActionKind, () => QuickPickAction>([
+  [QuickPickActionKind.selectItem, () => new SelectItemQuickPickAction("")],
+  [QuickPickActionKind.close, () => new CloseQuickPickAction()],
 ]);
 
 /*****************************
@@ -128,9 +128,7 @@ export class SelectItemQuickPickAction implements QuickPickAction {
       itemLabels: [itemLabel],
     };
   }
-}
 
-class SelectItemQuickPickActionHandler implements QuickPickActionHandler {
   run(qp: vscode.QuickPick<vscode.QuickPickItem>, props: SelectItemQuickPickActionProps): [string | undefined, Thenable<any>] {
     const matchedItems: vscode.QuickPickItem[] = [];
     for (const item of qp.items) {
@@ -157,15 +155,74 @@ class SelectItemQuickPickActionHandler implements QuickPickActionHandler {
 interface CloseQuickPickActionProps {}
 
 export class CloseQuickPickAction implements QuickPickAction {
-  readonly kind: QuickPickActionKind = QuickPickActionKind.close;
+  kind = QuickPickActionKind.close;
+  readonly props: CloseQuickPickActionProps;
+  constructor() {
+    this.props = {};
+  }
+
+  run(): [string | undefined, Thenable<any>] {
+    return [undefined, vscode.commands.executeCommand("workbench.action.closeQuickOpen")];
+  }
+}
+
+/**********************************
+ * PressItemButtonQuickPickAction *
+ **********************************/
+
+/*interface PressItemButtonQuickPickActionProps {
+  itemLabel: string;
+  buttonIndex: number;
+}
+
+export class PressItemButtonQuickPickAction implements QuickPickAction {
+  readonly kind: QuickPickActionKind = QuickPickActionKind.pressItemButton;
   readonly props: CloseQuickPickActionProps;
   constructor() {
     this.props = {};
   }
 }
 
-class CloseQuickPickActionHandler implements QuickPickActionHandler {
-  run(): [string | undefined, Thenable<any>] {
-    return [undefined, vscode.commands.executeCommand("workbench.action.closeQuickOpen")];
+class PressItemButtonQuickPickActionHandler implements QuickPickActionHandler {
+  run(qp: vscode.QuickPick<vscode.QuickPickItem>, props: PressItemButtonQuickPickActionProps): [string | undefined, Thenable<any>] {
+    for (const item of qp.items) {
+      if (item.label !== props.itemLabel) {
+        continue;
+      }
+
+      qp.show();
+
+      const button = item.buttons?.at(props.buttonIndex);
+      if (!button) {
+        return [`Item only has ${item.buttons?.length}, but needed at least ${props.buttonIndex+1}`, Promise.resolve()];
+      }
+      const event: vscode.QuickPickItemButtonEvent<vscode.QuickPickItem> = {
+        button,
+        item,
+      };
+      // qp.onDidTriggerItemButton(
+      // qp.;
+      return [undefined, vscode.commands.executeCommand("workbench.action.acceptSelectedQuickOpenItem")];
+    }
+
+    return [`No items matched the provided text selection`, Promise.resolve()];
   }
-}
+}*/
+
+// const quickPickActionHandlers: QuickPickActionHandler[] = [
+//   new SelectItemQuickPickActionHandler(),
+//   new CloseQuickPickActionHandler(),
+// ];
+
+// // TODO: Generate this from a list to ensure Kind type isn't duplicated (and all enum Kinds are covered);
+// const quickPickActionHandlersByKind = new Map<QuickPickActionKind, QuickPickActionHandler>();
+
+// for (const handler of quickPickActionHandlers) {
+//   // const kind = handler.k
+//   // if (quickPickActionHandlersByKind.
+// }
+
+
+// [QuickPickActionKind.selectItem, () => new SelectItemQuickPickActionHandler()],
+// [QuickPickActionKind.close, () => new CloseQuickPickActionHandler()],
+// [QuickPickActionKind.pressItemButton, () => new PressItemButtonQuickPickActionHandler()]],);
