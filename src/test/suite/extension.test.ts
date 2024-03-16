@@ -4,7 +4,7 @@ import * as assert from 'assert';
 // as well as import your extension to test it
 import * as vscode from 'vscode';
 import { Document, Match } from '../../find';
-import { StubbablesConfig } from '../../stubs';
+import { CloseQuickPickAction, SelectItemQuickPickAction, StubbablesConfig } from '../../stubs';
 import path = require('path');
 import { readFileSync, rmdirSync, unlinkSync, writeFileSync } from 'fs';
 
@@ -862,7 +862,7 @@ const testCases: TestCase[] = [
       "GHI Recording",
     ],
     stubbablesConfig: {
-      quickPickSelections: ["DEF Recording"],
+      quickPickActions: [new SelectItemQuickPickAction("DEF Recording")],
     },
     wantQuickPickOptions: [[
       "Recent recording 0", "Recent recording 1", "Recent recording 2",
@@ -912,10 +912,10 @@ const testCases: TestCase[] = [
       "GHI Recording",
     ],
     stubbablesConfig: {
-      quickPickSelections: [
-        "DEF Recording", // playNamedRecording (succeeds)
-        "DEF Recording", // deleteRecording
-        undefined,       // playNamedRecording (fails)
+      quickPickActions: [
+        new SelectItemQuickPickAction("DEF Recording"), // playNamedRecording (succeeds)
+        new SelectItemQuickPickAction("DEF Recording"), // deleteRecording
+        new CloseQuickPickAction(),                     // playNamedRecording (fails)
       ],
     },
     wantQuickPickOptions: [
@@ -1485,7 +1485,7 @@ suite('Groog commands', () => {
       // Verify the outcome (assert in order of information (e.g. mismatch in error messages in more useful than text being mismatched)).
       const finalConfig: StubbablesConfig = JSON.parse(readFileSync(stubbableTestFile).toString());
       assertUndefined(finalConfig.error, "StubbablesConfig.error");
-      assert.deepStrictEqual(finalConfig.quickPickSelections ?? [], []);
+      assert.deepStrictEqual(finalConfig.quickPickActions ?? [], []);
       assert.deepStrictEqual(finalConfig.wantQuickPickOptions ?? [], tc.wantQuickPickOptions ?? []);
       assert.deepStrictEqual(gotErrorMessages, tc.wantErrorMessages || [], "Expected error messages to be exactly equal");
       assert.deepStrictEqual(gotInfoMessages, tc.wantInfoMessages || [], "Expected info messages to be exactly equal");
