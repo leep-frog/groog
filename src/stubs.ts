@@ -31,14 +31,13 @@ export const stubbables = {
         return vscode.commands.executeCommand("workbench.action.closeQuickOpen");
       }
 
-      const handlerGenerator = quickPickActionHandlers.get(genericQuickPickAction.kind);;
-      if (!handlerGenerator) {
+      const actionHandler = quickPickActionHandlers.get(genericQuickPickAction.kind);;
+      if (!actionHandler) {
         sc.error = `Unsupported QuickPickActionKind: ${genericQuickPickAction.kind}`;
         return vscode.commands.executeCommand("workbench.action.closeQuickOpen");
       }
 
-      const handler = handlerGenerator();
-      const [errorMessage, promise] = handler.run(qp, genericQuickPickAction.props);
+      const [errorMessage, promise] = actionHandler.run(qp, genericQuickPickAction.props);
       if (errorMessage) {
         sc.error = errorMessage;
       }
@@ -106,11 +105,6 @@ interface QuickPickAction {
   // NOTE: the run method should use the provided props, *NOT* the props field
   run(qp: vscode.QuickPick<vscode.QuickPickItem>, props: any): [string | undefined, Thenable<any>];
 }
-
-const quickPickActionHandlers = new Map<QuickPickActionKind, () => QuickPickAction>([
-  [QuickPickActionKind.selectItem, () => new SelectItemQuickPickAction("")],
-  [QuickPickActionKind.close, () => new CloseQuickPickAction()],
-]);
 
 /*****************************
  * SelectItemQuickPickAction *
@@ -226,3 +220,17 @@ class PressItemButtonQuickPickActionHandler implements QuickPickActionHandler {
 // [QuickPickActionKind.selectItem, () => new SelectItemQuickPickActionHandler()],
 // [QuickPickActionKind.close, () => new CloseQuickPickActionHandler()],
 // [QuickPickActionKind.pressItemButton, () => new PressItemButtonQuickPickActionHandler()]],);
+
+const quickPickActions: QuickPickAction[] = [
+  new SelectItemQuickPickAction(""),
+  new CloseQuickPickAction(),
+];
+
+const quickPickActionHandlers = new Map<QuickPickActionKind, QuickPickAction>();
+
+for (const quickPickAction of quickPickActions) {
+  if (quickPickActionHandlers.has(quickPickAction.kind)) {
+    throw new Error(`Duplicate QuickPickActionKind: ${quickPickAction.kind}`);
+  }
+  quickPickActionHandlers.set(quickPickAction.kind, quickPickAction);
+}
