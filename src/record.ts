@@ -345,7 +345,7 @@ export class Recorder extends TypeHandler {
       }),
     );
 
-    stubbables.showQuickPick(input);
+    return stubbables.showQuickPick(input);
   }
 
   async playbackNamedRecording() {
@@ -391,11 +391,11 @@ export class Recorder extends TypeHandler {
         disposables.forEach(d => d.dispose);
       }),
       // When pressing a button
-      input.onDidTriggerItemButton(event => {
+      input.onDidTriggerItemButton(async (event: vscode.QuickPickItemButtonEvent<RecordBookQuickPickItem>): Promise<any> => {
         switch (event.button.constructor) {
         case RepeatRecordingButton:
           input.dispose();
-          event.item.recordBook.repeatedPlayback(this.emacs);
+          await event.item.recordBook.repeatedPlayback(this.emacs);
           break;
         case SaveRecentRecordingButton:
           input.dispose();

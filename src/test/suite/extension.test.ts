@@ -882,7 +882,7 @@ const testCases: TestCase[] = [
       type("i\n"),
       cmd("groog.record.saveRecordingAs"),
       cmd("groog.record.playNamedRecording"),
-      postRecordingDelay,
+      delay(250),
     ],
     wantInfoMessages: [
       `Recording saved as "ABC Recording"!`,
@@ -1309,7 +1309,6 @@ const testCases: TestCase[] = [
       type("xyz"),
       cmd("groog.record.endRecording"),
       cmd("groog.record.playNamedRecording"),
-      delay(250),
     ],
     stubbablesConfig: {
       quickPickActions: [

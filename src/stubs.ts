@@ -194,11 +194,12 @@ export class PressItemButtonQuickPickAction implements QuickPickAction {
       qp.show();
       const fqp = qp as FakeQuickPick<vscode.QuickPickItem>;
       try {
-        fqp.pressItemButton(item, button);
+        const promise = fqp.pressItemButton(item, button);
+        return [undefined, promise];
       } catch (e) {
         throw new Error(`An error occurred. The most likely cause is that you're creating your QuickPick with vscode.window.createQuickPick() instead of stubbables.createQuickPick(). Actual error is below:\n\n${e}`);
       }
-      return [undefined, vscode.commands.executeCommand("workbench.action.acceptSelectedQuickOpenItem")];
+
     }
 
     return [`No items matched the provided text selection`, Promise.resolve()];
@@ -239,10 +240,12 @@ class FakeQuickPick<T extends vscode.QuickPickItem> implements vscode.QuickPick<
     }
   }
 
-  public pressItemButton(item: T, button: vscode.QuickInputButton) {
+  public async pressItemButton(item: T, button: vscode.QuickInputButton) {
+    let p = Promise.resolve();
     for (const handler of this.itemButtonHandlers) {
-      handler({item, button});
+      p = p.then(() => handler({item, button}));
     }
+    return p;
   }
 
   // QuickPick overridden fields/methods below
