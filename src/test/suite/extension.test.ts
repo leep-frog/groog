@@ -1283,7 +1283,6 @@ const testCases: TestCase[] = [
   // Repeat record playback with buttons
   {
     name: "Repeat record playback with decreasing find matches",
-    runSolo: true,
     startingText: [
       "abc",
       "1",
