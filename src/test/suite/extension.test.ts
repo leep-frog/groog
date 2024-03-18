@@ -5,7 +5,7 @@ import * as assert from 'assert';
 import { readFileSync, writeFileSync } from 'fs';
 import * as vscode from 'vscode';
 import { Document, Match } from '../../find';
-import { CloseQuickPickAction, SelectItemQuickPickAction, StubbablesConfig } from '../../stubs';
+import { CloseQuickPickAction, PressItemButtonQuickPickAction, SelectItemQuickPickAction, StubbablesConfig } from '../../stubs';
 
 // Note: this needs to be identical to the value in .vscode-test.mjs (trying to have shared import there is awkward).
 // export const stubbableTestFile = path.resolve(".vscode-test", "stubbable-file.json");
@@ -1278,6 +1278,50 @@ const testCases: TestCase[] = [
     ],
     wantErrorMessages: [
       "Number of matches did not decrease, ending repeat playback",
+    ],
+  },
+  // Repeat record playback with buttons
+  {
+    name: "Repeat record playback with decreasing find matches",
+    runSolo: true,
+    startingText: [
+      "abc",
+      "1",
+      "defabc",
+      "2",
+      ".abcabc...abc.....",
+    ],
+    wantDocument: [
+      "xyz",
+      "1",
+      "defxyz",
+      "2",
+      ".xyzxyz...xyz.....",
+    ],
+    wantSelections: [
+      selection(4, 13),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      cmd("groog.find"),
+      type("abc"),
+      cmd("groog.ctrlG"),
+      cmd("groog.deleteLeft"),
+      type("xyz"),
+      cmd("groog.record.endRecording"),
+      cmd("groog.record.playNamedRecording"),
+      delay(250),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new PressItemButtonQuickPickAction("Recent recording 0", 1),
+      ],
+    },
+    wantQuickPickOptions: [
+      ["Recent recording 0"],
+    ],
+    wantErrorMessages: [
+      `No match found during recording playback`,
     ],
   },
   // Record undo tests

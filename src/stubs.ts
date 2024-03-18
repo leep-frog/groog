@@ -16,6 +16,14 @@ export interface StubbablesConfig {
 export const TEST_MODE: boolean = !!stubbableTestFilePath;
 
 export const stubbables = {
+  // Stubbable command to create a quick pick controllable in tests
+  createQuickPick: <T extends vscode.QuickPickItem> () => {
+    return runStubbableMethodNoInput<vscode.QuickPick<T>>(
+      vscode.window.createQuickPick,
+      () => new FakeQuickPick(vscode.window.createQuickPick()),
+    )();
+  },
+  // Stubbable command to show a quick pick controllable in tests
   showQuickPick: runStubbableMethod<vscode.QuickPick<vscode.QuickPickItem>, Thenable<void>>(
     async (qp: vscode.QuickPick<vscode.QuickPickItem>) => qp.show(),
     async (qp: vscode.QuickPick<vscode.QuickPickItem>, sc: StubbablesConfig) => {
@@ -85,7 +93,7 @@ function runStubbableMethod<I, O>(nonTestLogic: (input: I) => O, testLogic: (inp
 
 /*******************
  * QuickPickAction *
- *******************/
+********************/
 
 // All this rigmarole is needed since we serialize to and from JSON (which causes method info to be lost (i.e. the `run`method)).
 // That is why we need the separation of the QuickPickAction types and the QuickPickActionHandler types.
@@ -106,7 +114,7 @@ interface QuickPickAction {
 
 /*****************************
  * SelectItemQuickPickAction *
- *****************************/
+******************************/
 
 export class SelectItemQuickPickAction implements QuickPickAction {
   readonly kind: QuickPickActionKind = QuickPickActionKind.SelectItem;
@@ -141,7 +149,7 @@ export class SelectItemQuickPickAction implements QuickPickAction {
 
 /************************
  * CloseQuickPickAction *
- ************************/
+*************************/
 
 export class CloseQuickPickAction implements QuickPickAction {
   kind = QuickPickActionKind.Close;
@@ -157,15 +165,19 @@ export class CloseQuickPickAction implements QuickPickAction {
 
 /**********************************
  * PressItemButtonQuickPickAction *
- **********************************/
+***********************************/
 
-/*export class PressItemButtonQuickPickAction implements QuickPickAction {
+export class PressItemButtonQuickPickAction implements QuickPickAction {
   kind = QuickPickActionKind.PressItemButton;
   itemLabel: string;
   buttonIndex: number;
   constructor(itemLabel: string, buttonIndex: number) {
     this.itemLabel = itemLabel;
     this.buttonIndex = buttonIndex;
+  }
+
+  static fromJsonifiedObject(action: PressItemButtonQuickPickAction): PressItemButtonQuickPickAction {
+    return new PressItemButtonQuickPickAction(action.itemLabel, action.buttonIndex);
   }
 
   run(qp: vscode.QuickPick<vscode.QuickPickItem>): [string | undefined, Thenable<any>] {
@@ -178,19 +190,20 @@ export class CloseQuickPickAction implements QuickPickAction {
       if (!button) {
         return [`Item only has ${item.buttons?.length}, but needed at least ${this.buttonIndex+1}`, Promise.resolve()];
       }
-      const event: vscode.QuickPickItemButtonEvent<vscode.QuickPickItem> = {
-        button,
-        item,
-      };
 
-      // qp.show();
-      // qp.onDidTriggerItemButton(
+      qp.show();
+      const fqp = qp as FakeQuickPick<vscode.QuickPickItem>;
+      try {
+        fqp.pressItemButton(item, button);
+      } catch (e) {
+        throw new Error(`An error occurred. The most likely cause is that you're creating your QuickPick with vscode.window.createQuickPick() instead of stubbables.createQuickPick(). Actual error is below:\n\n${e}`);
+      }
       return [undefined, vscode.commands.executeCommand("workbench.action.acceptSelectedQuickOpenItem")];
     }
 
     return [`No items matched the provided text selection`, Promise.resolve()];
   }
-}*/
+}
 
 /*****************************
  * Handler Aggregation Types *
@@ -199,4 +212,108 @@ export class CloseQuickPickAction implements QuickPickAction {
 const quickPickActionHandlers = new Map<QuickPickActionKind, (props: any) => QuickPickAction>([
   [QuickPickActionKind.SelectItem, SelectItemQuickPickAction.fromJsonifiedObject],
   [QuickPickActionKind.Close, CloseQuickPickAction.fromJsonifiedObject],
+  [QuickPickActionKind.PressItemButton, PressItemButtonQuickPickAction.fromJsonifiedObject],
 ]);
+
+/*********************
+ * QuickPick Wrapper *
+**********************/
+
+class FakeQuickPick<T extends vscode.QuickPickItem> implements vscode.QuickPick<T> {
+
+  private readonly realQuickPick: vscode.QuickPick<T>;
+
+  private readonly buttonHandlers: ((e: vscode.QuickInputButton) => any)[];
+  private readonly itemButtonHandlers: ((e: vscode.QuickPickItemButtonEvent<T>) => any)[];
+
+  constructor(realQuickPick: vscode.QuickPick<T>) {
+    this.realQuickPick = realQuickPick;
+    this.buttonHandlers = [];
+    this.itemButtonHandlers = [];
+  }
+
+  // Custom methods
+  public pressButton(button: vscode.QuickInputButton) {
+    for (const handler of this.buttonHandlers) {
+      handler(button);
+    }
+  }
+
+  public pressItemButton(item: T, button: vscode.QuickInputButton) {
+    for (const handler of this.itemButtonHandlers) {
+      handler({item, button});
+    }
+  }
+
+  // QuickPick overridden fields/methods below
+  public onDidTriggerButton(listener: (e: vscode.QuickInputButton) => any, thisArgs?: any, disposables?: vscode.Disposable[]) : vscode.Disposable {
+    this.buttonHandlers.push(listener);
+    return this.realQuickPick.onDidTriggerButton(listener, thisArgs, disposables);
+  }
+
+  public onDidTriggerItemButton(listener: (e: vscode.QuickPickItemButtonEvent<T>) => any, thisArgs?: any, disposables?: vscode.Disposable[]) : vscode.Disposable {
+    this.itemButtonHandlers.push(listener);
+    return this.realQuickPick.onDidTriggerItemButton(listener, thisArgs, disposables);
+  }
+
+  // QuickPick simple forwarding fields/methods below
+
+  public get value(): string { return this.realQuickPick.value; }
+  public set value(s: string) { this.realQuickPick.value = s; }
+
+  public get placeholder(): string | undefined { return this.realQuickPick.placeholder; }
+  public set placeholder(s: string | undefined) { this.realQuickPick.placeholder = s; }
+
+  public get onDidChangeValue(): vscode.Event<string> { return this.realQuickPick.onDidChangeValue; }
+
+  public get onDidAccept(): vscode.Event<void> { return this.realQuickPick.onDidAccept; }
+
+  public get buttons(): readonly vscode.QuickInputButton[] { return this.realQuickPick.buttons; }
+  public set buttons(bs: vscode.QuickInputButton[]) { this.realQuickPick.buttons = bs; }
+
+  public get items(): readonly T[] { return this.realQuickPick.items; }
+  public set items(ts: readonly T[]) { this.realQuickPick.items = ts; }
+
+  public get canSelectMany(): boolean { return this.realQuickPick.canSelectMany; }
+
+  public get matchOnDescription(): boolean { return this.realQuickPick.matchOnDescription; }
+  public set matchOnDescription(b: boolean) { this.realQuickPick.matchOnDescription = b; }
+
+  public get matchOnDetail(): boolean { return this.realQuickPick.matchOnDetail; }
+  public set matchOnDetail(b: boolean) { this.realQuickPick.matchOnDetail = b; }
+
+  public get keepScrollPosition(): boolean | undefined { return this.realQuickPick.keepScrollPosition; }
+  public set keepScrollPosition(b: boolean | undefined) { this.realQuickPick.keepScrollPosition = b; }
+
+  public get activeItems(): readonly T[] { return this.realQuickPick.activeItems; }
+  public set activeItems(ts: T[]) { this.realQuickPick.activeItems = ts; }
+
+  public get onDidChangeActive(): vscode.Event<readonly T[]> { return this.realQuickPick.onDidChangeActive; }
+
+  public get selectedItems(): readonly T[] { return this.realQuickPick.selectedItems; }
+  public set selectedItems(ts: T[]) { this.realQuickPick.selectedItems = ts; }
+
+  public get onDidChangeSelection(): vscode.Event<readonly T[]> { return this.realQuickPick.onDidChangeSelection; }
+
+  // QuickInput fields/methods
+  public get title(): string | undefined { return this.realQuickPick.title; }
+  public set title(t: string | undefined) { this.realQuickPick.title = t; }
+
+  public get step(): number | undefined { return this.realQuickPick.step; }
+
+  public get totalSteps(): number | undefined { return this.realQuickPick.totalSteps; }
+
+  public get enabled(): boolean { return this.realQuickPick.enabled; }
+
+  public get busy(): boolean { return this.realQuickPick.busy; }
+
+  public get ignoreFocusOut(): boolean { return this.realQuickPick.ignoreFocusOut; }
+
+  public show(): void { this.realQuickPick.show(); }
+
+  public hide(): void { this.realQuickPick.hide(); }
+
+  public get onDidHide(): vscode.Event<void> { return this.realQuickPick.onDidHide; }
+
+  public dispose(): void { this.realQuickPick.dispose(); }
+}
