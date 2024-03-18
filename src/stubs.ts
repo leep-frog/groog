@@ -240,15 +240,15 @@ class FakeQuickPick<T extends vscode.QuickPickItem> implements vscode.QuickPick<
   public async acceptItems(items: T[]): Promise<any> {
     this.activeItems = items;
     this.selectedItems = items;
-    return this.runAsyncsInSequence(undefined, this.acceptHandlers);
+    await this.runAsyncsInSequence(undefined, this.acceptHandlers);
   }
 
-  public pressButton(button: vscode.QuickInputButton): Promise<any> {
-    return this.runAsyncsInSequence(button, this.buttonHandlers);
+  public async pressButton(button: vscode.QuickInputButton): Promise<any> {
+    await this.runAsyncsInSequence(button, this.buttonHandlers);
   }
 
   public async pressItemButton(item: T, button: vscode.QuickInputButton): Promise<any> {
-    return this.runAsyncsInSequence({item, button}, this.itemButtonHandlers);
+    await this.runAsyncsInSequence({item, button}, this.itemButtonHandlers);
   }
 
   private async runAsyncsInSequence<T>(t: T, handlers: ((t: T) => Promise<any>)[]): Promise<any> {
