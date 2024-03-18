@@ -225,9 +225,9 @@ class FakeQuickPick<T extends vscode.QuickPickItem> implements vscode.QuickPick<
 
   private readonly realQuickPick: vscode.QuickPick<T>;
 
-  private readonly acceptHandlers: ((e: void) => any)[];
-  private readonly buttonHandlers: ((e: vscode.QuickInputButton) => any)[];
-  private readonly itemButtonHandlers: ((e: vscode.QuickPickItemButtonEvent<T>) => any)[];
+  private readonly acceptHandlers: ((e: void) => Promise<any>)[];
+  private readonly buttonHandlers: ((e: vscode.QuickInputButton) => Promise<any>)[];
+  private readonly itemButtonHandlers: ((e: vscode.QuickPickItemButtonEvent<T>) => Promise<any>)[];
 
   constructor(realQuickPick: vscode.QuickPick<T>) {
     this.realQuickPick = realQuickPick;
@@ -240,41 +240,35 @@ class FakeQuickPick<T extends vscode.QuickPickItem> implements vscode.QuickPick<
   public async acceptItems(items: T[]): Promise<any> {
     this.activeItems = items;
     this.selectedItems = items;
-    let p = Promise.resolve();
-    for (const handler of this.acceptHandlers) {
-      p = p.then(handler);
-    }
-    return p;
+    return this.runAsyncsInSequence(undefined, this.acceptHandlers);
   }
 
   public pressButton(button: vscode.QuickInputButton): Promise<any> {
-    let p = Promise.resolve();
-    for (const handler of this.buttonHandlers) {
-      p = p.then(() => handler(button));
-    }
-    return p;
+    return this.runAsyncsInSequence(button, this.buttonHandlers);
   }
 
   public async pressItemButton(item: T, button: vscode.QuickInputButton): Promise<any> {
-    let p = Promise.resolve();
-    for (const handler of this.itemButtonHandlers) {
-      p = p.then(() => handler({item, button}));
+    return this.runAsyncsInSequence({item, button}, this.itemButtonHandlers);
+  }
+
+  private async runAsyncsInSequence<T>(t: T, handlers: ((t: T) => Promise<any>)[]): Promise<any> {
+    for (const handler of handlers) {
+      await handler(t);
     }
-    return p;
   }
 
   // QuickPick overridden fields/methods below
-  public onDidTriggerButton(listener: (e: vscode.QuickInputButton) => any, thisArgs?: any, disposables?: vscode.Disposable[]) : vscode.Disposable {
+  public onDidTriggerButton(listener: (e: vscode.QuickInputButton) => Promise<any>, thisArgs?: any, disposables?: vscode.Disposable[]) : vscode.Disposable {
     this.buttonHandlers.push(listener);
     return this.realQuickPick.onDidTriggerButton(listener, thisArgs, disposables);
   }
 
-  public onDidTriggerItemButton(listener: (e: vscode.QuickPickItemButtonEvent<T>) => any, thisArgs?: any, disposables?: vscode.Disposable[]) : vscode.Disposable {
+  public onDidTriggerItemButton(listener: (e: vscode.QuickPickItemButtonEvent<T>) => Promise<any>, thisArgs?: any, disposables?: vscode.Disposable[]) : vscode.Disposable {
     this.itemButtonHandlers.push(listener);
     return this.realQuickPick.onDidTriggerItemButton(listener, thisArgs, disposables);
   }
 
-  public onDidAccept(listener: (e: void) => any, thisArgs?: any, disposables?: vscode.Disposable[]) : vscode.Disposable {
+  public onDidAccept(listener: (e: void) => Promise<any>, thisArgs?: any, disposables?: vscode.Disposable[]) : vscode.Disposable {
     this.acceptHandlers.push(listener);
     return this.realQuickPick.onDidAccept(listener, thisArgs, disposables);
   }

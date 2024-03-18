@@ -337,7 +337,7 @@ export class Recorder extends TypeHandler {
         disposables.forEach(d => d.dispose);
       }),
       // When accepting an event, delete the record book
-      input.onDidAccept(e => {
+      input.onDidAccept(async (): Promise<any> => {
         for (const item of input.selectedItems) {
           this.namedRecordings.delete(item.label);
         }
@@ -406,13 +406,13 @@ export class Recorder extends TypeHandler {
         }
       }),
       // When accepting an event, run the record book!
-      input.onDidAccept(e => {
+      input.onDidAccept(async (): Promise<any> => {
         switch (input.selectedItems.length) {
         case 0:
           vscode.window.showInformationMessage("No selection made");
           break;
         case 1:
-          input.selectedItems[0].recordBook.playback(this.emacs);
+          await input.selectedItems[0].recordBook.playback(this.emacs);
           break;
         default:
           vscode.window.showErrorMessage(`Multiple selections made somehow?!`);
