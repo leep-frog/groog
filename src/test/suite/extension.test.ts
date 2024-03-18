@@ -877,11 +877,63 @@ const testCases: TestCase[] = [
       type("i\n"),
       cmd("groog.record.saveRecordingAs"),
       cmd("groog.record.playNamedRecording"),
+      delay(50),
     ],
     wantInfoMessages: [
       `Recording saved as "ABC Recording"!`,
       `Recording saved as "DEF Recording"!`,
       `Recording saved as "GHI Recording"!`,
+    ],
+  },
+  {
+    name: "Fails to play back named recording if multiple items are picked",
+    startingText: [
+      "start text",
+    ],
+    wantDocument: [
+      "abc",
+      "def",
+      "ghi",
+      "start text",
+    ],
+    wantSelections: [
+      selection(3, 0),
+    ],
+    inputBoxResponses: [
+      "ABC Recording",
+      "DEF Recording",
+      "GHI Recording",
+    ],
+    stubbablesConfig: {
+      quickPickActions: [new SelectItemQuickPickAction(["ABC Recording", "DEF Recording"])],
+    },
+    wantQuickPickOptions: [[
+      "Recent recording 0", "Recent recording 1", "Recent recording 2",
+      "ABC Recording", "DEF Recording", "GHI Recording",
+    ]],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      type("a"),
+      type("b"),
+      type("c"),
+      type("\n"),
+      cmd("groog.record.saveRecordingAs"),
+      cmd("groog.record.startRecording"),
+      type("def\n"),
+      cmd("groog.record.saveRecordingAs"),
+      cmd("groog.record.startRecording"),
+      type("gh"),
+      type("i\n"),
+      cmd("groog.record.saveRecordingAs"),
+      cmd("groog.record.playNamedRecording"),
+    ],
+    wantInfoMessages: [
+      `Recording saved as "ABC Recording"!`,
+      `Recording saved as "DEF Recording"!`,
+      `Recording saved as "GHI Recording"!`,
+    ],
+    wantErrorMessages: [
+      "Multiple selections made somehow?!",
     ],
   },
   {
@@ -1518,14 +1570,14 @@ suite('Groog commands', () => {
       // Verify the outcome (assert in order of information (e.g. mismatch in error messages in more useful than text being mismatched)).
       const finalConfig: StubbablesConfig = JSON.parse(readFileSync(stubbableTestFile).toString());
       assertUndefined(finalConfig.error, "StubbablesConfig.error");
-      assert.deepStrictEqual(finalConfig.quickPickActions ?? [], []);
-      assert.deepStrictEqual(finalConfig.wantQuickPickOptions ?? [], tc.wantQuickPickOptions ?? []);
-      assert.deepStrictEqual(gotErrorMessages, tc.wantErrorMessages || [], "Expected error messages to be exactly equal");
-      assert.deepStrictEqual(gotInfoMessages, tc.wantInfoMessages || [], "Expected info messages to be exactly equal");
-      assert.deepStrictEqual(gotInputBoxValidationMessages, tc.wantInputBoxValidationMessages || []);
+      assert.deepStrictEqual(finalConfig.quickPickActions ?? [], [], "Expected QUICK PICK ACTIONS to be empty");
+      assert.deepStrictEqual(finalConfig.wantQuickPickOptions ?? [], tc.wantQuickPickOptions ?? [], "Expected QUICK PICK OPTIONS to be exactly equal");
+      assert.deepStrictEqual(gotErrorMessages, tc.wantErrorMessages || [], "Expected ERROR MESSAGES to be exactly equal");
+      assert.deepStrictEqual(gotInfoMessages, tc.wantInfoMessages || [], "Expected INFO MESSAGES to be exactly equal");
+      assert.deepStrictEqual(gotInputBoxValidationMessages, tc.wantInputBoxValidationMessages || [], "Expected INPUT BOX VALIDATION MESSAGES to be exactly equal");
 
-      assert.deepStrictEqual(editor.document.getText(), wantText);
-      assert.deepStrictEqual(editor.selections, tc.wantSelections);
+      assert.deepStrictEqual(editor.document.getText(), wantText, "Expected DOCUMENT TEXT to be exactly equal");
+      assert.deepStrictEqual(editor.selections, tc.wantSelections, "Expected SELECTIONS to be exactly equal");
 
     });
   });
