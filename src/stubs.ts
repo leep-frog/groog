@@ -1,7 +1,5 @@
 import * as vscode from 'vscode';
-import { GlobalBoolTracker, GlobalStateTracker } from './emacs';
-import path = require('path');
-import { open, readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 
 const stubbableTestFilePath = process.env.VSCODE_STUBBABLE_TEST_FILE;
 
@@ -140,10 +138,14 @@ export class SelectItemQuickPickAction implements QuickPickAction {
       return [`All item labels were not matched. Found [${matchedItems.map(item => item.label)}]; wanted [${this.itemLabels}]`, Promise.resolve()];
     }
 
-    qp.selectedItems = matchedItems;
-    qp.activeItems = matchedItems;
     qp.show();
-    return [undefined, vscode.commands.executeCommand("workbench.action.acceptSelectedQuickOpenItem")];
+    const fqp = qp as FakeQuickPick<vscode.QuickPickItem>;
+    try {
+      const promise = fqp.acceptItems(matchedItems);
+      return [undefined, promise];
+    } catch (e) {
+      throw new Error(`An error occurred. The most likely cause is that you're creating your QuickPick with vscode.window.createQuickPick() instead of stubbables.createQuickPick(). Actual error is below:\n\n${e}`);
+    }
   }
 }
 
@@ -199,7 +201,6 @@ export class PressItemButtonQuickPickAction implements QuickPickAction {
       } catch (e) {
         throw new Error(`An error occurred. The most likely cause is that you're creating your QuickPick with vscode.window.createQuickPick() instead of stubbables.createQuickPick(). Actual error is below:\n\n${e}`);
       }
-
     }
 
     return [`No items matched the provided text selection`, Promise.resolve()];
@@ -224,23 +225,37 @@ class FakeQuickPick<T extends vscode.QuickPickItem> implements vscode.QuickPick<
 
   private readonly realQuickPick: vscode.QuickPick<T>;
 
+  private readonly acceptHandlers: ((e: void) => any)[];
   private readonly buttonHandlers: ((e: vscode.QuickInputButton) => any)[];
   private readonly itemButtonHandlers: ((e: vscode.QuickPickItemButtonEvent<T>) => any)[];
 
   constructor(realQuickPick: vscode.QuickPick<T>) {
     this.realQuickPick = realQuickPick;
+    this.acceptHandlers = [];
     this.buttonHandlers = [];
     this.itemButtonHandlers = [];
   }
 
   // Custom methods
-  public pressButton(button: vscode.QuickInputButton) {
-    for (const handler of this.buttonHandlers) {
-      handler(button);
+  public async acceptItems(items: T[]): Promise<any> {
+    this.activeItems = items;
+    this.selectedItems = items;
+    let p = Promise.resolve();
+    for (const handler of this.acceptHandlers) {
+      p = p.then(handler);
     }
+    return p;
   }
 
-  public async pressItemButton(item: T, button: vscode.QuickInputButton) {
+  public pressButton(button: vscode.QuickInputButton): Promise<any> {
+    let p = Promise.resolve();
+    for (const handler of this.buttonHandlers) {
+      p = p.then(() => handler(button));
+    }
+    return p;
+  }
+
+  public async pressItemButton(item: T, button: vscode.QuickInputButton): Promise<any> {
     let p = Promise.resolve();
     for (const handler of this.itemButtonHandlers) {
       p = p.then(() => handler({item, button}));
@@ -259,6 +274,11 @@ class FakeQuickPick<T extends vscode.QuickPickItem> implements vscode.QuickPick<
     return this.realQuickPick.onDidTriggerItemButton(listener, thisArgs, disposables);
   }
 
+  public onDidAccept(listener: (e: void) => any, thisArgs?: any, disposables?: vscode.Disposable[]) : vscode.Disposable {
+    this.acceptHandlers.push(listener);
+    return this.realQuickPick.onDidAccept(listener, thisArgs, disposables);
+  }
+
   // QuickPick simple forwarding fields/methods below
 
   public get value(): string { return this.realQuickPick.value; }
@@ -268,8 +288,6 @@ class FakeQuickPick<T extends vscode.QuickPickItem> implements vscode.QuickPick<
   public set placeholder(s: string | undefined) { this.realQuickPick.placeholder = s; }
 
   public get onDidChangeValue(): vscode.Event<string> { return this.realQuickPick.onDidChangeValue; }
-
-  public get onDidAccept(): vscode.Event<void> { return this.realQuickPick.onDidAccept; }
 
   public get buttons(): readonly vscode.QuickInputButton[] { return this.realQuickPick.buttons; }
   public set buttons(bs: vscode.QuickInputButton[]) { this.realQuickPick.buttons = bs; }
