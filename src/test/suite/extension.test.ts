@@ -29,9 +29,6 @@ function delay(ms: number): UserInteraction {
   return new DelayExecution(ms);
 }
 
-// Recording doesn't lock, so we need a delay to ensure the test totally completes.
-const postRecordingDelay = delay(100);
-
 interface TestMatch {
   range: vscode.Range;
   text: string;
@@ -784,7 +781,6 @@ const testCases: TestCase[] = [
       type("\n"),
       cmd("groog.record.saveRecordingAs"),
       cmd("groog.record.playRecording"),
-      postRecordingDelay,
     ],
     wantInputBoxValidationMessages: [
       {
@@ -825,7 +821,6 @@ const testCases: TestCase[] = [
       type("ABC\n"),
       cmd("groog.record.saveRecordingAs"),
       cmd("groog.record.playRecording"),
-      postRecordingDelay,
     ],
     wantInputBoxValidationMessages: [
       {
@@ -943,9 +938,7 @@ const testCases: TestCase[] = [
       cmd("groog.record.saveRecordingAs"),
       cmd("groog.record.playNamedRecording"),
       cmd("groog.record.deleteRecording"),
-      postRecordingDelay,
       cmd("groog.record.playNamedRecording"),
-      postRecordingDelay,
     ],
     wantInfoMessages: [
       `Recording saved as "ABC Recording"!`,
