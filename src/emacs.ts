@@ -238,7 +238,6 @@ export class Emacs {
       async (th: TypeHandler): Promise<boolean> => th.ctrlG(),
       async () => {
         for (var cmd of Object.values(CtrlGCommand)) {
-          // TODO: Maybe don't await if this starts to take too long.
           await vscode.commands.executeCommand(cmd);
         }
       },

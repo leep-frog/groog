@@ -96,8 +96,6 @@ export abstract class TypeHandler implements Registerable {
   abstract delHandler(cmd: DeleteCommand): Thenable<boolean>;
   abstract moveHandler(cmd: CursorMove, ...rest: any[]): Thenable<boolean>;
 
-  // TODO escape handler (or just same ctrl g?)
-
   // Reset between tests
   abstract testReset() : Promise<void>;
 }

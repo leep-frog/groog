@@ -847,7 +847,6 @@ export class FindRecord implements Record {
     return "RecordFind";
   }
 
-  // TODO: Change this to return Promise<string | undefined>
   async playback(emacs: Emacs, repeatMode?: boolean): Promise<boolean> {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {

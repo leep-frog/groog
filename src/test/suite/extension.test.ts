@@ -1538,7 +1538,7 @@ const testCases: () => TestCase[] = () => [
   /* Useful for commenting out tests. */
 ];
 
-// To run these tests, run the `Extension Tests` configurations from `.vscode/launch.json` // TODO: Make an npm target that does this?
+// Run `npm run test` to execute these tests.
 suite('Groog commands', () => {
   const requireRunSolo = testCases().some(tc => tc.runSolo);
 
