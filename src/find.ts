@@ -528,9 +528,9 @@ class FindContextCache {
 
     const matchInfoResponse = this.matchTracker!.getMatchInfo();
     const matchInfo = matchInfoResponse.info;
-    const suggestibleMatches = matchInfoResponse.suggestibleMatches;
     const matchError = matchInfoResponse.error;
     const match = matchInfo?.match;
+    const suggestibleMatches = match ? [] : matchInfoResponse.suggestibleMatches;
     const matches = matchInfo ? matchInfo.matches : [];
 
     // Update the decorations (always want these changes to be applied, hence why we do this first).
@@ -588,6 +588,7 @@ class FindContextCache {
 
     if (suggestibleMatches.length > 0) {
       input.activeItems = [suggestibleItems[0]];
+      input.selectedItems = [suggestibleItems[0]];
     }
 
     disposables.push(
