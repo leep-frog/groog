@@ -638,6 +638,25 @@ const testCases: () => TestCase[] = () => [
     ],
   },
   {
+    name: "Fails to playback if no named recording selected",
+    startingText: [
+      "abc",
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+    userInteractions: [
+      cmd("groog.record.playNamedRecording"),
+    ],
+    wantErrorMessages: [
+      `No named recording selection made`,
+    ],
+    stubbablesConfig: {
+      quickPickActions: [new SelectItemQuickPickAction([])],
+    },
+    wantQuickPickOptions: [[]],
+  },
+  {
     name: "Fails to delete recording if actively recording",
     startingText: [
       "abc",

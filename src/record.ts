@@ -320,13 +320,13 @@ export class Recorder extends TypeHandler {
     }
 
     const input = stubbables.createQuickPick<vscode.QuickPickItem>();
-    input.items = [...this.namedRecordings.keys()].sort((a: string, b: string): number => {
-      return a < b ? -1 : 1;
-    }).map(item => {
-      return {
-        label: item,
-      };
-    });
+    input.items = [...this.namedRecordings.keys()]
+      .sort((a: string, b: string): number => a.localeCompare(b))
+      .map(item => {
+        return {
+          label: item,
+        };
+      });
     input.placeholder = "Recording name";
     input.title = "Choose recording to delete";
 
@@ -373,7 +373,7 @@ export class Recorder extends TypeHandler {
           a[1].repeatable() ? new RepeatRecordingButton() : undefined,
         ].filter(btn => btn) as vscode.QuickInputButton[],
       };})
-      .sort((a, b) => a.label < b.label ? -1 : 1);
+      .sort((a, b) => a.label.localeCompare(b.label));
 
     // Create quick pick
     const disposables: vscode.Disposable[] = [];
@@ -412,7 +412,7 @@ export class Recorder extends TypeHandler {
         input.dispose();
         switch (input.selectedItems.length) {
         case 0:
-          vscode.window.showInformationMessage("No selection made");
+          vscode.window.showErrorMessage("No named recording selection made");
           break;
         case 1:
           await input.selectedItems[0].recordBook.playback(this.emacs);
@@ -524,7 +524,6 @@ class TypeRecord implements Record {
   }
 
   async playback(emacs: Emacs): Promise<boolean> {
-    // await vscode.commands.executeCommand("type", { "text": this.text });
     return emacs.typeBonusFeatures(this.text).then(() => true).catch((reason: any) => {
       vscode.window.showErrorMessage(`TypeBonusFeatures failed: ${reason}`);
       return false;
