@@ -729,6 +729,36 @@ const testCases: () => TestCase[] = () => [
     ],
   },
   {
+    name: "Records and plays back when recording would be popped",
+    startingText: [
+      "start text",
+    ],
+    wantDocument: [
+      "xyz",
+      "xyz",
+      "start text",
+    ],
+    wantSelections: [
+      selection(2, 0),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      type("ab"),
+      type("cde"),
+      // All these deleteLefts cause the 'abcde' text record to be deleted entirely
+      cmd("groog.deleteLeft"),
+      cmd("groog.deleteLeft"),
+      cmd("groog.deleteLeft"),
+      cmd("groog.deleteLeft"),
+      cmd("groog.deleteLeft"),
+      type("xy"),
+      type("z"),
+      type("\n"),
+      cmd("groog.record.endRecording"),
+      cmd("groog.record.playRecording"),
+    ],
+  },
+  {
     name: "Saves recording as and plays back",
     startingText: [
       "abc",
