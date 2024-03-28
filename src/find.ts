@@ -357,7 +357,7 @@ class FindContextCache {
     const matchInfo = matchInfoResponse.info;
     const err = matchInfoResponse.error;
     if (err) {
-      vscode.window.showInformationMessage(`Failed to get match info: ${err}`);
+      vscode.window.showErrorMessage(`Failed to get match info: ${err}`);
       return;
     }
     if (!matchInfo) {

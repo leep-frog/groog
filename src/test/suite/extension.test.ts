@@ -619,6 +619,203 @@ const testCases: () => TestCase[] = () => [
       selection(2, 3),
     ],
   },
+  // Replace tests
+  {
+    name: "Replace fails if match failure",
+    startingText: [
+      "abc",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      cmd("groog.find.toggleRegex"),
+      type("?a"),
+      cmd("groog.find.replaceOne"),
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+    wantErrorMessages: [
+      `Failed to get match info: Invalid regular expression: /?a/gim: Nothing to repeat`,
+    ],
+  },
+  {
+    name: "Replace does nothing if no match",
+    startingText: [
+      "abc",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      type("xyz"),
+      cmd("groog.find.replaceOne"),
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+  },
+  {
+    name: "Replaces one vanilla text",
+    startingText: [
+      "abcd",
+      "bcde",
+      "bc",
+      " BcD",
+    ],
+    wantDocument: [
+      "aXYZd",
+      "bcde",
+      "bc",
+      " BcD",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      type("bc"),
+      cmd("groog.find.toggleReplaceMode"),
+      type("XYZ"),
+      cmd("groog.find.replaceOne"),
+    ],
+    wantSelections: [
+      // Should be at next match
+      new vscode.Selection(1, 0, 1, 2),
+    ],
+  },
+  {
+    name: "Replaces all vanilla text",
+    startingText: [
+      "abcd",
+      "bcde",
+      "bc",
+      " BcD",
+    ],
+    wantDocument: [
+      "aXYZd",
+      "XYZde",
+      "XYZ",
+      " XYZD",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      type("bc"),
+      cmd("groog.find.toggleReplaceMode"),
+      type("XYZ"),
+      cmd("groog.find.replaceAll"),
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+  },
+  {
+    name: "Replaces one case match",
+    startingText: [
+      "aBc",
+      "bcd",
+      "bC",
+      "abc",
+    ],
+    wantDocument: [
+      "aBc",
+      "Xd",
+      "bC",
+      "abc",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      type("bc"),
+      cmd("groog.find.toggleReplaceMode"),
+      cmd("groog.find.toggleCaseSensitive"),
+      type("X"),
+      cmd("groog.find.replaceOne"),
+    ],
+    wantSelections: [
+      // Should be at next match
+      new vscode.Selection(3, 1, 3, 3),
+    ],
+  },
+  {
+    name: "Replaces all case match",
+    startingText: [
+      "aBc",
+      "bcd",
+      "bC",
+      "abc",
+      "   vbcnxm ",
+    ],
+    wantDocument: [
+      "aBc",
+      "Xd",
+      "bC",
+      "aX",
+      "   vXnxm ",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      type("bc"),
+      cmd("groog.find.toggleReplaceMode"),
+      cmd("groog.find.toggleCaseSensitive"),
+      type("X"),
+      cmd("groog.find.replaceAll"),
+    ],
+    wantSelections: [
+      // Should be at next match
+      selection(0, 0),
+    ],
+  },
+  {
+    name: "Replaces one whole word match",
+    startingText: [
+      "aBc",
+      "bc",
+      "Bc",
+      "bcd",
+      " a bc d ",
+    ],
+    wantDocument: [
+      "aBc",
+      "X",
+      "Bc",
+      "bcd",
+      " a bc d ",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      type("bc"),
+      cmd("groog.find.toggleReplaceMode"),
+      cmd("groog.find.toggleWholeWord"),
+      type("X"),
+      cmd("groog.find.replaceOne"),
+    ],
+    wantSelections: [
+      // Should be at next match
+      new vscode.Selection(2, 0, 2, 2),
+    ],
+  },
+  {
+    name: "Replaces all whole word match",
+    startingText: [
+      "aBc",
+      "X",
+      "Bc",
+      "bcd",
+      " a bc d ",
+    ],
+    wantDocument: [
+      "aBc",
+      "X",
+      "X",
+      "bcd",
+      " a X d ",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      type("bc"),
+      cmd("groog.find.toggleReplaceMode"),
+      cmd("groog.find.toggleWholeWord"),
+      type("X"),
+      cmd("groog.find.replaceAll"),
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+  },
   // Record tests
   {
     name: "Record playback fails if no recording set",
