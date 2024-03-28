@@ -124,7 +124,7 @@ export class TypoFixer {
       {
         undoStopAfter: false,
         undoStopBefore: false,
-      }
+      },
     );
 
     // Move cursor to before replacementTextAfterCursor portion

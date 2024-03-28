@@ -7,7 +7,7 @@ func groogPackage(versionOverride string) *Package {
 		Name:        "groog",
 		DisplayName: "groog",
 		Description: "",
-		Version:     "2.6.2",
+		Version:     "2.6.3",
 		Publisher:   "groogle",
 		Main:        "./out/extension.js",
 		Engines: map[string]string{
@@ -31,7 +31,7 @@ func groogPackage(versionOverride string) *Package {
 			"compile":  "tsc -p ./",
 			"watch":    "tsc -watch -p ./",
 			"pretest":  "npm run compile",
-			"lint":     "eslint src --ext ts",
+			"lint":     "eslint src --fix --ext ts",
 			"test":     "vscode-test --coverage --coverageReporter lcov --coverageReporter html",
 			"posttest": "echo 'Open the following file for html coverage report:\nfile:///C:/Users/gleep/Desktop/Coding/vs-code/groog/coverage/Desktop/Coding/vs-code/groog/src/index.html'",
 			"coverage": "c8 --reporter lcov --check-coverage npm run test",

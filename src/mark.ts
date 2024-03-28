@@ -61,7 +61,7 @@ export class MarkHandler extends TypeHandler {
 
             const pasteText: string = text.replace(prefixRegex, "");
             return this.paste(prefix, pasteText).then(pasted => pasted ? false : vscode.commands.executeCommand("editor.action.clipboardPasteAction"));
-          }
+          },
         );
       });
     });

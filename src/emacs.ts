@@ -202,7 +202,7 @@ export class Emacs {
   async delCommand(d: DeleteCommand): Promise<void> {
     return this.runHandlers(
       async (th: TypeHandler): Promise<boolean> => th.delHandler(d),
-      async () => handleDeleteCharacter(d).then(b => b ? false : vscode.commands.executeCommand(d))
+      async () => handleDeleteCharacter(d).then(b => b ? false : vscode.commands.executeCommand(d)),
     );
   }
 

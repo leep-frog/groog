@@ -50,7 +50,7 @@ export const stubbables = {
       }
       return promise;
     },
-  )
+  ),
 };
 
 function runStubbableMethodNoInput<O>(nonTestLogic: () => O, testLogic: (config: StubbablesConfig) => O): () => O {

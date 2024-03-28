@@ -26,7 +26,7 @@ export const miscCommands: MiscCommand[] = [
   {
     name: "testFile",
     f: (e: Emacs, mc: TestFileArgs) => testFile(mc, e.lastVisitedFile),
-  }
+  },
 ];
 
 interface SingleCommand {
