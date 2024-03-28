@@ -475,6 +475,8 @@ function cmd(command: string, ...args: any[]) : CommandExecution {
   return new CommandExecution(command, args);
 }
 
+const ctrlG = cmd("groog.ctrlG");
+
 function type(text: string) : CommandExecution {
   return cmd("groog.type", { "text": text });
 }
@@ -530,6 +532,91 @@ const testCases: () => TestCase[] = () => [
     ],
     wantSelections: [
       selection(0, 0),
+    ],
+  },
+  // Find tests
+  {
+    name: "Matches case word",
+    startingText: [
+      "ABC",
+      "aBc",
+      "Abc",
+      "abc",
+      "abC",
+    ],
+    wantDocument: [
+      "ABC",
+      "aBc",
+      "Abc",
+      "xyz",
+      "abC",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      cmd("groog.find.toggleCaseSensitive"),
+      type("abc"),
+      ctrlG,
+      cmd("groog.deleteLeft"),
+      type("xyz"),
+    ],
+    wantSelections: [
+      selection(3, 3),
+    ],
+  },
+  {
+    name: "Matches regex",
+    startingText: [
+      "1 jkslds jdkfjd 2",
+      "b1 qwertyuiop 3a",
+      " 1 qwertyuiop 3 ",
+      "1 qwertyuiop 3",
+      "1 asd fgh jkl\t4",
+      "15",
+    ],
+    wantDocument: [
+      "1 jkslds jdkfjd 2",
+      "b1 qwertyuiop 3a",
+      " 1 qwertyuiop 3 ",
+      "1 xyz 3",
+      "1 asd fgh jkl\t4",
+      "15",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      cmd("groog.find.toggleRegex"),
+      type("^1.*3$"),
+      ctrlG,
+      ctrlG,
+      cmd("groog.cursorLeft"),
+      cmd("groog.deleteWordLeft"),
+      type("xyz "),
+    ],
+    wantSelections: [
+      selection(3, 6),
+    ],
+  },
+  {
+    name: "Matches whole word",
+    startingText: [
+      "abcd",
+      "bcde",
+      "bcd",
+    ],
+    wantDocument: [
+      "abcd",
+      "bcde",
+      "xyz",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      cmd("groog.find.toggleWholeWord"),
+      type("bcd"),
+      ctrlG,
+      cmd("groog.deleteLeft"),
+      type("xyz"),
+    ],
+    wantSelections: [
+      selection(2, 3),
     ],
   },
   // Record tests
@@ -1166,7 +1253,7 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.record.startRecording"),
       cmd("groog.find"),
       type("abc"),
-      cmd("groog.ctrlG"),
+      ctrlG,
       cmd("groog.deleteLeft"),
       type("xyz"),
       cmd("groog.record.endRecording"),
@@ -1219,7 +1306,7 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.record.startRecording"),
       cmd("groog.find"),
       type("abc"),
-      cmd("groog.ctrlG"),
+      ctrlG,
       cmd("groog.deleteLeft"),
       type("xyz"),
       cmd("groog.record.endRecording"),
@@ -1253,8 +1340,8 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.record.startRecording"),
       cmd("groog.find"),
       type("abc"),
-      cmd("groog.ctrlG"),
-      cmd("groog.ctrlG"),
+      ctrlG,
+      ctrlG,
       type("xyz"),
       cmd("groog.record.endRecording"),
       cmd("groog.record.playRecordingRepeatedly"),
@@ -1288,8 +1375,8 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.find"),
       type("abc"),
       cmd("groog.find"),
-      cmd("groog.ctrlG"),
-      cmd("groog.ctrlG"),
+      ctrlG,
+      ctrlG,
       type("xyz"),
       cmd("groog.record.endRecording"),
       cmd("groog.record.playRecordingRepeatedly"),
@@ -1325,7 +1412,7 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.record.startRecording"),
       cmd("groog.find"),
       type("abc"),
-      cmd("groog.ctrlG"),
+      ctrlG,
       cmd("groog.cursorEnd"),
       cmd("groog.cursorLeft"),
       type("Z"),
@@ -1363,7 +1450,7 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.record.startRecording"),
       cmd("groog.find"),
       type("abc"),
-      cmd("groog.ctrlG"),
+      ctrlG,
       cmd("groog.cursorEnd"),
       cmd("groog.cursorLeft"),
       type("Z"),
@@ -1398,7 +1485,7 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.record.startRecording"),
       cmd("groog.find"),
       type("abc"),
-      cmd("groog.ctrlG"),
+      ctrlG,
       cmd("groog.deleteLeft"),
       type("xyz"),
       cmd("groog.record.endRecording"),
