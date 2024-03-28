@@ -856,10 +856,6 @@ export class FindRecord implements Record {
     this.matchIdx = -1;
   }
 
-  public name(): string {
-    return "RecordFind";
-  }
-
   async playback(emacs: Emacs, repeatMode?: boolean): Promise<boolean> {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {

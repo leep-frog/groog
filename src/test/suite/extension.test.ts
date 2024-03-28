@@ -1026,6 +1026,111 @@ const testCases: () => TestCase[] = () => [
   },
   // Find context tests
   {
+    name: "Find twice uses the previous find context",
+    startingText: [
+      "abc",
+      "def",
+      "abc2",
+      "ghi",
+      "abc3",
+      "xyz",
+    ],
+    wantDocument: [
+      "aZZZ",
+      "def",
+      "aREPLACE2",
+      "ghi",
+      "abc3",
+      "xyz",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      type("bc"),
+      ctrlG,
+      cmd("groog.deleteLeft"),
+      type("ZZZ"),
+      cmd("groog.find"),
+      cmd("groog.find"),
+      ctrlG,
+      cmd("groog.deleteLeft"),
+      type("REPLACE"),
+    ],
+    wantSelections: [
+      selection(2, 8),
+    ],
+  },
+  {
+    name: "reverseFind",
+    startingText: [
+      "abc",
+      "def",
+      "abc2",
+      "ghi",
+      "abc3",
+      "xyz",
+      "abc4",
+      "abc5",
+    ],
+    wantDocument: [
+      "abc",
+      "def",
+      "abc2",
+      "ghi",
+      "abc3",
+      "xyz",
+      "abc4",
+      "aZZZ5",
+    ],
+    userInteractions: [
+      cmd("groog.reverseFind"),
+      type("bc"),
+      ctrlG,
+      cmd("groog.deleteLeft"),
+      type("ZZZ"),
+    ],
+    wantSelections: [
+      selection(7, 4),
+    ],
+  },
+  {
+    name: "Multiple finds and reverseFind",
+    startingText: [
+      "abc",
+      "def",
+      "abc2",
+      "ghi",
+      "abc3",
+      "xyz",
+      "abc4",
+      "abc5",
+    ],
+    wantDocument: [
+      "abc",
+      "def",
+      "aZZZ2",
+      "ghi",
+      "abc3",
+      "xyz",
+      "abc4",
+      "abc5",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      type("bc"), // abc
+      cmd("groog.find"),  // abc2
+      cmd("groog.find"),  // abc3
+      cmd("groog.find"),  // abc4
+      cmd("groog.reverseFind"),  // abc3
+      cmd("groog.reverseFind"),  // abc2
+      ctrlG,
+      cmd("groog.deleteLeft"),
+      type("ZZZ"),
+    ],
+    wantSelections: [
+      selection(2, 4),
+    ],
+  },
+  {
     name: "Goes to previous context",
     startingText: [
       "abc",
