@@ -407,6 +407,9 @@ export class Recorder extends TypeHandler {
       }),
       // When accepting an event, run the record book!
       input.onDidAccept(async (): Promise<any> => {
+        // IMPORTANT NOTE: input.dispose() ***MUST*** be executed before anything else (for deterministic test execution).
+        // No clue why exactly, but if it's done at the end, then test execution doesn't await promises properly.
+        input.dispose();
         switch (input.selectedItems.length) {
         case 0:
           vscode.window.showInformationMessage("No selection made");
@@ -418,7 +421,6 @@ export class Recorder extends TypeHandler {
           vscode.window.showErrorMessage(`Multiple selections made somehow?!`);
           break;
         };
-        input.dispose();
       }),
     );
 

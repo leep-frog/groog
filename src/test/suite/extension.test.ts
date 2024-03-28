@@ -498,7 +498,9 @@ interface TestCase {
   wantErrorMessages?: string[];
 }
 
-const testCases: TestCase[] = [
+const TEST_ITERATIONS = 1;
+
+const testCases: () => TestCase[] = () => [
   // Basic/setup tests
   {
     name: "Captures opening info message",
@@ -833,7 +835,7 @@ const testCases: TestCase[] = [
     ],
     wantInfoMessages: [
       `Recording saved as "ABC Recording"!`,
-    ]
+    ],
   },
   {
     name: "Plays back named recording specified by name",
@@ -877,7 +879,6 @@ const testCases: TestCase[] = [
       type("i\n"),
       cmd("groog.record.saveRecordingAs"),
       cmd("groog.record.playNamedRecording"),
-      delay(50),
     ],
     wantInfoMessages: [
       `Recording saved as "ABC Recording"!`,
@@ -1490,97 +1491,104 @@ const testCases: TestCase[] = [
 
 // To run these tests, run the `Extension Tests` configurations from `.vscode/launch.json` // TODO: Make an npm target that does this?
 suite('Groog commands', () => {
-  const requireRunSolo = testCases.some(tc => tc.runSolo);
+  const requireRunSolo = testCases().some(tc => tc.runSolo);
 
-  testCases.forEach((tc, idx) => {
-    if (requireRunSolo && !tc.runSolo && idx !== 0) {
-      return;
-    }
-
-    test(tc.name, async () => {
-
-      if (idx) {
-        await vscode.commands.executeCommand("groog.testReset");
+  for (let iteration = 0; iteration < TEST_ITERATIONS; iteration++) {
+    testCases().forEach((tc, idx) => {
+      if (requireRunSolo && !(tc.runSolo || idx === 0)) {
+        return;
       }
 
-      const startText = (tc.startingText || []).join("\n");
-      const wantText = tc.wantDocument?.join("\n") || startText;
-
-      // Create or clear the editor
-      if (!vscode.window.activeTextEditor) {
-        await vscode.commands.executeCommand("workbench.action.files.newUntitledFile");
+      // Don't check for opening info message more than once
+      if (idx === 0 && iteration !== 0) {
+        return;
       }
-      const editor = assertDefined(vscode.window.activeTextEditor, "vscode.window.activeTextEditor");
-      await editor.edit(eb => {
-        const line = editor.document.lineAt(editor.document.lineCount-1);
-        eb.delete(new vscode.Range(
-          new vscode.Position(0, 0),
-          new vscode.Position(line.lineNumber, line.text.length),
-        ));
-      });
 
-      // Create the document if relevant
-      await editor.edit(eb => {
-        eb.insert(new vscode.Position(0, 0), startText);
-      });
-      editor.selection = new vscode.Selection(0, 0, 0, 0);
+      test(`${iteration} ${tc.name}`, async () => {
 
-      // Stub out message functions
-      // TODO: try/finally to ensure these are reset
-      const gotInfoMessages : string[] = [];
-      const originalShowInfo = vscode.window.showInformationMessage;
-      vscode.window.showInformationMessage = async (s: string) => {
-        gotInfoMessages.push(s);
-        originalShowInfo(s);
-      };
-      const gotErrorMessages : string[] = [];
-      const originalShowError = vscode.window.showErrorMessage;
-      vscode.window.showErrorMessage = async (s: string) => {
-        gotErrorMessages.push(s);
-        originalShowError(s);
-      };
-
-      // Stub out input box interactions
-      const gotInputBoxValidationMessages: (string | vscode.InputBoxValidationMessage)[] = [];
-      vscode.window.showInputBox = async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken) => {
-        const response = tc.inputBoxResponses?.shift();
-        if (!response) {
-          return response;
+        if (idx) {
+          await vscode.commands.executeCommand("groog.testReset");
         }
 
-        if (options?.validateInput) {
-          const validationMessage = await options.validateInput(response);
-          if (validationMessage) {
-            gotInputBoxValidationMessages.push(validationMessage);
-            validationMessage;
-            return undefined;
+        const startText = (tc.startingText || []).join("\n");
+        const wantText = tc.wantDocument?.join("\n") || startText;
+
+        // Create or clear the editor
+        if (!vscode.window.activeTextEditor) {
+          await vscode.commands.executeCommand("workbench.action.files.newUntitledFile");
+        }
+        const editor = assertDefined(vscode.window.activeTextEditor, "vscode.window.activeTextEditor");
+        await editor.edit(eb => {
+          const line = editor.document.lineAt(editor.document.lineCount-1);
+          eb.delete(new vscode.Range(
+            new vscode.Position(0, 0),
+            new vscode.Position(line.lineNumber, line.text.length),
+          ));
+        });
+
+        // Create the document if relevant
+        await editor.edit(eb => {
+          eb.insert(new vscode.Position(0, 0), startText);
+        });
+        editor.selection = new vscode.Selection(0, 0, 0, 0);
+
+        // Stub out message functions
+        // TODO: try/finally to ensure these are reset
+        const gotInfoMessages : string[] = [];
+        const originalShowInfo = vscode.window.showInformationMessage;
+        vscode.window.showInformationMessage = async (s: string) => {
+          gotInfoMessages.push(s);
+          originalShowInfo(s);
+        };
+        const gotErrorMessages : string[] = [];
+        const originalShowError = vscode.window.showErrorMessage;
+        vscode.window.showErrorMessage = async (s: string) => {
+          gotErrorMessages.push(s);
+          originalShowError(s);
+        };
+
+        // Stub out input box interactions
+        const gotInputBoxValidationMessages: (string | vscode.InputBoxValidationMessage)[] = [];
+        vscode.window.showInputBox = async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken) => {
+          const response = tc.inputBoxResponses?.shift();
+          if (!response) {
+            return response;
           }
+
+          if (options?.validateInput) {
+            const validationMessage = await options.validateInput(response);
+            if (validationMessage) {
+              gotInputBoxValidationMessages.push(validationMessage);
+              validationMessage;
+              return undefined;
+            }
+          }
+
+          return response;
+        };
+
+        writeFileSync(stubbableTestFile, JSON.stringify(tc.stubbablesConfig || {}));
+
+        // Run the commands
+        for (const userInteraction of (tc.userInteractions || [])) {
+          await userInteraction.do();
         }
 
-        return response;
-      };
+        // Verify the outcome (assert in order of information (e.g. mismatch in error messages in more useful than text being mismatched)).
+        const finalConfig: StubbablesConfig = JSON.parse(readFileSync(stubbableTestFile).toString());
+        assertUndefined(finalConfig.error, "StubbablesConfig.error");
+        assert.deepStrictEqual(finalConfig.quickPickActions ?? [], [], "Expected QUICK PICK ACTIONS to be empty");
+        assert.deepStrictEqual(finalConfig.wantQuickPickOptions ?? [], tc.wantQuickPickOptions ?? [], "Expected QUICK PICK OPTIONS to be exactly equal");
+        assert.deepStrictEqual(gotErrorMessages, tc.wantErrorMessages || [], "Expected ERROR MESSAGES to be exactly equal");
+        assert.deepStrictEqual(gotInfoMessages, tc.wantInfoMessages || [], "Expected INFO MESSAGES to be exactly equal");
+        assert.deepStrictEqual(gotInputBoxValidationMessages, tc.wantInputBoxValidationMessages || [], "Expected INPUT BOX VALIDATION MESSAGES to be exactly equal");
 
-      writeFileSync(stubbableTestFile, JSON.stringify(tc.stubbablesConfig || {}));
+        assert.deepStrictEqual(editor.document.getText(), wantText, "Expected DOCUMENT TEXT to be exactly equal");
+        assert.deepStrictEqual(editor.selections, tc.wantSelections, "Expected SELECTIONS to be exactly equal");
 
-      // Run the commands
-      for (const userInteraction of (tc.userInteractions || [])) {
-        await userInteraction.do();
-      }
-
-      // Verify the outcome (assert in order of information (e.g. mismatch in error messages in more useful than text being mismatched)).
-      const finalConfig: StubbablesConfig = JSON.parse(readFileSync(stubbableTestFile).toString());
-      assertUndefined(finalConfig.error, "StubbablesConfig.error");
-      assert.deepStrictEqual(finalConfig.quickPickActions ?? [], [], "Expected QUICK PICK ACTIONS to be empty");
-      assert.deepStrictEqual(finalConfig.wantQuickPickOptions ?? [], tc.wantQuickPickOptions ?? [], "Expected QUICK PICK OPTIONS to be exactly equal");
-      assert.deepStrictEqual(gotErrorMessages, tc.wantErrorMessages || [], "Expected ERROR MESSAGES to be exactly equal");
-      assert.deepStrictEqual(gotInfoMessages, tc.wantInfoMessages || [], "Expected INFO MESSAGES to be exactly equal");
-      assert.deepStrictEqual(gotInputBoxValidationMessages, tc.wantInputBoxValidationMessages || [], "Expected INPUT BOX VALIDATION MESSAGES to be exactly equal");
-
-      assert.deepStrictEqual(editor.document.getText(), wantText, "Expected DOCUMENT TEXT to be exactly equal");
-      assert.deepStrictEqual(editor.selections, tc.wantSelections, "Expected SELECTIONS to be exactly equal");
-
+      });
     });
-  });
+  }
 });
 
 function assertDefined<T>(t: T | undefined, objectName: string): T {
