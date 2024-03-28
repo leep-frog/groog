@@ -534,7 +534,151 @@ const testCases: () => TestCase[] = () => [
       selection(0, 0),
     ],
   },
+  // Find command failure tests
+  {
+    name: "groog.find.replaceOne if not in find mode",
+    startingText: [
+      "abc",
+    ],
+    userInteractions: [
+      cmd("groog.find.replaceOne"),
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+    wantErrorMessages: [
+      `Cannot replace matches when not in groog.find mode`,
+    ],
+  },
+  {
+    name: "groog.find.replaceAll if not in find mode",
+    startingText: [
+      "abc",
+    ],
+    userInteractions: [
+      cmd("groog.find.replaceAll"),
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+    wantErrorMessages: [
+      `Cannot replace matches when not in groog.find mode`,
+    ],
+  },
+  {
+    name: "groog.find.toggleReplaceMode if not in find mode",
+    startingText: [
+      "abc",
+    ],
+    userInteractions: [
+      cmd("groog.find.toggleReplaceMode"),
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+    wantErrorMessages: [
+      `groog.find.toggleReplaceMode can only be executed in find mode`,
+    ],
+  },
+  {
+    name: "groog.find.previous if not in find mode",
+    startingText: [
+      "abc",
+    ],
+    userInteractions: [
+      cmd("groog.find.previous"),
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+    wantErrorMessages: [
+      `groog.find.previous can only be executed in find mode`,
+    ],
+  },
+  {
+    name: "groog.find.next if not in find mode",
+    startingText: [
+      "abc",
+    ],
+    userInteractions: [
+      cmd("groog.find.next"),
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+    wantErrorMessages: [
+      `groog.find.next can only be executed in find mode`,
+    ],
+  },
   // Find tests
+  {
+    name: "Moving deactivates find",
+    startingText: [
+      "abcdef",
+    ],
+    wantDocument: [
+      "abXcdef",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      type("cde"),
+      cmd("groog.cursorLeft"),
+      type("X"),
+    ],
+    wantSelections: [
+      selection(0, 3),
+    ],
+  },
+  {
+    name: "Unsupported delete command is ignored",
+    startingText: [
+      "abcdef",
+    ],
+    wantDocument: [
+      "abXf",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      type("cd"),
+      cmd("groog.deleteRight"),
+      type("e"),
+      ctrlG,
+      type("X"),
+    ],
+    wantSelections: [
+      selection(0, 3),
+    ],
+    wantErrorMessages: [
+      `Unsupported find command: groog.deleteRight`,
+    ],
+  },
+  {
+    name: "Supports groog.deleteLeft",
+    startingText: [
+      "abc1",
+      "abc2",
+      "abc3",
+      "abc4",
+    ],
+    wantDocument: [
+      "abc1",
+      "abc2",
+      "abc3 HERE",
+      "abc4",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      type("abcX"),
+      cmd("groog.deleteLeft"),
+      type("3"),
+      ctrlG,
+      ctrlG,
+      type(" HERE"),
+    ],
+    wantSelections: [
+      selection(2, 9),
+    ],
+  },
   {
     name: "Matches case word",
     startingText: [

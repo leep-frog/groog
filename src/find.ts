@@ -718,7 +718,7 @@ export class FindHandler extends TypeHandler {
 
     recorder.registerCommand(context, 'find.toggleReplaceMode', async (): Promise<void> => {
       if (!this.isActive()) {
-        vscode.window.showInformationMessage("groog.find.toggleReplaceMode can only be executed in find mode");
+        vscode.window.showErrorMessage("groog.find.toggleReplaceMode can only be executed in find mode");
         return;
       }
       return this.cache.toggleReplaceMode();
@@ -727,7 +727,7 @@ export class FindHandler extends TypeHandler {
     // Goes to previous find context
     recorder.registerCommand(context, 'find.previous', async (): Promise<void> => {
       if (!this.isActive()) {
-        vscode.window.showInformationMessage("groog.find.previous can only be executed in find mode");
+        vscode.window.showErrorMessage("groog.find.previous can only be executed in find mode");
         return;
       }
       return this.cache.prevContext();
@@ -735,7 +735,7 @@ export class FindHandler extends TypeHandler {
     // Goes to next find context
     recorder.registerCommand(context, 'find.next', async () => {
       if (!this.isActive()) {
-        vscode.window.showInformationMessage("groog.find.next can only be executed in find mode");
+        vscode.window.showErrorMessage("groog.find.next can only be executed in find mode");
         return;
       }
       return this.cache.nextContext();
@@ -820,7 +820,7 @@ export class FindHandler extends TypeHandler {
     if (s === DeleteCommand.Left) {
       return this.cache.deleteLeft().then(() => false);
     }
-    vscode.window.showInformationMessage("Unsupported find command: " + s);
+    vscode.window.showErrorMessage(`Unsupported find command: groog.${s}`);
     return false;
   }
 
