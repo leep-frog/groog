@@ -305,15 +305,6 @@ class FindContextCache {
     };
   }
 
-  public testReset() {
-    if (this.active) {
-      vscode.window.showErrorMessage(`Cannot run test reset when still active`);
-    }
-    this.caseToggle = false;
-    this.regexToggle = false;
-    this.wholeWordToggle = false;
-  }
-
   public toggleRegex() {
     this.regexToggle = !this.regexToggle;
     if (this.active) {
@@ -843,7 +834,7 @@ export class FindHandler extends TypeHandler {
 
   async testReset() {
     this.deactivate();
-    this.cache.testReset();
+    this.cache = new FindContextCache();
   }
 }
 

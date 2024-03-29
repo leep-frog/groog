@@ -666,6 +666,42 @@ const testCases: () => TestCase[] = () => [
       `Cannot select text from outside the editor`,
     ],
   },
+  {
+    name: "End of find cache",
+    startingText: [
+      "abc",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      type("ab"),
+      cmd("groog.find.next"),
+      type("c"),
+    ],
+    wantSelections: [
+      new vscode.Selection(0, 0, 0, 3),
+    ],
+    wantInfoMessages: [
+      `End of find cache`,
+    ],
+  },
+  {
+    name: "Beginning of find cache",
+    startingText: [
+      "abc",
+    ],
+    userInteractions: [
+      cmd("groog.find"),
+      type("ab"),
+      cmd("groog.find.previous"),
+      type("c"),
+    ],
+    wantSelections: [
+      new vscode.Selection(0, 0, 0, 3),
+    ],
+    wantInfoMessages: [
+      `No earlier find contexts available`,
+    ],
+  },
   // Find tests
   {
     name: "Moving deactivates find",
