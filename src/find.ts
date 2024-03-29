@@ -409,6 +409,10 @@ class FindContextCache {
   }
 
   public async end(): Promise<void> {
+    if (!this.matchTracker) {
+      // If here, then failed to start. startNew is responsible for notifications, so just return here;
+      return;
+    }
     // Focus on the last match (if relevant)
     const matchInfoResponse = this.matchTracker!.getMatchInfo();
     const matchInfo = matchInfoResponse.info;

@@ -493,6 +493,7 @@ interface TestCase {
   inputBoxResponses?: string[];
   stubbablesConfig?: StubbablesConfig;
   wantDocument?: string[];
+  noDocument?: boolean;
   wantSelections: vscode.Selection[];
   wantInputBoxValidationMessages?: vscode.InputBoxValidationMessage[];
   wantQuickPickOptions?: string[][];
@@ -608,6 +609,42 @@ const testCases: () => TestCase[] = () => [
     ],
     wantErrorMessages: [
       `groog.find.next can only be executed in find mode`,
+    ],
+  },
+  // Find no editor tests
+  {
+    name: "groog.find fails if no editor",
+    startingText: [
+      "abc",
+    ],
+    wantDocument: [],
+    // noDocument: true,
+    userInteractions: [
+      cmd("workbench.action.closeEditorsAndGroup"),
+      cmd("groog.find"),
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+    wantErrorMessages: [
+      `Cannot activate find mode from outside an editor`,
+    ],
+  },
+  {
+    name: "groog.reverseFind fails if no editor",
+    startingText: [
+      "abc",
+    ],
+    wantDocument: [],
+    userInteractions: [
+      cmd("workbench.action.closeEditorsAndGroup"),
+      cmd("groog.reverseFind"),
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+    wantErrorMessages: [
+      `Cannot activate find mode from outside an editor`,
     ],
   },
   // Find tests
@@ -2231,7 +2268,7 @@ suite('Groog commands', () => {
         }
 
         const startText = (tc.startingText || []).join("\n");
-        const wantText = tc.wantDocument?.join("\n") || startText;
+        const wantText = tc.wantDocument?.join("\n") ?? startText;
 
         // Create or clear the editor
         if (!vscode.window.activeTextEditor) {
