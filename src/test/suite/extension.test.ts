@@ -647,6 +647,25 @@ const testCases: () => TestCase[] = () => [
       `Cannot activate find mode from outside an editor`,
     ],
   },
+  {
+    name: "groog.find deactivate fails if no editor",
+    startingText: [
+      "abc",
+    ],
+    wantDocument: [],
+    userInteractions: [
+      cmd("groog.find"),
+      type("ab"),
+      cmd("workbench.action.closeEditorsAndGroup"),
+      type("c"),
+    ],
+    wantSelections: [
+      selection(0, 0),
+    ],
+    wantErrorMessages: [
+      `Cannot select text from outside the editor`,
+    ],
+  },
   // Find tests
   {
     name: "Moving deactivates find",

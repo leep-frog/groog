@@ -424,7 +424,7 @@ class FindContextCache {
     if (matchInfo) {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
-        vscode.window.showErrorMessage(`Cannot select text from outside the editor.`);
+        vscode.window.showErrorMessage(`Cannot select text from outside the editor`);
       } else {
         editor.selection = new vscode.Selection(matchInfo.match.range.start, matchInfo.match.range.end);
       }
