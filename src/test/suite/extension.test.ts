@@ -1334,7 +1334,7 @@ const testCases: () => TestCase[] = () => [
       selection(0, 0),
     ],
   },
-  /*{
+  {
     name: "Replaces one vanilla text",
     startingText: [
       "abcd",
@@ -1354,6 +1354,47 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.find.toggleReplaceMode"),
       type("XYZ"),
       cmd("groog.find.replaceOne"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'bc'
+        new NoOpQuickPickAction(), // toggle replace mode
+        new NoOpQuickPickAction(), // type 'xyz'
+        new NoOpQuickPickAction(), // replace
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'bc'
+      [
+        "bc",
+        "Flags: []",
+        "1 of 4",
+      ],
+      // toggle replace mode
+      [
+        "bc",
+        "Flags: []",
+        "1 of 4",
+      ],
+      // type 'xyz'
+      [
+        "bc",
+        "Flags: []",
+        "1 of 4",
+      ],
+      // replace one
+      [
+        "bc",
+        "Flags: []",
+        "1 of 3",
+      ],
     ],
     wantSelections: [
       // Should be at next match
@@ -1381,6 +1422,47 @@ const testCases: () => TestCase[] = () => [
       type("XYZ"),
       cmd("groog.find.replaceAll"),
     ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'bc'
+        new NoOpQuickPickAction(), // toggle replace mode
+        new NoOpQuickPickAction(), // type 'XYZ'
+        new NoOpQuickPickAction(), // replace
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'bc'
+      [
+        "bc",
+        "Flags: []",
+        "1 of 4",
+      ],
+      // toggle replace mode
+      [
+        "bc",
+        "Flags: []",
+        "1 of 4",
+      ],
+      // type 'xyz'
+      [
+        "bc",
+        "Flags: []",
+        "1 of 4",
+      ],
+      // replace one
+      [
+        "bc",
+        "Flags: []",
+        "No results",
+      ],
+    ],
     wantSelections: [
       selection(0, 0),
     ],
@@ -1407,12 +1489,60 @@ const testCases: () => TestCase[] = () => [
       type("X"),
       cmd("groog.find.replaceOne"),
     ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'bc'
+        new NoOpQuickPickAction(), // toggle replace mode
+        new NoOpQuickPickAction(), // toggle case sensitive
+        new NoOpQuickPickAction(), // type 'X'
+        new NoOpQuickPickAction(), // replace
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'bc'
+      [
+        "bc",
+        "Flags: []",
+        "1 of 4",
+      ],
+      // toggle replace mode
+      [
+        "bc",
+        "Flags: []",
+        "1 of 4",
+      ],
+      // toggle case sensitive
+      [
+        "bc",
+        "Flags: [C]",
+        "1 of 2",
+      ],
+      // type 'X'
+      [
+        "bc",
+        "Flags: [C]",
+        "1 of 2",
+      ],
+      // replace one
+      [
+        "bc",
+        "Flags: [C]",
+        "1 of 1",
+      ],
+    ],
     wantSelections: [
       // Should be at next match
       new vscode.Selection(3, 1, 3, 3),
     ],
   },
-  {
+  /*{
     name: "Replaces all case match",
     startingText: [
       "aBc",
