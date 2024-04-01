@@ -16,7 +16,7 @@ export interface RegisterCommandOptionalProps {
 const RECENT_RECORDING_PREFIX = "Recent recording";
 const MAX_RECORDINGS = 3;
 
-class RecordBook {
+export class RecordBook {
   records: Record[];
   locked: boolean;
 
@@ -516,7 +516,7 @@ export interface Record {
   noop(): boolean;
 }
 
-class TypeRecord implements Record {
+export class TypeRecord implements Record {
   text: string;
 
   constructor(text: string) {

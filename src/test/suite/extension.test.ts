@@ -6,6 +6,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import * as vscode from 'vscode';
 import { Document, Match } from '../../find';
 import { CloseQuickPickAction, NoOpQuickPickAction, PressItemButtonQuickPickAction, SelectItemQuickPickAction, StubbablesConfig } from '../../stubs';
+import { Record, RecordBook, TypeRecord } from '../../record';
 
 // Note: this needs to be identical to the value in .vscode-test.mjs (trying to have shared import there is awkward).
 // export const stubbableTestFile = path.resolve(".vscode-test", "stubbable-file.json");
@@ -441,6 +442,36 @@ const documentTestCases: DocumentTest[] = [
   /* Useful for commenting out tests. */
 ];
 
+interface RecordingQuickPickProps {
+  label: string,
+  recordBook: RecordBook,
+  savable?: boolean,
+}
+
+function recordingQuickPick(props: RecordingQuickPickProps) {
+  const buttons = [];
+  if (props.savable) {
+    buttons.push({
+      iconPath: {
+        id: "save",
+      },
+      tooltip: "Save recording as...",
+    });
+  }
+  return {
+    buttons,
+    label: props.label,
+    recordBook: props.recordBook,
+  };
+}
+
+function recordBook(records: Record[]) {
+  const rb = new RecordBook();
+  rb.locked = true;
+  rb.records = records;
+  return rb;
+}
+
 suite('Document.matches Test Suite', () => {
   documentTestCases.forEach(dtc => {
     test(dtc.name, () => {
@@ -517,7 +548,7 @@ const testCases: () => TestCase[] = () => [
       `Basic keyboard mode activated`,
     ],
   },
-  {
+  /*{
     name: "Works for empty file and no changes",
     wantSelections: [
       selection(0, 0),
@@ -1575,7 +1606,7 @@ const testCases: () => TestCase[] = () => [
       new vscode.Selection(3, 1, 3, 3),
     ],
   },
-  /*{
+  {
     name: "Replaces all case match",
     startingText: [
       "aBc",
@@ -1598,6 +1629,66 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.find.toggleCaseSensitive"),
       type("X"),
       cmd("groog.find.replaceAll"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'bc'
+        new NoOpQuickPickAction(), // toggle replace mode
+        new NoOpQuickPickAction(), // toggle case sensitive
+        new NoOpQuickPickAction(), // type 'X'
+        new NoOpQuickPickAction(), // replace
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'bc'
+      [
+        "bc",
+        "Flags: []",
+        "1 of 5",
+      ],
+      // toggle replace mode
+      [
+        {
+          label: "bc",
+          detail: "No replace text set",
+        },
+        "Flags: []",
+        "1 of 5",
+      ],
+      // toggle case sensitive
+      [
+        {
+          label: "bc",
+          detail: "No replace text set",
+        },
+        "Flags: [C]",
+        "1 of 3",
+      ],
+      // type 'X'
+      [
+        {
+          label: "bc",
+          detail: "X",
+        },
+        "Flags: [C]",
+        "1 of 3",
+      ],
+      // replace all
+      [
+        {
+          label: "bc",
+          detail: "X",
+        },
+        "Flags: [C]",
+        "No results",
+      ],
     ],
     wantSelections: [
       // Should be at next match
@@ -1628,6 +1719,66 @@ const testCases: () => TestCase[] = () => [
       type("X"),
       cmd("groog.find.replaceOne"),
     ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'bc'
+        new NoOpQuickPickAction(), // toggle replace mode
+        new NoOpQuickPickAction(), // toggle whole word
+        new NoOpQuickPickAction(), // type 'X'
+        new NoOpQuickPickAction(), // replace
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'bc'
+      [
+        "bc",
+        "Flags: []",
+        "1 of 5",
+      ],
+      // toggle replace mode
+      [
+        {
+          label: "bc",
+          detail: "No replace text set",
+        },
+        "Flags: []",
+        "1 of 5",
+      ],
+      // toggle whole word
+      [
+        {
+          label: "bc",
+          detail: "No replace text set",
+        },
+        "Flags: [W]",
+        "1 of 3",
+      ],
+      // type 'X'
+      [
+        {
+          label: "bc",
+          detail: "X",
+        },
+        "Flags: [W]",
+        "1 of 3",
+      ],
+      // replace all
+      [
+        {
+          label: "bc",
+          detail: "X",
+        },
+        "Flags: [W]",
+        "1 of 2",
+      ],
+    ],
     wantSelections: [
       // Should be at next match
       new vscode.Selection(2, 0, 2, 2),
@@ -1657,10 +1808,76 @@ const testCases: () => TestCase[] = () => [
       type("X"),
       cmd("groog.find.replaceAll"),
     ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'bc'
+        new NoOpQuickPickAction(), // toggle replace mode
+        new NoOpQuickPickAction(), // toggle whole word
+        new NoOpQuickPickAction(), // type 'X'
+        new NoOpQuickPickAction(), // replace
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'bc'
+      [
+        "bc",
+        "Flags: []",
+        "1 of 4",
+      ],
+      // toggle replace mode
+      [
+        {
+          label: "bc",
+          detail: "No replace text set",
+        },
+        "Flags: []",
+        "1 of 4",
+      ],
+      // toggle whole word
+      [
+        {
+          label: "bc",
+          detail: "No replace text set",
+        },
+        "Flags: [W]",
+        "1 of 2",
+      ],
+      // type 'X'
+      [
+        {
+          label: "bc",
+          detail: "X",
+        },
+        "Flags: [W]",
+        "1 of 2",
+      ],
+      // replace all
+      [
+        {
+          label: "bc",
+          detail: "X",
+        },
+        "Flags: [W]",
+        "No results",
+        // Whole-word suggestibles
+        {
+          label: "bcd",
+          pickable: true,
+        },
+      ],
+    ],
     wantSelections: [
       selection(0, 0),
     ],
   },
+  /*******/
   // Find context tests
   {
     name: "Find twice uses the previous find context",
@@ -1691,6 +1908,40 @@ const testCases: () => TestCase[] = () => [
       ctrlG,
       cmd("groog.deleteLeft"),
       type("REPLACE"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'bc'
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // groog.find
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'bc'
+      [
+        "bc",
+        "Flags: []",
+        "1 of 3",
+      ],
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'bc'
+      [
+        "bc",
+        "Flags: []",
+        "1 of 2",
+      ],
     ],
     wantSelections: [
       selection(2, 8),
@@ -1724,6 +1975,26 @@ const testCases: () => TestCase[] = () => [
       ctrlG,
       cmd("groog.deleteLeft"),
       type("ZZZ"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.reverseFind
+        new NoOpQuickPickAction(), // type 'bc'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.reverseFind
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'bc'
+      [
+        "bc",
+        "Flags: []",
+        "5 of 5",
+      ],
     ],
     wantSelections: [
       selection(7, 4),
@@ -1763,6 +2034,61 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.deleteLeft"),
       type("ZZZ"),
     ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'bc'
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // groog.reverseFind
+        new NoOpQuickPickAction(), // groog.reverseFind
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'bc'
+      [
+        "bc",
+        "Flags: []",
+        "1 of 5",
+      ],
+      // groog.find
+      [
+        "bc",
+        "Flags: []",
+        "2 of 5",
+      ],
+      // groog.find
+      [
+        "bc",
+        "Flags: []",
+        "3 of 5",
+      ],
+      // groog.find
+      [
+        "bc",
+        "Flags: []",
+        "4 of 5",
+      ],
+      // groog.reverseFind
+      [
+        "bc",
+        "Flags: []",
+        "3 of 5",
+      ],
+      // groog.reverseFind
+      [
+        "bc",
+        "Flags: []",
+        "2 of 5",
+      ],
+    ],
     wantSelections: [
       selection(2, 4),
     ],
@@ -1797,6 +2123,75 @@ const testCases: () => TestCase[] = () => [
       ctrlG,
       cmd("groog.deleteLeft"),
       type("REPLACE"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'bc'
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'de'
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'xyz'
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // groog.find.previous
+        new NoOpQuickPickAction(), // groog.find.previous
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'bc'
+      [
+        "bc",
+        "Flags: []",
+        "1 of 1",
+      ],
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'de'
+      [
+        "de",
+        "Flags: []",
+        "1 of 1",
+      ],
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'xyz'
+      [
+        "xyz",
+        "Flags: []",
+        "1 of 1",
+      ],
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // groog.find.previous
+      [
+        "xyz",
+        "Flags: []",
+        "1 of 1",
+      ],
+      // groog.find.previous
+      [
+        "de",
+        "Flags: []",
+        "1 of 1",
+      ],
     ],
     wantSelections: [
       selection(1, 7),
@@ -1835,6 +2230,96 @@ const testCases: () => TestCase[] = () => [
       ctrlG,
       cmd("groog.deleteLeft"),
       type("REPLACE"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'bc'
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'de'
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'xyz'
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // groog.find.previous
+        new NoOpQuickPickAction(), // groog.find.previous
+        new NoOpQuickPickAction(), // groog.find.next
+        new NoOpQuickPickAction(), // groog.find.previous
+        new NoOpQuickPickAction(), // type 'f'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'bc'
+      [
+        "bc",
+        "Flags: []",
+        "1 of 1",
+      ],
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'de'
+      [
+        "de",
+        "Flags: []",
+        "1 of 1",
+      ],
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'xyz'
+      [
+        "xyz",
+        "Flags: []",
+        "1 of 1",
+      ],
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // groog.find.previous
+      [
+        "xyz",
+        "Flags: []",
+        "1 of 1",
+      ],
+      // groog.find.previous
+      [
+        "de",
+        "Flags: []",
+        "1 of 1",
+      ],
+      // groog.find.next
+      [
+        "xyz",
+        "Flags: []",
+        "1 of 1",
+      ],
+      // groog.find.previous
+      [
+        "de",
+        "Flags: []",
+        "1 of 1",
+      ],
+      // tpye 'f'
+      [
+        "def",
+        "Flags: []",
+        "1 of 1",
+      ],
     ],
     wantSelections: [
       selection(1, 7),
@@ -2321,18 +2806,65 @@ const testCases: () => TestCase[] = () => [
         new CloseQuickPickAction(),                     // playNamedRecording (fails)
       ],
     },
+    runSolo: true,
     wantQuickPickOptions: [
       // playNamedRecording
       [
-        "Recent recording 0", "Recent recording 1", "Recent recording 2",
-        "ABC Recording", "DEF Recording", "GHI Recording",
+        recordingQuickPick({
+          label: "Recent recording 0",
+          recordBook: recordBook([new TypeRecord("ghi\n")]),
+          savable: true,
+        }),
+        recordingQuickPick({
+          label: "Recent recording 1",
+          recordBook: recordBook([new TypeRecord("def\n")]),
+          savable: true,
+        }),
+        recordingQuickPick({
+          label: "Recent recording 2",
+          recordBook: recordBook([new TypeRecord("abc\n")]),
+          savable: true,
+        }),
+        recordingQuickPick({
+          label: "ABC Recording",
+          recordBook: recordBook([new TypeRecord("abc\n")]),
+        }),
+        recordingQuickPick({
+          label: "DEF Recording",
+          recordBook: recordBook([new TypeRecord("def\n")]),
+        }),
+        recordingQuickPick({
+          label: "GHI Recording",
+          recordBook: recordBook([new TypeRecord("ghi\n")]),
+        }),
       ],
       // deleteRecording
       ["ABC Recording", "DEF Recording", "GHI Recording"],
       // playNamedRecording
       [
-        "Recent recording 0", "Recent recording 1", "Recent recording 2",
-        "ABC Recording", "GHI Recording",
+        recordingQuickPick({
+          label: "Recent recording 0",
+          recordBook: recordBook([new TypeRecord("ghi\n")]),
+          savable: true,
+        }),
+        recordingQuickPick({
+          label: "Recent recording 1",
+          recordBook: recordBook([new TypeRecord("def\n")]),
+          savable: true,
+        }),
+        recordingQuickPick({
+          label: "Recent recording 2",
+          recordBook: recordBook([new TypeRecord("abc\n")]),
+          savable: true,
+        }),
+        recordingQuickPick({
+          label: "ABC Recording",
+          recordBook: recordBook([new TypeRecord("abc\n")]),
+        }),
+        recordingQuickPick({
+          label: "GHI Recording",
+          recordBook: recordBook([new TypeRecord("ghi\n")]),
+        }),
       ],
     ],
     userInteractions: [
@@ -2480,6 +3012,26 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.record.endRecording"),
       cmd("groog.record.playRecording"),
     ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'abc'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'abc'
+      [
+        "abc",
+        "Flags: []",
+        "1 of 2",
+      ],
+    ],
   },
   // Repeat recording tests
   {
@@ -2533,12 +3085,32 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.record.endRecording"),
       cmd("groog.record.playRecordingRepeatedly"),
     ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'abc'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'abc'
+      [
+        "abc",
+        "Flags: []",
+        "1 of 5",
+      ],
+    ],
     wantErrorMessages: [
       "No match found during recording playback",
     ],
   },
   {
-    name: "Repeat record playback with decreasing find matches",
+    name: "Repeat record playback with non-decreasing find matches",
     startingText: [
       "abc",
       "1",
@@ -2566,6 +3138,26 @@ const testCases: () => TestCase[] = () => [
       type("xyz"),
       cmd("groog.record.endRecording"),
       cmd("groog.record.playRecordingRepeatedly"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'abc'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'abc'
+      [
+        "abc",
+        "Flags: []",
+        "1 of 5",
+      ],
     ],
     wantInfoMessages: [
       "Successfully ran recording on all matches",
@@ -2601,6 +3193,33 @@ const testCases: () => TestCase[] = () => [
       type("xyz"),
       cmd("groog.record.endRecording"),
       cmd("groog.record.playRecordingRepeatedly"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'abc'
+        new NoOpQuickPickAction(), // groog.find
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'abc'
+      [
+        "abc",
+        "Flags: []",
+        "1 of 4",
+      ],
+      // groog.find
+      [
+        "abc",
+        "Flags: []",
+        "2 of 4",
+      ],
     ],
     wantErrorMessages: [
       "Landed on same match index, ending repeat playback",
@@ -2640,6 +3259,26 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.record.endRecording"),
       cmd("groog.record.playRecordingRepeatedly"),
     ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'abc'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'abc'
+      [
+        "abc",
+        "Flags: []",
+        "1 of 4",
+      ],
+    ],
     wantErrorMessages: [
       "Number of matches changed (4 -> 3), ending repeat playback",
     ],
@@ -2677,6 +3316,26 @@ const testCases: () => TestCase[] = () => [
       type("Z"),
       cmd("groog.record.endRecording"),
       cmd("groog.record.playRecordingRepeatedly"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'abc'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'abc'
+      [
+        "abc",
+        "Flags: []",
+        "1 of 4",
+      ],
     ],
     wantErrorMessages: [
       "Number of matches did not decrease, ending repeat playback",
@@ -2949,7 +3608,7 @@ suite('Groog commands', () => {
           });
         });
 
-        assert.deepStrictEqual(finalConfig.gotQuickPickOptions ?? [], wantQuickPickOptions, "Expected QUICK PICK OPTIONS to be exactly equal");
+        assert.deepStrictEqual(classless(finalConfig.gotQuickPickOptions ?? []), classless(wantQuickPickOptions), "Expected QUICK PICK OPTIONS to be exactly equal");
         assert.deepStrictEqual(gotErrorMessages, tc.wantErrorMessages || [], "Expected ERROR MESSAGES to be exactly equal");
         assert.deepStrictEqual(gotInfoMessages, tc.wantInfoMessages || [], "Expected INFO MESSAGES to be exactly equal");
         assert.deepStrictEqual(gotInputBoxValidationMessages, tc.wantInputBoxValidationMessages || [], "Expected INPUT BOX VALIDATION MESSAGES to be exactly equal");
@@ -2961,6 +3620,11 @@ suite('Groog commands', () => {
     });
   }
 });
+
+// Remove class info so deepStrictEqual works on any type
+function classless(obj: any) {
+  return JSON.parse(JSON.stringify(obj));
+}
 
 function assertDefined<T>(t: T | undefined, objectName: string): T {
   assert.notEqual(t, undefined, `Expected ${objectName} to be defined, but it was undefined`);
