@@ -100,6 +100,7 @@ enum QuickPickActionKind {
   Close,
   SelectItem,
   PressItemButton,
+  NoOp,
 }
 
 interface QuickPickAction {
@@ -165,6 +166,22 @@ export class CloseQuickPickAction implements QuickPickAction {
   }
 }
 
+/************************
+ * NoOpQuickPickAction *
+*************************/
+
+export class NoOpQuickPickAction implements QuickPickAction {
+  kind = QuickPickActionKind.NoOp;
+
+  run(): [string | undefined, Thenable<any>] {
+    return [undefined, Promise.resolve()];
+  }
+
+  static fromJsonifiedObject(action: NoOpQuickPickAction): NoOpQuickPickAction {
+    return new NoOpQuickPickAction();
+  }
+}
+
 /**********************************
  * PressItemButtonQuickPickAction *
 ***********************************/
@@ -214,6 +231,7 @@ export class PressItemButtonQuickPickAction implements QuickPickAction {
 const quickPickActionHandlers = new Map<QuickPickActionKind, (props: any) => QuickPickAction>([
   [QuickPickActionKind.SelectItem, SelectItemQuickPickAction.fromJsonifiedObject],
   [QuickPickActionKind.Close, CloseQuickPickAction.fromJsonifiedObject],
+  [QuickPickActionKind.NoOp, NoOpQuickPickAction.fromJsonifiedObject],
   [QuickPickActionKind.PressItemButton, PressItemButtonQuickPickAction.fromJsonifiedObject],
 ]);
 

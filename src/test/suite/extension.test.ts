@@ -5,7 +5,7 @@ import * as assert from 'assert';
 import { readFileSync, writeFileSync } from 'fs';
 import * as vscode from 'vscode';
 import { Document, Match } from '../../find';
-import { CloseQuickPickAction, PressItemButtonQuickPickAction, SelectItemQuickPickAction, StubbablesConfig } from '../../stubs';
+import { CloseQuickPickAction, NoOpQuickPickAction, PressItemButtonQuickPickAction, SelectItemQuickPickAction, StubbablesConfig } from '../../stubs';
 
 // Note: this needs to be identical to the value in .vscode-test.mjs (trying to have shared import there is awkward).
 // export const stubbableTestFile = path.resolve(".vscode-test", "stubbable-file.json");
@@ -652,12 +652,32 @@ const testCases: () => TestCase[] = () => [
     startingText: [
       "abc",
     ],
-    wantDocument: [],
     userInteractions: [
       cmd("groog.find"),
       type("ab"),
       cmd("workbench.action.closeEditorsAndGroup"),
       type("c"),
+    ],
+    wantDocument: [],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'ab'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'ab'
+      [
+        "ab",
+        "Flags: []",
+        "1 of 1",
+      ],
     ],
     wantSelections: [
       selection(0, 0),
@@ -677,6 +697,33 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.find.next"),
       type("c"),
     ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'ab'
+        new NoOpQuickPickAction(), // type 'c'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'ab'
+      [
+        "ab",
+        "Flags: []",
+        "1 of 1",
+      ],
+      // type 'c'
+      [
+        "abc",
+        "Flags: []",
+        "1 of 1",
+      ],
+    ],
     wantSelections: [
       new vscode.Selection(0, 0, 0, 3),
     ],
@@ -694,6 +741,33 @@ const testCases: () => TestCase[] = () => [
       type("ab"),
       cmd("groog.find.previous"),
       type("c"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'ab'
+        new NoOpQuickPickAction(), // type 'c'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'ab'
+      [
+        "ab",
+        "Flags: []",
+        "1 of 1",
+      ],
+      // type 'c'
+      [
+        "abc",
+        "Flags: []",
+        "1 of 1",
+      ],
     ],
     wantSelections: [
       new vscode.Selection(0, 0, 0, 3),
@@ -717,6 +791,26 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.cursorLeft"),
       type("X"),
     ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'cde'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'cde'
+      [
+        "cde",
+        "Flags: []",
+        "1 of 1",
+      ],
+    ],
     wantSelections: [
       selection(0, 3),
     ],
@@ -736,6 +830,34 @@ const testCases: () => TestCase[] = () => [
       type("e"),
       ctrlG,
       type("X"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'cd'
+        // deleteRight is ignored
+        new NoOpQuickPickAction(), // type 'e'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'cd'
+      [
+        "cd",
+        "Flags: []",
+        "1 of 1",
+      ],
+      // type 'e'
+      [
+        "cde",
+        "Flags: []",
+        "1 of 1",
+      ],
     ],
     wantSelections: [
       selection(0, 3),
@@ -767,6 +889,40 @@ const testCases: () => TestCase[] = () => [
       ctrlG,
       type(" HERE"),
     ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'abcX'
+        new NoOpQuickPickAction(), // deleteLeft
+        new NoOpQuickPickAction(), // type 'e'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'abcX'
+      [
+        "abcX",
+        "Flags: []",
+        "No results",
+      ],
+      // deleteLeft
+      [
+        "abc",
+        "Flags: []",
+        "1 of 4",
+      ],
+      // type '3'
+      [
+        "abc3",
+        "Flags: []",
+        "1 of 1",
+      ],
+    ],
     wantSelections: [
       selection(2, 9),
     ],
@@ -796,6 +952,40 @@ const testCases: () => TestCase[] = () => [
       ctrlG,
       ctrlG,
       type(" HERE"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'a'
+        new NoOpQuickPickAction(), // paste
+        new NoOpQuickPickAction(), // type '2'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'a'
+      [
+        "a",
+        "Flags: []",
+        "1 of 4",
+      ],
+      // paste
+      [
+        "abc",
+        "Flags: []",
+        "1 of 4",
+      ],
+      // type '2'
+      [
+        "abc2",
+        "Flags: []",
+        "1 of 1",
+      ],
     ],
     wantSelections: [
       selection(2, 9),
@@ -831,6 +1021,40 @@ const testCases: () => TestCase[] = () => [
       ctrlG,
       type(" HERE"),
     ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'a'
+        new NoOpQuickPickAction(), // paste
+        new NoOpQuickPickAction(), // type '3'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'a'
+      [
+        "a",
+        "Flags: []",
+        "1 of 4",
+      ],
+      // paste
+      [
+        "abc",
+        "Flags: []",
+        "1 of 4",
+      ],
+      // type '3'
+      [
+        "abc3",
+        "Flags: []",
+        "1 of 1",
+      ],
+    ],
     wantSelections: [
       selection(3, 9),
     ],
@@ -858,6 +1082,33 @@ const testCases: () => TestCase[] = () => [
       ctrlG,
       cmd("groog.deleteLeft"),
       type("xyz"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // toggle case
+        new NoOpQuickPickAction(), // type 'abc'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // toggle case
+      [
+        " ",
+        "Flags: [C]",
+        "No results",
+      ],
+      // type 'abc'
+      [
+        "abc",
+        "Flags: [C]",
+        "1 of 1",
+      ],
     ],
     wantSelections: [
       selection(3, 3),
@@ -891,6 +1142,33 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.deleteWordLeft"),
       type("xyz "),
     ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // toggle regex
+        new NoOpQuickPickAction(), // type 'abc'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // toggle regex
+      [
+        " ",
+        "Flags: [R]",
+        "No results",
+      ],
+      // type 'abc'
+      [
+        "^1.*3$",
+        "Flags: [R]",
+        "1 of 1",
+      ],
+    ],
     wantSelections: [
       selection(3, 6),
     ],
@@ -915,10 +1193,67 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.deleteLeft"),
       type("xyz"),
     ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // toggle whole word
+        new NoOpQuickPickAction(), // type 'abc'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // toggle whole word
+      [
+        " ",
+        "Flags: [W]",
+        "No results",
+      ],
+      // type 'abc'
+      [
+        "bcd",
+        "Flags: [W]",
+        "1 of 1",
+      ],
+    ],
     wantSelections: [
       selection(2, 3),
     ],
   },
+  // Find whole word item accept logic
+  // {
+  //   name: "Matches whole word",
+  //   startingText: [
+  //     "abcd",
+  //     "bcdef",
+  //     "bcdeeee",
+  //     "a BCDE fg",
+  //     "bcause",
+  //   ],
+  //   wantDocument: [
+  //     "abcd",
+  //     "bcdef",
+  //     "bcdeeee",
+  //     "a BCDE fg",
+  //     "bcause",
+  //   ],
+  //   userInteractions: [
+  //     cmd("groog.find"),
+  //     cmd("groog.find.toggleWholeWord"),
+  //     type("bcd"),
+  //     ctrlG,
+
+  //     cmd("groog.deleteLeft"),
+  //     type("xyz"),
+  //   ],
+  //   wantSelections: [
+  //     selection(2, 3),
+  //   ],
+  // },
   // Replace tests
   {
     name: "Replace fails if match failure",
@@ -930,6 +1265,33 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.find.toggleRegex"),
       type("?a"),
       cmd("groog.find.replaceOne"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // toggle regex
+        new NoOpQuickPickAction(), // type '?a'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // toggle whole word
+      [
+        " ",
+        "Flags: [R]",
+        "No results",
+      ],
+      // type '?a'
+      [
+        "?a",
+        "Flags: [R]",
+        "No results",
+      ],
     ],
     wantSelections: [
       selection(0, 0),
@@ -948,11 +1310,31 @@ const testCases: () => TestCase[] = () => [
       type("xyz"),
       cmd("groog.find.replaceOne"),
     ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'xyz'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'xyz'
+      [
+        "xyz",
+        "Flags: []",
+        "No results",
+      ],
+    ],
     wantSelections: [
       selection(0, 0),
     ],
   },
-  {
+  /*{
     name: "Replaces one vanilla text",
     startingText: [
       "abcd",

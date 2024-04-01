@@ -16,6 +16,6 @@ export default defineConfig({
   },
   mocha: {
     timeout: 60000,
-    bail: true,
+    // bail: true,
   },
 });

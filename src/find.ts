@@ -5,6 +5,7 @@ import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { positiveMod } from './misc-command';
 import { Record, Recorder } from './record';
+import { stubbables } from './stubs';
 
 function findColor(opacity?: number): string{
   return `rgba(200, 120, 0, ${opacity ?? 1})`;
@@ -586,7 +587,7 @@ class FindContextCache {
     ];
 
     const disposables: vscode.Disposable[] = [];
-    const input = vscode.window.createQuickPick<FindQuickPickItem>();
+    const input = stubbables.createQuickPick<FindQuickPickItem>();
     input.items = items;
     input.title = "Find Mode";
 
@@ -618,7 +619,7 @@ class FindContextCache {
         input.dispose();
       }),
     );
-    return input.show();
+    return stubbables.showQuickPick(input);
   }
 
   async prevMatch() {
