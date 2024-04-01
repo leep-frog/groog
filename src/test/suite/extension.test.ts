@@ -496,7 +496,7 @@ interface TestCase {
   noDocument?: boolean;
   wantSelections: vscode.Selection[];
   wantInputBoxValidationMessages?: vscode.InputBoxValidationMessage[];
-  wantQuickPickOptions?: string[][];
+  wantQuickPickOptions?: (string | vscode.QuickPickItem)[][];
   wantInfoMessages?: string[];
   wantErrorMessages?: string[];
 }
@@ -1288,7 +1288,10 @@ const testCases: () => TestCase[] = () => [
       ],
       // type '?a'
       [
-        "?a",
+        {
+          label: "?a",
+          description: "Invalid regular expression: /?a/gim: Nothing to repeat",
+        },
         "Flags: [R]",
         "No results",
       ],
@@ -1379,19 +1382,28 @@ const testCases: () => TestCase[] = () => [
       ],
       // toggle replace mode
       [
-        "bc",
+        {
+          label: "bc",
+          detail: "No replace text set",
+        },
         "Flags: []",
         "1 of 4",
       ],
       // type 'xyz'
       [
-        "bc",
+        {
+          label: "bc",
+          detail: "XYZ",
+        },
         "Flags: []",
         "1 of 4",
       ],
       // replace one
       [
-        "bc",
+        {
+          label: "bc",
+          detail: "XYZ",
+        },
         "Flags: []",
         "1 of 3",
       ],
@@ -1446,19 +1458,28 @@ const testCases: () => TestCase[] = () => [
       ],
       // toggle replace mode
       [
-        "bc",
+        {
+          label: "bc",
+          detail: "No replace text set",
+        },
         "Flags: []",
         "1 of 4",
       ],
       // type 'xyz'
       [
-        "bc",
+        {
+          label: "bc",
+          detail: "XYZ",
+        },
         "Flags: []",
         "1 of 4",
       ],
       // replace one
       [
-        "bc",
+        {
+          label: "bc",
+          detail: "XYZ",
+        },
         "Flags: []",
         "No results",
       ],
@@ -1514,25 +1535,37 @@ const testCases: () => TestCase[] = () => [
       ],
       // toggle replace mode
       [
-        "bc",
+        {
+          label: "bc",
+          detail: "No replace text set",
+        },
         "Flags: []",
         "1 of 4",
       ],
       // toggle case sensitive
       [
-        "bc",
+        {
+          label: "bc",
+          detail: "No replace text set",
+        },
         "Flags: [C]",
         "1 of 2",
       ],
       // type 'X'
       [
-        "bc",
+        {
+          label: "bc",
+          detail: "X",
+        },
         "Flags: [C]",
         "1 of 2",
       ],
       // replace one
       [
-        "bc",
+        {
+          label: "bc",
+          detail: "X",
+        },
         "Flags: [C]",
         "1 of 1",
       ],
@@ -2902,7 +2935,21 @@ suite('Groog commands', () => {
         const finalConfig: StubbablesConfig = JSON.parse(readFileSync(stubbableTestFile).toString());
         assertUndefined(finalConfig.error, "StubbablesConfig.error");
         assert.deepStrictEqual(finalConfig.quickPickActions ?? [], [], "Expected QUICK PICK ACTIONS to be empty");
-        assert.deepStrictEqual(finalConfig.wantQuickPickOptions ?? [], tc.wantQuickPickOptions ?? [], "Expected QUICK PICK OPTIONS to be exactly equal");
+
+        const wantQuickPickOptions = (tc.wantQuickPickOptions ?? []).map((value: (string | vscode.QuickPickItem)[], index: number, array: (string | vscode.QuickPickItem)[][]) => {
+          return value.map((s: string | vscode.QuickPickItem) => {
+
+            if (typeof(s) === typeof("")) {
+              return {
+                label: s,
+              } as vscode.QuickPickItem;
+            }
+
+            return (s as vscode.QuickPickItem);
+          });
+        });
+
+        assert.deepStrictEqual(finalConfig.gotQuickPickOptions ?? [], wantQuickPickOptions, "Expected QUICK PICK OPTIONS to be exactly equal");
         assert.deepStrictEqual(gotErrorMessages, tc.wantErrorMessages || [], "Expected ERROR MESSAGES to be exactly equal");
         assert.deepStrictEqual(gotInfoMessages, tc.wantInfoMessages || [], "Expected INFO MESSAGES to be exactly equal");
         assert.deepStrictEqual(gotInputBoxValidationMessages, tc.wantInputBoxValidationMessages || [], "Expected INPUT BOX VALIDATION MESSAGES to be exactly equal");

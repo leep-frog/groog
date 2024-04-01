@@ -6,7 +6,7 @@ const stubbableTestFilePath = process.env.VSCODE_STUBBABLE_TEST_FILE;
 export interface StubbablesConfig {
   // If a value is undefined, then return undefined.
   quickPickActions?: QuickPickAction[];
-  wantQuickPickOptions?: string[][];
+  gotQuickPickOptions?: vscode.QuickPickItem[][];
   changed?: boolean;
   error?: string;
 }
@@ -26,10 +26,15 @@ export const stubbables = {
     async (qp: vscode.QuickPick<vscode.QuickPickItem>) => qp.show(),
     async (qp: vscode.QuickPick<vscode.QuickPickItem>, sc: StubbablesConfig) => {
       sc.changed = true;
-      if (sc.wantQuickPickOptions === undefined) {
-        sc.wantQuickPickOptions = [];
+      if (sc.gotQuickPickOptions === undefined) {
+        sc.gotQuickPickOptions = [];
       }
-      sc.wantQuickPickOptions.push(qp.items.map(item => item.label));
+      sc.gotQuickPickOptions.push(qp.items.map(item => {
+        return {
+          // Copy the item elements in case the reference is updated elsewhere.
+          ...item,
+        };
+      }));
 
       const genericQuickPickAction = sc.quickPickActions?.shift();
       if (!genericQuickPickAction) {
