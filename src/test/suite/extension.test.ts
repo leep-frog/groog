@@ -2553,6 +2553,108 @@ const testCases: () => TestCase[] = () => [
     ],
   },
   {
+    name: "Play back fails if no find match",
+    startingText: [
+      "abc",
+      "1",
+      "def",
+      "ghi",
+      "----",
+      "def",
+      "2",
+      "3",
+      "abc",
+      "4",
+      // No second ghi
+    ],
+    wantDocument: [
+      "un",
+      "1",
+      "deux",
+      "trois",
+      "----",
+      "deux",
+      "2",
+      "3",
+      "un",
+      "4",
+    ],
+    wantSelections: [
+      selection(5, 4),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      cmd("groog.find"),
+      type("abc"),
+      ctrlG,
+      type("un"),
+
+      cmd("groog.find"),
+      type("def"),
+      ctrlG,
+      type("deux"),
+
+      cmd("groog.find"),
+      type("ghi"),
+      ctrlG,
+      type("trois"),
+
+      cmd("groog.record.endRecording"),
+      cmd("groog.record.playRecording"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find for abc
+        new NoOpQuickPickAction(), // groog.find for def
+        new NoOpQuickPickAction(), // groog.find for ghi
+        new NoOpQuickPickAction(), // groog.find for abc playback
+        new NoOpQuickPickAction(), // groog.find for def playback
+        new NoOpQuickPickAction(), // groog.find for ghi playback
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'abc'
+      [
+        "abc",
+        "Flags: []",
+        "1 of 2",
+      ],
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'def'
+      [
+        "def",
+        "Flags: []",
+        "1 of 2",
+      ],
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'ghi'
+      [
+        "ghi",
+        "Flags: []",
+        "1 of 1",
+      ],
+    ],
+    wantErrorMessages: [
+      `No match found during recording playback`,
+    ],
+  },
+  {
     name: "Records and plays back when recording would be popped",
     startingText: [
       "start text",
