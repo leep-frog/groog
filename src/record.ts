@@ -488,16 +488,16 @@ export class Recorder extends TypeHandler {
   }
   async onYank() { }
   alwaysOnYank: boolean = false;
-  async onPaste(text: string): Promise<boolean> {
+  async onPaste(): Promise<boolean> {
     return true;
   }
-  async onEmacsPaste(text: string): Promise<boolean> {
+  async onEmacsPaste(): Promise<boolean> {
     return true;
   }
-  async delHandler(s: DeleteCommand): Promise<boolean> {
+  async delHandler(): Promise<boolean> {
     return true;
   }
-  async moveHandler(vsCommand: CursorMove, ...rest: any[]): Promise<boolean> {
+  async moveHandler(): Promise<boolean> {
     return true;
   }
 }

@@ -2393,6 +2393,35 @@ const testCases: () => TestCase[] = () => [
     ],
   },
   {
+    name: "Handles nested startRecording commands",
+    startingText: [
+      "",
+    ],
+    wantDocument: [
+      "abc",
+      "def",
+      "ghi",
+      "abc",
+      "def",
+      "",
+    ],
+    wantSelections: [
+      selection(5, 0),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      type("abc\n"),
+      cmd("groog.record.startRecording"),
+      type("def\n"),
+      cmd("groog.record.endRecording"),
+      type("ghi\n"),
+      cmd("groog.record.playRecording"),
+    ],
+    wantErrorMessages: [
+      `Already recording!`,
+    ],
+  },
+  {
     name: "Fails to playback if actively recording",
     startingText: [
       "abc",
@@ -3166,6 +3195,39 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.emacsPaste"),
       type(" End line\nNewline\n"),
       cmd("groog.emacsPaste"),
+      cmd("groog.cursorDown"),
+      cmd("groog.cursorHome"),
+      cmd("groog.record.endRecording"),
+      cmd("groog.record.playRecording"),
+    ],
+  },
+  {
+    name: "Records vanilla copy and paste",
+    startingText: [
+      "abc",
+      "1",
+      "defabc",
+      "2",
+    ],
+    wantDocument: [
+      "abcxabcabc",
+      "abcxabc1",
+      "defabc",
+      "2",
+    ],
+    wantSelections: [
+      selection(2, 0),
+    ],
+    userInteractions: [
+      cmd("groog.toggleMarkMode"),
+      cmd("groog.cursorEnd"),
+      cmd("editor.action.clipboardCopyAction"),
+      cmd("groog.cursorHome"),
+
+      cmd("groog.record.startRecording"),
+      cmd("groog.paste"),
+      type("x"),
+      cmd("groog.paste"),
       cmd("groog.cursorDown"),
       cmd("groog.cursorHome"),
       cmd("groog.record.endRecording"),

@@ -45,7 +45,7 @@ export class MarkHandler extends TypeHandler {
       return vscode.env.clipboard.readText().then(text => {
 
         // Use runHandlers to check if other handlers should handle the pasting isntead.
-        this.emacs.runHandlers(
+        return this.emacs.runHandlers(
           async (th: TypeHandler) => th.onPaste(text),
           async () => {
             const prefixRegex = /^(\s*)/;
