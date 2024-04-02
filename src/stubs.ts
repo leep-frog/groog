@@ -114,6 +114,7 @@ enum QuickPickActionKind {
   Close,
   SelectItem,
   PressItemButton,
+  PressUnknownButton,
   NoOp,
 }
 
@@ -241,6 +242,50 @@ export class PressItemButtonQuickPickAction implements QuickPickAction {
   }
 }
 
+/*************************************
+ * PressUnknownButtonQuickPickAction *
+**************************************/
+
+export class PressUnknownButtonQuickPickAction implements QuickPickAction {
+  kind = QuickPickActionKind.PressUnknownButton;
+  itemLabel: string;
+
+  constructor(itemLabel: string) {
+    this.itemLabel = itemLabel;
+  }
+
+  static fromJsonifiedObject(action: PressUnknownButtonQuickPickAction): PressUnknownButtonQuickPickAction {
+    return new PressUnknownButtonQuickPickAction(action.itemLabel);
+  }
+
+  run(qp: vscode.QuickPick<vscode.QuickPickItem>): [string | undefined, Thenable<any>] {
+    for (const item of qp.items) {
+      if (item.label !== this.itemLabel) {
+        continue;
+      }
+
+      const unknownButton: vscode.QuickInputButton = new FakeQuickInputButton();
+      qp.show();
+      const fqp = qp as FakeQuickPick<vscode.QuickPickItem>;
+      try {
+        const promise = fqp.pressItemButton(item, unknownButton);
+        return [undefined, promise];
+      } catch (e) {
+        throw new Error(`An error occurred. The most likely cause is that you're creating your QuickPick with vscode.window.createQuickPick() instead of stubbables.createQuickPick(). Actual error is below:\n\n${e}`);
+      }
+    }
+
+    return [`No items matched the provided text selection`, Promise.resolve()];
+  }
+}
+
+class FakeQuickInputButton implements vscode.QuickInputButton {
+  readonly iconPath: vscode.ThemeIcon;
+  constructor() {
+    this.iconPath = new vscode.ThemeIcon("invalid-icon-path-string");
+  }
+}
+
 /*****************************
  * Handler Aggregation Types *
 ******************************/
@@ -250,6 +295,7 @@ const quickPickActionHandlers = new Map<QuickPickActionKind, (props: any) => Qui
   [QuickPickActionKind.Close, CloseQuickPickAction.fromJsonifiedObject],
   [QuickPickActionKind.NoOp, NoOpQuickPickAction.fromJsonifiedObject],
   [QuickPickActionKind.PressItemButton, PressItemButtonQuickPickAction.fromJsonifiedObject],
+  [QuickPickActionKind.PressUnknownButton, PressUnknownButtonQuickPickAction.fromJsonifiedObject],
 ]);
 
 /*********************

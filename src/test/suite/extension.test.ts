@@ -5,7 +5,7 @@ import * as assert from 'assert';
 import { readFileSync, writeFileSync } from 'fs';
 import * as vscode from 'vscode';
 import { Document, FindRecord, Match } from '../../find';
-import { CloseQuickPickAction, NoOpQuickPickAction, PressItemButtonQuickPickAction, SelectItemQuickPickAction, StubbablesConfig } from '../../stubs';
+import { CloseQuickPickAction, NoOpQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectItemQuickPickAction, StubbablesConfig } from '../../stubs';
 import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
 import { jsonIgnoreReplacer } from 'json-ignore';
 
@@ -3680,6 +3680,79 @@ const testCases: () => TestCase[] = () => [
     ],
   },
   // SaveRecentRecordingButton
+  {
+    name: "Fails if unknown button",
+    startingText: [
+      "abc",
+      "def",
+      "ghi",
+      "def",
+    ],
+    wantDocument: [
+      "abc",
+      "XYZ",
+      "ghi",
+      "def",
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      cmd("groog.find"),
+      type("def"),
+      ctrlG,
+      type("XYZ"),
+      cmd("groog.record.endRecording"),
+
+      cmd("groog.record.playNamedRecording"),
+    ],
+    inputBoxResponses: [
+      "My favorite recording",
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'def'
+
+        // playNamedRecording
+        new PressUnknownButtonQuickPickAction("Recent recording 0"),
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'abc'
+      [
+        "def",
+        "Flags: []",
+        "1 of 2",
+      ],
+      // playNamedRecording (to save)
+      [
+        recordingQuickPick({
+          label: "Recent recording 0",
+          recordBook: recordBook([
+            new FindRecord(0, {
+              caseInsensitive: true,
+              prevMatchOnChange: false,
+              queryText: "def",
+              regex: false,
+              wholeWord: false,
+            }),
+            new TypeRecord("XYZ"),
+          ]),
+          savable: true,
+          repeatable: true,
+        }),
+      ],
+    ],
+    wantSelections: [selection(1, 3)],
+    wantErrorMessages: [
+      `Unknown item button`,
+    ],
+  },
   {
     name: "Save a recent recording",
     startingText: [
