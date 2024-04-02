@@ -195,7 +195,7 @@ export class Emacs {
       return;
     }
 
-    await vscode.commands.executeCommand("default:type", {text: s});
+    return await vscode.commands.executeCommand("default:type", {text: s});
   }
 
 

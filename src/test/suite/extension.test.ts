@@ -2422,6 +2422,48 @@ const testCases: () => TestCase[] = () => [
     ],
   },
   {
+    name: "groog.deleteRight eats text",
+    startingText: [
+      "start",
+      "text",
+      "end",
+    ],
+    wantDocument: [
+      "startX",
+      "textX",
+      "end",
+    ],
+    wantSelections: [
+      selection(1, 5),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      cmd("groog.cursorEnd"),
+      cmd("groog.cursorEnd"),
+      type("X"),
+      cmd("groog.record.endRecording"),
+
+      cmd("groog.cursorRight"), // to next line
+
+      cmd("groog.record.playNamedRecording"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new SelectItemQuickPickAction(["Recent recording 0"]),
+      ],
+    },
+    wantQuickPickOptions: [[
+      recordingQuickPick({
+        label: "Recent recording 0",
+        recordBook: recordBook([
+          new CommandRecord("groog.cursorEnd"), // Note only one of these
+          new TypeRecord("X"),
+        ]),
+        savable: true,
+      }),
+    ]],
+  },
+  {
     name: "Fails to playback if actively recording",
     startingText: [
       "abc",

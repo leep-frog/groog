@@ -524,10 +524,7 @@ export class TypeRecord implements Record {
   }
 
   async playback(emacs: Emacs): Promise<boolean> {
-    return emacs.typeBonusFeatures(this.text).then(() => true).catch((reason: any) => {
-      vscode.window.showErrorMessage(`TypeBonusFeatures failed: ${reason}`);
-      return false;
-    });
+    return emacs.typeBonusFeatures(this.text).then(() => true);
   }
 
   noop(): boolean {
@@ -579,6 +576,12 @@ export class CommandRecord implements Record {
   }
 
   eat(next: Record): boolean {
+    switch (next.constructor) {
+    case CommandRecord:
+      const cr = <CommandRecord>next;
+      return (this.command === `groog.cursorEnd`) && (cr.command === `groog.cursorEnd`);
+    }
+
     return false;
   }
 
