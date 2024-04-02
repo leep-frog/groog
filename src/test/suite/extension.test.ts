@@ -561,7 +561,7 @@ const testCases: () => TestCase[] = () => [
       `Basic keyboard mode activated`,
     ],
   },
-  /*{
+  {
     name: "Works for empty file and no changes",
     wantSelections: [
       selection(0, 0),
@@ -1890,7 +1890,6 @@ const testCases: () => TestCase[] = () => [
       selection(0, 0),
     ],
   },
-  /*******/
   // Find context tests
   {
     name: "Find twice uses the previous find context",
