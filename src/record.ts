@@ -243,7 +243,7 @@ export class Recorder extends TypeHandler {
       await callback(...args);
       return;
     }
-    this.addRecord(new CommandRecord(command, args));
+    this.addRecord(new CommandRecord(command, ...args));
     this.baseCommand = false;
     await callback(...args);
     this.baseCommand = true;
@@ -564,9 +564,9 @@ export class CommandRecord implements Record {
   command: string;
   args: any[];
 
-  constructor(command: string, args?: any[]) {
+  constructor(command: string, ...args: any) {
     this.command = command;
-    this.args = args || [];
+    this.args = args;
   }
 
   async playback(): Promise<boolean> {
