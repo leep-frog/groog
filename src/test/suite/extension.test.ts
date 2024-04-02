@@ -3580,6 +3580,284 @@ const testCases: () => TestCase[] = () => [
       `No match found during recording playback`,
     ],
   },
+  // SaveRecentRecordingButton
+  {
+    name: "Save a recent recording",
+    startingText: [
+      "abc",
+      "1",
+      "def",
+      "ghi",
+      "----",
+      "def",
+      "2",
+      "3",
+      "ghi",
+      "4",
+      "abc",
+    ],
+    wantDocument: [
+      "un",
+      "1",
+      "deux",
+      "trois",
+      "----",
+      "deux",
+      "2",
+      "3",
+      "ghi",
+      "4",
+      "abc",
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      cmd("groog.find"),
+      type("abc"),
+      ctrlG,
+      type("un"),
+      cmd("groog.record.endRecording"),
+
+      cmd("groog.record.startRecording"),
+      cmd("groog.find"),
+      type("def"),
+      ctrlG,
+      type("deux"),
+      cmd("groog.record.endRecording"),
+
+      cmd("groog.record.startRecording"),
+      cmd("groog.find"),
+      type("ghi"),
+      ctrlG,
+      type("trois"),
+      cmd("groog.record.endRecording"),
+
+      cmd("groog.record.playNamedRecording"),
+      cmd("groog.record.playNamedRecording"),
+    ],
+    inputBoxResponses: [
+      "My favorite recording",
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'abc'
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'def'
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'ghi'
+
+        // Save abc recording
+        new PressItemButtonQuickPickAction("Recent recording 1", 0),
+        new SelectItemQuickPickAction(["My favorite recording"]),
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'abc'
+      [
+        "abc",
+        "Flags: []",
+        "1 of 2",
+      ],
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'def'
+      [
+        "def",
+        "Flags: []",
+        "1 of 2",
+      ],
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'ghi'
+      [
+        "ghi",
+        "Flags: []",
+        "1 of 2",
+      ],
+      // playNamedRecording (to save)
+      [
+        recordingQuickPick({
+          label: "Recent recording 0",
+          recordBook: recordBook([
+            new FindRecord(0, {
+              caseInsensitive: true,
+              prevMatchOnChange: false,
+              queryText: "ghi",
+              regex: false,
+              wholeWord: false,
+            }),
+            new TypeRecord("trois"),
+          ]),
+          savable: true,
+          repeatable: true,
+        }),
+        recordingQuickPick({
+          label: "Recent recording 1",
+          recordBook: recordBook([
+            new FindRecord(0, {
+              caseInsensitive: true,
+              prevMatchOnChange: false,
+              queryText: "def",
+              regex: false,
+              wholeWord: false,
+            }),
+            new TypeRecord("deux"),
+          ]),
+          savable: true,
+          repeatable: true,
+        }),
+        recordingQuickPick({
+          label: "Recent recording 2",
+          recordBook: recordBook([
+            new FindRecord(0, {
+              caseInsensitive: true,
+              prevMatchOnChange: false,
+              queryText: "abc",
+              regex: false,
+              wholeWord: false,
+            }),
+            new TypeRecord("un"),
+          ]),
+          savable: true,
+          repeatable: true,
+        }),
+      ],
+      // playNamedRecording (to playback)
+      [
+        recordingQuickPick({
+          label: "Recent recording 0",
+          recordBook: recordBook([
+            new FindRecord(0, {
+              caseInsensitive: true,
+              prevMatchOnChange: false,
+              queryText: "ghi",
+              regex: false,
+              wholeWord: false,
+            }),
+            new TypeRecord("trois"),
+          ]),
+          savable: true,
+          repeatable: true,
+        }),
+        recordingQuickPick({
+          label: "Recent recording 1",
+          recordBook: recordBook([
+            new FindRecord(0, {
+              caseInsensitive: true,
+              prevMatchOnChange: false,
+              queryText: "def",
+              regex: false,
+              wholeWord: false,
+            }),
+            new TypeRecord("deux"),
+          ]),
+          savable: true,
+          repeatable: true,
+        }),
+        recordingQuickPick({
+          label: "Recent recording 2",
+          recordBook: recordBook([
+            new FindRecord(0, {
+              caseInsensitive: true,
+              prevMatchOnChange: false,
+              queryText: "abc",
+              regex: false,
+              wholeWord: false,
+            }),
+            new TypeRecord("un"),
+          ]),
+          savable: true,
+          repeatable: true,
+        }),
+        recordingQuickPick({
+          label: "My favorite recording",
+          recordBook: recordBook([
+            new FindRecord(0, {
+              caseInsensitive: true,
+              prevMatchOnChange: false,
+              queryText: "def",
+              regex: false,
+              wholeWord: false,
+            }),
+            new TypeRecord("deux"),
+          ]),
+          repeatable: true,
+        }),
+      ],
+    ],
+    wantSelections: [selection(5, 4)],
+    wantInfoMessages: [
+      `Recording saved as "My favorite recording"!`,
+    ],
+  },
+  {
+    name: "Save a recent recording",
+    startingText: [
+      "",
+    ],
+    wantDocument: [
+      "abcdefghijklghi",
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      type("abc"),
+      cmd("groog.record.endRecording"),
+
+      cmd("groog.record.startRecording"),
+      type("def"),
+      cmd("groog.record.endRecording"),
+
+      cmd("groog.record.startRecording"),
+      type("ghi"),
+      cmd("groog.record.endRecording"),
+
+      cmd("groog.record.startRecording"),
+      type("jkl"),
+      cmd("groog.record.endRecording"),
+
+      cmd("groog.record.playNamedRecording"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        // Run second to last recording (ghi)
+        new SelectItemQuickPickAction(["Recent recording 1"]),
+      ],
+    },
+    wantQuickPickOptions: [
+      [
+        recordingQuickPick({
+          label: "Recent recording 0",
+          recordBook: recordBook([new TypeRecord("jkl")]),
+          savable: true,
+        }),
+        recordingQuickPick({
+          label: "Recent recording 1",
+          recordBook: recordBook([new TypeRecord("ghi")]),
+          savable: true,
+        }),
+        recordingQuickPick({
+          label: "Recent recording 2",
+          recordBook: recordBook([new TypeRecord("def")]),
+          savable: true,
+        }),
+      ],
+    ],
+    wantSelections: [selection(0, 15)],
+  },
   // Record undo tests
   {
     name: "Record undo fails if no recordings",

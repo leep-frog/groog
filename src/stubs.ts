@@ -39,7 +39,14 @@ export const stubbables = {
 
       const genericQuickPickAction = sc.quickPickActions?.shift();
       if (!genericQuickPickAction) {
-        sc.error = "Ran out of quickPickSelections";
+        sc.error = [
+          `Ran out of quickPickSelections for quick pick:`,
+          `Title:       ${qp.title}`,
+          `Placeholder: ${qp.placeholder}`,
+          `Items: [`,
+          ...qp.items.map(item => JSON.stringify(item)),
+          `]`,
+        ].join("\n");
         return vscode.commands.executeCommand("workbench.action.closeQuickOpen");
       }
 
@@ -196,7 +203,10 @@ export class NoOpQuickPickAction implements QuickPickAction {
 export class PressItemButtonQuickPickAction implements QuickPickAction {
   kind = QuickPickActionKind.PressItemButton;
   itemLabel: string;
+  // Use buttonIndex because contents of button (e.g. icon and tooltip)
+  // will be validated in tests when comparing wantQuickPickOptions
   buttonIndex: number;
+
   constructor(itemLabel: string, buttonIndex: number) {
     this.itemLabel = itemLabel;
     this.buttonIndex = buttonIndex;
