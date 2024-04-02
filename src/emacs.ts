@@ -107,7 +107,7 @@ export class Emacs {
 
     this.typoFixer.register(context);
 
-    context.subscriptions.push(vscode.commands.registerCommand('groog.type', this.recorder.lockWrap<TypeArg>('groog.type', (arg: TypeArg) => this.type(arg))));
+    context.subscriptions.push(vscode.commands.registerCommand('groog.type', this.recorder.lockWrap('groog.type', (arg: TypeArg) => this.type(arg))));
     context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(e => {
       if (e && isFileUri(e.document.uri) && (!this.lastVisitedFile || (this.lastVisitedFile.toString() !== e.document.uri.toString()))) {
         this.lastVisitedFile = e.document.uri;

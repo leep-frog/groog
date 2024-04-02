@@ -208,10 +208,10 @@ export class Recorder extends TypeHandler {
   // that their order would become mixed up due to the parallel nature of commands (which run async).
   // The initialization of command executions, however, are well ordered, so requiring a lock
   // immediately has proven to be a great solution to this problem.
-  public lockWrap<T>(name: string, f: (t: T) => Thenable<void>, noTimeout?: boolean): (t: T) => Thenable<void> {
-    return async (t: T) => await this.typeLock.acquireAsync()
+  public lockWrap(name: string, f: (...t: any) => Thenable<void>, noTimeout?: boolean): (...t: any) => Thenable<void> {
+    return async (...t: any) => await this.typeLock.acquireAsync()
       .then(() => noTimeout ? undefined : setTimeout(() => vscode.window.showErrorMessage(`LockWrap "${name}" is taking too long`), 5_000))
-      .then((timeoutRef) => f(t).then(() => noTimeout ? undefined : clearTimeout(timeoutRef)))
+      .then((timeoutRef) => f(...t).then(() => noTimeout ? undefined : clearTimeout(timeoutRef)))
       .finally(() => this.typeLock.release());
   }
 
@@ -243,7 +243,7 @@ export class Recorder extends TypeHandler {
       await callback(...args);
       return;
     }
-    await this.addRecord(new CommandRecord(command, args));
+    this.addRecord(new CommandRecord(command, args));
     this.baseCommand = false;
     await callback(...args);
     this.baseCommand = true;
@@ -560,7 +560,7 @@ export class TypeRecord implements Record {
   }
 }
 
-class CommandRecord implements Record {
+export class CommandRecord implements Record {
   command: string;
   args: any[];
 

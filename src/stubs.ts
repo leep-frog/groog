@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { readFileSync, writeFileSync } from 'fs';
+import { jsonIgnoreReplacer } from 'json-ignore';
 
 const stubbableTestFilePath = process.env.VSCODE_STUBBABLE_TEST_FILE;
 
@@ -84,7 +85,8 @@ function runStubbableMethod<I, O>(nonTestLogic: (input: I) => O, testLogic: (inp
 
     try {
       if (stubbableConfig.changed) {
-        writeFileSync(stubbableTestFilePath, JSON.stringify(stubbableConfig));
+        // jsonIgnoreReplacer ensures that relevant @jsonIgnore() annotated fields aren't included
+        writeFileSync(stubbableTestFilePath, JSON.stringify(stubbableConfig, jsonIgnoreReplacer));
       }
     } catch (e) {
       vscode.window.showErrorMessage(`Failed to write stubbables config back test file: ${e}`);

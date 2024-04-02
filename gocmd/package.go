@@ -40,6 +40,7 @@ func groogPackage(versionOverride string) *Package {
 			"await-lock":             "^2.2.2",
 			"escape-string-regexp":   "^5.0.0",
 			"sorted-array-functions": "^1.3.0",
+			"json-ignore":            "^0.4.0",
 		},
 		DevDependencies: map[string]string{
 			"@types/vscode":                    "^1.81.0",

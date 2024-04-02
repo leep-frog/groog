@@ -4,9 +4,10 @@ import * as assert from 'assert';
 // as well as import your extension to test it
 import { readFileSync, writeFileSync } from 'fs';
 import * as vscode from 'vscode';
-import { Document, Match } from '../../find';
+import { Document, FindRecord, Match } from '../../find';
 import { CloseQuickPickAction, NoOpQuickPickAction, PressItemButtonQuickPickAction, SelectItemQuickPickAction, StubbablesConfig } from '../../stubs';
-import { Record, RecordBook, TypeRecord } from '../../record';
+import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
+import { jsonIgnoreReplacer } from 'json-ignore';
 
 // Note: this needs to be identical to the value in .vscode-test.mjs (trying to have shared import there is awkward).
 // export const stubbableTestFile = path.resolve(".vscode-test", "stubbable-file.json");
@@ -446,10 +447,12 @@ interface RecordingQuickPickProps {
   label: string,
   recordBook: RecordBook,
   savable?: boolean,
+  repeatable?: boolean,
 }
 
 function recordingQuickPick(props: RecordingQuickPickProps) {
   const buttons = [];
+
   if (props.savable) {
     buttons.push({
       iconPath: {
@@ -458,6 +461,16 @@ function recordingQuickPick(props: RecordingQuickPickProps) {
       tooltip: "Save recording as...",
     });
   }
+
+  if (props.repeatable) {
+    buttons.push({
+      iconPath: {
+        id: "debug-rerun",
+      },
+      tooltip: "Run repeatedly",
+    });
+  }
+
   return {
     buttons,
     label: props.label,
@@ -2699,13 +2712,6 @@ const testCases: () => TestCase[] = () => [
       "DEF Recording",
       "GHI Recording",
     ],
-    stubbablesConfig: {
-      quickPickActions: [new SelectItemQuickPickAction(["DEF Recording"])],
-    },
-    wantQuickPickOptions: [[
-      "Recent recording 0", "Recent recording 1", "Recent recording 2",
-      "ABC Recording", "DEF Recording", "GHI Recording",
-    ]],
     userInteractions: [
       cmd("groog.record.startRecording"),
       type("a"),
@@ -2722,6 +2728,38 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.record.saveRecordingAs"),
       cmd("groog.record.playNamedRecording"),
     ],
+    stubbablesConfig: {
+      quickPickActions: [new SelectItemQuickPickAction(["DEF Recording"])],
+    },
+    wantQuickPickOptions: [[
+      recordingQuickPick({
+        label: "Recent recording 0",
+        recordBook: recordBook([new TypeRecord("ghi\n")]),
+        savable: true,
+      }),
+      recordingQuickPick({
+        label: "Recent recording 1",
+        recordBook: recordBook([new TypeRecord("def\n")]),
+        savable: true,
+      }),
+      recordingQuickPick({
+        label: "Recent recording 2",
+        recordBook: recordBook([new TypeRecord("abc\n")]),
+        savable: true,
+      }),
+      recordingQuickPick({
+        label: "ABC Recording",
+        recordBook: recordBook([new TypeRecord("abc\n")]),
+      }),
+      recordingQuickPick({
+        label: "DEF Recording",
+        recordBook: recordBook([new TypeRecord("def\n")]),
+      }),
+      recordingQuickPick({
+        label: "GHI Recording",
+        recordBook: recordBook([new TypeRecord("ghi\n")]),
+      }),
+    ]],
     wantInfoMessages: [
       `Recording saved as "ABC Recording"!`,
       `Recording saved as "DEF Recording"!`,
@@ -2747,13 +2785,6 @@ const testCases: () => TestCase[] = () => [
       "DEF Recording",
       "GHI Recording",
     ],
-    stubbablesConfig: {
-      quickPickActions: [new SelectItemQuickPickAction(["ABC Recording", "DEF Recording"])],
-    },
-    wantQuickPickOptions: [[
-      "Recent recording 0", "Recent recording 1", "Recent recording 2",
-      "ABC Recording", "DEF Recording", "GHI Recording",
-    ]],
     userInteractions: [
       cmd("groog.record.startRecording"),
       type("a"),
@@ -2770,6 +2801,38 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.record.saveRecordingAs"),
       cmd("groog.record.playNamedRecording"),
     ],
+    stubbablesConfig: {
+      quickPickActions: [new SelectItemQuickPickAction(["ABC Recording", "DEF Recording"])],
+    },
+    wantQuickPickOptions: [[
+      recordingQuickPick({
+        label: "Recent recording 0",
+        recordBook: recordBook([new TypeRecord("ghi\n")]),
+        savable: true,
+      }),
+      recordingQuickPick({
+        label: "Recent recording 1",
+        recordBook: recordBook([new TypeRecord("def\n")]),
+        savable: true,
+      }),
+      recordingQuickPick({
+        label: "Recent recording 2",
+        recordBook: recordBook([new TypeRecord("abc\n")]),
+        savable: true,
+      }),
+      recordingQuickPick({
+        label: "ABC Recording",
+        recordBook: recordBook([new TypeRecord("abc\n")]),
+      }),
+      recordingQuickPick({
+        label: "DEF Recording",
+        recordBook: recordBook([new TypeRecord("def\n")]),
+      }),
+      recordingQuickPick({
+        label: "GHI Recording",
+        recordBook: recordBook([new TypeRecord("ghi\n")]),
+      }),
+    ]],
     wantInfoMessages: [
       `Recording saved as "ABC Recording"!`,
       `Recording saved as "DEF Recording"!`,
@@ -2806,7 +2869,6 @@ const testCases: () => TestCase[] = () => [
         new CloseQuickPickAction(),                     // playNamedRecording (fails)
       ],
     },
-    runSolo: true,
     wantQuickPickOptions: [
       // playNamedRecording
       [
@@ -3343,7 +3405,7 @@ const testCases: () => TestCase[] = () => [
   },
   // Repeat record playback with buttons
   {
-    name: "Repeat record playback with decreasing find matches",
+    name: "Repeat named record playback with decreasing find matches",
     startingText: [
       "abc",
       "1",
@@ -3373,11 +3435,45 @@ const testCases: () => TestCase[] = () => [
     ],
     stubbablesConfig: {
       quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'abc'
+
+        // Save recording
         new PressItemButtonQuickPickAction("Recent recording 0", 1),
       ],
     },
     wantQuickPickOptions: [
-      ["Recent recording 0"],
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'abc'
+      [
+        "abc",
+        "Flags: []",
+        "1 of 5",
+      ],
+      // playNamedRecording
+      [
+        recordingQuickPick({
+          label: "Recent recording 0",
+          recordBook: recordBook([
+            new FindRecord(0, {
+              caseInsensitive: true,
+              prevMatchOnChange: false,
+              queryText: "abc",
+              regex: false,
+              wholeWord: false,
+            }),
+            new CommandRecord("groog.deleteLeft"),
+            new TypeRecord("xyz"),
+          ]),
+          savable: true,
+          repeatable: true,
+        }),
+      ],
     ],
     wantErrorMessages: [
       `No match found during recording playback`,
@@ -3623,7 +3719,7 @@ suite('Groog commands', () => {
 
 // Remove class info so deepStrictEqual works on any type
 function classless(obj: any) {
-  return JSON.parse(JSON.stringify(obj));
+  return JSON.parse(JSON.stringify(obj, jsonIgnoreReplacer));
 }
 
 function assertDefined<T>(t: T | undefined, objectName: string): T {

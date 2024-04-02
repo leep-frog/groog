@@ -32,6 +32,7 @@
   "dependencies": {
     "await-lock": "^2.2.2",
     "escape-string-regexp": "^5.0.0",
+    "json-ignore": "^0.4.0",
     "sorted-array-functions": "^1.3.0"
   },
   "devDependencies": {
@@ -1002,7 +1003,7 @@
         "command": "workbench.action.terminal.sendSequence",
         "when": "groog.context.qmkMode && panelFocus",
         "args": {
-          "text": "\u0018\u0008"
+          "text": "\u0018\b"
         }
       },
       {

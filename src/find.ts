@@ -6,6 +6,7 @@ import { CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { positiveMod } from './misc-command';
 import { Record, Recorder } from './record';
 import { stubbables } from './stubs';
+import { jsonIgnore } from 'json-ignore';
 
 function findColor(opacity?: number): string{
   return `rgba(200, 120, 0, ${opacity ?? 1})`;
@@ -842,8 +843,12 @@ export class FindHandler extends TypeHandler {
 export class FindRecord implements Record {
   private nexts: number;
   private matchProps: RefreshMatchesProps;
-  numMatches: number;
-  matchIdx: number;
+
+  @jsonIgnore() // Ignore this field in test comparison
+    numMatches: number;
+
+  @jsonIgnore() // Ignore this field in test comparison
+    matchIdx: number;
 
   constructor(nexts: number, props: RefreshMatchesProps) {
     this.nexts = nexts;
