@@ -2526,6 +2526,30 @@ const testCases: () => TestCase[] = () => [
     ],
   },
   {
+    name: "Records and plays back text and command recording",
+    startingText: [
+      "start",
+      "text",
+      "ending",
+    ],
+    wantDocument: [
+      "start",
+      "Ztext",
+      "enZding",
+    ],
+    wantSelections: [
+      selection(2, 4),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      cmd("groog.cursorDown"),
+      type("Z"),
+      cmd("groog.cursorRight"),
+      cmd("groog.record.endRecording"),
+      cmd("groog.record.playRecording"),
+    ],
+  },
+  {
     name: "Records and plays back",
     startingText: [
       "abc",
@@ -3266,6 +3290,81 @@ const testCases: () => TestCase[] = () => [
         "abc",
         "Flags: []",
         "1 of 5",
+      ],
+    ],
+    wantErrorMessages: [
+      "No match found during recording playback",
+    ],
+  },
+  {
+    name: "Repeat record playback fails if subsequent find fails",
+    startingText: [
+      "abc def",
+      "1",
+      "abc BLOOP def",
+      "2",
+      "abc FIN ghi",
+      "abc ANOTHER",
+    ],
+    wantDocument: [
+      "ABC XYZ",
+      "1",
+      "ABC BLOOP XYZ",
+      "2",
+      "ABC FIN ghi",
+      "abc ANOTHER",
+    ],
+    wantSelections: [
+      selection(4, 3),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      cmd("groog.find"),
+      type("abc"),
+      ctrlG,
+      cmd("groog.deleteLeft"),
+      type("ABC"),
+      cmd("groog.find"),
+      type("def"),
+      ctrlG,
+      cmd("groog.deleteLeft"),
+      type("XYZ"), // Note this can't be 'DEF' otherwise it still matches find
+      cmd("groog.record.endRecording"),
+
+      cmd("groog.record.playRecordingRepeatedly"),
+    ],
+    stubbablesConfig: {
+      quickPickActions: [
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'abc'
+        new NoOpQuickPickAction(), // groog.find
+        new NoOpQuickPickAction(), // type 'def'
+      ],
+    },
+    wantQuickPickOptions: [
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'abc'
+      [
+        "abc",
+        "Flags: []",
+        "1 of 4",
+      ],
+      // groog.find
+      [
+        " ",
+        "Flags: []",
+        "No results",
+      ],
+      // type 'def'
+      [
+        "def",
+        "Flags: []",
+        "1 of 2",
       ],
     ],
     wantErrorMessages: [
