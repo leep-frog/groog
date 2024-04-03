@@ -33,6 +33,13 @@ const typescriptLanguageKey = "typescript";
 
 export function defaultCorrections(): Correction[] {
   return [
+    // Simple typos
+    {
+      words: {
+        "buidl": "build",
+      },
+    },
+    // Typescript messages
     {
       languages: [
         typescriptLanguageKey,

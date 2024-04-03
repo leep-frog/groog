@@ -28,7 +28,7 @@ interface InternalCorrectorsByLanguage {
   [key: string]: InternalCorrector;
 }
 
-const lastWordPattern = /\b([a-zA-Z]*)$/;
+const lastWordPattern = /\b([a-zA-Z]+)$/;
 
 export class TypoFixer {
   // map from language to char to correction options

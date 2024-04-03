@@ -563,6 +563,83 @@ const testCases: () => TestCase[] = () => [
     ],
   },
   {
+    name: "Typo fixer doesn't do anything if still typing",
+    wantSelections: [
+      selection(0, 5),
+    ],
+    wantDocument: [
+      "buidl",
+    ],
+    userInteractions: [
+      type("buid"),
+      type("l"),
+    ],
+  },
+  {
+    name: "Typo fixer fixes if word is over",
+    wantSelections: [
+      selection(0, 6),
+    ],
+    wantDocument: [
+      "build ",
+    ],
+    userInteractions: [
+      type("buid"),
+      type("l"),
+      type(" "),
+    ],
+  },
+  {
+    name: "Typo fixer fixes if word is over with other word break character",
+    wantSelections: [
+      selection(0, 6),
+    ],
+    wantDocument: [
+      "build(",
+    ],
+    userInteractions: [
+      type("buid"),
+      type("l"),
+      type("("),
+    ],
+  },
+  {
+    name: "Doesn't run typo if typing over a selection",
+    startingText: [
+      "buidl  ",
+    ],
+    startingSelections: [
+      new vscode.Selection(0, 5, 0, 7),
+    ],
+    wantSelections: [
+      selection(0, 6),
+    ],
+    wantDocument: [
+      "buidl ",
+    ],
+    userInteractions: [
+      type(" "),
+    ],
+  },
+  {
+    name: "Doesn't run typo if not at the end of a word",
+    startingText: [
+      "buidl(",
+    ],
+    startingSelections: [
+      selection(0, 6),
+    ],
+    wantSelections: [
+      selection(0, 7),
+    ],
+    wantDocument: [
+      "buidl( ",
+    ],
+    userInteractions: [
+      type(" "),
+    ],
+  },
+  {
     name: "Toggles to QMK mode",
     // TODO: Test something about context value
     wantSelections: [
