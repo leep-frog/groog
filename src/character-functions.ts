@@ -57,17 +57,13 @@ async function genericHandle<T>(t: T, map: Map<T, TypedCharacterHandlerFunction>
       if (sel.isEmpty) {
         const [newSelection, shouldApply] = fn(editor, sel, editBuilder);
         applied = applied || shouldApply;
-        return newSelection || sel;
+        return newSelection;
       } else {
         return sel;
       }
     }));
   }).then(res => {
-    if (!res) {
-      vscode.window.showInformationMessage(`Failed to execute edit`);
-    } else {
-      editor.selections = newSelections;
-    }
+    editor.selections = newSelections;
     return applied;
   });
 }

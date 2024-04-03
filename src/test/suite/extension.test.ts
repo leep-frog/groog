@@ -4588,6 +4588,114 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.deleteWordRight"),
     ],
   },
+  {
+    name: "deleteRight does nothing if at the end of the document",
+    startingText: [
+      "first line",
+      "middle line",
+      "last line",
+    ],
+    startingSelections: [selection(2, 9)],
+    wantDocument: [
+      "first line",
+      "middle line",
+      "last line",
+    ],
+    wantSelections: [selection(2, 9)],
+    userInteractions: [
+      cmd("groog.deleteRight"),
+    ],
+  },
+  {
+    name: "deleteWordRight does nothing if at the end of the document",
+    startingText: [
+      "first line",
+      "middle line",
+      "last line",
+    ],
+    startingSelections: [selection(2, 9)],
+    wantDocument: [
+      "first line",
+      "middle line",
+      "last line",
+    ],
+    wantSelections: [selection(2, 9)],
+    userInteractions: [
+      cmd("groog.deleteWordRight"),
+    ],
+  },
+  {
+    name: "deleteRight deletes whitespace if at the end of the document",
+    startingText: [
+      "first line",
+      "middle line",
+      "last line \t \t ",
+    ],
+    startingSelections: [selection(2, 9)],
+    wantDocument: [
+      "first line",
+      "middle line",
+      "last line",
+    ],
+    wantSelections: [selection(2, 9)],
+    userInteractions: [
+      cmd("groog.deleteRight"),
+    ],
+  },
+  {
+    name: "deleteWordRight deletes whitespace if at the end of the document",
+    startingText: [
+      "first line",
+      "middle line",
+      "last line \t \t ",
+    ],
+    startingSelections: [selection(2, 9)],
+    wantDocument: [
+      "first line",
+      "middle line",
+      "last line",
+    ],
+    wantSelections: [selection(2, 9)],
+    userInteractions: [
+      cmd("groog.deleteWordRight"),
+    ],
+  },
+  {
+    name: "deleteRight deletes only one character if at the last line of the document and non-whitespace characters after",
+    startingText: [
+      "first line",
+      "middle line",
+      "last line\t \t X  ",
+    ],
+    startingSelections: [selection(2, 9)],
+    wantDocument: [
+      "first line",
+      "middle line",
+      "last line \t X  ",
+    ],
+    wantSelections: [selection(2, 9)],
+    userInteractions: [
+      cmd("groog.deleteRight"),
+    ],
+  },
+  {
+    name: "deleteWordRight deletes only one character if at the last line of the document and non-whitespace characters after",
+    startingText: [
+      "first line",
+      "middle line",
+      "last line\t \t X  ",
+    ],
+    startingSelections: [selection(2, 9)],
+    wantDocument: [
+      "first line",
+      "middle line",
+      "last line \t X  ",
+    ],
+    wantSelections: [selection(2, 9)],
+    userInteractions: [
+      cmd("groog.deleteRight"),
+    ],
+  },
   /* Useful for commenting out tests. */
 ];
 
