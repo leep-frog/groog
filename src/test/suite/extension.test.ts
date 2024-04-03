@@ -556,7 +556,33 @@ const testCases: () => TestCase[] = () => [
       selection(0, 0),
     ],
     userInteractions: [
-      cmd("groog.cursorRight"),
+      cmd("groog.cursorRight"), // Need command to activate extension.
+    ],
+    wantInfoMessages: [
+      `Basic keyboard mode activated`,
+    ],
+  },
+  {
+    name: "Toggles to QMK mode",
+    // TODO: Test something about context value
+    wantSelections: [
+      selection(0, 0),
+    ],
+    userInteractions: [
+      cmd("groog.toggleQMK"),
+    ],
+    wantInfoMessages: [
+      `QMK keyboard mode activated`,
+    ],
+  },
+  {
+    name: "Toggles back to basic keyboard mode",
+    // TODO: Test something about context value
+    wantSelections: [
+      selection(0, 0),
+    ],
+    userInteractions: [
+      cmd("groog.toggleQMK"),
     ],
     wantInfoMessages: [
       `Basic keyboard mode activated`,

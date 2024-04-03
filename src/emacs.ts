@@ -16,12 +16,12 @@ import { TEST_MODE } from './stubs';
 export class GlobalBoolTracker {
   private stateTracker: GlobalStateTracker<boolean>;
   private value: boolean;
-  private toggleActions: Map<boolean, () => any>;
+  private toggleActions: Map<boolean, () => Promise<any>>;
 
-  constructor(key: string, activateFunc: () => any, deactivateFunc: () => any) {
+  constructor(key: string, activateFunc: () => Promise<any>, deactivateFunc: () => Promise<any>) {
     this.stateTracker = new GlobalStateTracker<boolean>(key);
     this.value = false; // This is actually set in initialize()
-    this.toggleActions = new Map<boolean, () => void>([
+    this.toggleActions = new Map<boolean, () => Promise<any>>([
       [true, activateFunc],
       [false, deactivateFunc],
     ]);
@@ -29,12 +29,12 @@ export class GlobalBoolTracker {
 
   async initialize(context: vscode.ExtensionContext) {
     this.value = !!this.stateTracker.get(context);
-    this.toggleActions.get(this.value)!();
+    return this.toggleActions.get(this.value)!();
   }
 
   async toggle(context: vscode.ExtensionContext) {
     this.value = !this.value;
-    return this.stateTracker.update(context, this.value).then(() => this.toggleActions.get(this.value)!());
+    return this.stateTracker.update(context, this.value).then(this.toggleActions.get(this.value)!);
   }
 
   get(): boolean {
@@ -69,10 +69,10 @@ export class Emacs {
 
   constructor() {
     this.cm = new ColorMode();
-    this.qmkTracker = new GlobalBoolTracker("qmkState", () => {
-      setGroogContext('qmk', true).then(() => vscode.window.showInformationMessage(`QMK keyboard mode activated`));
-    }, () => {
-      setGroogContext('qmk', false).then(() => vscode.window.showInformationMessage(`Basic keyboard mode activated`));
+    this.qmkTracker = new GlobalBoolTracker("qmkState", async () => {
+      return setGroogContext('qmk', true).then(() => vscode.window.showInformationMessage(`QMK keyboard mode activated`));
+    }, async () => {
+      return setGroogContext('qmk', false).then(() => vscode.window.showInformationMessage(`Basic keyboard mode activated`));
     });
     this.recorder = new Recorder(this.cm, this);
     this.typoFixer = new TypoFixer();
