@@ -533,6 +533,7 @@ interface TestCase {
   name: string;
   runSolo?: boolean
   startingText?: string[];
+  startingSelections?: vscode.Selection[];
   userInteractions?: UserInteraction[];
   inputBoxResponses?: string[];
   stubbablesConfig?: StubbablesConfig;
@@ -4253,6 +4254,149 @@ const testCases: () => TestCase[] = () => [
       `Undo failed`,
     ],
   },
+  // Type-over tests
+  {
+    name: "Typing a bracket automatically adds a closing bracket",
+    startingText: [
+      "",
+    ],
+    wantDocument: [
+      "{}",
+    ],
+    wantSelections: [
+      selection(0, 1),
+    ],
+    userInteractions: [
+      type("{"),
+    ],
+  },
+  {
+    name: "Typing a bracket at the end of a line automatically adds a closing bracket",
+    startingText: [
+      "some text ",
+    ],
+    wantDocument: [
+      "some text {}",
+    ],
+    startingSelections: [
+      selection(0, 10),
+    ],
+    wantSelections: [
+      selection(0, 11),
+    ],
+    userInteractions: [
+      type("{"),
+    ],
+  },
+  {
+    name: "Typing a bracket not at the end of a line automatically only adds opening bracket",
+    startingText: [
+      "some text ",
+    ],
+    wantDocument: [
+      "some tex{t ",
+    ],
+    startingSelections: [
+      selection(0, 8),
+    ],
+    wantSelections: [
+      selection(0, 9),
+    ],
+    userInteractions: [
+      type("{"),
+    ],
+  },
+  {
+    name: "Typing a bracket at the end of a line, ignoring whitespace characters, adds closing bracket",
+    startingText: [
+      "some text  \t\t \t ",
+    ],
+    wantDocument: [
+      "some text{}  \t\t \t ",
+    ],
+    startingSelections: [
+      selection(0, 9),
+    ],
+    wantSelections: [
+      selection(0, 10),
+    ],
+    userInteractions: [
+      type("{"),
+    ],
+  },
+  {
+    name: "Typing a bracket over selection simply adds bracket",
+    // Note: the custom logic doesn't do anything here. We simply return
+    // applied=false back to emacs.ts and it types the character as normal.
+    startingText: [
+      "some text  \t\t \t \t",
+    ],
+    startingSelections: [new vscode.Selection(0, 10, 0, 15)],
+    wantDocument: [
+      "some text { \t",
+    ],
+    wantSelections: [
+      selection(0, 11),
+    ],
+    userInteractions: [
+      type("{"),
+    ],
+  },
+  {
+    name: "Typing a bracket over multiple selections only adds brackets to empty selections",
+    // Note: since our custom logic runs on some of the selections
+    // (aka empty selections with no suffix text),
+    // and returns applied=true to emacs.ts, then no typing will be executed there.
+    // Hence why the non-empty selections don't have any changes
+    startingText: [
+      "some text  \t\t \t \t",
+      "some text  \t\t \t \t",
+      "some text  suffix",
+      "some text ",
+      "some text  suffix",
+    ],
+    startingSelections: [
+      selection(0, 10),
+      new vscode.Selection(1, 10, 1, 15),
+      selection(2, 10),
+      selection(3, 10),
+      new vscode.Selection(4, 10, 4, 15),
+    ],
+    wantDocument: [
+      "some text {} \t\t \t \t",
+      "some text  \t\t \t \t",
+      "some text  suffix",
+      "some text {}",
+      "some text  suffix",
+    ],
+    wantSelections: [
+      selection(0, 11),
+      new vscode.Selection(1, 10, 1, 15),
+      selection(2, 10),
+      selection(3, 11),
+      new vscode.Selection(4, 10, 4, 15),
+    ],
+    userInteractions: [
+      type("{"),
+    ],
+  },
+  {
+    name: "Groog commands with multiple selections work",
+    startingText: [
+      "0123456789",
+    ],
+    startingSelections: [new vscode.Selection(0, 3, 0, 4), new vscode.Selection(0, 6, 0, 8)],
+    wantDocument: [
+      "0124589",
+    ],
+    wantSelections: [
+      selection(0, 3),
+      selection(0, 5),
+    ],
+    userInteractions: [
+      cmd("groog.deleteLeft"),
+    ],
+  },
   /* Useful for commenting out tests. */
 ];
 
@@ -4296,8 +4440,9 @@ suite('Groog commands', () => {
         // Create the document if relevant
         await editor.edit(eb => {
           eb.insert(new vscode.Position(0, 0), startText);
+        }).then(() => {
+          editor.selections = (tc.startingSelections || [new vscode.Selection(0, 0, 0, 0)]);
         });
-        editor.selection = new vscode.Selection(0, 0, 0, 0);
 
         // Stub out message functions
         // TODO: try/finally to ensure these are reset
