@@ -4397,6 +4397,197 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.deleteLeft"),
     ],
   },
+  {
+    name: "Types over type-overable characters",
+    startingText: [
+      "]}'\"`",
+    ],
+    wantDocument: [
+      "0]1}2'3\"4`5",
+    ],
+    wantSelections: [selection(0, 11)],
+    userInteractions: [
+      type("0"),
+      type("]"),
+      type("1"),
+      type("}"),
+      type("2"),
+      type("'"),
+      type("3"),
+      type(`"`),
+      type("4"),
+      type("`"),
+      type("5"),
+    ],
+  },
+  {
+    name: "Does not type over when character not type-overable",
+    startingText: [
+      // Close paren is not included in type-over list
+      ")",
+    ],
+    wantDocument: [
+      "))",
+    ],
+    wantSelections: [selection(0, 1)],
+    userInteractions: [
+      type(")"),
+    ],
+  },
+  {
+    name: "Does not type over when next character is different",
+    startingText: [
+      ")",
+    ],
+    wantDocument: [
+      "])",
+    ],
+    wantSelections: [selection(0, 1)],
+    userInteractions: [
+      type("]"),
+    ],
+  },
+  // Delete right at end of line
+  {
+    name: "deleteRight removes single non-whitespace character if trailing characters aren't all whitespace",
+    startingText: [
+      "prefix abc",
+      "next line",
+    ],
+    startingSelections: [selection(0, 7)],
+    wantDocument: [
+      "prefix bc",
+      "next line",
+    ],
+    wantSelections: [selection(0, 7)],
+    userInteractions: [
+      cmd("groog.deleteRight"),
+    ],
+  },
+  {
+    name: "deleteWordRight removes single word if trailing characters aren't all whitespace",
+    startingText: [
+      "prefix abc def",
+      "next line",
+    ],
+    startingSelections: [selection(0, 7)],
+    wantDocument: [
+      "prefix  def",
+      "next line",
+    ],
+    wantSelections: [selection(0, 7)],
+    userInteractions: [
+      cmd("groog.deleteWordRight"),
+    ],
+  },
+  {
+    name: "deleteRight removes single whitespace character if trailing characters aren't all whitespace",
+    startingText: [
+      "prefix \tabc",
+      "next line",
+    ],
+    startingSelections: [selection(0, 7)],
+    wantDocument: [
+      "prefix abc",
+      "next line",
+    ],
+    wantSelections: [selection(0, 7)],
+    userInteractions: [
+      cmd("groog.deleteRight"),
+    ],
+  },
+  {
+    name: "deleteWordRight removes single word if trailing characters aren't all whitespace",
+    startingText: [
+      "prefix \t abc def",
+      "next line",
+    ],
+    startingSelections: [selection(0, 7)],
+    wantDocument: [
+      // Note only the tab is removed
+      "prefix abc def",
+      "next line",
+    ],
+    wantSelections: [selection(0, 7)],
+    userInteractions: [
+      cmd("groog.deleteWordRight"),
+    ],
+  },
+  {
+    name: "deleteRight removes newline",
+    startingText: [
+      "prefix ",
+      "next line",
+    ],
+    startingSelections: [selection(0, 7)],
+    wantDocument: [
+      "prefix next line",
+    ],
+    wantSelections: [selection(0, 7)],
+    userInteractions: [
+      cmd("groog.deleteRight"),
+    ],
+  },
+  {
+    name: "deleteRight removes trailing whitespace and newline",
+    startingText: [
+      "prefix \t \t \t",
+      "next line",
+    ],
+    startingSelections: [selection(0, 7)],
+    wantDocument: [
+      "prefix next line",
+    ],
+    wantSelections: [selection(0, 7)],
+    userInteractions: [
+      cmd("groog.deleteRight"),
+    ],
+  },
+  {
+    name: "deleteRight removes preceding whitespace and newline",
+    startingText: [
+      "prefix ",
+      " \t \t next line",
+    ],
+    startingSelections: [selection(0, 7)],
+    wantDocument: [
+      "prefix next line",
+    ],
+    wantSelections: [selection(0, 7)],
+    userInteractions: [
+      cmd("groog.deleteRight"),
+    ],
+  },
+  {
+    name: "deleteRight removes trailing whitespace, preceding whitespace, and newline",
+    startingText: [
+      "prefix \t \t \t",
+      " \t \t next line",
+    ],
+    startingSelections: [selection(0, 7)],
+    wantDocument: [
+      "prefix next line",
+    ],
+    wantSelections: [selection(0, 7)],
+    userInteractions: [
+      cmd("groog.deleteRight"),
+    ],
+  },
+  {
+    name: "deleteWordRight removes trailing whitespace, preceding whitespace, and newline",
+    startingText: [
+      "prefix \t \t \t",
+      " \t \t next line",
+    ],
+    startingSelections: [selection(0, 7)],
+    wantDocument: [
+      "prefix next line",
+    ],
+    wantSelections: [selection(0, 7)],
+    userInteractions: [
+      cmd("groog.deleteWordRight"),
+    ],
+  },
   /* Useful for commenting out tests. */
 ];
 

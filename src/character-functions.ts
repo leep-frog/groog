@@ -89,7 +89,7 @@ function typeOverFunctions(...characters: string[]): Iterable<[string, TypedChar
 }
 
 // If typing 'character' symbol, and the next character is that character, then simply
-// type over it (i.e. move the cursor to the next position.
+// type over it (i.e. move the cursor to the next position).
 function typeOverFunction(character: string): TypedCharacterHandlerFunction {
   return (editor: vscode.TextEditor, selection: vscode.Selection, editBuilder: vscode.TextEditorEdit): [vscode.Selection, boolean] => {
     const cursor = selection.active;
