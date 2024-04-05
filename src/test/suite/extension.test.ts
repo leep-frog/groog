@@ -764,6 +764,32 @@ const testCases: () => TestCase[] = () => [
       type("&"),
     ],
   },
+  // Typo with multi-line suffix replacements
+  {
+    name: "Replacement suffix before and after cursor",
+    startingText: [
+      "The alphabet: ",
+    ],
+    startingSelections: [
+      selection(0, 14),
+    ],
+    wantSelections: [
+      selection(3, 1),
+    ],
+    wantDocument: [
+      "The alphabet: abcdef",
+      "ghijkl",
+      "mn",
+      "opq",
+      "rstuvw",
+      "xyz",
+    ],
+    userInteractions: [
+      type("typoalphabet"),
+      type(" "),
+    ],
+  },
+  // Keyboard toggle tests
   {
     name: "Toggles to QMK mode",
     // TODO: Test something about context value
