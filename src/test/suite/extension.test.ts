@@ -4939,6 +4939,37 @@ const testCases: () => TestCase[] = () => [
       "General Kenobi",
     ],
   },
+  // Copy file name tests
+  {
+    name: "Fails to copy file name if no editor",
+    userInteractions: [
+      closeAllEditors,
+      cmd("groog.copyFilename"),
+    ],
+    wantErrorMessages: [
+      "No active editor",
+    ],
+  },
+  {
+    name: "Copies file name",
+    startingFile: startingFile("empty.go"),
+    wantDocument: [
+      "empty.gopackage main",
+      "",
+      "func main() {",
+      "",
+      "}",
+      "",
+    ],
+    wantSelections: [selection(5, 0)],
+    userInteractions: [
+      cmd("groog.copyFilename"),
+      cmd("groog.paste"),
+    ],
+    wantInfoMessages: [
+      "Filename copied!",
+    ],
+  },
   /* Useful for commenting out tests. */
 ];
 
