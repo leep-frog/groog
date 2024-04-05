@@ -3,11 +3,12 @@ import * as assert from 'assert';
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import { readFileSync, writeFileSync } from 'fs';
+import { jsonIgnoreReplacer } from 'json-ignore';
 import * as vscode from 'vscode';
 import { Document, FindRecord, Match } from '../../find';
-import { CloseQuickPickAction, NoOpQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectItemQuickPickAction, StubbablesConfig } from '../../stubs';
 import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
-import { jsonIgnoreReplacer } from 'json-ignore';
+import { CloseQuickPickAction, NoOpQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectItemQuickPickAction, StubbablesConfig } from '../../stubs';
+import path = require('path');
 
 // Note: this needs to be identical to the value in .vscode-test.mjs (trying to have shared import there is awkward).
 // export const stubbableTestFile = path.resolve(".vscode-test", "stubbable-file.json");
@@ -29,6 +30,10 @@ class DelayExecution implements UserInteraction {
 
 function delay(ms: number): UserInteraction {
   return new DelayExecution(ms);
+}
+
+function startingFile(filename: string) {
+  return path.resolve(__dirname, "..", "..", "..", "src", "test", "test-workspace", filename);
 }
 
 interface TestMatch {
@@ -533,6 +538,7 @@ interface TestCase {
   name: string;
   runSolo?: boolean
   startingText?: string[];
+  startingFile?: string;
   startingSelections?: vscode.Selection[];
   userInteractions?: UserInteraction[];
   inputBoxResponses?: string[];
@@ -637,6 +643,30 @@ const testCases: () => TestCase[] = () => [
     ],
     userInteractions: [
       type(" "),
+    ],
+  },
+  {
+    name: "Language specific typo runs in that language",
+    startingFile: startingFile("empty.go"),
+    startingSelections: [
+      selection(3, 0),
+    ],
+    wantSelections: [
+      selection(3, 19),
+    ],
+    wantDocument: [
+      "package main",
+      "",
+      "func main() {",
+      `  fmt.Println("abc")`,
+      "}",
+      "",
+    ],
+    userInteractions: [
+      type("  "),
+      type("fpl"),
+      type(" "),
+      type(`"abc"`),
     ],
   },
   {
@@ -4826,25 +4856,30 @@ suite('Groog commands', () => {
         const startText = (tc.startingText || []).join("\n");
         const wantText = tc.wantDocument?.join("\n") ?? startText;
 
-        // Create or clear the editor
-        if (!vscode.window.activeTextEditor) {
-          await vscode.commands.executeCommand("workbench.action.files.newUntitledFile");
-        }
-        const editor = assertDefined(vscode.window.activeTextEditor, "vscode.window.activeTextEditor");
-        await editor.edit(eb => {
-          const line = editor.document.lineAt(editor.document.lineCount-1);
-          eb.delete(new vscode.Range(
-            new vscode.Position(0, 0),
-            new vscode.Position(line.lineNumber, line.text.length),
-          ));
-        });
+        await vscode.commands.executeCommand("workbench.action.closeEditorInAllGroups");
 
-        // Create the document if relevant
-        await editor.edit(eb => {
-          eb.insert(new vscode.Position(0, 0), startText);
-        }).then(() => {
-          editor.selections = (tc.startingSelections || [new vscode.Selection(0, 0, 0, 0)]);
-        });
+        let editor: vscode.TextEditor;
+        if (tc.startingFile) {
+          await vscode.workspace.openTextDocument(tc.startingFile).then(doc => vscode.window.showTextDocument(doc));
+          editor = assertDefined(vscode.window.activeTextEditor, "vscode.window.activeTextEditor");
+        } else {
+          // Create or clear the editor
+          if (!vscode.window.activeTextEditor) {
+            await vscode.commands.executeCommand("workbench.action.files.newUntitledFile");
+          }
+
+          editor = assertDefined(vscode.window.activeTextEditor, "vscode.window.activeTextEditor");
+          await editor.edit(eb => {
+            const line = editor.document.lineAt(editor.document.lineCount-1);
+            eb.delete(new vscode.Range(
+              new vscode.Position(0, 0),
+              new vscode.Position(line.lineNumber, line.text.length),
+            ));
+            eb.insert(new vscode.Position(0, 0), startText);
+          });
+        }
+
+        editor.selections = (tc.startingSelections || [new vscode.Selection(0, 0, 0, 0)]);
 
         // Stub out message functions
         // TODO: try/finally to ensure these are reset

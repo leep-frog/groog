@@ -1,2 +1,4 @@
 {
+  "extensions.ignoreRecommendations": false,
+  "files.eol": "\n",
 }
