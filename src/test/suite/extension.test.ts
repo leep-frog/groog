@@ -5052,7 +5052,6 @@ const testCases: () => TestCase[] = () => [
   // Scripts tests
   {
     name: "Newline replacement fails if no editor",
-    runSolo: true,
     noStartingEditor: true,
     userInteractions: [
       cmd("groog.script.replaceNewlineStringsWithQuotes"),
@@ -5063,7 +5062,6 @@ const testCases: () => TestCase[] = () => [
   },
   {
     name: "Runs newline replacement with quotes",
-    runSolo: true,
     startingText: [
       `  "One\\ntwo three\\nfour\\nfive six seven\\n eight nine \\nten"`,
     ],
@@ -5081,7 +5079,6 @@ const testCases: () => TestCase[] = () => [
   },
   {
     name: "Runs newline replacement with ticks",
-    runSolo: true,
     startingText: [
       "  `One\\ntwo three\\nfour\\nfive six seven\\n eight nine \\nten`",
     ],
