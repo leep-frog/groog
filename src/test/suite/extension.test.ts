@@ -524,7 +524,9 @@ function cmd(command: string, ...args: any[]) : CommandExecution {
   return new CommandExecution(command, args);
 }
 
+// Frequently used commands
 const ctrlG = cmd("groog.ctrlG");
+const closeAllEditors = cmd("workbench.action.closeEditorsAndGroup");
 
 function type(text: string) : CommandExecution {
   return cmd("groog.type", { "text": text });
@@ -568,16 +570,31 @@ const testCases: () => TestCase[] = () => [
       `Basic keyboard mode activated`,
     ],
   },
+  // Typo tests
+  // Note: These typos are configured in src/test/test-workspace/.vscode/settings.json
+  {
+    name: "Typo does nothing if typing with no editor",
+    wantSelections: [
+      selection(0, 0),
+    ],
+    userInteractions: [
+      closeAllEditors,
+      type(" "),
+    ],
+    wantErrorMessages: [
+      `Couldn't find active editor`,
+    ],
+  },
   {
     name: "Typo fixer doesn't do anything if still typing",
     wantSelections: [
-      selection(0, 5),
+      selection(0, 9),
     ],
     wantDocument: [
-      "buidl",
+      "typobuidl",
     ],
     userInteractions: [
-      type("buid"),
+      type("typobuid"),
       type("l"),
     ],
   },
@@ -590,7 +607,7 @@ const testCases: () => TestCase[] = () => [
       "build ",
     ],
     userInteractions: [
-      type("buid"),
+      type("typobuid"),
       type("l"),
       type(" "),
     ],
@@ -604,7 +621,7 @@ const testCases: () => TestCase[] = () => [
       "build(",
     ],
     userInteractions: [
-      type("buid"),
+      type("typobuid"),
       type("l"),
       type("("),
     ],
@@ -612,16 +629,16 @@ const testCases: () => TestCase[] = () => [
   {
     name: "Doesn't run typo if typing over a selection",
     startingText: [
-      "buidl  ",
+      "typobuidl  ",
     ],
     startingSelections: [
-      new vscode.Selection(0, 5, 0, 7),
+      new vscode.Selection(0, 9, 0, 11),
     ],
     wantSelections: [
-      selection(0, 6),
+      selection(0, 10),
     ],
     wantDocument: [
-      "buidl ",
+      "typobuidl ",
     ],
     userInteractions: [
       type(" "),
@@ -630,16 +647,16 @@ const testCases: () => TestCase[] = () => [
   {
     name: "Doesn't run typo if not at the end of a word",
     startingText: [
-      "buidl(",
+      "typobuidl(",
     ],
     startingSelections: [
-      selection(0, 6),
+      selection(0, 10),
     ],
     wantSelections: [
-      selection(0, 7),
+      selection(0, 11),
     ],
     wantDocument: [
-      "buidl( ",
+      "typobuidl( ",
     ],
     userInteractions: [
       type(" "),
@@ -667,6 +684,84 @@ const testCases: () => TestCase[] = () => [
       type("fpl"),
       type(" "),
       type(`"abc"`),
+    ],
+  },
+  {
+    name: "Regular word is not changed if not a configured break character",
+    wantSelections: [
+      selection(0, 8),
+    ],
+    wantDocument: [
+      "typoabc ",
+    ],
+    userInteractions: [
+      type("typoabc"),
+      type(" "),
+    ],
+  },
+  {
+    name: "Proper break character replaces word",
+    wantSelections: [
+      selection(0, 4),
+    ],
+    wantDocument: [
+      "ABC^",
+    ],
+    userInteractions: [
+      type("typoabc"),
+      type("^"),
+    ],
+  },
+  {
+    name: "Exclude break character replaces word without character",
+    wantSelections: [
+      selection(0, 3),
+    ],
+    wantDocument: [
+      "ABC",
+    ],
+    userInteractions: [
+      type("typoabc"),
+      type("."),
+    ],
+  },
+  {
+    name: "Replacement suffix",
+    wantSelections: [
+      selection(0, 6),
+    ],
+    wantDocument: [
+      "ABC$ef",
+    ],
+    userInteractions: [
+      type("typoabc"),
+      type("$"),
+    ],
+  },
+  {
+    name: "Replacement suffix after cursor",
+    wantSelections: [
+      selection(0, 4),
+    ],
+    wantDocument: [
+      "ABC-EF",
+    ],
+    userInteractions: [
+      type("typoabc"),
+      type("-"),
+    ],
+  },
+  {
+    name: "Replacement suffix before and after cursor",
+    wantSelections: [
+      selection(0, 5),
+    ],
+    wantDocument: [
+      "ABCdeF",
+    ],
+    userInteractions: [
+      type("typoabc"),
+      type("&"),
     ],
   },
   {
@@ -798,7 +893,7 @@ const testCases: () => TestCase[] = () => [
     wantDocument: [],
     // noDocument: true,
     userInteractions: [
-      cmd("workbench.action.closeEditorsAndGroup"),
+      closeAllEditors,
       cmd("groog.find"),
     ],
     wantSelections: [
@@ -815,7 +910,7 @@ const testCases: () => TestCase[] = () => [
     ],
     wantDocument: [],
     userInteractions: [
-      cmd("workbench.action.closeEditorsAndGroup"),
+      closeAllEditors,
       cmd("groog.reverseFind"),
     ],
     wantSelections: [
@@ -833,7 +928,7 @@ const testCases: () => TestCase[] = () => [
     userInteractions: [
       cmd("groog.find"),
       type("ab"),
-      cmd("workbench.action.closeEditorsAndGroup"),
+      closeAllEditors,
       type("c"),
     ],
     wantDocument: [],
@@ -4856,7 +4951,7 @@ suite('Groog commands', () => {
         const startText = (tc.startingText || []).join("\n");
         const wantText = tc.wantDocument?.join("\n") ?? startText;
 
-        await vscode.commands.executeCommand("workbench.action.closeEditorInAllGroups");
+        await vscode.commands.executeCommand(closeAllEditors.command);
 
         let editor: vscode.TextEditor;
         if (tc.startingFile) {

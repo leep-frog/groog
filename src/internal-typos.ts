@@ -8,8 +8,9 @@ const whitespaceCharBreakKey = "WHITESPACE";
 // Types used internally
 interface CorrectionOptions {
   // All fields are required since we construct this internally only.
-  replacementText: string;
-  replacementTextAfterCursor: string;
+  replacementWord: string;
+  replacementSuffix: string;
+  replacementSuffixAfterCursor: string;
   excludeBreakCharacter: boolean;
 }
 
@@ -118,7 +119,7 @@ export class TypoFixer {
         editBuilder.delete(lastWordRange);
         editBuilder.insert(
           lastWordRange.start,
-          options.replacementText + (!!options.excludeBreakCharacter ? "" : breakCharacter) + options.replacementTextAfterCursor,
+          options.replacementWord + (!!options.excludeBreakCharacter ? "" : breakCharacter) + options.replacementSuffix + options.replacementSuffixAfterCursor,
         );
       },
       {
@@ -128,12 +129,12 @@ export class TypoFixer {
     );
 
     // Move cursor to before replacementTextAfterCursor portion
-    if (options.replacementTextAfterCursor.length > 0) {
+    if (options.replacementSuffixAfterCursor.length > 0) {
       // position.translate and cursorMove does not doesn't move across newline characters.
       // It just errors due to a negative 'character' value, hence why we do our own
       // custom logic to determine exact cursor position here.
 
-      const textByLine = options.replacementTextAfterCursor.split("\n");
+      const textByLine = options.replacementSuffixAfterCursor.split("\n");
       const lineOffset = textByLine.length - 1;
       const cursorOffset = textByLine[0].length;
 
@@ -186,8 +187,9 @@ export class TypoFixer {
       for (const word in correction.words) {
 
         const opts : CorrectionOptions = {
-          replacementText: correction.words[word] + (correction.replacementSuffix || ""),
-          replacementTextAfterCursor: correction.replacementSuffixAfterCursor || "",
+          replacementWord: correction.words[word],
+          replacementSuffix: (correction.replacementSuffix || ""),
+          replacementSuffixAfterCursor: correction.replacementSuffixAfterCursor || "",
           excludeBreakCharacter: !!correction.excludeBreakCharacter,
         };
 

@@ -1,4 +1,55 @@
 {
   "extensions.ignoreRecommendations": false,
   "files.eol": "\n",
+  "groog.typos": [
+    {
+      "words": {
+        "typobuidl": "build",
+      },
+    },
+    {
+      "words": {
+        "typgofpl": "fmt.Println",
+      },
+      "excludeBreakCharacter": true,
+      "replacementSuffix": "(",
+      "replacementSuffixAfterCursor": ")"
+    },
+    {
+      "words": {
+        "typoabc": "ABC",
+      },
+      "breakCharacters": "^",
+    },
+    {
+      "words": {
+        "typoabc": "ABC",
+      },
+      "breakCharacters": ".",
+      "excludeBreakCharacter": true,
+    },
+    {
+      "words": {
+        "typoabc": "ABC",
+      },
+      "breakCharacters": "$",
+      "replacementSuffix": "ef",
+    },
+    {
+      "words": {
+        "typoabc": "ABC",
+      },
+      "breakCharacters": "-",
+      "replacementSuffixAfterCursor": "EF",
+    },
+    {
+      "words": {
+        "typoabc": "ABC",
+      },
+      "breakCharacters": "&",
+      "replacementSuffix": "de",
+      "excludeBreakCharacter": true,
+      "replacementSuffixAfterCursor": "F",
+    },
+  ]
 }
