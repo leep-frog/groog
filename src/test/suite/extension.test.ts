@@ -4961,7 +4961,7 @@ const testCases: () => TestCase[] = () => [
       "}",
       "",
     ],
-    wantSelections: [selection(5, 0)],
+    wantSelections: [selection(0, 8)],
     userInteractions: [
       cmd("groog.copyFilename"),
       cmd("groog.paste"),
