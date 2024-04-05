@@ -539,6 +539,7 @@ function selection(line: number, char: number) : vscode.Selection {
 interface TestCase {
   name: string;
   runSolo?: boolean
+  noStartingEditor?: boolean;
   startingText?: string[];
   startingFile?: string;
   startingSelections?: vscode.Selection[];
@@ -4970,6 +4971,84 @@ const testCases: () => TestCase[] = () => [
       "Filename copied!",
     ],
   },
+  // Multi-command tests
+  {
+    name: "Runs multi-command",
+    wantDocument: [
+      "abcdef",
+    ],
+    wantSelections: [selection(0, 6)],
+    userInteractions: [
+      cmd("groog.multiCommand.execute", {
+        sequence: [
+          {
+            command: "groog.type",
+            args: {
+              "text": "abc",
+            },
+          },
+          {
+            command: "groog.message.info",
+            args: {
+              "message": "hi",
+            },
+          },
+          {
+            command: "groog.type",
+            args: {
+              "text": "def",
+            },
+          },
+        ],
+      }),
+    ],
+    wantInfoMessages: [
+      "hi",
+    ],
+  },
+  // Test file tests
+  {
+    name: "Fails to run test file if no previous file set",
+    noStartingEditor: true,
+    userInteractions: [
+      cmd("groog.testFile"),
+    ],
+    wantErrorMessages: [
+      "Previous file not set",
+    ],
+  },
+  {
+    name: "Fails to run test file if no file suffix",
+    startingFile: startingFile("greetings.txt"),
+    userInteractions: [
+      cmd("groog.testFile"),
+    ],
+    wantDocument: [
+      "Hello there",
+      "",
+    ],
+    wantErrorMessages: [
+      "Unknown file suffix: txt",
+    ],
+  },
+  {
+    name: "Fails to run test file if go file suffix",
+    startingFile: startingFile("empty.go"),
+    userInteractions: [
+      cmd("groog.testFile"),
+    ],
+    wantDocument: [
+      "package main",
+      "",
+      "func main() {",
+      "",
+      "}",
+      "",
+    ],
+    wantErrorMessages: [
+      "go testing should be routed to custom command in keybindings.go",
+    ],
+  },
   /* Useful for commenting out tests. */
 ];
 
@@ -4999,28 +5078,35 @@ suite('Groog commands', () => {
 
         await vscode.commands.executeCommand(closeAllEditors.command);
 
-        let editor: vscode.TextEditor;
-        if (tc.startingFile) {
-          await vscode.workspace.openTextDocument(tc.startingFile).then(doc => vscode.window.showTextDocument(doc));
-          editor = assertDefined(vscode.window.activeTextEditor, "vscode.window.activeTextEditor");
+        let editor: vscode.TextEditor | undefined;
+        if (tc.noStartingEditor) {
+          // Do nothing
         } else {
-          // Create or clear the editor
-          if (!vscode.window.activeTextEditor) {
-            await vscode.commands.executeCommand("workbench.action.files.newUntitledFile");
+
+          let editor_: vscode.TextEditor;
+          if (tc.startingFile) {
+            await vscode.workspace.openTextDocument(tc.startingFile).then(doc => vscode.window.showTextDocument(doc));
+            editor_ = assertDefined(vscode.window.activeTextEditor, "vscode.window.activeTextEditor");
+          } else {
+            // Create or clear the editor
+            if (!vscode.window.activeTextEditor) {
+              await vscode.commands.executeCommand("workbench.action.files.newUntitledFile");
+            }
+
+            editor_ = assertDefined(vscode.window.activeTextEditor, "vscode.window.activeTextEditor");
+            await editor_.edit(eb => {
+              const line = editor_.document.lineAt(editor_.document.lineCount-1);
+              eb.delete(new vscode.Range(
+                new vscode.Position(0, 0),
+                new vscode.Position(line.lineNumber, line.text.length),
+              ));
+              eb.insert(new vscode.Position(0, 0), startText);
+            });
           }
 
-          editor = assertDefined(vscode.window.activeTextEditor, "vscode.window.activeTextEditor");
-          await editor.edit(eb => {
-            const line = editor.document.lineAt(editor.document.lineCount-1);
-            eb.delete(new vscode.Range(
-              new vscode.Position(0, 0),
-              new vscode.Position(line.lineNumber, line.text.length),
-            ));
-            eb.insert(new vscode.Position(0, 0), startText);
-          });
+          editor_.selections = (tc.startingSelections || [selection(0, 0)]);
+          editor = editor_;
         }
-
-        editor.selections = (tc.startingSelections || [selection(0, 0)]);
 
         // Stub out message functions
         // TODO: try/finally to ensure these are reset
@@ -5087,9 +5173,13 @@ suite('Groog commands', () => {
         assert.deepStrictEqual(gotInfoMessages, tc.wantInfoMessages || [], "Expected INFO MESSAGES to be exactly equal");
         assert.deepStrictEqual(gotInputBoxValidationMessages, tc.wantInputBoxValidationMessages || [], "Expected INPUT BOX VALIDATION MESSAGES to be exactly equal");
 
-        assert.deepStrictEqual(editor.document.getText(), wantText, "Expected DOCUMENT TEXT to be exactly equal");
-        assert.deepStrictEqual(editor.selections, tc.wantSelections || [selection(0, 0)], "Expected SELECTIONS to be exactly equal");
-
+        if (editor) {
+          assert.deepStrictEqual(editor.document.getText(), wantText, "Expected DOCUMENT TEXT to be exactly equal");
+          assert.deepStrictEqual(editor.selections, tc.wantSelections || [selection(0, 0)], "Expected SELECTIONS to be exactly equal");
+        } else {
+          assertUndefined(tc.wantDocument, "wantDocument");
+          assertUndefined(tc.wantSelections, "wantSelections");
+        }
       });
     });
   }

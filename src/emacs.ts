@@ -155,6 +155,7 @@ export class Emacs {
 
     this.recorder.registerCommand(context, 'testReset', async () => {
       if (TEST_MODE) {
+        this.lastVisitedFile = undefined;
         for (const h of this.typeHandlers) {
           await h.testReset();
         }

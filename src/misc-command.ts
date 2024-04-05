@@ -87,8 +87,7 @@ async function testFile(args: TestFileArgs, file?: vscode.Uri) {
   const suffix = file.fsPath.split(".").pop();
   switch (suffix) {
   case "go":
-    vscode.window.showErrorMessage(`go testing should be routed to custom command in keybindings.go`);
-    break;
+    return vscode.window.showErrorMessage(`go testing should be routed to custom command in keybindings.go`);
   case "ts":
     // It's possible to run launch.json configurations with `vscode.debug.startDebugging(fs, "Extension Tests");`
     // But `npm run test` currently does everything we need, but an option to keep in mind if ever needed.
@@ -98,7 +97,7 @@ async function testFile(args: TestFileArgs, file?: vscode.Uri) {
     sendTerminalCommand(args, `zts ${path.parse(file.fsPath).name}`);
     break;
   default:
-    vscode.window.showErrorMessage(`Unknown file suffix: ${suffix}`);
+    return vscode.window.showErrorMessage(`Unknown file suffix: ${suffix}`);
   }
 }
 
