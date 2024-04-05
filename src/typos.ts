@@ -52,6 +52,15 @@ export function defaultCorrections(): Correction[] {
       replacementSuffixAfterCursor: "\`);",
       excludeBreakCharacter: true,
     },
+    {
+      languages: [
+        typescriptLanguageKey,
+      ],
+      words: {
+        "rso": "runSolo: true",
+      },
+      excludeBreakCharacter: true,
+    },
     // Println replacements (no quotes in suffix fields)
     {
       languages: [

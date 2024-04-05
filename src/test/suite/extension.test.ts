@@ -5049,6 +5049,54 @@ const testCases: () => TestCase[] = () => [
       "go testing should be routed to custom command in keybindings.go",
     ],
   },
+  // Scripts tests
+  {
+    name: "Newline replacement fails if no editor",
+    runSolo: true,
+    noStartingEditor: true,
+    userInteractions: [
+      cmd("groog.script.replaceNewlineStringsWithQuotes"),
+    ],
+    wantErrorMessages: [
+      "No active text editor.",
+    ],
+  },
+  {
+    name: "Runs newline replacement with quotes",
+    runSolo: true,
+    startingText: [
+      `  "One\\ntwo three\\nfour\\nfive six seven\\n eight nine \\nten"`,
+    ],
+    userInteractions: [
+      cmd("groog.script.replaceNewlineStringsWithQuotes"),
+    ],
+    wantDocument: [
+      `  "One",`,
+      `  "two three",`,
+      `  "four",`,
+      `  "five six seven",`,
+      `  " eight nine ",`,
+      `  "ten"`,
+    ],
+  },
+  {
+    name: "Runs newline replacement with ticks",
+    runSolo: true,
+    startingText: [
+      "  `One\\ntwo three\\nfour\\nfive six seven\\n eight nine \\nten`",
+    ],
+    userInteractions: [
+      cmd("groog.script.replaceNewlineStringsWithTicks"),
+    ],
+    wantDocument: [
+      "  `One`,",
+      "  `two three`,",
+      "  `four`,",
+      "  `five six seven`,",
+      "  ` eight nine `,",
+      "  `ten`",
+    ],
+  },
   /* Useful for commenting out tests. */
 ];
 
