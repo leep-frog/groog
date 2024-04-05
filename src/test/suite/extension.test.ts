@@ -547,7 +547,7 @@ interface TestCase {
   stubbablesConfig?: StubbablesConfig;
   wantDocument?: string[];
   noDocument?: boolean;
-  wantSelections: vscode.Selection[];
+  wantSelections?: vscode.Selection[];
   wantInputBoxValidationMessages?: vscode.InputBoxValidationMessage[];
   wantQuickPickOptions?: (string | vscode.QuickPickItem)[][];
   wantInfoMessages?: string[];
@@ -560,9 +560,6 @@ const testCases: () => TestCase[] = () => [
   // Basic/setup tests
   {
     name: "Captures opening info message",
-    wantSelections: [
-      selection(0, 0),
-    ],
     userInteractions: [
       cmd("groog.cursorRight"), // Need command to activate extension.
     ],
@@ -574,9 +571,6 @@ const testCases: () => TestCase[] = () => [
   // Note: These typos are configured in src/test/test-workspace/.vscode/settings.json
   {
     name: "Typo does nothing if typing with no editor",
-    wantSelections: [
-      selection(0, 0),
-    ],
     userInteractions: [
       closeAllEditors,
       type(" "),
@@ -793,9 +787,6 @@ const testCases: () => TestCase[] = () => [
   {
     name: "Toggles to QMK mode",
     // TODO: Test something about context value
-    wantSelections: [
-      selection(0, 0),
-    ],
     userInteractions: [
       cmd("groog.toggleQMK"),
     ],
@@ -806,9 +797,6 @@ const testCases: () => TestCase[] = () => [
   {
     name: "Toggles back to basic keyboard mode",
     // TODO: Test something about context value
-    wantSelections: [
-      selection(0, 0),
-    ],
     userInteractions: [
       cmd("groog.toggleQMK"),
     ],
@@ -818,9 +806,6 @@ const testCases: () => TestCase[] = () => [
   },
   {
     name: "Works for empty file and no changes",
-    wantSelections: [
-      selection(0, 0),
-    ],
   },
   {
     name: "Writes text to file",
@@ -829,9 +814,6 @@ const testCases: () => TestCase[] = () => [
     ],
     wantDocument: [
       "abc",
-    ],
-    wantSelections: [
-      selection(0, 0),
     ],
   },
   // Find command failure tests
@@ -842,9 +824,6 @@ const testCases: () => TestCase[] = () => [
     ],
     userInteractions: [
       cmd("groog.find.replaceOne"),
-    ],
-    wantSelections: [
-      selection(0, 0),
     ],
     wantErrorMessages: [
       `Cannot replace matches when not in groog.find mode`,
@@ -858,9 +837,6 @@ const testCases: () => TestCase[] = () => [
     userInteractions: [
       cmd("groog.find.replaceAll"),
     ],
-    wantSelections: [
-      selection(0, 0),
-    ],
     wantErrorMessages: [
       `Cannot replace matches when not in groog.find mode`,
     ],
@@ -872,9 +848,6 @@ const testCases: () => TestCase[] = () => [
     ],
     userInteractions: [
       cmd("groog.find.toggleReplaceMode"),
-    ],
-    wantSelections: [
-      selection(0, 0),
     ],
     wantErrorMessages: [
       `groog.find.toggleReplaceMode can only be executed in find mode`,
@@ -888,9 +861,6 @@ const testCases: () => TestCase[] = () => [
     userInteractions: [
       cmd("groog.find.previous"),
     ],
-    wantSelections: [
-      selection(0, 0),
-    ],
     wantErrorMessages: [
       `groog.find.previous can only be executed in find mode`,
     ],
@@ -902,9 +872,6 @@ const testCases: () => TestCase[] = () => [
     ],
     userInteractions: [
       cmd("groog.find.next"),
-    ],
-    wantSelections: [
-      selection(0, 0),
     ],
     wantErrorMessages: [
       `groog.find.next can only be executed in find mode`,
@@ -922,9 +889,6 @@ const testCases: () => TestCase[] = () => [
       closeAllEditors,
       cmd("groog.find"),
     ],
-    wantSelections: [
-      selection(0, 0),
-    ],
     wantErrorMessages: [
       `Cannot activate find mode from outside an editor`,
     ],
@@ -938,9 +902,6 @@ const testCases: () => TestCase[] = () => [
     userInteractions: [
       closeAllEditors,
       cmd("groog.reverseFind"),
-    ],
-    wantSelections: [
-      selection(0, 0),
     ],
     wantErrorMessages: [
       `Cannot activate find mode from outside an editor`,
@@ -977,9 +938,6 @@ const testCases: () => TestCase[] = () => [
         "Flags: []",
         "1 of 1",
       ],
-    ],
-    wantSelections: [
-      selection(0, 0),
     ],
     wantErrorMessages: [
       `Cannot select text from outside the editor`,
@@ -1595,9 +1553,6 @@ const testCases: () => TestCase[] = () => [
         "No results",
       ],
     ],
-    wantSelections: [
-      selection(0, 0),
-    ],
     wantErrorMessages: [
       `Failed to get match info: Invalid regular expression: /?a/gim: Nothing to repeat`,
     ],
@@ -1631,9 +1586,6 @@ const testCases: () => TestCase[] = () => [
         "Flags: []",
         "No results",
       ],
-    ],
-    wantSelections: [
-      selection(0, 0),
     ],
   },
   {
@@ -1782,9 +1734,6 @@ const testCases: () => TestCase[] = () => [
         "Flags: []",
         "No results",
       ],
-    ],
-    wantSelections: [
-      selection(0, 0),
     ],
   },
   {
@@ -2140,9 +2089,6 @@ const testCases: () => TestCase[] = () => [
           pickable: true,
         },
       ],
-    ],
-    wantSelections: [
-      selection(0, 0),
     ],
   },
   // Find context tests
@@ -2598,9 +2544,6 @@ const testCases: () => TestCase[] = () => [
     startingText: [
       "abc",
     ],
-    wantSelections: [
-      selection(0, 0),
-    ],
     userInteractions: [
       cmd("groog.record.playRecording"),
     ],
@@ -2613,9 +2556,6 @@ const testCases: () => TestCase[] = () => [
     startingText: [
       "abc",
     ],
-    wantSelections: [
-      selection(0, 0),
-    ],
     userInteractions: [
       cmd("groog.record.playRecordingRepeatedly"),
     ],
@@ -2625,9 +2565,6 @@ const testCases: () => TestCase[] = () => [
   },
   {
     name: "Save named recording fails if not recording",
-    wantSelections: [
-      selection(0, 0),
-    ],
     userInteractions: [
       cmd("groog.record.saveRecordingAs"),
     ],
@@ -2637,9 +2574,6 @@ const testCases: () => TestCase[] = () => [
   },
   {
     name: "End recording fails if not recording",
-    wantSelections: [
-      selection(0, 0),
-    ],
     userInteractions: [
       cmd("groog.record.endRecording"),
     ],
@@ -2773,9 +2707,6 @@ const testCases: () => TestCase[] = () => [
     startingText: [
       "abc",
     ],
-    wantSelections: [
-      selection(0, 0),
-    ],
     userInteractions: [
       cmd("groog.record.playNamedRecording"),
     ],
@@ -2841,9 +2772,6 @@ const testCases: () => TestCase[] = () => [
     name: "Records and plays back empty recording",
     startingText: [
       "start text",
-    ],
-    wantSelections: [
-      selection(0, 0),
     ],
     userInteractions: [
       cmd("groog.record.startRecording"),
@@ -4398,9 +4326,6 @@ const testCases: () => TestCase[] = () => [
     wantDocument: [
       "start text",
     ],
-    wantSelections: [
-      selection(0, 0),
-    ],
     userInteractions: [
       cmd("groog.record.undo"),
     ],
@@ -4950,6 +4875,70 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.deleteRight"),
     ],
   },
+  // Notification tests
+  {
+    name: "Notification fails if no args",
+    userInteractions: [
+      cmd("groog.message.info"),
+    ],
+    wantErrorMessages: [
+      "No message set",
+    ],
+  },
+  {
+    name: "Notification fails if no message",
+    userInteractions: [
+      cmd("groog.message.info", {}),
+    ],
+    wantErrorMessages: [
+      "No message set",
+    ],
+  },
+  {
+    name: "Notification fails if wrong args",
+    userInteractions: [
+      cmd("groog.message.info", {
+        badKey: "hello there",
+      }),
+    ],
+    wantErrorMessages: [
+      "No message set",
+    ],
+  },
+  {
+    name: "Notification fails if empty message",
+    userInteractions: [
+      cmd("groog.message.info", {
+        message: "",
+      }),
+    ],
+    wantErrorMessages: [
+      "No message set",
+    ],
+  },
+  {
+    name: "Notification is sent",
+    userInteractions: [
+      cmd("groog.message.info", {
+        message: "Hello there",
+      }),
+    ],
+    wantInfoMessages: [
+      "Hello there",
+    ],
+  },
+  {
+    name: "Error notification is sent",
+    userInteractions: [
+      cmd("groog.message.info", {
+        message: "General Kenobi",
+        error: true,
+      }),
+    ],
+    wantErrorMessages: [
+      "General Kenobi",
+    ],
+  },
   /* Useful for commenting out tests. */
 ];
 
@@ -5000,7 +4989,7 @@ suite('Groog commands', () => {
           });
         }
 
-        editor.selections = (tc.startingSelections || [new vscode.Selection(0, 0, 0, 0)]);
+        editor.selections = (tc.startingSelections || [selection(0, 0)]);
 
         // Stub out message functions
         // TODO: try/finally to ensure these are reset
@@ -5068,7 +5057,7 @@ suite('Groog commands', () => {
         assert.deepStrictEqual(gotInputBoxValidationMessages, tc.wantInputBoxValidationMessages || [], "Expected INPUT BOX VALIDATION MESSAGES to be exactly equal");
 
         assert.deepStrictEqual(editor.document.getText(), wantText, "Expected DOCUMENT TEXT to be exactly equal");
-        assert.deepStrictEqual(editor.selections, tc.wantSelections, "Expected SELECTIONS to be exactly equal");
+        assert.deepStrictEqual(editor.selections, tc.wantSelections || [selection(0, 0)], "Expected SELECTIONS to be exactly equal");
 
       });
     });

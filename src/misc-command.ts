@@ -1,7 +1,7 @@
 import { basename } from 'path';
-import path = require('path');
 import * as vscode from 'vscode';
 import { Emacs } from './emacs';
+import path = require('path');
 
 interface MiscCommand {
   name: string;
@@ -108,7 +108,7 @@ interface Message {
 }
 
 async function infoMessage(msg: Message | undefined) {
-  if (!msg) {
+  if (!msg || !msg.message) {
     vscode.window.showErrorMessage("No message set");
     return;
   }
