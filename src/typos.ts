@@ -37,6 +37,9 @@ export function defaultCorrections(): Correction[] {
     {
       words: {
         "buidl": "build",
+        "buidler": "builder",
+        "Buidl": "Build",
+        "Buidler": "Builder",
       },
     },
     // Typescript messages
