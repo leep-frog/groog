@@ -70,9 +70,15 @@ export class Emacs {
   constructor() {
     this.cm = new ColorMode();
     this.qmkTracker = new GlobalBoolTracker("qmkState", async () => {
-      return setGroogContext('qmk', true).then(() => vscode.window.showInformationMessage(`QMK keyboard mode activated`));
+      return setGroogContext('qmk', true).then(() => {
+        // We don't want to wait on the message, otherwise, we are locked until the message is cleared
+        vscode.window.showInformationMessage(`QMK keyboard mode activated`);
+      });
     }, async () => {
-      return setGroogContext('qmk', false).then(() => vscode.window.showInformationMessage(`Basic keyboard mode activated`));
+      return setGroogContext('qmk', false).then(() => {
+        // We don't want to wait on the message, otherwise, we are locked until the message is cleared
+        vscode.window.showInformationMessage(`Basic keyboard mode activated`);
+      });
     });
     this.recorder = new Recorder(this.cm, this);
     this.typoFixer = new TypoFixer();
