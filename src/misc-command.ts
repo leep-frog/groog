@@ -9,6 +9,8 @@ interface MiscCommand {
   noLock?: boolean;
 }
 
+let ignoreTestFilenameTracker = false;
+
 export const miscCommands: MiscCommand[] = [
   {
     name: "multiCommand.execute",
@@ -26,6 +28,13 @@ export const miscCommands: MiscCommand[] = [
   {
     name: "testFile",
     f: (e: Emacs, mc: TestFileArgs) => testFile(mc, e.lastVisitedFile),
+  },
+  {
+    name: "toggleTestFile",
+    f: async () => {
+      ignoreTestFilenameTracker = !ignoreTestFilenameTracker;
+      vscode.window.showInformationMessage(`Changed ignore test file to ${ignoreTestFilenameTracker}`);
+    },
   },
 ];
 
@@ -94,7 +103,8 @@ async function testFile(args: TestFileArgs, file?: vscode.Uri) {
     sendTerminalCommand(args, `npm run test`);
     break;
   case "java":
-    sendTerminalCommand(args, `zts ${path.parse(file.fsPath).name}`);
+    const javaTestCommand = ignoreTestFilenameTracker ? `zts` : `zts ${path.parse(file.fsPath).name}`;
+    sendTerminalCommand(args, javaTestCommand);
     break;
   default:
     return vscode.window.showErrorMessage(`Unknown file suffix: ${suffix}`);

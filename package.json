@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.6.7",
+  "version": "2.6.8",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -2096,6 +2096,14 @@
         "key": "ctrl+z ctrl+right",
         "command": "faves.search",
         "when": "groog.context.qmkMode"
+      },
+      {
+        "key": "ctrl+z t",
+        "command": "groog.toggleTestFile"
+      },
+      {
+        "key": "ctrl+z ctrl+t",
+        "command": "groog.toggleTestFile"
       },
       {
         "key": "ctrl+z v",

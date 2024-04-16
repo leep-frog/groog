@@ -9,7 +9,7 @@ export default defineConfig({
   useInstallation: {
     fromMachine: true,
     // This needs to be a different version than the one I'm actually using, otherwise test doesn't run
-    fromPath: path.resolve(".vscode-test", "vscode-win32-x64-archive-1.87.0", "Code.exe"),
+    fromPath: path.resolve(".vscode-test", "vscode-win32-x64-archive-1.86.0", "Code.exe"),
   },
   workspaceFolder: path.resolve("src", "test", "test-workspace"),
   env: {

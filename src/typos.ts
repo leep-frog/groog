@@ -60,7 +60,7 @@ export function defaultCorrections(): Correction[] {
         typescriptLanguageKey,
       ],
       words: {
-        "rso": "runSolo: true",
+        "rso": "runSolo: true,",
       },
       excludeBreakCharacter: true,
     },

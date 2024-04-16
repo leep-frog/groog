@@ -5049,6 +5049,26 @@ const testCases: () => TestCase[] = () => [
       "go testing should be routed to custom command in keybindings.go",
     ],
   },
+  {
+    name: "Toggles ignore test file to true",
+    userInteractions: [
+      cmd("groog.toggleTestFile"),
+    ],
+    wantDocument: [],
+    wantInfoMessages: [
+      "Changed ignore test file to true",
+    ],
+  },
+  {
+    name: "Toggles ignore test file to false",
+    userInteractions: [
+      cmd("groog.toggleTestFile"),
+    ],
+    wantDocument: [],
+    wantInfoMessages: [
+      "Changed ignore test file to false",
+    ],
+  },
   // Scripts tests
   {
     name: "Newline replacement fails if no editor",

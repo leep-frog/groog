@@ -1,3 +1,4 @@
+import { jsonIgnore } from 'json-ignore';
 import * as vscode from 'vscode';
 import { ColorMode, HandlerColoring, gutterHandlerColoring } from './color_mode';
 import { Emacs, GlobalBoolTracker } from './emacs';
@@ -6,7 +7,6 @@ import { CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { positiveMod } from './misc-command';
 import { Record, Recorder } from './record';
 import { stubbables } from './stubs';
-import { jsonIgnore } from 'json-ignore';
 
 function findColor(opacity?: number): string{
   return `rgba(200, 120, 0, ${opacity ?? 1})`;

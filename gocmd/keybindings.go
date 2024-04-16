@@ -581,6 +581,7 @@ var (
 		alt(shift("p")): onlyMC("editor.action.marker.prevInFiles", "closeMarkersNavigation"),
 		alt(shift("n")): onlyMC("editor.action.marker.nextInFiles", "closeMarkersNavigation"),
 
+		ctrlZ("t"): only("groog.toggleTestFile"),
 		ctrlX("t"): {
 			goFile.value: mcWithArgs(
 				&KB{
