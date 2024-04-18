@@ -4,7 +4,7 @@
       "jt"
     ],
     "body": [
-      "public static Stream<Arguments> ${1:Name}testCases() {",
+      "public static Stream<Arguments> ${1:Name}TestCases() {",
       "    return Stream.of(",
       "        Arguments.of(",
       "            \"testName\"",
@@ -12,8 +12,8 @@
       "    );",
       "}",
       "",
-      "@ParameterizedTest(name = \"{0}\"",
-      "@MethodSource(\"${1:Name}testCases\")",
+      "@ParameterizedTest(name = \"{0}\")",
+      "@MethodSource(\"${1:Name}TestCases\")",
       "public void test${1/(.*)/${1:/capitalize}/}(",
       "    final String testName",
       ") {",
