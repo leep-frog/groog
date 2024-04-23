@@ -5032,6 +5032,31 @@ const testCases: () => TestCase[] = () => [
     ],
   },
   {
+    name: "Fails to run test file if no file suffix (message displayed at part 0)",
+    startingFile: startingFile("greetings.txt"),
+    userInteractions: [
+      cmd("groog.testFile", {part: 0}),
+    ],
+    wantDocument: [
+      "Hello there",
+      "",
+    ],
+    wantErrorMessages: [
+      "Unknown file suffix: txt",
+    ],
+  },
+  {
+    name: "Fails to run test file if no file suffix (no message displayed at part 1)",
+    startingFile: startingFile("greetings.txt"),
+    userInteractions: [
+      cmd("groog.testFile", {part: 1}),
+    ],
+    wantDocument: [
+      "Hello there",
+      "",
+    ],
+  },
+  {
     name: "Fails to run test file if go file suffix",
     startingFile: startingFile("empty.go"),
     userInteractions: [
@@ -5050,23 +5075,36 @@ const testCases: () => TestCase[] = () => [
     ],
   },
   {
-    name: "Toggles ignore test file to true",
+    name: "Doesn't toggle fixed test file if no file visited",
     userInteractions: [
-      cmd("groog.toggleTestFile"),
+      cmd("groog.toggleFixedTestFile"),
     ],
-    wantDocument: [],
+    wantErrorMessages: [
+      "No active file",
+    ],
+  },
+  {
+    name: "Toggles fixed test file to current active file",
+    startingFile: startingFile("bloop.java"),
+    wantDocument: [""],
+    userInteractions: [
+      cmd("groog.toggleFixedTestFile"),
+    ],
     wantInfoMessages: [
-      "Changed ignore test file to true",
+      `Set fixed test file to ${startingFile("bloop.java")}`.replace("C:", "c:"),
     ],
   },
   {
     name: "Toggles ignore test file to false",
+    startingFile: startingFile("bloop.java"),
+    wantDocument: [""],
     userInteractions: [
-      cmd("groog.toggleTestFile"),
+      cmd("groog.toggleFixedTestFile"),
+      cmd("groog.toggleFixedTestFile"),
     ],
-    wantDocument: [],
     wantInfoMessages: [
-      "Changed ignore test file to false",
+      `Set fixed test file to ${startingFile("bloop.java")}`.replace("C:", "c:"),
+      "Unset fixed test file",
     ],
   },
   // Scripts tests

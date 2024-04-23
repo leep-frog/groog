@@ -9,7 +9,11 @@ interface MiscCommand {
   noLock?: boolean;
 }
 
-let ignoreTestFilenameTracker = false;
+let fixedTestFile: vscode.Uri | undefined = undefined;
+
+export function miscTestReset() {
+  fixedTestFile = undefined;
+}
 
 export const miscCommands: MiscCommand[] = [
   {
@@ -30,10 +34,20 @@ export const miscCommands: MiscCommand[] = [
     f: (e: Emacs, mc: TestFileArgs) => testFile(mc, e.lastVisitedFile),
   },
   {
-    name: "toggleTestFile",
+    name: "toggleFixedTestFile",
     f: async () => {
-      ignoreTestFilenameTracker = !ignoreTestFilenameTracker;
-      vscode.window.showInformationMessage(`Changed ignore test file to ${ignoreTestFilenameTracker}`);
+      if (!fixedTestFile) {
+        const currentFile = vscode.window.activeTextEditor?.document.uri;
+        if (!currentFile || currentFile.scheme !== "file") {
+          vscode.window.showErrorMessage(`No active file`);
+        } else {
+          fixedTestFile = currentFile;
+          vscode.window.showInformationMessage(`Set fixed test file to ${fixedTestFile.fsPath}`);
+        }
+      } else {
+        fixedTestFile = undefined;
+        vscode.window.showInformationMessage(`Unset fixed test file`);
+      }
     },
   },
 ];
@@ -87,7 +101,8 @@ interface TestFileArgs {
   part: number;
 }
 
-async function testFile(args: TestFileArgs, file?: vscode.Uri) {
+async function testFile(args: TestFileArgs, lastFile?: vscode.Uri) {
+  const file = fixedTestFile ?? lastFile;
   if (!file) {
     vscode.window.showErrorMessage(`Previous file not set`);
     return;
@@ -96,18 +111,22 @@ async function testFile(args: TestFileArgs, file?: vscode.Uri) {
   const suffix = file.fsPath.split(".").pop();
   switch (suffix) {
   case "go":
-    return vscode.window.showErrorMessage(`go testing should be routed to custom command in keybindings.go`);
+    vscode.window.showErrorMessage(`go testing should be routed to custom command in keybindings.go`);
+    return;
   case "ts":
     // It's possible to run launch.json configurations with `vscode.debug.startDebugging(fs, "Extension Tests");`
     // But `npm run test` currently does everything we need, but an option to keep in mind if ever needed.
     sendTerminalCommand(args, `npm run test`);
     break;
   case "java":
-    const javaTestCommand = ignoreTestFilenameTracker ? `zts` : `zts ${path.parse(file.fsPath).name}`;
+    const javaTestCommand = `zts ${path.parse(file.fsPath).name}`;
     sendTerminalCommand(args, javaTestCommand);
     break;
   default:
-    return vscode.window.showErrorMessage(`Unknown file suffix: ${suffix}`);
+    if (!args || args.part === 0) {
+      vscode.window.showErrorMessage(`Unknown file suffix: ${suffix}`);
+    }
+    return;
   }
 }
 

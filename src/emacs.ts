@@ -6,7 +6,7 @@ import { Registerable, TypeHandler, getPrefixText } from './handler';
 import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { TypoFixer } from './internal-typos';
 import { MarkHandler } from './mark';
-import { miscCommands, multiCommand } from './misc-command';
+import { miscCommands, miscTestReset, multiCommand } from './misc-command';
 import { Recorder } from './record';
 import { Scripts } from './scripts';
 import { Settings } from './settings';
@@ -165,6 +165,7 @@ export class Emacs {
         for (const h of this.typeHandlers) {
           await h.testReset();
         }
+        miscTestReset();
       } else {
         vscode.window.showErrorMessage(`Cannot run testReset outside of test mode!`);
       }
