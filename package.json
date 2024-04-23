@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.6.9",
+  "version": "2.6.10",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -2099,11 +2099,11 @@
       },
       {
         "key": "ctrl+z t",
-        "command": "groog.toggleTestFile"
+        "command": "groog.toggleFixedTestFile"
       },
       {
         "key": "ctrl+z ctrl+t",
-        "command": "groog.toggleTestFile"
+        "command": "groog.toggleFixedTestFile"
       },
       {
         "key": "ctrl+z v",
