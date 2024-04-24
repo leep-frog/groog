@@ -42,7 +42,7 @@ export const miscCommands: MiscCommand[] = [
           vscode.window.showErrorMessage(`No active file`);
         } else {
           fixedTestFile = currentFile;
-          vscode.window.showInformationMessage(`Set fixed test file to ${fixedTestFile.fsPath}`);
+          vscode.window.showInformationMessage(`Set fixed test file to ${basename(fixedTestFile.fsPath)}`);
         }
       } else {
         fixedTestFile = undefined;

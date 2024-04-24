@@ -5091,7 +5091,7 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.toggleFixedTestFile"),
     ],
     wantInfoMessages: [
-      `Set fixed test file to ${startingFile("bloop.java")}`.replace("C:", "c:"),
+      `Set fixed test file to bloop.java`,
     ],
   },
   {
@@ -5103,7 +5103,7 @@ const testCases: () => TestCase[] = () => [
       cmd("groog.toggleFixedTestFile"),
     ],
     wantInfoMessages: [
-      `Set fixed test file to ${startingFile("bloop.java")}`.replace("C:", "c:"),
+      `Set fixed test file to bloop.java`,
       "Unset fixed test file",
     ],
   },
