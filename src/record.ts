@@ -1,12 +1,11 @@
+import { stubbables } from '@leep-frog/vscode-test-stubber';
 import AwaitLock from 'await-lock';
 import * as vscode from 'vscode';
 import { ColorMode, HandlerColoring, gutterHandlerColoring } from './color_mode';
 import { Emacs } from './emacs';
 import { FindHandler, FindRecord } from './find';
 import { TypeHandler } from './handler';
-import { CursorMove, DeleteCommand } from './interfaces';
-import { MatchRecord } from 'glob/dist/commonjs/processor';
-import { TEST_MODE, stubbables } from './stubs';
+import { DeleteCommand } from './interfaces';
 
 export interface RegisterCommandOptionalProps {
   noLock?: boolean;

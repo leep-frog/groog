@@ -2,12 +2,12 @@ import * as assert from 'assert';
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
+import { CloseQuickPickAction, NoOpQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectItemQuickPickAction, StubbablesConfig } from '@leep-frog/vscode-test-stubber';
 import { readFileSync, writeFileSync } from 'fs';
 import { jsonIgnoreReplacer } from 'json-ignore';
 import * as vscode from 'vscode';
 import { Document, FindRecord, Match } from '../../find';
 import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
-import { CloseQuickPickAction, NoOpQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectItemQuickPickAction, StubbablesConfig } from '../../stubs';
 import path = require('path');
 
 // Note: this needs to be identical to the value in .vscode-test.mjs (trying to have shared import there is awkward).

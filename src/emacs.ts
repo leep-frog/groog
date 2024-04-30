@@ -1,3 +1,4 @@
+import { TEST_MODE } from '@leep-frog/vscode-test-stubber';
 import * as vscode from 'vscode';
 import { handleDeleteCharacter, handleTypedCharacter } from './character-functions';
 import { ColorMode } from './color_mode';
@@ -10,7 +11,6 @@ import { miscCommands, miscTestReset, multiCommand } from './misc-command';
 import { Recorder } from './record';
 import { Scripts } from './scripts';
 import { Settings } from './settings';
-import { TEST_MODE } from './stubs';
 import { TerminalFindHandler } from './terminal-find';
 
 export class GlobalBoolTracker {

@@ -1,3 +1,4 @@
+import { stubbables } from '@leep-frog/vscode-test-stubber';
 import { jsonIgnore } from 'json-ignore';
 import * as vscode from 'vscode';
 import { ColorMode, HandlerColoring, gutterHandlerColoring } from './color_mode';
@@ -6,7 +7,6 @@ import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { positiveMod } from './misc-command';
 import { Record, Recorder } from './record';
-import { stubbables } from './stubs';
 
 function findColor(opacity?: number): string{
   return `rgba(200, 120, 0, ${opacity ?? 1})`;
