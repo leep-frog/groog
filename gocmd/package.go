@@ -11,7 +11,7 @@ func groogPackage(versionOverride string) *Package {
 		Publisher:   "groogle",
 		Main:        "./out/extension.js",
 		Engines: map[string]string{
-			"vscode": "^1.88.0",
+			"vscode": "^1.81.0",
 		},
 		Repository: &Repository{
 			Type: "git",
