@@ -1,4 +1,4 @@
-import { stubbables } from '@leep-frog/vscode-test-stubber';
+import { VSCODE_STUBS } from '@leep-frog/vscode-test-stubber';
 import { jsonIgnore } from 'json-ignore';
 import * as vscode from 'vscode';
 import { ColorMode, HandlerColoring, gutterHandlerColoring } from './color_mode';
@@ -588,7 +588,7 @@ class FindContextCache {
     ];
 
     const disposables: vscode.Disposable[] = [];
-    const input = stubbables.createQuickPick<FindQuickPickItem>();
+    const input = VSCODE_STUBS.createQuickPick<FindQuickPickItem>();
     input.items = items;
     input.title = "Find Mode";
 
@@ -620,7 +620,7 @@ class FindContextCache {
         input.dispose();
       }),
     );
-    return stubbables.showQuickPick(input);
+    return VSCODE_STUBS.showQuickPick(input);
   }
 
   async prevMatch() {
