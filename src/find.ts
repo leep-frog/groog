@@ -588,7 +588,7 @@ class FindContextCache {
     ];
 
     const disposables: vscode.Disposable[] = [];
-    const input = VSCODE_STUBS.createQuickPick<FindQuickPickItem>();
+    const input = vscode.window.createQuickPick<FindQuickPickItem>();
     input.items = items;
     input.title = "Find Mode";
 
