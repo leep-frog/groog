@@ -2,8 +2,7 @@ import * as assert from 'assert';
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
-import { CloseQuickPickAction, NoOpQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectItemQuickPickAction, StubbablesConfig, testSetup, testVerify } from '@leep-frog/vscode-test-stubber';
-import { jsonIgnoreReplacer } from 'json-ignore';
+import { CloseQuickPickAction, NoOpQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectItemQuickPickAction, SimpleTestCase, SimpleTestCaseProps, StubbablesConfig, UserInteraction, cmd } from '@leep-frog/vscode-test-stubber';
 import * as vscode from 'vscode';
 import { Document, FindRecord, Match } from '../../find';
 import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
@@ -12,24 +11,6 @@ import path = require('path');
 // Note: this needs to be identical to the value in .vscode-test.mjs (trying to have shared import there is awkward).
 // export const stubbableTestFile = path.resolve(".vscode-test", "stubbable-file.json");
 export const stubbableTestFile = `C:\\Users\\gleep\\Desktop\\Coding\\vs-code\\groog\\.vscode-test\\stubbable-file.json`;
-
-class DelayExecution implements UserInteraction {
-  constructor(
-    public waitMs: number,
-  ) {}
-
-  delay() {
-    return new Promise( resolve => setTimeout(resolve, this.waitMs) );
-  }
-
-  async do() {
-    await this.delay();
-  };
-}
-
-function delay(ms: number): UserInteraction {
-  return new DelayExecution(ms);
-}
 
 function startingFile(filename: string) {
   return path.resolve(__dirname, "..", "..", "..", "src", "test", "test-workspace", filename);
@@ -504,30 +485,11 @@ suite('Document.matches Test Suite', () => {
   });
 });
 
-interface UserInteraction {
-  do(): Promise<any>;
-}
-
-class CommandExecution implements UserInteraction {
-  constructor(
-    public command: string,
-    public args?: any[],
-  ) {}
-
-  async do() {
-    return vscode.commands.executeCommand(this.command, ...(this.args || []));
-  };
-}
-
-function cmd(command: string, ...args: any[]) : CommandExecution {
-  return new CommandExecution(command, args);
-}
-
 // Frequently used commands
 const ctrlG = cmd("groog.ctrlG");
 const closeAllEditors = cmd("workbench.action.closeEditorsAndGroup");
 
-function type(text: string) : CommandExecution {
+function type(text: string) : UserInteraction {
   return cmd("groog.type", { "text": text });
 }
 
@@ -538,17 +500,17 @@ function selection(line: number, char: number) : vscode.Selection {
 interface TestCase {
   name: string;
   runSolo?: boolean
-  noStartingEditor?: boolean;
-  startingText?: string[];
-  startingFile?: string;
-  startingSelections?: vscode.Selection[];
-  userInteractions?: UserInteraction[];
+  // noStartingEditor?: boolean;
+  // text?: string[];
+  // startingFile?: string;
+  // selections?: vscode.Selection[];
+  // userInteractions?: UserInteraction[];
   inputBoxResponses?: string[];
   stubbablesConfig?: StubbablesConfig;
-  wantDocument?: string[];
-  noDocument?: boolean;
-  wantSelections?: vscode.Selection[];
+  // expectedText?: string[];
+  // expectedSelections?: vscode.Selection[];
   wantInputBoxValidationMessages?: vscode.InputBoxValidationMessage[];
+  stc: SimpleTestCaseProps;
 }
 
 const TEST_ITERATIONS = 1;
@@ -558,9 +520,11 @@ function testCases(): TestCase[] {
     // Basic/setup tests
     {
       name: "Captures opening info message",
-      userInteractions: [
-        cmd("groog.cursorRight"), // Need command to activate extension.
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.cursorRight"), // Need command to activate extension.
+        ],
+      },
       stubbablesConfig: {
         expectedInfoMessages: [
           `Basic keyboard mode activated`,
@@ -571,10 +535,12 @@ function testCases(): TestCase[] {
     // Note: These typos are configured in src/test/test-workspace/.vscode/settings.json
     {
       name: "Typo does nothing if typing with no editor",
-      userInteractions: [
-        closeAllEditors,
-        type(" "),
-      ],
+      stc: {
+        userInteractions: [
+          closeAllEditors,
+          type(" "),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `Couldn't find active editor`,
@@ -583,215 +549,252 @@ function testCases(): TestCase[] {
     },
     {
       name: "Typo fixer doesn't do anything if still typing",
-      wantSelections: [
-        selection(0, 9),
-      ],
-      wantDocument: [
-        "typobuidl",
-      ],
-      userInteractions: [
-        type("typobuid"),
-        type("l"),
-      ],
+      stc: {
+        text: [],
+        expectedSelections: [
+          selection(0, 9),
+        ],
+        expectedText: [
+          "typobuidl",
+        ],
+        userInteractions: [
+          type("typobuid"),
+          type("l"),
+        ],
+      },
     },
     {
       name: "Typo fixer fixes if word is over",
-      wantSelections: [
-        selection(0, 6),
-      ],
-      wantDocument: [
-        "build ",
-      ],
-      userInteractions: [
-        type("typobuid"),
-        type("l"),
-        type(" "),
-      ],
+      stc: {
+        text: [],
+        expectedSelections: [
+          selection(0, 6),
+        ],
+        expectedText: [
+          "build ",
+        ],
+        userInteractions: [
+          type("typobuid"),
+          type("l"),
+          type(" "),
+        ],
+      },
     },
     {
       name: "Typo fixer fixes if word is over with other word break character",
-      wantSelections: [
-        selection(0, 6),
-      ],
-      wantDocument: [
-        "build(",
-      ],
-      userInteractions: [
-        type("typobuid"),
-        type("l"),
-        type("("),
-      ],
+      stc: {
+        text: [],
+        expectedSelections: [
+          selection(0, 6),
+        ],
+        expectedText: [
+          "build(",
+        ],
+        userInteractions: [
+          type("typobuid"),
+          type("l"),
+          type("("),
+        ],
+      },
     },
     {
       name: "Doesn't run typo if typing over a selection",
-      startingText: [
-        "typobuidl  ",
-      ],
-      startingSelections: [
-        new vscode.Selection(0, 9, 0, 11),
-      ],
-      wantSelections: [
-        selection(0, 10),
-      ],
-      wantDocument: [
-        "typobuidl ",
-      ],
-      userInteractions: [
-        type(" "),
-      ],
+      stc: {
+        selections: [
+          new vscode.Selection(0, 9, 0, 11),
+        ],
+        expectedSelections: [
+          selection(0, 10),
+        ],
+        expectedText: [
+          "typobuidl ",
+        ],
+        userInteractions: [
+          type(" "),
+        ],
+        text: [
+          "typobuidl  ",
+        ],
+      },
     },
     {
       name: "Doesn't run typo if not at the end of a word",
-      startingText: [
-        "typobuidl(",
-      ],
-      startingSelections: [
-        selection(0, 10),
-      ],
-      wantSelections: [
-        selection(0, 11),
-      ],
-      wantDocument: [
-        "typobuidl( ",
-      ],
-      userInteractions: [
-        type(" "),
-      ],
+      stc: {
+        selections: [
+          selection(0, 10),
+        ],
+        expectedSelections: [
+          selection(0, 11),
+        ],
+        expectedText: [
+          "typobuidl( ",
+        ],
+        userInteractions: [
+          type(" "),
+        ],
+        text: [
+          "typobuidl(",
+        ],
+      },
     },
     {
       name: "Language specific typo runs in that language",
-      startingFile: startingFile("empty.go"),
-      startingSelections: [
-        selection(3, 0),
-      ],
-      wantSelections: [
-        selection(3, 19),
-      ],
-      wantDocument: [
-        "package main",
-        "",
-        "func main() {",
-        `  fmt.Println("abc")`,
-        "}",
-        "",
-      ],
-      userInteractions: [
-        type("  "),
-        type("fpl"),
-        type(" "),
-        type(`"abc"`),
-      ],
+      stc: {
+        userInteractions: [
+          type("  "),
+          type("fpl"),
+          type(" "),
+          type(`"abc"`),
+        ],
+        file: startingFile("empty.go"),
+        selections: [
+          selection(3, 0),
+        ],
+        expectedSelections: [
+          selection(3, 19),
+        ],
+        expectedText: [
+          "package main",
+          "",
+          "func main() {",
+          `  fmt.Println("abc")`,
+          "}",
+          "",
+        ],
+      },
     },
     {
       name: "Regular word is not changed if not a configured break character",
-      wantSelections: [
-        selection(0, 8),
-      ],
-      wantDocument: [
-        "typoabc ",
-      ],
-      userInteractions: [
-        type("typoabc"),
-        type(" "),
-      ],
+      stc: {
+        text: [],
+        userInteractions: [
+          type("typoabc"),
+          type(" "),
+        ],
+        expectedSelections: [
+          selection(0, 8),
+        ],
+        expectedText: [
+          "typoabc ",
+        ],
+      },
     },
     {
       name: "Proper break character replaces word",
-      wantSelections: [
-        selection(0, 4),
-      ],
-      wantDocument: [
-        "ABC^",
-      ],
-      userInteractions: [
-        type("typoabc"),
-        type("^"),
-      ],
+      stc: {
+        text: [],
+        userInteractions: [
+          type("typoabc"),
+          type("^"),
+        ],
+        expectedSelections: [
+          selection(0, 4),
+        ],
+        expectedText: [
+          "ABC^",
+        ],
+      },
     },
     {
       name: "Exclude break character replaces word without character",
-      wantSelections: [
-        selection(0, 3),
-      ],
-      wantDocument: [
-        "ABC",
-      ],
-      userInteractions: [
-        type("typoabc"),
-        type("."),
-      ],
+      stc: {
+        text: [],
+        userInteractions: [
+          type("typoabc"),
+          type("."),
+        ],
+        expectedSelections: [
+          selection(0, 3),
+        ],
+        expectedText: [
+          "ABC",
+        ],
+      },
     },
     {
       name: "Replacement suffix",
-      wantSelections: [
-        selection(0, 6),
-      ],
-      wantDocument: [
-        "ABC$ef",
-      ],
-      userInteractions: [
-        type("typoabc"),
-        type("$"),
-      ],
+      stc: {
+        text: [],
+        userInteractions: [
+          type("typoabc"),
+          type("$"),
+        ],
+        expectedSelections: [
+          selection(0, 6),
+        ],
+        expectedText: [
+          "ABC$ef",
+        ],
+      },
     },
     {
       name: "Replacement suffix after cursor",
-      wantSelections: [
-        selection(0, 4),
-      ],
-      wantDocument: [
-        "ABC-EF",
-      ],
-      userInteractions: [
-        type("typoabc"),
-        type("-"),
-      ],
+      stc: {
+        text: [],
+        userInteractions: [
+          type("typoabc"),
+          type("-"),
+        ],
+        expectedSelections: [
+          selection(0, 4),
+        ],
+        expectedText: [
+          "ABC-EF",
+        ],
+      },
     },
     {
       name: "Replacement suffix before and after cursor",
-      wantSelections: [
-        selection(0, 5),
-      ],
-      wantDocument: [
-        "ABCdeF",
-      ],
-      userInteractions: [
-        type("typoabc"),
-        type("&"),
-      ],
+      stc: {
+        text: [],
+        userInteractions: [
+          type("typoabc"),
+          type("&"),
+        ],
+        expectedSelections: [
+          selection(0, 5),
+        ],
+        expectedText: [
+          "ABCdeF",
+        ],
+      },
     },
     // Typo with multi-line suffix replacements
     {
       name: "Replacement suffix before and after cursor",
-      startingText: [
-        "The alphabet: ",
-      ],
-      startingSelections: [
-        selection(0, 14),
-      ],
-      wantSelections: [
-        selection(3, 1),
-      ],
-      wantDocument: [
-        "The alphabet: abcdef",
-        "ghijkl",
-        "mn",
-        "opq",
-        "rstuvw",
-        "xyz",
-      ],
-      userInteractions: [
-        type("typoalphabet"),
-        type(" "),
-      ],
+      stc: {
+        userInteractions: [
+          type("typoalphabet"),
+          type(" "),
+        ],
+        text: [
+          "The alphabet: ",
+        ],
+        selections: [
+          selection(0, 14),
+        ],
+        expectedSelections: [
+          selection(3, 1),
+        ],
+        expectedText: [
+          "The alphabet: abcdef",
+          "ghijkl",
+          "mn",
+          "opq",
+          "rstuvw",
+          "xyz",
+        ],
+      },
     },
     // Keyboard toggle tests
     {
       name: "Toggles to QMK mode",
       // TODO: Test something about context value
-      userInteractions: [
-        cmd("groog.toggleQMK"),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.toggleQMK"),
+        ],
+      },
       stubbablesConfig: {
         expectedInfoMessages: [
           `QMK keyboard mode activated`,
@@ -801,36 +804,45 @@ function testCases(): TestCase[] {
     {
       name: "Toggles back to basic keyboard mode",
       // TODO: Test something about context value
-      userInteractions: [
-        cmd("groog.toggleQMK"),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.toggleQMK"),
+        ],
+      },
       stubbablesConfig: {
         expectedInfoMessages: [
           `Basic keyboard mode activated`,
         ],
       },
     },
-    {
-      name: "Works for empty file and no changes",
-    },
+    // { TODOOOOOO
+    // name: "Works for empty file and no changes",
+    // },
     {
       name: "Writes text to file",
-      startingText: [
-        "abc",
-      ],
-      wantDocument: [
-        "abc",
-      ],
+      stc: {
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "abc",
+        ],
+      },
     },
     // Find command failure tests
     {
       name: "groog.find.replaceOne if not in find mode",
-      startingText: [
-        "abc",
-      ],
-      userInteractions: [
-        cmd("groog.find.replaceOne"),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.find.replaceOne"),
+        ],
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "abc",
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `Cannot replace matches when not in groog.find mode`,
@@ -839,12 +851,17 @@ function testCases(): TestCase[] {
     },
     {
       name: "groog.find.replaceAll if not in find mode",
-      startingText: [
-        "abc",
-      ],
-      userInteractions: [
-        cmd("groog.find.replaceAll"),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.find.replaceAll"),
+        ],
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "abc",
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `Cannot replace matches when not in groog.find mode`,
@@ -853,12 +870,17 @@ function testCases(): TestCase[] {
     },
     {
       name: "groog.find.toggleReplaceMode if not in find mode",
-      startingText: [
-        "abc",
-      ],
-      userInteractions: [
-        cmd("groog.find.toggleReplaceMode"),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.find.toggleReplaceMode"),
+        ],
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "abc",
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `groog.find.toggleReplaceMode can only be executed in find mode`,
@@ -867,12 +889,17 @@ function testCases(): TestCase[] {
     },
     {
       name: "groog.find.previous if not in find mode",
-      startingText: [
-        "abc",
-      ],
-      userInteractions: [
-        cmd("groog.find.previous"),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.find.previous"),
+        ],
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "abc",
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `groog.find.previous can only be executed in find mode`,
@@ -881,12 +908,17 @@ function testCases(): TestCase[] {
     },
     {
       name: "groog.find.next if not in find mode",
-      startingText: [
-        "abc",
-      ],
-      userInteractions: [
-        cmd("groog.find.next"),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.find.next"),
+        ],
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "abc",
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `groog.find.next can only be executed in find mode`,
@@ -896,15 +928,12 @@ function testCases(): TestCase[] {
     // Find no editor tests
     {
       name: "groog.find fails if no editor",
-      startingText: [
-        "abc",
-      ],
-      wantDocument: [],
-      // noDocument: true,
-      userInteractions: [
-        closeAllEditors,
-        cmd("groog.find"),
-      ],
+      stc: {
+        userInteractions: [
+          closeAllEditors,
+          cmd("groog.find"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `Cannot activate find mode from outside an editor`,
@@ -913,14 +942,12 @@ function testCases(): TestCase[] {
     },
     {
       name: "groog.reverseFind fails if no editor",
-      startingText: [
-        "abc",
-      ],
-      wantDocument: [],
-      userInteractions: [
-        closeAllEditors,
-        cmd("groog.reverseFind"),
-      ],
+      stc: {
+        userInteractions: [
+          closeAllEditors,
+          cmd("groog.reverseFind"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `Cannot activate find mode from outside an editor`,
@@ -929,16 +956,17 @@ function testCases(): TestCase[] {
     },
     {
       name: "groog.find deactivate fails if no editor",
-      startingText: [
-        "abc",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("ab"),
-        closeAllEditors,
-        type("c"),
-      ],
-      wantDocument: [],
+      stc: {
+        text: [
+          "abc",
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          type("ab"),
+          closeAllEditors,
+          type("c"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -965,15 +993,23 @@ function testCases(): TestCase[] {
     },
     {
       name: "End of find cache",
-      startingText: [
-        "abc",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("ab"),
-        cmd("groog.find.next"),
-        type("c"),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.find"),
+          type("ab"),
+          cmd("groog.find.next"),
+          type("c"),
+        ],
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "abc",
+        ],
+        expectedSelections: [
+          new vscode.Selection(0, 0, 0, 3),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -1004,21 +1040,26 @@ function testCases(): TestCase[] {
           `End of find cache`,
         ],
       },
-      wantSelections: [
-        new vscode.Selection(0, 0, 0, 3),
-      ],
     },
     {
       name: "Beginning of find cache",
-      startingText: [
-        "abc",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("ab"),
-        cmd("groog.find.previous"),
-        type("c"),
-      ],
+      stc: {
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "abc",
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          type("ab"),
+          cmd("groog.find.previous"),
+          type("c"),
+        ],
+        expectedSelections: [
+          new vscode.Selection(0, 0, 0, 3),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -1049,25 +1090,27 @@ function testCases(): TestCase[] {
           `No earlier find contexts available`,
         ],
       },
-      wantSelections: [
-        new vscode.Selection(0, 0, 0, 3),
-      ],
     },
     // Find tests
     {
       name: "Moving deactivates find",
-      startingText: [
-        "abcdef",
-      ],
-      wantDocument: [
-        "abXcdef",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("cde"),
-        cmd("groog.cursorLeft"),
-        type("X"),
-      ],
+      stc: {
+        text: [
+          "abcdef",
+        ],
+        expectedText: [
+          "abXcdef",
+        ],
+        expectedSelections: [
+          selection(0, 3),
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          type("cde"),
+          cmd("groog.cursorLeft"),
+          type("X"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -1088,26 +1131,28 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [
-        selection(0, 3),
-      ],
     },
     {
       name: "Unsupported delete command is ignored",
-      startingText: [
-        "abcdef",
-      ],
-      wantDocument: [
-        "abXf",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("cd"),
-        cmd("groog.deleteRight"),
-        type("e"),
-        ctrlG,
-        type("X"),
-      ],
+      stc: {
+        text: [
+          "abcdef",
+        ],
+        expectedText: [
+          "abXf",
+        ],
+        expectedSelections: [
+          selection(0, 3),
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          type("cd"),
+          cmd("groog.deleteRight"),
+          type("e"),
+          ctrlG,
+          type("X"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -1139,33 +1184,35 @@ function testCases(): TestCase[] {
           `Unsupported find command: groog.deleteRight`,
         ],
       },
-      wantSelections: [
-        selection(0, 3),
-      ],
     },
     {
       name: "Supports groog.deleteLeft",
-      startingText: [
-        "abc1",
-        "abc2",
-        "abc3",
-        "abc4",
-      ],
-      wantDocument: [
-        "abc1",
-        "abc2",
-        "abc3 HERE",
-        "abc4",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("abcX"),
-        cmd("groog.deleteLeft"),
-        type("3"),
-        ctrlG,
-        ctrlG,
-        type(" HERE"),
-      ],
+      stc: {
+        text: [
+          "abc1",
+          "abc2",
+          "abc3",
+          "abc4",
+        ],
+        expectedText: [
+          "abc1",
+          "abc2",
+          "abc3 HERE",
+          "abc4",
+        ],
+        expectedSelections: [
+          selection(2, 9),
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          type("abcX"),
+          cmd("groog.deleteLeft"),
+          type("3"),
+          ctrlG,
+          ctrlG,
+          type(" HERE"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -1200,36 +1247,38 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [
-        selection(2, 9),
-      ],
     },
     {
       name: "Works with emacs pasting",
-      startingText: [
-        "bc",
-        "abc1",
-        "abc2",
-        "abc3",
-        "abc4",
-      ],
-      wantDocument: [
-        "",
-        "abc1",
-        "abc2 HERE",
-        "abc3",
-        "abc4",
-      ],
-      userInteractions: [
-        cmd("groog.kill"),
-        cmd("groog.find"),
-        type("a"),
-        cmd("groog.emacsPaste"),
-        type("2"),
-        ctrlG,
-        ctrlG,
-        type(" HERE"),
-      ],
+      stc: {
+        text: [
+          "bc",
+          "abc1",
+          "abc2",
+          "abc3",
+          "abc4",
+        ],
+        expectedText: [
+          "",
+          "abc1",
+          "abc2 HERE",
+          "abc3",
+          "abc4",
+        ],
+        expectedSelections: [
+          selection(2, 9),
+        ],
+        userInteractions: [
+          cmd("groog.kill"),
+          cmd("groog.find"),
+          type("a"),
+          cmd("groog.emacsPaste"),
+          type("2"),
+          ctrlG,
+          ctrlG,
+          type(" HERE"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -1264,40 +1313,42 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [
-        selection(2, 9),
-      ],
     },
     {
       name: "Works with regular pasting",
-      startingText: [
-        "bc",
-        "abc1",
-        "abc2",
-        "abc3",
-        "abc4",
-      ],
-      wantDocument: [
-        "bcX",
-        "abc1",
-        "abc2",
-        "abc3 HERE",
-        "abc4",
-      ],
-      userInteractions: [
-        cmd("groog.toggleMarkMode"),
-        cmd("groog.cursorEnd"),
-        cmd("editor.action.clipboardCopyAction"),
-        ctrlG,
-        type("X"),
-        cmd("groog.find"),
-        type("a"),
-        cmd("groog.paste"),
-        type("3"),
-        ctrlG,
-        ctrlG,
-        type(" HERE"),
-      ],
+      stc: {
+        text: [
+          "bc",
+          "abc1",
+          "abc2",
+          "abc3",
+          "abc4",
+        ],
+        expectedText: [
+          "bcX",
+          "abc1",
+          "abc2",
+          "abc3 HERE",
+          "abc4",
+        ],
+        expectedSelections: [
+          selection(3, 9),
+        ],
+        userInteractions: [
+          cmd("groog.toggleMarkMode"),
+          cmd("groog.cursorEnd"),
+          cmd("editor.action.clipboardCopyAction"),
+          ctrlG,
+          type("X"),
+          cmd("groog.find"),
+          type("a"),
+          cmd("groog.paste"),
+          type("3"),
+          ctrlG,
+          ctrlG,
+          type(" HERE"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -1332,34 +1383,36 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [
-        selection(3, 9),
-      ],
     },
     {
       name: "Matches case word",
-      startingText: [
-        "ABC",
-        "aBc",
-        "Abc",
-        "abc",
-        "abC",
-      ],
-      wantDocument: [
-        "ABC",
-        "aBc",
-        "Abc",
-        "xyz",
-        "abC",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        cmd("groog.find.toggleCaseSensitive"),
-        type("abc"),
-        ctrlG,
-        cmd("groog.deleteLeft"),
-        type("xyz"),
-      ],
+      stc: {
+        text: [
+          "ABC",
+          "aBc",
+          "Abc",
+          "abc",
+          "abC",
+        ],
+        expectedText: [
+          "ABC",
+          "aBc",
+          "Abc",
+          "xyz",
+          "abC",
+        ],
+        expectedSelections: [
+          selection(3, 3),
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          cmd("groog.find.toggleCaseSensitive"),
+          type("abc"),
+          ctrlG,
+          cmd("groog.deleteLeft"),
+          type("xyz"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -1387,38 +1440,40 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [
-        selection(3, 3),
-      ],
     },
     {
       name: "Matches regex",
-      startingText: [
-        "1 jkslds jdkfjd 2",
-        "b1 qwertyuiop 3a",
-        " 1 qwertyuiop 3 ",
-        "1 qwertyuiop 3",
-        "1 asd fgh jkl\t4",
-        "15",
-      ],
-      wantDocument: [
-        "1 jkslds jdkfjd 2",
-        "b1 qwertyuiop 3a",
-        " 1 qwertyuiop 3 ",
-        "1 xyz 3",
-        "1 asd fgh jkl\t4",
-        "15",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        cmd("groog.find.toggleRegex"),
-        type("^1.*3$"),
-        ctrlG,
-        ctrlG,
-        cmd("groog.cursorLeft"),
-        cmd("groog.deleteWordLeft"),
-        type("xyz "),
-      ],
+      stc: {
+        text: [
+          "1 jkslds jdkfjd 2",
+          "b1 qwertyuiop 3a",
+          " 1 qwertyuiop 3 ",
+          "1 qwertyuiop 3",
+          "1 asd fgh jkl\t4",
+          "15",
+        ],
+        expectedText: [
+          "1 jkslds jdkfjd 2",
+          "b1 qwertyuiop 3a",
+          " 1 qwertyuiop 3 ",
+          "1 xyz 3",
+          "1 asd fgh jkl\t4",
+          "15",
+        ],
+        expectedSelections: [
+          selection(3, 6),
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          cmd("groog.find.toggleRegex"),
+          type("^1.*3$"),
+          ctrlG,
+          ctrlG,
+          cmd("groog.cursorLeft"),
+          cmd("groog.deleteWordLeft"),
+          type("xyz "),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -1446,30 +1501,32 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [
-        selection(3, 6),
-      ],
     },
     {
       name: "Matches whole word",
-      startingText: [
-        "abcd",
-        "bcde",
-        "bcd",
-      ],
-      wantDocument: [
-        "abcd",
-        "bcde",
-        "xyz",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        cmd("groog.find.toggleWholeWord"),
-        type("bcd"),
-        ctrlG,
-        cmd("groog.deleteLeft"),
-        type("xyz"),
-      ],
+      stc: {
+        text: [
+          "abcd",
+          "bcde",
+          "bcd",
+        ],
+        expectedText: [
+          "abcd",
+          "bcde",
+          "xyz",
+        ],
+        expectedSelections: [
+          selection(2, 3),
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          cmd("groog.find.toggleWholeWord"),
+          type("bcd"),
+          ctrlG,
+          cmd("groog.deleteLeft"),
+          type("xyz"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -1497,52 +1554,54 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [
-        selection(2, 3),
-      ],
     },
     // Find whole word item accept logic
     // {
     //   name: "Matches whole word",
-    //   startingText: [
+    //   text: [
     //     "abcd",
     //     "bcdef",
     //     "bcdeeee",
     //     "a BCDE fg",
     //     "bcause",
     //   ],
-    //   wantDocument: [
+    //   expectedText: [
     //     "abcd",
     //     "bcdef",
     //     "bcdeeee",
     //     "a BCDE fg",
     //     "bcause",
     //   ],
+    // stc: {
     //   userInteractions: [
     //     cmd("groog.find"),
     //     cmd("groog.find.toggleWholeWord"),
     //     type("bcd"),
     //     ctrlG,
-
     //     cmd("groog.deleteLeft"),
     //     type("xyz"),
     //   ],
-    //   wantSelections: [
+    //   expectedSelections: [
     //     selection(2, 3),
     //   ],
     // },
     // Replace tests
     {
       name: "Replace fails if match failure",
-      startingText: [
-        "abc",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        cmd("groog.find.toggleRegex"),
-        type("?a"),
-        cmd("groog.find.replaceOne"),
-      ],
+      stc: {
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "abc",
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          cmd("groog.find.toggleRegex"),
+          type("?a"),
+          cmd("groog.find.replaceOne"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -1579,14 +1638,19 @@ function testCases(): TestCase[] {
     },
     {
       name: "Replace does nothing if no match",
-      startingText: [
-        "abc",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("xyz"),
-        cmd("groog.find.replaceOne"),
-      ],
+      stc: {
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "abc",
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          type("xyz"),
+          cmd("groog.find.replaceOne"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -1610,25 +1674,31 @@ function testCases(): TestCase[] {
     },
     {
       name: "Replaces one vanilla text",
-      startingText: [
-        "abcd",
-        "bcde",
-        "bc",
-        " BcD",
-      ],
-      wantDocument: [
-        "aXYZd",
-        "bcde",
-        "bc",
-        " BcD",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("bc"),
-        cmd("groog.find.toggleReplaceMode"),
-        type("XYZ"),
-        cmd("groog.find.replaceOne"),
-      ],
+      stc: {
+        text: [
+          "abcd",
+          "bcde",
+          "bc",
+          " BcD",
+        ],
+        expectedText: [
+          "aXYZd",
+          "bcde",
+          "bc",
+          " BcD",
+        ],
+        expectedSelections: [
+        // Should be at next match
+          new vscode.Selection(1, 0, 1, 2),
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          type("bc"),
+          cmd("groog.find.toggleReplaceMode"),
+          type("XYZ"),
+          cmd("groog.find.replaceOne"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -1679,32 +1749,30 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [
-      // Should be at next match
-        new vscode.Selection(1, 0, 1, 2),
-      ],
     },
     {
       name: "Replaces all vanilla text",
-      startingText: [
-        "abcd",
-        "bcde",
-        "bc",
-        " BcD",
-      ],
-      wantDocument: [
-        "aXYZd",
-        "XYZde",
-        "XYZ",
-        " XYZD",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("bc"),
-        cmd("groog.find.toggleReplaceMode"),
-        type("XYZ"),
-        cmd("groog.find.replaceAll"),
-      ],
+      stc: {
+        text: [
+          "abcd",
+          "bcde",
+          "bc",
+          " BcD",
+        ],
+        expectedText: [
+          "aXYZd",
+          "XYZde",
+          "XYZ",
+          " XYZD",
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          type("bc"),
+          cmd("groog.find.toggleReplaceMode"),
+          type("XYZ"),
+          cmd("groog.find.replaceAll"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -1758,26 +1826,32 @@ function testCases(): TestCase[] {
     },
     {
       name: "Replaces one case match",
-      startingText: [
-        "aBc",
-        "bcd",
-        "bC",
-        "abc",
-      ],
-      wantDocument: [
-        "aBc",
-        "Xd",
-        "bC",
-        "abc",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("bc"),
-        cmd("groog.find.toggleReplaceMode"),
-        cmd("groog.find.toggleCaseSensitive"),
-        type("X"),
-        cmd("groog.find.replaceOne"),
-      ],
+      stc: {
+        text: [
+          "aBc",
+          "bcd",
+          "bC",
+          "abc",
+        ],
+        expectedText: [
+          "aBc",
+          "Xd",
+          "bC",
+          "abc",
+        ],
+        expectedSelections: [
+        // Should be at next match
+          new vscode.Selection(3, 1, 3, 3),
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          type("bc"),
+          cmd("groog.find.toggleReplaceMode"),
+          cmd("groog.find.toggleCaseSensitive"),
+          type("X"),
+          cmd("groog.find.replaceOne"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -1838,35 +1912,37 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [
-      // Should be at next match
-        new vscode.Selection(3, 1, 3, 3),
-      ],
     },
     {
       name: "Replaces all case match",
-      startingText: [
-        "aBc",
-        "bcd",
-        "bC",
-        "abc",
-        "   vbcnxm ",
-      ],
-      wantDocument: [
-        "aBc",
-        "Xd",
-        "bC",
-        "aX",
-        "   vXnxm ",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("bc"),
-        cmd("groog.find.toggleReplaceMode"),
-        cmd("groog.find.toggleCaseSensitive"),
-        type("X"),
-        cmd("groog.find.replaceAll"),
-      ],
+      stc: {
+        text: [
+          "aBc",
+          "bcd",
+          "bC",
+          "abc",
+          "   vbcnxm ",
+        ],
+        expectedText: [
+          "aBc",
+          "Xd",
+          "bC",
+          "aX",
+          "   vXnxm ",
+        ],
+        expectedSelections: [
+        // Should be at next match
+          selection(0, 0),
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          type("bc"),
+          cmd("groog.find.toggleReplaceMode"),
+          cmd("groog.find.toggleCaseSensitive"),
+          type("X"),
+          cmd("groog.find.replaceAll"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -1927,35 +2003,37 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [
-      // Should be at next match
-        selection(0, 0),
-      ],
     },
     {
       name: "Replaces one whole word match",
-      startingText: [
-        "aBc",
-        "bc",
-        "Bc",
-        "bcd",
-        " a bc d ",
-      ],
-      wantDocument: [
-        "aBc",
-        "X",
-        "Bc",
-        "bcd",
-        " a bc d ",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("bc"),
-        cmd("groog.find.toggleReplaceMode"),
-        cmd("groog.find.toggleWholeWord"),
-        type("X"),
-        cmd("groog.find.replaceOne"),
-      ],
+      stc: {
+        text: [
+          "aBc",
+          "bc",
+          "Bc",
+          "bcd",
+          " a bc d ",
+        ],
+        expectedText: [
+          "aBc",
+          "X",
+          "Bc",
+          "bcd",
+          " a bc d ",
+        ],
+        expectedSelections: [
+        // Should be at next match
+          new vscode.Selection(2, 0, 2, 2),
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          type("bc"),
+          cmd("groog.find.toggleReplaceMode"),
+          cmd("groog.find.toggleWholeWord"),
+          type("X"),
+          cmd("groog.find.replaceOne"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -2016,35 +2094,33 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [
-      // Should be at next match
-        new vscode.Selection(2, 0, 2, 2),
-      ],
     },
     {
       name: "Replaces all whole word match",
-      startingText: [
-        "aBc",
-        "X",
-        "Bc",
-        "bcd",
-        " a bc d ",
-      ],
-      wantDocument: [
-        "aBc",
-        "X",
-        "X",
-        "bcd",
-        " a X d ",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("bc"),
-        cmd("groog.find.toggleReplaceMode"),
-        cmd("groog.find.toggleWholeWord"),
-        type("X"),
-        cmd("groog.find.replaceAll"),
-      ],
+      stc: {
+        text: [
+          "aBc",
+          "X",
+          "Bc",
+          "bcd",
+          " a bc d ",
+        ],
+        expectedText: [
+          "aBc",
+          "X",
+          "X",
+          "bcd",
+          " a X d ",
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          type("bc"),
+          cmd("groog.find.toggleReplaceMode"),
+          cmd("groog.find.toggleWholeWord"),
+          type("X"),
+          cmd("groog.find.replaceAll"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -2116,34 +2192,39 @@ function testCases(): TestCase[] {
     // Find context tests
     {
       name: "Find twice uses the previous find context",
-      startingText: [
-        "abc",
-        "def",
-        "abc2",
-        "ghi",
-        "abc3",
-        "xyz",
-      ],
-      wantDocument: [
-        "aZZZ",
-        "def",
-        "aREPLACE2",
-        "ghi",
-        "abc3",
-        "xyz",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("bc"),
-        ctrlG,
-        cmd("groog.deleteLeft"),
-        type("ZZZ"),
-        cmd("groog.find"),
-        cmd("groog.find"),
-        ctrlG,
-        cmd("groog.deleteLeft"),
-        type("REPLACE"),
-      ],
+      stc: {
+        text: [
+          "abc",
+          "def",
+          "abc2",
+          "ghi",
+          "abc3",
+          "xyz",
+        ],
+        expectedText: [
+          "aZZZ",
+          "def",
+          "aREPLACE2",
+          "ghi",
+          "abc3",
+          "xyz",
+        ],
+        expectedSelections: [
+          selection(2, 8),
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          type("bc"),
+          ctrlG,
+          cmd("groog.deleteLeft"),
+          type("ZZZ"),
+          cmd("groog.find"),
+          cmd("groog.find"),
+          ctrlG,
+          cmd("groog.deleteLeft"),
+          type("REPLACE"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -2178,39 +2259,41 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [
-        selection(2, 8),
-      ],
     },
     {
       name: "reverseFind",
-      startingText: [
-        "abc",
-        "def",
-        "abc2",
-        "ghi",
-        "abc3",
-        "xyz",
-        "abc4",
-        "abc5",
-      ],
-      wantDocument: [
-        "abc",
-        "def",
-        "abc2",
-        "ghi",
-        "abc3",
-        "xyz",
-        "abc4",
-        "aZZZ5",
-      ],
-      userInteractions: [
-        cmd("groog.reverseFind"),
-        type("bc"),
-        ctrlG,
-        cmd("groog.deleteLeft"),
-        type("ZZZ"),
-      ],
+      stc: {
+        text: [
+          "abc",
+          "def",
+          "abc2",
+          "ghi",
+          "abc3",
+          "xyz",
+          "abc4",
+          "abc5",
+        ],
+        expectedText: [
+          "abc",
+          "def",
+          "abc2",
+          "ghi",
+          "abc3",
+          "xyz",
+          "abc4",
+          "aZZZ5",
+        ],
+        expectedSelections: [
+          selection(7, 4),
+        ],
+        userInteractions: [
+          cmd("groog.reverseFind"),
+          type("bc"),
+          ctrlG,
+          cmd("groog.deleteLeft"),
+          type("ZZZ"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.reverseFind
@@ -2231,44 +2314,46 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [
-        selection(7, 4),
-      ],
     },
     {
       name: "Multiple finds and reverseFind",
-      startingText: [
-        "abc",
-        "def",
-        "abc2",
-        "ghi",
-        "abc3",
-        "xyz",
-        "abc4",
-        "abc5",
-      ],
-      wantDocument: [
-        "abc",
-        "def",
-        "aZZZ2",
-        "ghi",
-        "abc3",
-        "xyz",
-        "abc4",
-        "abc5",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("bc"), // abc
-        cmd("groog.find"),  // abc2
-        cmd("groog.find"),  // abc3
-        cmd("groog.find"),  // abc4
-        cmd("groog.reverseFind"),  // abc3
-        cmd("groog.reverseFind"),  // abc2
-        ctrlG,
-        cmd("groog.deleteLeft"),
-        type("ZZZ"),
-      ],
+      stc: {
+        text: [
+          "abc",
+          "def",
+          "abc2",
+          "ghi",
+          "abc3",
+          "xyz",
+          "abc4",
+          "abc5",
+        ],
+        expectedText: [
+          "abc",
+          "def",
+          "aZZZ2",
+          "ghi",
+          "abc3",
+          "xyz",
+          "abc4",
+          "abc5",
+        ],
+        expectedSelections: [
+          selection(2, 4),
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          type("bc"), // abc
+          cmd("groog.find"),  // abc2
+          cmd("groog.find"),  // abc3
+          cmd("groog.find"),  // abc4
+          cmd("groog.reverseFind"),  // abc3
+          cmd("groog.reverseFind"),  // abc2
+          ctrlG,
+          cmd("groog.deleteLeft"),
+          type("ZZZ"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -2324,41 +2409,43 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [
-        selection(2, 4),
-      ],
     },
     {
       name: "Goes to previous context",
-      startingText: [
-        "abc",
-        "def",
-        "ghi",
-        "xyz",
-      ],
-      wantDocument: [
-        "abc",
-        "REPLACEf",
-        "ghi",
-        "xyz",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("bc"),
-        ctrlG,
-        cmd("groog.find"),
-        type("de"),
-        ctrlG,
-        cmd("groog.find"),
-        type("xyz"),
-        ctrlG,
-        cmd("groog.find"),
-        cmd("groog.find.previous"),
-        cmd("groog.find.previous"),
-        ctrlG,
-        cmd("groog.deleteLeft"),
-        type("REPLACE"),
-      ],
+      stc: {
+        text: [
+          "abc",
+          "def",
+          "ghi",
+          "xyz",
+        ],
+        expectedText: [
+          "abc",
+          "REPLACEf",
+          "ghi",
+          "xyz",
+        ],
+        expectedSelections: [
+          selection(1, 7),
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          type("bc"),
+          ctrlG,
+          cmd("groog.find"),
+          type("de"),
+          ctrlG,
+          cmd("groog.find"),
+          type("xyz"),
+          ctrlG,
+          cmd("groog.find"),
+          cmd("groog.find.previous"),
+          cmd("groog.find.previous"),
+          ctrlG,
+          cmd("groog.deleteLeft"),
+          type("REPLACE"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -2428,44 +2515,46 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [
-        selection(1, 7),
-      ],
     },
     {
       name: "Goes to previous context and continues typing",
-      startingText: [
-        "abc",
-        "def",
-        "ghi",
-        "xyz",
-      ],
-      wantDocument: [
-        "abc",
-        "REPLACE",
-        "ghi",
-        "xyz",
-      ],
-      userInteractions: [
-        cmd("groog.find"),
-        type("bc"),
-        ctrlG,
-        cmd("groog.find"),
-        type("de"), // No `f`
-        ctrlG,
-        cmd("groog.find"),
-        type("xyz"),
-        ctrlG,
-        cmd("groog.find"),
-        cmd("groog.find.previous"),
-        cmd("groog.find.previous"),
-        cmd("groog.find.next"),
-        cmd("groog.find.previous"),
-        type("f"),
-        ctrlG,
-        cmd("groog.deleteLeft"),
-        type("REPLACE"),
-      ],
+      stc: {
+        text: [
+          "abc",
+          "def",
+          "ghi",
+          "xyz",
+        ],
+        expectedText: [
+          "abc",
+          "REPLACE",
+          "ghi",
+          "xyz",
+        ],
+        expectedSelections: [
+          selection(1, 7),
+        ],
+        userInteractions: [
+          cmd("groog.find"),
+          type("bc"),
+          ctrlG,
+          cmd("groog.find"),
+          type("de"), // No `f`
+          ctrlG,
+          cmd("groog.find"),
+          type("xyz"),
+          ctrlG,
+          cmd("groog.find"),
+          cmd("groog.find.previous"),
+          cmd("groog.find.previous"),
+          cmd("groog.find.next"),
+          cmd("groog.find.previous"),
+          type("f"),
+          ctrlG,
+          cmd("groog.deleteLeft"),
+          type("REPLACE"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -2556,19 +2645,21 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [
-        selection(1, 7),
-      ],
     },
     // Record tests
     {
       name: "Record playback fails if no recording set",
-      startingText: [
-        "abc",
-      ],
-      userInteractions: [
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "abc",
+        ],
+        userInteractions: [
+          cmd("groog.record.playRecording"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `No recordings exist yet!`,
@@ -2577,12 +2668,17 @@ function testCases(): TestCase[] {
     },
     {
       name: "Record playback fails if no recording set",
-      startingText: [
-        "abc",
-      ],
-      userInteractions: [
-        cmd("groog.record.playRecordingRepeatedly"),
-      ],
+      stc: {
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "abc",
+        ],
+        userInteractions: [
+          cmd("groog.record.playRecordingRepeatedly"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `No recordings exist yet!`,
@@ -2591,9 +2687,11 @@ function testCases(): TestCase[] {
     },
     {
       name: "Save named recording fails if not recording",
-      userInteractions: [
-        cmd("groog.record.saveRecordingAs"),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.record.saveRecordingAs"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `Not recording!`,
@@ -2602,9 +2700,11 @@ function testCases(): TestCase[] {
     },
     {
       name: "End recording fails if not recording",
-      userInteractions: [
-        cmd("groog.record.endRecording"),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.record.endRecording"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `Not recording!`,
@@ -2613,29 +2713,31 @@ function testCases(): TestCase[] {
     },
     {
       name: "Handles nested startRecording commands",
-      startingText: [
-        "",
-      ],
-      wantDocument: [
-        "abc",
-        "def",
-        "ghi",
-        "abc",
-        "def",
-        "",
-      ],
-      wantSelections: [
-        selection(5, 0),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        type("abc\n"),
-        cmd("groog.record.startRecording"),
-        type("def\n"),
-        cmd("groog.record.endRecording"),
-        type("ghi\n"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "",
+        ],
+        expectedText: [
+          "abc",
+          "def",
+          "ghi",
+          "abc",
+          "def",
+          "",
+        ],
+        expectedSelections: [
+          selection(5, 0),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          type("abc\n"),
+          cmd("groog.record.startRecording"),
+          type("def\n"),
+          cmd("groog.record.endRecording"),
+          type("ghi\n"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `Already recording!`,
@@ -2644,30 +2746,32 @@ function testCases(): TestCase[] {
     },
     {
       name: "groog.deleteRight eats text",
-      startingText: [
-        "start",
-        "text",
-        "end",
-      ],
-      wantDocument: [
-        "startX",
-        "textX",
-        "end",
-      ],
-      wantSelections: [
-        selection(1, 5),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.cursorEnd"),
-        cmd("groog.cursorEnd"),
-        type("X"),
-        cmd("groog.record.endRecording"),
+      stc: {
+        text: [
+          "start",
+          "text",
+          "end",
+        ],
+        expectedText: [
+          "startX",
+          "textX",
+          "end",
+        ],
+        expectedSelections: [
+          selection(1, 5),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.cursorEnd"),
+          cmd("groog.cursorEnd"),
+          type("X"),
+          cmd("groog.record.endRecording"),
 
-        cmd("groog.cursorRight"), // to next line
+          cmd("groog.cursorRight"), // to next line
 
-        cmd("groog.record.playNamedRecording"),
-      ],
+          cmd("groog.record.playNamedRecording"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new SelectItemQuickPickAction(["Recent recording 0"]),
@@ -2686,25 +2790,27 @@ function testCases(): TestCase[] {
     },
     {
       name: "Fails to playback if actively recording",
-      startingText: [
-        "abc",
-      ],
-      wantDocument: [
-        "xy",
-        "xyabc",
-      ],
-      wantSelections: [
-        selection(1, 2),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        type("x"),
-        cmd("groog.record.playRecording"),
-        type("y"),
-        cmd("groog.record.endRecording"),
-        type("\n"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "xy",
+          "xyabc",
+        ],
+        expectedSelections: [
+          selection(1, 2),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          type("x"),
+          cmd("groog.record.playRecording"),
+          type("y"),
+          cmd("groog.record.endRecording"),
+          type("\n"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `Still recording!`,
@@ -2713,25 +2819,27 @@ function testCases(): TestCase[] {
     },
     {
       name: "Fails to playback named recording if actively recording",
-      startingText: [
-        "abc",
-      ],
-      wantDocument: [
-        "xy",
-        "xyabc",
-      ],
-      wantSelections: [
-        selection(1, 2),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        type("x"),
-        cmd("groog.record.playNamedRecording"),
-        type("y"),
-        cmd("groog.record.endRecording"),
-        type("\n"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "xy",
+          "xyabc",
+        ],
+        expectedSelections: [
+          selection(1, 2),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          type("x"),
+          cmd("groog.record.playNamedRecording"),
+          type("y"),
+          cmd("groog.record.endRecording"),
+          type("\n"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `Still recording!`,
@@ -2740,12 +2848,17 @@ function testCases(): TestCase[] {
     },
     {
       name: "Fails to playback if no named recording selected",
-      startingText: [
-        "abc",
-      ],
-      userInteractions: [
-        cmd("groog.record.playNamedRecording"),
-      ],
+      stc: {
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "abc",
+        ],
+        userInteractions: [
+          cmd("groog.record.playNamedRecording"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [new SelectItemQuickPickAction([])],
         expectedQuickPickExecutions: [[]],
@@ -2756,25 +2869,27 @@ function testCases(): TestCase[] {
     },
     {
       name: "Fails to delete recording if actively recording",
-      startingText: [
-        "abc",
-      ],
-      wantDocument: [
-        "xy",
-        "xyabc",
-      ],
-      wantSelections: [
-        selection(1, 2),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        type("x"),
-        cmd("groog.record.deleteRecording"),
-        type("y"),
-        cmd("groog.record.endRecording"),
-        type("\n"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "xy",
+          "xyabc",
+        ],
+        expectedSelections: [
+          selection(1, 2),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          type("x"),
+          cmd("groog.record.deleteRecording"),
+          type("y"),
+          cmd("groog.record.endRecording"),
+          type("\n"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `Still recording!`,
@@ -2783,25 +2898,27 @@ function testCases(): TestCase[] {
     },
     {
       name: "Fails to repeatedly playback if actively recording",
-      startingText: [
-        "abc",
-      ],
-      wantDocument: [
-        "xy",
-        "xyabc",
-      ],
-      wantSelections: [
-        selection(1, 2),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        type("x"),
-        cmd("groog.record.playRecordingRepeatedly"),
-        type("y"),
-        cmd("groog.record.endRecording"),
-        type("\n"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "abc",
+        ],
+        expectedText: [
+          "xy",
+          "xyabc",
+        ],
+        expectedSelections: [
+          selection(1, 2),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          type("x"),
+          cmd("groog.record.playRecordingRepeatedly"),
+          type("y"),
+          cmd("groog.record.endRecording"),
+          type("\n"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `Still recording!`,
@@ -2810,116 +2927,127 @@ function testCases(): TestCase[] {
     },
     {
       name: "Records and plays back empty recording",
-      startingText: [
-        "start text",
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "start text",
+        ],
+        expectedText: [
+          "start text",
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
     },
     {
       name: "Records and plays back text and command recording",
-      startingText: [
-        "start",
-        "text",
-        "ending",
-      ],
-      wantDocument: [
-        "start",
-        "Ztext",
-        "enZding",
-      ],
-      wantSelections: [
-        selection(2, 4),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.cursorDown"),
-        type("Z"),
-        cmd("groog.cursorRight"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "start",
+          "text",
+          "ending",
+        ],
+        expectedText: [
+          "start",
+          "Ztext",
+          "enZding",
+        ],
+        expectedSelections: [
+          selection(2, 4),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.cursorDown"),
+          type("Z"),
+          cmd("groog.cursorRight"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
     },
     {
       name: "Records and plays back",
-      startingText: [
-        "abc",
-        "1",
-        "defabc",
-        "2",
-      ],
-      wantDocument: [
-        "abcx",
-        "1yx",
-        "defyabc",
-        "2",
-      ],
-      wantSelections: [
-        selection(2, 4),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.cursorEnd"),
-        type("x"),
-        cmd("groog.cursorDown"),
-        type("y"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "abc",
+          "1",
+          "defabc",
+          "2",
+        ],
+        expectedText: [
+          "abcx",
+          "1yx",
+          "defyabc",
+          "2",
+        ],
+        expectedSelections: [
+          selection(2, 4),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.cursorEnd"),
+          type("x"),
+          cmd("groog.cursorDown"),
+          type("y"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
     },
     {
       name: "Play back fails if no find match",
-      startingText: [
-        "abc",
-        "1",
-        "def",
-        "ghi",
-        "----",
-        "def",
-        "2",
-        "3",
-        "abc",
-        "4",
-      // No second ghi
-      ],
-      wantDocument: [
-        "un",
-        "1",
-        "deux",
-        "trois",
-        "----",
-        "deux",
-        "2",
-        "3",
-        "un",
-        "4",
-      ],
-      wantSelections: [
-        selection(5, 4),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.find"),
-        type("abc"),
-        ctrlG,
-        type("un"),
+      stc: {
+        text: [
+          "abc",
+          "1",
+          "def",
+          "ghi",
+          "----",
+          "def",
+          "2",
+          "3",
+          "abc",
+          "4",
+        // No second ghi
+        ],
+        expectedText: [
+          "un",
+          "1",
+          "deux",
+          "trois",
+          "----",
+          "deux",
+          "2",
+          "3",
+          "un",
+          "4",
+        ],
+        expectedSelections: [
+          selection(5, 4),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.find"),
+          type("abc"),
+          ctrlG,
+          type("un"),
 
-        cmd("groog.find"),
-        type("def"),
-        ctrlG,
-        type("deux"),
+          cmd("groog.find"),
+          type("def"),
+          ctrlG,
+          type("deux"),
 
-        cmd("groog.find"),
-        type("ghi"),
-        ctrlG,
-        type("trois"),
+          cmd("groog.find"),
+          type("ghi"),
+          ctrlG,
+          type("trois"),
 
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecording"),
-      ],
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find for abc
@@ -2974,61 +3102,65 @@ function testCases(): TestCase[] {
     },
     {
       name: "Records and plays back when recording would be popped",
-      startingText: [
-        "start text",
-      ],
-      wantDocument: [
-        "xyz",
-        "xyz",
-        "start text",
-      ],
-      wantSelections: [
-        selection(2, 0),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        type("ab"),
-        type("cde"),
-        // All these deleteLefts cause the 'abcde' text record to be deleted entirely
-        cmd("groog.deleteLeft"),
-        cmd("groog.deleteLeft"),
-        cmd("groog.deleteLeft"),
-        cmd("groog.deleteLeft"),
-        cmd("groog.deleteLeft"),
-        type("xy"),
-        type("z"),
-        type("\n"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "start text",
+        ],
+        expectedText: [
+          "xyz",
+          "xyz",
+          "start text",
+        ],
+        expectedSelections: [
+          selection(2, 0),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          type("ab"),
+          type("cde"),
+          // All these deleteLefts cause the 'abcde' text record to be deleted entirely
+          cmd("groog.deleteLeft"),
+          cmd("groog.deleteLeft"),
+          cmd("groog.deleteLeft"),
+          cmd("groog.deleteLeft"),
+          cmd("groog.deleteLeft"),
+          type("xy"),
+          type("z"),
+          type("\n"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
     },
     {
       name: "Saves recording as and plays back",
-      startingText: [
-        "abc",
-        "1",
-        "defabc",
-        "2",
-      ],
-      wantDocument: [
-        "abcx",
-        "1yx",
-        "defyabc",
-        "2",
-      ],
-      wantSelections: [
-        selection(2, 4),
-      ],
       inputBoxResponses: ["some-name"],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.cursorEnd"),
-        type("x"),
-        cmd("groog.cursorDown"),
-        type("y"),
-        cmd("groog.record.saveRecordingAs"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "abc",
+          "1",
+          "defabc",
+          "2",
+        ],
+        expectedText: [
+          "abcx",
+          "1yx",
+          "defyabc",
+          "2",
+        ],
+        expectedSelections: [
+          selection(2, 4),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.cursorEnd"),
+          type("x"),
+          cmd("groog.cursorDown"),
+          type("y"),
+          cmd("groog.record.saveRecordingAs"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
       stubbablesConfig: {
         expectedInfoMessages: [
           `Recording saved as "some-name"!`,
@@ -3037,29 +3169,31 @@ function testCases(): TestCase[] {
     },
     {
       name: "Fails to name recording if reserved prefix",
-      startingText: [
-        "start text",
-      ],
-      wantDocument: [
-        "abc",
-        "abc",
-        "start text",
-      ],
-      wantSelections: [
-        selection(2, 0),
-      ],
       inputBoxResponses: [
         "Recent recording bleh",
       ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        type("a"),
-        type("b"),
-        type("c"),
-        type("\n"),
-        cmd("groog.record.saveRecordingAs"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "start text",
+        ],
+        expectedText: [
+          "abc",
+          "abc",
+          "start text",
+        ],
+        expectedSelections: [
+          selection(2, 0),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          type("a"),
+          type("b"),
+          type("c"),
+          type("\n"),
+          cmd("groog.record.saveRecordingAs"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
       wantInputBoxValidationMessages: [
         {
           message: "This is a reserved prefix",
@@ -3074,34 +3208,36 @@ function testCases(): TestCase[] {
     },
     {
       name: "Fails to name recording if recording name already exists",
-      startingText: [
-        "start text",
-      ],
-      wantDocument: [
-        "abc",
-        "ABC",
-        "ABC",
-        "start text",
-      ],
-      wantSelections: [
-        selection(3, 0),
-      ],
       inputBoxResponses: [
         "ABC Recording",
         "ABC Recording",
       ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        type("a"),
-        type("b"),
-        type("c"),
-        type("\n"),
-        cmd("groog.record.saveRecordingAs"),
-        cmd("groog.record.startRecording"),
-        type("ABC\n"),
-        cmd("groog.record.saveRecordingAs"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "start text",
+        ],
+        expectedText: [
+          "abc",
+          "ABC",
+          "ABC",
+          "start text",
+        ],
+        expectedSelections: [
+          selection(3, 0),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          type("a"),
+          type("b"),
+          type("c"),
+          type("\n"),
+          cmd("groog.record.saveRecordingAs"),
+          cmd("groog.record.startRecording"),
+          type("ABC\n"),
+          cmd("groog.record.saveRecordingAs"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
       wantInputBoxValidationMessages: [
         {
           message: "This record name already exists",
@@ -3119,40 +3255,42 @@ function testCases(): TestCase[] {
     },
     {
       name: "Plays back named recording specified by name",
-      startingText: [
-        "start text",
-      ],
-      wantDocument: [
-        "abc",
-        "def",
-        "ghi",
-        "def",
-        "start text",
-      ],
-      wantSelections: [
-        selection(4, 0),
-      ],
       inputBoxResponses: [
         "ABC Recording",
         "DEF Recording",
         "GHI Recording",
       ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        type("a"),
-        type("b"),
-        type("c"),
-        type("\n"),
-        cmd("groog.record.saveRecordingAs"),
-        cmd("groog.record.startRecording"),
-        type("def\n"),
-        cmd("groog.record.saveRecordingAs"),
-        cmd("groog.record.startRecording"),
-        type("gh"),
-        type("i\n"),
-        cmd("groog.record.saveRecordingAs"),
-        cmd("groog.record.playNamedRecording"),
-      ],
+      stc: {
+        text: [
+          "start text",
+        ],
+        expectedText: [
+          "abc",
+          "def",
+          "ghi",
+          "def",
+          "start text",
+        ],
+        expectedSelections: [
+          selection(4, 0),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          type("a"),
+          type("b"),
+          type("c"),
+          type("\n"),
+          cmd("groog.record.saveRecordingAs"),
+          cmd("groog.record.startRecording"),
+          type("def\n"),
+          cmd("groog.record.saveRecordingAs"),
+          cmd("groog.record.startRecording"),
+          type("gh"),
+          type("i\n"),
+          cmd("groog.record.saveRecordingAs"),
+          cmd("groog.record.playNamedRecording"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [new SelectItemQuickPickAction(["DEF Recording"])],
         expectedQuickPickExecutions:[[
@@ -3193,39 +3331,41 @@ function testCases(): TestCase[] {
     },
     {
       name: "Fails to play back named recording if multiple items are picked",
-      startingText: [
-        "start text",
-      ],
-      wantDocument: [
-        "abc",
-        "def",
-        "ghi",
-        "start text",
-      ],
-      wantSelections: [
-        selection(3, 0),
-      ],
       inputBoxResponses: [
         "ABC Recording",
         "DEF Recording",
         "GHI Recording",
       ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        type("a"),
-        type("b"),
-        type("c"),
-        type("\n"),
-        cmd("groog.record.saveRecordingAs"),
-        cmd("groog.record.startRecording"),
-        type("def\n"),
-        cmd("groog.record.saveRecordingAs"),
-        cmd("groog.record.startRecording"),
-        type("gh"),
-        type("i\n"),
-        cmd("groog.record.saveRecordingAs"),
-        cmd("groog.record.playNamedRecording"),
-      ],
+      stc: {
+        text: [
+          "start text",
+        ],
+        expectedText: [
+          "abc",
+          "def",
+          "ghi",
+          "start text",
+        ],
+        expectedSelections: [
+          selection(3, 0),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          type("a"),
+          type("b"),
+          type("c"),
+          type("\n"),
+          cmd("groog.record.saveRecordingAs"),
+          cmd("groog.record.startRecording"),
+          type("def\n"),
+          cmd("groog.record.saveRecordingAs"),
+          cmd("groog.record.startRecording"),
+          type("gh"),
+          type("i\n"),
+          cmd("groog.record.saveRecordingAs"),
+          cmd("groog.record.playNamedRecording"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [new SelectItemQuickPickAction(["ABC Recording", "DEF Recording"])],
         expectedQuickPickExecutions:[[
@@ -3269,19 +3409,6 @@ function testCases(): TestCase[] {
     },
     {
       name: "Deletes recording",
-      startingText: [
-        "start text",
-      ],
-      wantDocument: [
-        "abc",
-        "def",
-        "ghi",
-        "def",
-        "start text",
-      ],
-      wantSelections: [
-        selection(4, 0),
-      ],
       inputBoxResponses: [
         "ABC Recording",
         "DEF Recording",
@@ -3359,179 +3486,204 @@ function testCases(): TestCase[] {
           `Recording saved as "GHI Recording"!`,
         ],
       },
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        type("abc\n"),
-        cmd("groog.record.saveRecordingAs"),
-        cmd("groog.record.startRecording"),
-        type("def\n"),
-        cmd("groog.record.saveRecordingAs"),
-        cmd("groog.record.startRecording"),
-        type("ghi\n"),
-        cmd("groog.record.saveRecordingAs"),
-        cmd("groog.record.playNamedRecording"),
-        cmd("groog.record.deleteRecording"),
-        cmd("groog.record.playNamedRecording"),
-      ],
+      stc: {
+        text: [
+          "start text",
+        ],
+        expectedText: [
+          "abc",
+          "def",
+          "ghi",
+          "def",
+          "start text",
+        ],
+        expectedSelections: [
+          selection(4, 0),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          type("abc\n"),
+          cmd("groog.record.saveRecordingAs"),
+          cmd("groog.record.startRecording"),
+          type("def\n"),
+          cmd("groog.record.saveRecordingAs"),
+          cmd("groog.record.startRecording"),
+          type("ghi\n"),
+          cmd("groog.record.saveRecordingAs"),
+          cmd("groog.record.playNamedRecording"),
+          cmd("groog.record.deleteRecording"),
+          cmd("groog.record.playNamedRecording"),
+        ],
+      },
     },
     {
       name: "Records kill and paste",
-      startingText: [
-        "abc",
-        "1",
-        "defabc",
-        "2",
-      ],
-      wantDocument: [
-        "abcxabc",
-        "1x1",
-        "defabc",
-        "2",
-      ],
-      wantSelections: [
-        selection(2, 0),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.kill"),
-        cmd("groog.emacsPaste"),
-        type("x"),
-        cmd("groog.emacsPaste"),
-        cmd("groog.cursorDown"),
-        cmd("groog.cursorHome"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "abc",
+          "1",
+          "defabc",
+          "2",
+        ],
+        expectedText: [
+          "abcxabc",
+          "1x1",
+          "defabc",
+          "2",
+        ],
+        expectedSelections: [
+          selection(2, 0),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.kill"),
+          cmd("groog.emacsPaste"),
+          type("x"),
+          cmd("groog.emacsPaste"),
+          cmd("groog.cursorDown"),
+          cmd("groog.cursorHome"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
     },
     {
       name: "Records maim and paste",
-      startingText: [
-        "abc",
-        "1",
-        "defabc",
-        "2",
-      ],
-      wantDocument: [
-        "abcxabcabc",
-        "1x11",
-        "defabc",
-        "2",
-      ],
-      wantSelections: [
-        selection(2, 0),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.maim"),
-        cmd("groog.emacsPaste"),
-        type("x"),
-        cmd("groog.emacsPaste"),
-        cmd("groog.cursorDown"),
-        cmd("groog.cursorHome"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "abc",
+          "1",
+          "defabc",
+          "2",
+        ],
+        expectedText: [
+          "abcxabcabc",
+          "1x11",
+          "defabc",
+          "2",
+        ],
+        expectedSelections: [
+          selection(2, 0),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.maim"),
+          cmd("groog.emacsPaste"),
+          type("x"),
+          cmd("groog.emacsPaste"),
+          cmd("groog.cursorDown"),
+          cmd("groog.cursorHome"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
     },
     {
       name: "Records mark and paste",
-      startingText: [
-        "abc",
-        "1",
-        "defabc",
-        "2",
-        "zzz",
-      ],
-      wantDocument: [
-        "abc",
-        "1 End line",
-        "Newline",
-        "abc",
-        "1",
-        "defabc",
-        "2 End line",
-        "Newline",
-        "defabc",
-        "2",
-        "zzz",
-      ],
-      wantSelections: [
-        selection(10, 0),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.toggleMarkMode"),
-        cmd("groog.cursorDown"),
-        cmd("groog.cursorEnd"),
-        cmd("groog.yank"),
-        cmd("groog.emacsPaste"),
-        type(" End line\nNewline\n"),
-        cmd("groog.emacsPaste"),
-        cmd("groog.cursorDown"),
-        cmd("groog.cursorHome"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "abc",
+          "1",
+          "defabc",
+          "2",
+          "zzz",
+        ],
+        expectedText: [
+          "abc",
+          "1 End line",
+          "Newline",
+          "abc",
+          "1",
+          "defabc",
+          "2 End line",
+          "Newline",
+          "defabc",
+          "2",
+          "zzz",
+        ],
+        expectedSelections: [
+          selection(10, 0),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.toggleMarkMode"),
+          cmd("groog.cursorDown"),
+          cmd("groog.cursorEnd"),
+          cmd("groog.yank"),
+          cmd("groog.emacsPaste"),
+          type(" End line\nNewline\n"),
+          cmd("groog.emacsPaste"),
+          cmd("groog.cursorDown"),
+          cmd("groog.cursorHome"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
     },
     {
       name: "Records vanilla copy and paste",
-      startingText: [
-        "abc",
-        "1",
-        "defabc",
-        "2",
-      ],
-      wantDocument: [
-        "abcxabcabc",
-        "abcxabc1",
-        "defabc",
-        "2",
-      ],
-      wantSelections: [
-        selection(2, 0),
-      ],
-      userInteractions: [
-        cmd("groog.toggleMarkMode"),
-        cmd("groog.cursorEnd"),
-        cmd("editor.action.clipboardCopyAction"),
-        cmd("groog.cursorHome"),
+      stc: {
+        text: [
+          "abc",
+          "1",
+          "defabc",
+          "2",
+        ],
+        expectedText: [
+          "abcxabcabc",
+          "abcxabc1",
+          "defabc",
+          "2",
+        ],
+        expectedSelections: [
+          selection(2, 0),
+        ],
+        userInteractions: [
+          cmd("groog.toggleMarkMode"),
+          cmd("groog.cursorEnd"),
+          cmd("editor.action.clipboardCopyAction"),
+          cmd("groog.cursorHome"),
 
-        cmd("groog.record.startRecording"),
-        cmd("groog.paste"),
-        type("x"),
-        cmd("groog.paste"),
-        cmd("groog.cursorDown"),
-        cmd("groog.cursorHome"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecording"),
-      ],
+          cmd("groog.record.startRecording"),
+          cmd("groog.paste"),
+          type("x"),
+          cmd("groog.paste"),
+          cmd("groog.cursorDown"),
+          cmd("groog.cursorHome"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
     },
     {
       name: "Records with find",
-      startingText: [
-        "abc",
-        "1",
-        "defabc",
-        "2",
-      ],
-      wantDocument: [
-        "xyz",
-        "1",
-        "defxyz",
-        "2",
-      ],
-      wantSelections: [
-        selection(2, 6),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.find"),
-        type("abc"),
-        ctrlG,
-        cmd("groog.deleteLeft"),
-        type("xyz"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "abc",
+          "1",
+          "defabc",
+          "2",
+        ],
+        expectedText: [
+          "xyz",
+          "1",
+          "defxyz",
+          "2",
+        ],
+        expectedSelections: [
+          selection(2, 6),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.find"),
+          type("abc"),
+          ctrlG,
+          cmd("groog.deleteLeft"),
+          type("xyz"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -3556,22 +3708,24 @@ function testCases(): TestCase[] {
     // Repeat recording tests
     {
       name: "Repeat recording fails if doesn't start with find",
-      startingText: [
-        "start text",
-      ],
-      wantDocument: [
-        "xyz",
-        "start text",
-      ],
-      wantSelections: [
-        selection(1, 0),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        type("xyz\n"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecordingRepeatedly"),
-      ],
+      stc: {
+        text: [
+          "start text",
+        ],
+        expectedText: [
+          "xyz",
+          "start text",
+        ],
+        expectedSelections: [
+          selection(1, 0),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          type("xyz\n"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecordingRepeatedly"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `This recording isn't repeatable`,
@@ -3580,33 +3734,35 @@ function testCases(): TestCase[] {
     },
     {
       name: "Repeat record playback with decreasing find matches",
-      startingText: [
-        "abc",
-        "1",
-        "defabc",
-        "2",
-        ".abcabc...abc.....",
-      ],
-      wantDocument: [
-        "xyz",
-        "1",
-        "defxyz",
-        "2",
-        ".xyzxyz...xyz.....",
-      ],
-      wantSelections: [
-        selection(4, 13),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.find"),
-        type("abc"),
-        ctrlG,
-        cmd("groog.deleteLeft"),
-        type("xyz"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecordingRepeatedly"),
-      ],
+      stc: {
+        text: [
+          "abc",
+          "1",
+          "defabc",
+          "2",
+          ".abcabc...abc.....",
+        ],
+        expectedText: [
+          "xyz",
+          "1",
+          "defxyz",
+          "2",
+          ".xyzxyz...xyz.....",
+        ],
+        expectedSelections: [
+          selection(4, 13),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.find"),
+          type("abc"),
+          ctrlG,
+          cmd("groog.deleteLeft"),
+          type("xyz"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecordingRepeatedly"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -3633,41 +3789,43 @@ function testCases(): TestCase[] {
     },
     {
       name: "Repeat record playback fails if subsequent find fails",
-      startingText: [
-        "abc def",
-        "1",
-        "abc BLOOP def",
-        "2",
-        "abc FIN ghi",
-        "abc ANOTHER",
-      ],
-      wantDocument: [
-        "ABC XYZ",
-        "1",
-        "ABC BLOOP XYZ",
-        "2",
-        "ABC FIN ghi",
-        "abc ANOTHER",
-      ],
-      wantSelections: [
-        selection(4, 3),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.find"),
-        type("abc"),
-        ctrlG,
-        cmd("groog.deleteLeft"),
-        type("ABC"),
-        cmd("groog.find"),
-        type("def"),
-        ctrlG,
-        cmd("groog.deleteLeft"),
-        type("XYZ"), // Note this can't be 'DEF' otherwise it still matches find
-        cmd("groog.record.endRecording"),
+      stc: {
+        text: [
+          "abc def",
+          "1",
+          "abc BLOOP def",
+          "2",
+          "abc FIN ghi",
+          "abc ANOTHER",
+        ],
+        expectedText: [
+          "ABC XYZ",
+          "1",
+          "ABC BLOOP XYZ",
+          "2",
+          "ABC FIN ghi",
+          "abc ANOTHER",
+        ],
+        expectedSelections: [
+          selection(4, 3),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.find"),
+          type("abc"),
+          ctrlG,
+          cmd("groog.deleteLeft"),
+          type("ABC"),
+          cmd("groog.find"),
+          type("def"),
+          ctrlG,
+          cmd("groog.deleteLeft"),
+          type("XYZ"), // Note this can't be 'DEF' otherwise it still matches find
+          cmd("groog.record.endRecording"),
 
-        cmd("groog.record.playRecordingRepeatedly"),
-      ],
+          cmd("groog.record.playRecordingRepeatedly"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -3708,34 +3866,36 @@ function testCases(): TestCase[] {
     },
     {
       name: "Repeat record playback with non-decreasing find matches",
-      startingText: [
-        "abc",
-        "1",
-        "defabc",
-        "2",
-        ".abcabc...abc.....",
-      ],
-      wantDocument: [
-      // Once for record and once for playback
-        "abcxyzxyz",
-        "1",
-        "defabcxyz",
-        "2",
-        ".abcxyzabcxyz...abcxyz.....",
-      ],
-      wantSelections: [
-        new vscode.Selection(2, 3, 2, 6),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.find"),
-        type("abc"),
-        ctrlG,
-        ctrlG,
-        type("xyz"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecordingRepeatedly"),
-      ],
+      stc: {
+        text: [
+          "abc",
+          "1",
+          "defabc",
+          "2",
+          ".abcabc...abc.....",
+        ],
+        expectedText: [
+        // Once for record and once for playback
+          "abcxyzxyz",
+          "1",
+          "defabcxyz",
+          "2",
+          ".abcxyzabcxyz...abcxyz.....",
+        ],
+        expectedSelections: [
+          new vscode.Selection(2, 3, 2, 6),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.find"),
+          type("abc"),
+          ctrlG,
+          ctrlG,
+          type("xyz"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecordingRepeatedly"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -3762,35 +3922,37 @@ function testCases(): TestCase[] {
     },
     {
       name: "Record with skipped find executions",
-      startingText: [
-        "abc",
-        "1",
-        "defabc",
-        "2",
-        ".abc...abc.....",
-      ],
-      wantDocument: [
-        "abc",
-        "1",
-        // Once for record and once for playback
-        "defabcxyzxyz",
-        "2",
-        ".abc...abcxyz.....",
-      ],
-      wantSelections: [
-        new vscode.Selection(4, 7, 4, 10),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.find"),
-        type("abc"),
-        cmd("groog.find"),
-        ctrlG,
-        ctrlG,
-        type("xyz"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecordingRepeatedly"),
-      ],
+      stc: {
+        text: [
+          "abc",
+          "1",
+          "defabc",
+          "2",
+          ".abc...abc.....",
+        ],
+        expectedText: [
+          "abc",
+          "1",
+          // Once for record and once for playback
+          "defabcxyzxyz",
+          "2",
+          ".abc...abcxyz.....",
+        ],
+        expectedSelections: [
+          new vscode.Selection(4, 7, 4, 10),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.find"),
+          type("abc"),
+          cmd("groog.find"),
+          ctrlG,
+          ctrlG,
+          type("xyz"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecordingRepeatedly"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -3824,38 +3986,40 @@ function testCases(): TestCase[] {
     },
     {
       name: "Record repeat playback ends if start in non-decrease mode and count changes",
-      startingText: [
-        "abcdef",
-        "1",
-        "....abc.....",
-        "",
-        "abc",
-        "",
-        "abc123",
-      ],
-      wantDocument: [
-        "abcdeZf",
-        "1",
-        "....abc....Z.",
-        "",
-        "abZc",
-        "",
-        "abc123",
-      ],
-      wantSelections: [
-        new vscode.Selection(6, 0, 6, 3),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.find"),
-        type("abc"),
-        ctrlG,
-        cmd("groog.cursorEnd"),
-        cmd("groog.cursorLeft"),
-        type("Z"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecordingRepeatedly"),
-      ],
+      stc: {
+        text: [
+          "abcdef",
+          "1",
+          "....abc.....",
+          "",
+          "abc",
+          "",
+          "abc123",
+        ],
+        expectedText: [
+          "abcdeZf",
+          "1",
+          "....abc....Z.",
+          "",
+          "abZc",
+          "",
+          "abc123",
+        ],
+        expectedSelections: [
+          new vscode.Selection(6, 0, 6, 3),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.find"),
+          type("abc"),
+          ctrlG,
+          cmd("groog.cursorEnd"),
+          cmd("groog.cursorLeft"),
+          type("Z"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecordingRepeatedly"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -3882,38 +4046,40 @@ function testCases(): TestCase[] {
     },
     {
       name: "Record repeat playback ends if start in decrease mode and count does not change",
-      startingText: [
-        "defabc",
-        "1",
-        "....abc",
-        "",
-        "abcdef",
-        "",
-        "123abc",
-      ],
-      wantDocument: [
-        "defabZc",
-        "1",
-        "....abZc",
-        "",
-        "abcdeZf",
-        "",
-        "123abc",
-      ],
-      wantSelections: [
-        new vscode.Selection(6, 3, 6, 6),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.find"),
-        type("abc"),
-        ctrlG,
-        cmd("groog.cursorEnd"),
-        cmd("groog.cursorLeft"),
-        type("Z"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecordingRepeatedly"),
-      ],
+      stc: {
+        text: [
+          "defabc",
+          "1",
+          "....abc",
+          "",
+          "abcdef",
+          "",
+          "123abc",
+        ],
+        expectedText: [
+          "defabZc",
+          "1",
+          "....abZc",
+          "",
+          "abcdeZf",
+          "",
+          "123abc",
+        ],
+        expectedSelections: [
+          new vscode.Selection(6, 3, 6, 6),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.find"),
+          type("abc"),
+          ctrlG,
+          cmd("groog.cursorEnd"),
+          cmd("groog.cursorLeft"),
+          type("Z"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecordingRepeatedly"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -3941,33 +4107,35 @@ function testCases(): TestCase[] {
     // Repeat record playback with buttons
     {
       name: "Repeat named record playback with decreasing find matches",
-      startingText: [
-        "abc",
-        "1",
-        "defabc",
-        "2",
-        ".abcabc...abc.....",
-      ],
-      wantDocument: [
-        "xyz",
-        "1",
-        "defxyz",
-        "2",
-        ".xyzxyz...xyz.....",
-      ],
-      wantSelections: [
-        selection(4, 13),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.find"),
-        type("abc"),
-        ctrlG,
-        cmd("groog.deleteLeft"),
-        type("xyz"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playNamedRecording"),
-      ],
+      stc: {
+        text: [
+          "abc",
+          "1",
+          "defabc",
+          "2",
+          ".abcabc...abc.....",
+        ],
+        expectedText: [
+          "xyz",
+          "1",
+          "defxyz",
+          "2",
+          ".xyzxyz...xyz.....",
+        ],
+        expectedSelections: [
+          selection(4, 13),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.find"),
+          type("abc"),
+          ctrlG,
+          cmd("groog.deleteLeft"),
+          type("xyz"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playNamedRecording"),
+        ],
+      },
       stubbablesConfig: {
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
@@ -4017,28 +4185,31 @@ function testCases(): TestCase[] {
     // SaveRecentRecordingButton
     {
       name: "Fails if unknown button",
-      startingText: [
-        "abc",
-        "def",
-        "ghi",
-        "def",
-      ],
-      wantDocument: [
-        "abc",
-        "XYZ",
-        "ghi",
-        "def",
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.find"),
-        type("def"),
-        ctrlG,
-        type("XYZ"),
-        cmd("groog.record.endRecording"),
+      stc: {
+        text: [
+          "abc",
+          "def",
+          "ghi",
+          "def",
+        ],
+        expectedText: [
+          "abc",
+          "XYZ",
+          "ghi",
+          "def",
+        ],
+        expectedSelections: [selection(1, 3)],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.find"),
+          type("def"),
+          ctrlG,
+          type("XYZ"),
+          cmd("groog.record.endRecording"),
 
-        cmd("groog.record.playNamedRecording"),
-      ],
+          cmd("groog.record.playNamedRecording"),
+        ],
+      },
       inputBoxResponses: [
         "My favorite recording",
       ],
@@ -4086,61 +4257,63 @@ function testCases(): TestCase[] {
           `Unknown item button`,
         ],
       },
-      wantSelections: [selection(1, 3)],
     },
     {
       name: "Save a recent recording",
-      startingText: [
-        "abc",
-        "1",
-        "def",
-        "ghi",
-        "----",
-        "def",
-        "2",
-        "3",
-        "ghi",
-        "4",
-        "abc",
-      ],
-      wantDocument: [
-        "un",
-        "1",
-        "deux",
-        "trois",
-        "----",
-        "deux",
-        "2",
-        "3",
-        "ghi",
-        "4",
-        "abc",
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.find"),
-        type("abc"),
-        ctrlG,
-        type("un"),
-        cmd("groog.record.endRecording"),
+      stc: {
+        text: [
+          "abc",
+          "1",
+          "def",
+          "ghi",
+          "----",
+          "def",
+          "2",
+          "3",
+          "ghi",
+          "4",
+          "abc",
+        ],
+        expectedText: [
+          "un",
+          "1",
+          "deux",
+          "trois",
+          "----",
+          "deux",
+          "2",
+          "3",
+          "ghi",
+          "4",
+          "abc",
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.find"),
+          type("abc"),
+          ctrlG,
+          type("un"),
+          cmd("groog.record.endRecording"),
 
-        cmd("groog.record.startRecording"),
-        cmd("groog.find"),
-        type("def"),
-        ctrlG,
-        type("deux"),
-        cmd("groog.record.endRecording"),
+          cmd("groog.record.startRecording"),
+          cmd("groog.find"),
+          type("def"),
+          ctrlG,
+          type("deux"),
+          cmd("groog.record.endRecording"),
 
-        cmd("groog.record.startRecording"),
-        cmd("groog.find"),
-        type("ghi"),
-        ctrlG,
-        type("trois"),
-        cmd("groog.record.endRecording"),
+          cmd("groog.record.startRecording"),
+          cmd("groog.find"),
+          type("ghi"),
+          ctrlG,
+          type("trois"),
+          cmd("groog.record.endRecording"),
 
-        cmd("groog.record.playNamedRecording"),
-        cmd("groog.record.playNamedRecording"),
-      ],
+          cmd("groog.record.playNamedRecording"),
+          cmd("groog.record.playNamedRecording"),
+        ],
+        expectedSelections: [selection(5, 4)],
+      },
       inputBoxResponses: [
         "My favorite recording",
       ],
@@ -4309,35 +4482,37 @@ function testCases(): TestCase[] {
           `Recording saved as "My favorite recording"!`,
         ],
       },
-      wantSelections: [selection(5, 4)],
     },
     {
       name: "Save a recent recording",
-      startingText: [
-        "",
-      ],
-      wantDocument: [
-        "abcdefghijklghi",
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        type("abc"),
-        cmd("groog.record.endRecording"),
+      stc: {
+        text: [
+          "",
+        ],
+        expectedText: [
+          "abcdefghijklghi",
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          type("abc"),
+          cmd("groog.record.endRecording"),
 
-        cmd("groog.record.startRecording"),
-        type("def"),
-        cmd("groog.record.endRecording"),
+          cmd("groog.record.startRecording"),
+          type("def"),
+          cmd("groog.record.endRecording"),
 
-        cmd("groog.record.startRecording"),
-        type("ghi"),
-        cmd("groog.record.endRecording"),
+          cmd("groog.record.startRecording"),
+          type("ghi"),
+          cmd("groog.record.endRecording"),
 
-        cmd("groog.record.startRecording"),
-        type("jkl"),
-        cmd("groog.record.endRecording"),
+          cmd("groog.record.startRecording"),
+          type("jkl"),
+          cmd("groog.record.endRecording"),
 
-        cmd("groog.record.playNamedRecording"),
-      ],
+          cmd("groog.record.playNamedRecording"),
+        ],
+        expectedSelections: [selection(0, 15)],
+      },
       stubbablesConfig: {
         quickPickActions: [
         // Run second to last recording (ghi)
@@ -4363,20 +4538,21 @@ function testCases(): TestCase[] {
           ],
         ],
       },
-      wantSelections: [selection(0, 15)],
     },
     // Record undo tests
     {
       name: "Record undo fails if no recordings",
-      startingText: [
-        "start text",
-      ],
-      wantDocument: [
-        "start text",
-      ],
-      userInteractions: [
-        cmd("groog.record.undo"),
-      ],
+      stc: {
+        text: [
+          "start text",
+        ],
+        expectedText: [
+          "start text",
+        ],
+        userInteractions: [
+          cmd("groog.record.undo"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `No recordings exist yet!`,
@@ -4385,22 +4561,24 @@ function testCases(): TestCase[] {
     },
     {
       name: "Record undo fails if recording is locked",
-      startingText: [
-        "start text",
-      ],
-      wantDocument: [
-        "abc",
-        "start text",
-      ],
-      wantSelections: [
-        selection(1, 0),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        type("abc\n"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.undo"),
-      ],
+      stc: {
+        text: [
+          "start text",
+        ],
+        expectedText: [
+          "abc",
+          "start text",
+        ],
+        expectedSelections: [
+          selection(1, 0),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          type("abc\n"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.undo"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           `Cannot undo a locked recording`,
@@ -4409,78 +4587,84 @@ function testCases(): TestCase[] {
     },
     {
       name: "Record undo does nothing if empty record book",
-      startingText: [
-        "start text",
-      ],
-      wantDocument: [
-        "def",
-        "Xdef",
-        "start text",
-      ],
-      wantSelections: [
-        selection(2, 0),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        cmd("groog.record.undo"),
-        type("d"),
-        type("e"),
-        type("f"),
-        type("\n"),
-        cmd("groog.record.endRecording"),
-        type("X"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "start text",
+        ],
+        expectedText: [
+          "def",
+          "Xdef",
+          "start text",
+        ],
+        expectedSelections: [
+          selection(2, 0),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          cmd("groog.record.undo"),
+          type("d"),
+          type("e"),
+          type("f"),
+          type("\n"),
+          cmd("groog.record.endRecording"),
+          type("X"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
     },
     {
       name: "Record undo works if recording is locked",
-      startingText: [
-        "start text",
-      ],
-      wantDocument: [
-        "abc",
-        "abc",
-        "start text",
-      ],
-      wantSelections: [
-        selection(2, 0),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        type("a"),
-        type("b"),
-        type("Z"),
-        cmd("groog.record.undo"),
-        type("c"),
-        type("\n"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "start text",
+        ],
+        expectedText: [
+          "abc",
+          "abc",
+          "start text",
+        ],
+        expectedSelections: [
+          selection(2, 0),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          type("a"),
+          type("b"),
+          type("Z"),
+          cmd("groog.record.undo"),
+          type("c"),
+          type("\n"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
     },
     {
       name: "Record undo fails",
-      startingText: [
-        "start text",
-      ],
-      wantDocument: [
-        "ac",
-        "ac",
-        "bbstart text",
-      ],
-      wantSelections: [
-        selection(2, 0),
-      ],
-      userInteractions: [
-        cmd("groog.record.startRecording"),
-        type("a"),
-        type("b"),
-        cmd("groog.cursorLeft"),
-        cmd("groog.record.undo"),
-        type("c"),
-        type("\n"),
-        cmd("groog.record.endRecording"),
-        cmd("groog.record.playRecording"),
-      ],
+      stc: {
+        text: [
+          "start text",
+        ],
+        expectedText: [
+          "ac",
+          "ac",
+          "bbstart text",
+        ],
+        expectedSelections: [
+          selection(2, 0),
+        ],
+        userInteractions: [
+          cmd("groog.record.startRecording"),
+          type("a"),
+          type("b"),
+          cmd("groog.cursorLeft"),
+          cmd("groog.record.undo"),
+          type("c"),
+          type("\n"),
+          cmd("groog.record.endRecording"),
+          cmd("groog.record.playRecording"),
+        ],
+      },
       stubbablesConfig: {
         expectedInfoMessages: [
           `Undo failed`,
@@ -4490,451 +4674,503 @@ function testCases(): TestCase[] {
     // Type-over tests
     {
       name: "Typing a bracket automatically adds a closing bracket",
-      startingText: [
-        "",
-      ],
-      wantDocument: [
-        "{}",
-      ],
-      wantSelections: [
-        selection(0, 1),
-      ],
-      userInteractions: [
-        type("{"),
-      ],
+      stc: {
+        text: [
+          "",
+        ],
+        expectedText: [
+          "{}",
+        ],
+        expectedSelections: [
+          selection(0, 1),
+        ],
+        userInteractions: [
+          type("{"),
+        ],
+      },
     },
     {
       name: "Typing a bracket at the end of a line automatically adds a closing bracket",
-      startingText: [
-        "some text ",
-      ],
-      wantDocument: [
-        "some text {}",
-      ],
-      startingSelections: [
-        selection(0, 10),
-      ],
-      wantSelections: [
-        selection(0, 11),
-      ],
-      userInteractions: [
-        type("{"),
-      ],
+      stc: {
+        text: [
+          "some text ",
+        ],
+        expectedText: [
+          "some text {}",
+        ],
+        selections: [
+          selection(0, 10),
+        ],
+        expectedSelections: [
+          selection(0, 11),
+        ],
+        userInteractions: [
+          type("{"),
+        ],
+      },
     },
     {
       name: "Typing a bracket not at the end of a line automatically only adds opening bracket",
-      startingText: [
-        "some text ",
-      ],
-      wantDocument: [
-        "some tex{t ",
-      ],
-      startingSelections: [
-        selection(0, 8),
-      ],
-      wantSelections: [
-        selection(0, 9),
-      ],
-      userInteractions: [
-        type("{"),
-      ],
+      stc: {
+        text: [
+          "some text ",
+        ],
+        expectedText: [
+          "some tex{t ",
+        ],
+        selections: [
+          selection(0, 8),
+        ],
+        expectedSelections: [
+          selection(0, 9),
+        ],
+        userInteractions: [
+          type("{"),
+        ],
+      },
     },
     {
       name: "Typing a bracket at the end of a line, ignoring whitespace characters, adds closing bracket",
-      startingText: [
-        "some text  \t\t \t ",
-      ],
-      wantDocument: [
-        "some text{}  \t\t \t ",
-      ],
-      startingSelections: [
-        selection(0, 9),
-      ],
-      wantSelections: [
-        selection(0, 10),
-      ],
-      userInteractions: [
-        type("{"),
-      ],
+      stc: {
+        text: [
+          "some text  \t\t \t ",
+        ],
+        expectedText: [
+          "some text{}  \t\t \t ",
+        ],
+        selections: [
+          selection(0, 9),
+        ],
+        expectedSelections: [
+          selection(0, 10),
+        ],
+        userInteractions: [
+          type("{"),
+        ],
+      },
     },
     {
       name: "Typing a bracket over selection simply adds bracket",
-      // Note: the custom logic doesn't do anything here. We simply return
-      // applied=false back to emacs.ts and it types the character as normal.
-      startingText: [
-        "some text  \t\t \t \t",
-      ],
-      startingSelections: [new vscode.Selection(0, 10, 0, 15)],
-      wantDocument: [
-        "some text { \t",
-      ],
-      wantSelections: [
-        selection(0, 11),
-      ],
-      userInteractions: [
-        type("{"),
-      ],
+      stc: {
+        // Note: the custom logic doesn't do anything here. We simply return
+        // applied=false back to emacs.ts and it types the character as normal.
+        text: [
+          "some text  \t\t \t \t",
+        ],
+        selections: [new vscode.Selection(0, 10, 0, 15)],
+        expectedText: [
+          "some text { \t",
+        ],
+        expectedSelections: [
+          selection(0, 11),
+        ],
+        userInteractions: [
+          type("{"),
+        ],
+      },
     },
     {
       name: "Typing a bracket over multiple selections only adds brackets to empty selections",
-      // Note: since our custom logic runs on some of the selections
-      // (aka empty selections with no suffix text),
-      // and returns applied=true to emacs.ts, then no typing will be executed there.
-      // Hence why the non-empty selections don't have any changes
-      startingText: [
-        "some text  \t\t \t \t",
-        "some text  \t\t \t \t",
-        "some text  suffix",
-        "some text ",
-        "some text  suffix",
-      ],
-      startingSelections: [
-        selection(0, 10),
-        new vscode.Selection(1, 10, 1, 15),
-        selection(2, 10),
-        selection(3, 10),
-        new vscode.Selection(4, 10, 4, 15),
-      ],
-      wantDocument: [
-        "some text {} \t\t \t \t",
-        "some text  \t\t \t \t",
-        "some text  suffix",
-        "some text {}",
-        "some text  suffix",
-      ],
-      wantSelections: [
-        selection(0, 11),
-        new vscode.Selection(1, 10, 1, 15),
-        selection(2, 10),
-        selection(3, 11),
-        new vscode.Selection(4, 10, 4, 15),
-      ],
-      userInteractions: [
-        type("{"),
-      ],
+      stc: {
+        // Note: since our custom logic runs on some of the selections
+        // (aka empty selections with no suffix text),
+        // and returns applied=true to emacs.ts, then no typing will be executed there.
+        // Hence why the non-empty selections don't have any changes
+        text: [
+          "some text  \t\t \t \t",
+          "some text  \t\t \t \t",
+          "some text  suffix",
+          "some text ",
+          "some text  suffix",
+        ],
+        selections: [
+          selection(0, 10),
+          new vscode.Selection(1, 10, 1, 15),
+          selection(2, 10),
+          selection(3, 10),
+          new vscode.Selection(4, 10, 4, 15),
+        ],
+        expectedText: [
+          "some text {} \t\t \t \t",
+          "some text  \t\t \t \t",
+          "some text  suffix",
+          "some text {}",
+          "some text  suffix",
+        ],
+        expectedSelections: [
+          selection(0, 11),
+          new vscode.Selection(1, 10, 1, 15),
+          selection(2, 10),
+          selection(3, 11),
+          new vscode.Selection(4, 10, 4, 15),
+        ],
+        userInteractions: [
+          type("{"),
+        ],
+      },
     },
     {
       name: "Groog commands with multiple selections work",
-      startingText: [
-        "0123456789",
-      ],
-      startingSelections: [new vscode.Selection(0, 3, 0, 4), new vscode.Selection(0, 6, 0, 8)],
-      wantDocument: [
-        "0124589",
-      ],
-      wantSelections: [
-        selection(0, 3),
-        selection(0, 5),
-      ],
-      userInteractions: [
-        cmd("groog.deleteLeft"),
-      ],
+      stc: {
+        text: [
+          "0123456789",
+        ],
+        selections: [new vscode.Selection(0, 3, 0, 4), new vscode.Selection(0, 6, 0, 8)],
+        expectedText: [
+          "0124589",
+        ],
+        expectedSelections: [
+          selection(0, 3),
+          selection(0, 5),
+        ],
+        userInteractions: [
+          cmd("groog.deleteLeft"),
+        ],
+      },
     },
     {
       name: "Types over type-overable characters",
-      startingText: [
-        "]}'\"`",
-      ],
-      wantDocument: [
-        "0]1}2'3\"4`5",
-      ],
-      wantSelections: [selection(0, 11)],
-      userInteractions: [
-        type("0"),
-        type("]"),
-        type("1"),
-        type("}"),
-        type("2"),
-        type("'"),
-        type("3"),
-        type(`"`),
-        type("4"),
-        type("`"),
-        type("5"),
-      ],
+      stc: {
+        text: [
+          "]}'\"`",
+        ],
+        expectedText: [
+          "0]1}2'3\"4`5",
+        ],
+        expectedSelections: [selection(0, 11)],
+        userInteractions: [
+          type("0"),
+          type("]"),
+          type("1"),
+          type("}"),
+          type("2"),
+          type("'"),
+          type("3"),
+          type(`"`),
+          type("4"),
+          type("`"),
+          type("5"),
+        ],
+      },
     },
     {
       name: "Does not type over when character not type-overable",
-      startingText: [
-      // Close paren is not included in type-over list
-        ")",
-      ],
-      wantDocument: [
-        "))",
-      ],
-      wantSelections: [selection(0, 1)],
-      userInteractions: [
-        type(")"),
-      ],
+      stc: {
+        text: [
+        // Close paren is not included in type-over list
+          ")",
+        ],
+        expectedText: [
+          "))",
+        ],
+        expectedSelections: [selection(0, 1)],
+        userInteractions: [
+          type(")"),
+        ],
+      },
     },
     {
       name: "Does not type over when next character is different",
-      startingText: [
-        ")",
-      ],
-      wantDocument: [
-        "])",
-      ],
-      wantSelections: [selection(0, 1)],
-      userInteractions: [
-        type("]"),
-      ],
+      stc: {
+        text: [
+          ")",
+        ],
+        expectedText: [
+          "])",
+        ],
+        expectedSelections: [selection(0, 1)],
+        userInteractions: [
+          type("]"),
+        ],
+      },
     },
     // Delete right at end of line
     {
       name: "deleteRight removes single non-whitespace character if trailing characters aren't all whitespace",
-      startingText: [
-        "prefix abc",
-        "next line",
-      ],
-      startingSelections: [selection(0, 7)],
-      wantDocument: [
-        "prefix bc",
-        "next line",
-      ],
-      wantSelections: [selection(0, 7)],
-      userInteractions: [
-        cmd("groog.deleteRight"),
-      ],
+      stc: {
+        text: [
+          "prefix abc",
+          "next line",
+        ],
+        selections: [selection(0, 7)],
+        expectedText: [
+          "prefix bc",
+          "next line",
+        ],
+        expectedSelections: [selection(0, 7)],
+        userInteractions: [
+          cmd("groog.deleteRight"),
+        ],
+      },
     },
     {
       name: "deleteWordRight removes single word if trailing characters aren't all whitespace",
-      startingText: [
-        "prefix abc def",
-        "next line",
-      ],
-      startingSelections: [selection(0, 7)],
-      wantDocument: [
-        "prefix  def",
-        "next line",
-      ],
-      wantSelections: [selection(0, 7)],
-      userInteractions: [
-        cmd("groog.deleteWordRight"),
-      ],
+      stc: {
+        text: [
+          "prefix abc def",
+          "next line",
+        ],
+        selections: [selection(0, 7)],
+        expectedText: [
+          "prefix  def",
+          "next line",
+        ],
+        expectedSelections: [selection(0, 7)],
+        userInteractions: [
+          cmd("groog.deleteWordRight"),
+        ],
+      },
     },
     {
       name: "deleteRight removes single whitespace character if trailing characters aren't all whitespace",
-      startingText: [
-        "prefix \tabc",
-        "next line",
-      ],
-      startingSelections: [selection(0, 7)],
-      wantDocument: [
-        "prefix abc",
-        "next line",
-      ],
-      wantSelections: [selection(0, 7)],
-      userInteractions: [
-        cmd("groog.deleteRight"),
-      ],
+      stc: {
+        text: [
+          "prefix \tabc",
+          "next line",
+        ],
+        selections: [selection(0, 7)],
+        expectedText: [
+          "prefix abc",
+          "next line",
+        ],
+        expectedSelections: [selection(0, 7)],
+        userInteractions: [
+          cmd("groog.deleteRight"),
+        ],
+      },
     },
     {
       name: "deleteWordRight removes single word if trailing characters aren't all whitespace",
-      startingText: [
-        "prefix \t abc def",
-        "next line",
-      ],
-      startingSelections: [selection(0, 7)],
-      wantDocument: [
-      // Note only the tab is removed
-        "prefix abc def",
-        "next line",
-      ],
-      wantSelections: [selection(0, 7)],
-      userInteractions: [
-        cmd("groog.deleteWordRight"),
-      ],
+      stc: {
+        text: [
+          "prefix \t abc def",
+          "next line",
+        ],
+        selections: [selection(0, 7)],
+        expectedText: [
+        // Note only the tab is removed
+          "prefix abc def",
+          "next line",
+        ],
+        expectedSelections: [selection(0, 7)],
+        userInteractions: [
+          cmd("groog.deleteWordRight"),
+        ],
+      },
     },
     {
       name: "deleteRight removes newline",
-      startingText: [
-        "prefix ",
-        "next line",
-      ],
-      startingSelections: [selection(0, 7)],
-      wantDocument: [
-        "prefix next line",
-      ],
-      wantSelections: [selection(0, 7)],
-      userInteractions: [
-        cmd("groog.deleteRight"),
-      ],
+      stc: {
+        text: [
+          "prefix ",
+          "next line",
+        ],
+        selections: [selection(0, 7)],
+        expectedText: [
+          "prefix next line",
+        ],
+        expectedSelections: [selection(0, 7)],
+        userInteractions: [
+          cmd("groog.deleteRight"),
+        ],
+      },
     },
     {
       name: "deleteRight removes trailing whitespace and newline",
-      startingText: [
-        "prefix \t \t \t",
-        "next line",
-      ],
-      startingSelections: [selection(0, 7)],
-      wantDocument: [
-        "prefix next line",
-      ],
-      wantSelections: [selection(0, 7)],
-      userInteractions: [
-        cmd("groog.deleteRight"),
-      ],
+      stc: {
+        text: [
+          "prefix \t \t \t",
+          "next line",
+        ],
+        selections: [selection(0, 7)],
+        expectedText: [
+          "prefix next line",
+        ],
+        expectedSelections: [selection(0, 7)],
+        userInteractions: [
+          cmd("groog.deleteRight"),
+        ],
+      },
     },
     {
       name: "deleteRight removes preceding whitespace and newline",
-      startingText: [
-        "prefix ",
-        " \t \t next line",
-      ],
-      startingSelections: [selection(0, 7)],
-      wantDocument: [
-        "prefix next line",
-      ],
-      wantSelections: [selection(0, 7)],
-      userInteractions: [
-        cmd("groog.deleteRight"),
-      ],
+      stc: {
+        text: [
+          "prefix ",
+          " \t \t next line",
+        ],
+        selections: [selection(0, 7)],
+        expectedText: [
+          "prefix next line",
+        ],
+        expectedSelections: [selection(0, 7)],
+        userInteractions: [
+          cmd("groog.deleteRight"),
+        ],
+      },
     },
     {
       name: "deleteRight removes trailing whitespace, preceding whitespace, and newline",
-      startingText: [
-        "prefix \t \t \t",
-        " \t \t next line",
-      ],
-      startingSelections: [selection(0, 7)],
-      wantDocument: [
-        "prefix next line",
-      ],
-      wantSelections: [selection(0, 7)],
-      userInteractions: [
-        cmd("groog.deleteRight"),
-      ],
+      stc: {
+        text: [
+          "prefix \t \t \t",
+          " \t \t next line",
+        ],
+        selections: [selection(0, 7)],
+        expectedText: [
+          "prefix next line",
+        ],
+        expectedSelections: [selection(0, 7)],
+        userInteractions: [
+          cmd("groog.deleteRight"),
+        ],
+      },
     },
     {
       name: "deleteWordRight removes trailing whitespace, preceding whitespace, and newline",
-      startingText: [
-        "prefix \t \t \t",
-        " \t \t next line",
-      ],
-      startingSelections: [selection(0, 7)],
-      wantDocument: [
-        "prefix next line",
-      ],
-      wantSelections: [selection(0, 7)],
-      userInteractions: [
-        cmd("groog.deleteWordRight"),
-      ],
+      stc: {
+        text: [
+          "prefix \t \t \t",
+          " \t \t next line",
+        ],
+        selections: [selection(0, 7)],
+        expectedText: [
+          "prefix next line",
+        ],
+        expectedSelections: [selection(0, 7)],
+        userInteractions: [
+          cmd("groog.deleteWordRight"),
+        ],
+      },
     },
     {
       name: "deleteRight does nothing if at the end of the document",
-      startingText: [
-        "first line",
-        "middle line",
-        "last line",
-      ],
-      startingSelections: [selection(2, 9)],
-      wantDocument: [
-        "first line",
-        "middle line",
-        "last line",
-      ],
-      wantSelections: [selection(2, 9)],
-      userInteractions: [
-        cmd("groog.deleteRight"),
-      ],
+      stc: {
+        text: [
+          "first line",
+          "middle line",
+          "last line",
+        ],
+        selections: [selection(2, 9)],
+        expectedText: [
+          "first line",
+          "middle line",
+          "last line",
+        ],
+        expectedSelections: [selection(2, 9)],
+        userInteractions: [
+          cmd("groog.deleteRight"),
+        ],
+      },
     },
     {
       name: "deleteWordRight does nothing if at the end of the document",
-      startingText: [
-        "first line",
-        "middle line",
-        "last line",
-      ],
-      startingSelections: [selection(2, 9)],
-      wantDocument: [
-        "first line",
-        "middle line",
-        "last line",
-      ],
-      wantSelections: [selection(2, 9)],
-      userInteractions: [
-        cmd("groog.deleteWordRight"),
-      ],
+      stc: {
+        text: [
+          "first line",
+          "middle line",
+          "last line",
+        ],
+        selections: [selection(2, 9)],
+        expectedText: [
+          "first line",
+          "middle line",
+          "last line",
+        ],
+        expectedSelections: [selection(2, 9)],
+        userInteractions: [
+          cmd("groog.deleteWordRight"),
+        ],
+      },
     },
     {
       name: "deleteRight deletes whitespace if at the end of the document",
-      startingText: [
-        "first line",
-        "middle line",
-        "last line \t \t ",
-      ],
-      startingSelections: [selection(2, 9)],
-      wantDocument: [
-        "first line",
-        "middle line",
-        "last line",
-      ],
-      wantSelections: [selection(2, 9)],
-      userInteractions: [
-        cmd("groog.deleteRight"),
-      ],
+      stc: {
+        text: [
+          "first line",
+          "middle line",
+          "last line \t \t ",
+        ],
+        selections: [selection(2, 9)],
+        expectedText: [
+          "first line",
+          "middle line",
+          "last line",
+        ],
+        expectedSelections: [selection(2, 9)],
+        userInteractions: [
+          cmd("groog.deleteRight"),
+        ],
+      },
     },
     {
       name: "deleteWordRight deletes whitespace if at the end of the document",
-      startingText: [
-        "first line",
-        "middle line",
-        "last line \t \t ",
-      ],
-      startingSelections: [selection(2, 9)],
-      wantDocument: [
-        "first line",
-        "middle line",
-        "last line",
-      ],
-      wantSelections: [selection(2, 9)],
-      userInteractions: [
-        cmd("groog.deleteWordRight"),
-      ],
+      stc: {
+        text: [
+          "first line",
+          "middle line",
+          "last line \t \t ",
+        ],
+        selections: [selection(2, 9)],
+        expectedText: [
+          "first line",
+          "middle line",
+          "last line",
+        ],
+        expectedSelections: [selection(2, 9)],
+        userInteractions: [
+          cmd("groog.deleteWordRight"),
+        ],
+      },
     },
     {
       name: "deleteRight deletes only one character if at the last line of the document and non-whitespace characters after",
-      startingText: [
-        "first line",
-        "middle line",
-        "last line\t \t X  ",
-      ],
-      startingSelections: [selection(2, 9)],
-      wantDocument: [
-        "first line",
-        "middle line",
-        "last line \t X  ",
-      ],
-      wantSelections: [selection(2, 9)],
-      userInteractions: [
-        cmd("groog.deleteRight"),
-      ],
+      stc: {
+        text: [
+          "first line",
+          "middle line",
+          "last line\t \t X  ",
+        ],
+        selections: [selection(2, 9)],
+        expectedText: [
+          "first line",
+          "middle line",
+          "last line \t X  ",
+        ],
+        expectedSelections: [selection(2, 9)],
+        userInteractions: [
+          cmd("groog.deleteRight"),
+        ],
+      },
     },
     {
       name: "deleteWordRight deletes only one character if at the last line of the document and non-whitespace characters after",
-      startingText: [
-        "first line",
-        "middle line",
-        "last line\t \t X  ",
-      ],
-      startingSelections: [selection(2, 9)],
-      wantDocument: [
-        "first line",
-        "middle line",
-        "last line \t X  ",
-      ],
-      wantSelections: [selection(2, 9)],
-      userInteractions: [
-        cmd("groog.deleteRight"),
-      ],
+      stc: {
+        text: [
+          "first line",
+          "middle line",
+          "last line\t \t X  ",
+        ],
+        selections: [selection(2, 9)],
+        expectedText: [
+          "first line",
+          "middle line",
+          "last line \t X  ",
+        ],
+        expectedSelections: [selection(2, 9)],
+        userInteractions: [
+          cmd("groog.deleteRight"),
+        ],
+      },
     },
     // Notification tests
     {
       name: "Notification fails if no args",
-      userInteractions: [
-        cmd("groog.message.info"),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.message.info"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           "No message set",
@@ -4943,9 +5179,11 @@ function testCases(): TestCase[] {
     },
     {
       name: "Notification fails if no message",
-      userInteractions: [
-        cmd("groog.message.info", {}),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.message.info", {}),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           "No message set",
@@ -4954,11 +5192,13 @@ function testCases(): TestCase[] {
     },
     {
       name: "Notification fails if wrong args",
-      userInteractions: [
-        cmd("groog.message.info", {
-          badKey: "hello there",
-        }),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.message.info", {
+            badKey: "hello there",
+          }),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           "No message set",
@@ -4967,11 +5207,13 @@ function testCases(): TestCase[] {
     },
     {
       name: "Notification fails if empty message",
-      userInteractions: [
-        cmd("groog.message.info", {
-          message: "",
-        }),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.message.info", {
+            message: "",
+          }),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           "No message set",
@@ -4980,11 +5222,13 @@ function testCases(): TestCase[] {
     },
     {
       name: "Notification is sent",
-      userInteractions: [
-        cmd("groog.message.info", {
-          message: "Hello there",
-        }),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.message.info", {
+            message: "Hello there",
+          }),
+        ],
+      },
       stubbablesConfig: {
         expectedInfoMessages: [
           "Hello there",
@@ -4993,12 +5237,14 @@ function testCases(): TestCase[] {
     },
     {
       name: "Error notification is sent",
-      userInteractions: [
-        cmd("groog.message.info", {
-          message: "General Kenobi",
-          error: true,
-        }),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.message.info", {
+            message: "General Kenobi",
+            error: true,
+          }),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           "General Kenobi",
@@ -5008,10 +5254,12 @@ function testCases(): TestCase[] {
     // Copy file name tests
     {
       name: "Fails to copy file name if no editor",
-      userInteractions: [
-        closeAllEditors,
-        cmd("groog.copyFilename"),
-      ],
+      stc: {
+        userInteractions: [
+          closeAllEditors,
+          cmd("groog.copyFilename"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           "No active editor",
@@ -5020,20 +5268,22 @@ function testCases(): TestCase[] {
     },
     {
       name: "Copies file name",
-      startingFile: startingFile("empty.go"),
-      wantDocument: [
-        "empty.gopackage main",
-        "",
-        "func main() {",
-        "",
-        "}",
-        "",
-      ],
-      wantSelections: [selection(0, 8)],
-      userInteractions: [
-        cmd("groog.copyFilename"),
-        cmd("groog.paste"),
-      ],
+      stc: {
+        file: startingFile("empty.go"),
+        expectedText: [
+          "empty.gopackage main",
+          "",
+          "func main() {",
+          "",
+          "}",
+          "",
+        ],
+        expectedSelections: [selection(0, 8)],
+        userInteractions: [
+          cmd("groog.copyFilename"),
+          cmd("groog.paste"),
+        ],
+      },
       stubbablesConfig: {
         expectedInfoMessages: [
           "Filename copied!",
@@ -5043,34 +5293,37 @@ function testCases(): TestCase[] {
     // Multi-command tests
     {
       name: "Runs multi-command",
-      wantDocument: [
-        "abcdef",
-      ],
-      wantSelections: [selection(0, 6)],
-      userInteractions: [
-        cmd("groog.multiCommand.execute", {
-          sequence: [
-            {
-              command: "groog.type",
-              args: {
-                "text": "abc",
+      stc: {
+        text: [],
+        expectedText: [
+          "abcdef",
+        ],
+        expectedSelections: [selection(0, 6)],
+        userInteractions: [
+          cmd("groog.multiCommand.execute", {
+            sequence: [
+              {
+                command: "groog.type",
+                args: {
+                  "text": "abc",
+                },
               },
-            },
-            {
-              command: "groog.message.info",
-              args: {
-                "message": "hi",
+              {
+                command: "groog.message.info",
+                args: {
+                  "message": "hi",
+                },
               },
-            },
-            {
-              command: "groog.type",
-              args: {
-                "text": "def",
+              {
+                command: "groog.type",
+                args: {
+                  "text": "def",
+                },
               },
-            },
-          ],
-        }),
-      ],
+            ],
+          }),
+        ],
+      },
       stubbablesConfig: {
         expectedInfoMessages: [
           "hi",
@@ -5080,10 +5333,11 @@ function testCases(): TestCase[] {
     // Test file tests
     {
       name: "Fails to run test file if no previous file set",
-      noStartingEditor: true,
-      userInteractions: [
-        cmd("groog.testFile"),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.testFile"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           "Previous file not set",
@@ -5092,14 +5346,16 @@ function testCases(): TestCase[] {
     },
     {
       name: "Fails to run test file if no file suffix",
-      startingFile: startingFile("greetings.txt"),
-      userInteractions: [
-        cmd("groog.testFile"),
-      ],
-      wantDocument: [
-        "Hello there",
-        "",
-      ],
+      stc: {
+        file: startingFile("greetings.txt"),
+        userInteractions: [
+          cmd("groog.testFile"),
+        ],
+        expectedText: [
+          "Hello there",
+          "",
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           "Unknown file suffix: txt",
@@ -5108,14 +5364,16 @@ function testCases(): TestCase[] {
     },
     {
       name: "Fails to run test file if no file suffix (message displayed at part 0)",
-      startingFile: startingFile("greetings.txt"),
-      userInteractions: [
-        cmd("groog.testFile", {part: 0}),
-      ],
-      wantDocument: [
-        "Hello there",
-        "",
-      ],
+      stc: {
+        file: startingFile("greetings.txt"),
+        userInteractions: [
+          cmd("groog.testFile", {part: 0}),
+        ],
+        expectedText: [
+          "Hello there",
+          "",
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           "Unknown file suffix: txt",
@@ -5124,29 +5382,33 @@ function testCases(): TestCase[] {
     },
     {
       name: "Fails to run test file if no file suffix (no message displayed at part 1)",
-      startingFile: startingFile("greetings.txt"),
-      userInteractions: [
-        cmd("groog.testFile", {part: 1}),
-      ],
-      wantDocument: [
-        "Hello there",
-        "",
-      ],
+      stc: {
+        file: startingFile("greetings.txt"),
+        userInteractions: [
+          cmd("groog.testFile", {part: 1}),
+        ],
+        expectedText: [
+          "Hello there",
+          "",
+        ],
+      },
     },
     {
       name: "Fails to run test file if go file suffix",
-      startingFile: startingFile("empty.go"),
-      userInteractions: [
-        cmd("groog.testFile"),
-      ],
-      wantDocument: [
-        "package main",
-        "",
-        "func main() {",
-        "",
-        "}",
-        "",
-      ],
+      stc: {
+        file: startingFile("empty.go"),
+        userInteractions: [
+          cmd("groog.testFile"),
+        ],
+        expectedText: [
+          "package main",
+          "",
+          "func main() {",
+          "",
+          "}",
+          "",
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           "go testing should be routed to custom command in keybindings.go",
@@ -5155,9 +5417,11 @@ function testCases(): TestCase[] {
     },
     {
       name: "Doesn't toggle fixed test file if no file visited",
-      userInteractions: [
-        cmd("groog.toggleFixedTestFile"),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.toggleFixedTestFile"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           "No active file",
@@ -5166,11 +5430,13 @@ function testCases(): TestCase[] {
     },
     {
       name: "Toggles fixed test file to current active file",
-      startingFile: startingFile("bloop.java"),
-      wantDocument: [""],
-      userInteractions: [
-        cmd("groog.toggleFixedTestFile"),
-      ],
+      stc: {
+        file: startingFile("bloop.java"),
+        expectedText: [""],
+        userInteractions: [
+          cmd("groog.toggleFixedTestFile"),
+        ],
+      },
       stubbablesConfig: {
         expectedInfoMessages: [
           `Set fixed test file to bloop.java`,
@@ -5179,12 +5445,14 @@ function testCases(): TestCase[] {
     },
     {
       name: "Toggles ignore test file to false",
-      startingFile: startingFile("bloop.java"),
-      wantDocument: [""],
-      userInteractions: [
-        cmd("groog.toggleFixedTestFile"),
-        cmd("groog.toggleFixedTestFile"),
-      ],
+      stc: {
+        file: startingFile("bloop.java"),
+        expectedText: [""],
+        userInteractions: [
+          cmd("groog.toggleFixedTestFile"),
+          cmd("groog.toggleFixedTestFile"),
+        ],
+      },
       stubbablesConfig: {
         expectedInfoMessages: [
           `Set fixed test file to bloop.java`,
@@ -5195,10 +5463,11 @@ function testCases(): TestCase[] {
     // Scripts tests
     {
       name: "Newline replacement fails if no editor",
-      noStartingEditor: true,
-      userInteractions: [
-        cmd("groog.script.replaceNewlineStringsWithQuotes"),
-      ],
+      stc: {
+        userInteractions: [
+          cmd("groog.script.replaceNewlineStringsWithQuotes"),
+        ],
+      },
       stubbablesConfig: {
         expectedErrorMessages: [
           "No active text editor.",
@@ -5207,37 +5476,41 @@ function testCases(): TestCase[] {
     },
     {
       name: "Runs newline replacement with quotes",
-      startingText: [
-        `  "One\\ntwo three\\nfour\\nfive six seven\\n eight nine \\nten"`,
-      ],
-      userInteractions: [
-        cmd("groog.script.replaceNewlineStringsWithQuotes"),
-      ],
-      wantDocument: [
-        `  "One",`,
-        `  "two three",`,
-        `  "four",`,
-        `  "five six seven",`,
-        `  " eight nine ",`,
-        `  "ten"`,
-      ],
+      stc: {
+        text: [
+          `  "One\\ntwo three\\nfour\\nfive six seven\\n eight nine \\nten"`,
+        ],
+        userInteractions: [
+          cmd("groog.script.replaceNewlineStringsWithQuotes"),
+        ],
+        expectedText: [
+          `  "One",`,
+          `  "two three",`,
+          `  "four",`,
+          `  "five six seven",`,
+          `  " eight nine ",`,
+          `  "ten"`,
+        ],
+      },
     },
     {
       name: "Runs newline replacement with ticks",
-      startingText: [
-        "  `One\\ntwo three\\nfour\\nfive six seven\\n eight nine \\nten`",
-      ],
-      userInteractions: [
-        cmd("groog.script.replaceNewlineStringsWithTicks"),
-      ],
-      wantDocument: [
-        "  `One`,",
-        "  `two three`,",
-        "  `four`,",
-        "  `five six seven`,",
-        "  ` eight nine `,",
-        "  `ten`",
-      ],
+      stc: {
+        text: [
+          "  `One\\ntwo three\\nfour\\nfive six seven\\n eight nine \\nten`",
+        ],
+        userInteractions: [
+          cmd("groog.script.replaceNewlineStringsWithTicks"),
+        ],
+        expectedText: [
+          "  `One`,",
+          "  `two three`,",
+          "  `four`,",
+          "  `five six seven`,",
+          "  ` eight nine `,",
+          "  `ten`",
+        ],
+      },
     },
   /* Useful for commenting out tests. */
   ];
@@ -5264,41 +5537,6 @@ suite('Groog commands', () => {
           await vscode.commands.executeCommand("groog.testReset");
         }
 
-        const startText = (tc.startingText || []).join("\n");
-        const wantText = tc.wantDocument?.join("\n") ?? startText;
-
-        await vscode.commands.executeCommand(closeAllEditors.command);
-
-        let editor: vscode.TextEditor | undefined;
-        if (tc.noStartingEditor) {
-          // Do nothing
-        } else {
-
-          let editor_: vscode.TextEditor;
-          if (tc.startingFile) {
-            await vscode.workspace.openTextDocument(tc.startingFile).then(doc => vscode.window.showTextDocument(doc));
-            editor_ = assertDefined(vscode.window.activeTextEditor, "vscode.window.activeTextEditor");
-          } else {
-            // Create or clear the editor
-            if (!vscode.window.activeTextEditor) {
-              await vscode.commands.executeCommand("workbench.action.files.newUntitledFile");
-            }
-
-            editor_ = assertDefined(vscode.window.activeTextEditor, "vscode.window.activeTextEditor");
-            await editor_.edit(eb => {
-              const line = editor_.document.lineAt(editor_.document.lineCount-1);
-              eb.delete(new vscode.Range(
-                new vscode.Position(0, 0),
-                new vscode.Position(line.lineNumber, line.text.length),
-              ));
-              eb.insert(new vscode.Position(0, 0), startText);
-            });
-          }
-
-          editor_.selections = (tc.startingSelections || [selection(0, 0)]);
-          editor = editor_;
-        }
-
         // Stub out input box interactions
         const gotInputBoxValidationMessages: (string | vscode.InputBoxValidationMessage)[] = [];
         vscode.window.showInputBox = async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken) => {
@@ -5319,33 +5557,17 @@ suite('Groog commands', () => {
           return response;
         };
 
-        testSetup(stubbableTestFile, tc.stubbablesConfig);
-
         // Run the commands
-        for (const userInteraction of (tc.userInteractions || [])) {
-          await userInteraction.do();
-        }
+        await new SimpleTestCase(tc.stc).runTest(stubbableTestFile, tc.stubbablesConfig).catch(e => {
+          throw e;
+        });
 
         // Verify the outcome (assert in order of information (e.g. mismatch in error messages in more useful than text being mismatched)).
-        testVerify(stubbableTestFile);
         assert.deepStrictEqual(gotInputBoxValidationMessages, tc.wantInputBoxValidationMessages || [], "Expected INPUT BOX VALIDATION MESSAGES to be exactly equal");
-
-        if (editor) {
-          assert.deepStrictEqual(editor.document.getText(), wantText, "Expected DOCUMENT TEXT to be exactly equal");
-          assert.deepStrictEqual(editor.selections, tc.wantSelections || [selection(0, 0)], "Expected SELECTIONS to be exactly equal");
-        } else {
-          assertUndefined(tc.wantDocument, "wantDocument");
-          assertUndefined(tc.wantSelections, "wantSelections");
-        }
       });
     });
   }
 });
-
-// Remove class info so deepStrictEqual works on any type
-function classless(obj: any) {
-  return JSON.parse(JSON.stringify(obj, jsonIgnoreReplacer));
-}
 
 function assertDefined<T>(t: T | undefined, objectName: string): T {
   assert.notEqual(t, undefined, `Expected ${objectName} to be defined, but it was undefined`);
