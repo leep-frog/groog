@@ -499,18 +499,9 @@ function selection(line: number, char: number) : vscode.Selection {
 
 interface TestCase {
   name: string;
-  runSolo?: boolean
-  // noStartingEditor?: boolean;
-  // text?: string[];
-  // startingFile?: string;
-  // selections?: vscode.Selection[];
-  // userInteractions?: UserInteraction[];
-  inputBoxResponses?: string[];
   stubbablesConfig?: StubbablesConfig;
-  // expectedText?: string[];
-  // expectedSelections?: vscode.Selection[];
-  wantInputBoxValidationMessages?: vscode.InputBoxValidationMessage[];
   stc: SimpleTestCaseProps;
+  runSolo?: boolean;
 }
 
 const TEST_ITERATIONS = 1;
@@ -3134,7 +3125,6 @@ function testCases(): TestCase[] {
     },
     {
       name: "Saves recording as and plays back",
-      inputBoxResponses: ["some-name"],
       stc: {
         text: [
           "abc",
@@ -3162,16 +3152,24 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
+        inputBoxResponses: ["some-name"],
         expectedInfoMessages: [
           `Recording saved as "some-name"!`,
+        ],
+        expectedInputBoxes: [
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+            validationMessage: undefined,
+          },
         ],
       },
     },
     {
       name: "Fails to name recording if reserved prefix",
-      inputBoxResponses: [
-        "Recent recording bleh",
-      ],
       stc: {
         text: [
           "start text",
@@ -3194,24 +3192,30 @@ function testCases(): TestCase[] {
           cmd("groog.record.playRecording"),
         ],
       },
-      wantInputBoxValidationMessages: [
-        {
-          message: "This is a reserved prefix",
-          severity: vscode.InputBoxValidationSeverity.Error,
-        },
-      ],
       stubbablesConfig: {
+        inputBoxResponses: [
+          "Recent recording bleh",
+        ],
         expectedErrorMessages: [
           `No recording name provided`,
+        ],
+        expectedInputBoxes: [
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+            validationMessage: {
+              message: "This is a reserved prefix",
+              severity: vscode.InputBoxValidationSeverity.Error,
+            },
+          },
         ],
       },
     },
     {
       name: "Fails to name recording if recording name already exists",
-      inputBoxResponses: [
-        "ABC Recording",
-        "ABC Recording",
-      ],
       stc: {
         text: [
           "start text",
@@ -3238,13 +3242,31 @@ function testCases(): TestCase[] {
           cmd("groog.record.playRecording"),
         ],
       },
-      wantInputBoxValidationMessages: [
-        {
-          message: "This record name already exists",
-          severity: vscode.InputBoxValidationSeverity.Error,
-        },
-      ],
       stubbablesConfig: {
+        inputBoxResponses: [
+          "ABC Recording",
+          "ABC Recording",
+        ],
+        expectedInputBoxes: [
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+          },
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+            validationMessage: {
+              message: "This record name already exists",
+              severity: vscode.InputBoxValidationSeverity.Error,
+            },
+          },
+        ],
         expectedInfoMessages: [
           `Recording saved as "ABC Recording"!`,
         ],
@@ -3255,11 +3277,6 @@ function testCases(): TestCase[] {
     },
     {
       name: "Plays back named recording specified by name",
-      inputBoxResponses: [
-        "ABC Recording",
-        "DEF Recording",
-        "GHI Recording",
-      ],
       stc: {
         text: [
           "start text",
@@ -3292,6 +3309,11 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
+        inputBoxResponses: [
+          "ABC Recording",
+          "DEF Recording",
+          "GHI Recording",
+        ],
         quickPickActions: [new SelectItemQuickPickAction(["DEF Recording"])],
         expectedQuickPickExecutions:[[
           recordingQuickPick({
@@ -3322,6 +3344,29 @@ function testCases(): TestCase[] {
             recordBook: recordBook([new TypeRecord("ghi\n")]),
           }),
         ]],
+        expectedInputBoxes: [
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+          },
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+          },
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+          },
+        ],
         expectedInfoMessages: [
           `Recording saved as "ABC Recording"!`,
           `Recording saved as "DEF Recording"!`,
@@ -3331,11 +3376,6 @@ function testCases(): TestCase[] {
     },
     {
       name: "Fails to play back named recording if multiple items are picked",
-      inputBoxResponses: [
-        "ABC Recording",
-        "DEF Recording",
-        "GHI Recording",
-      ],
       stc: {
         text: [
           "start text",
@@ -3367,6 +3407,11 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
+        inputBoxResponses: [
+          "ABC Recording",
+          "DEF Recording",
+          "GHI Recording",
+        ],
         quickPickActions: [new SelectItemQuickPickAction(["ABC Recording", "DEF Recording"])],
         expectedQuickPickExecutions:[[
           recordingQuickPick({
@@ -3397,6 +3442,29 @@ function testCases(): TestCase[] {
             recordBook: recordBook([new TypeRecord("ghi\n")]),
           }),
         ]],
+        expectedInputBoxes: [
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+          },
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+          },
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+          },
+        ],
         expectedInfoMessages: [
           `Recording saved as "ABC Recording"!`,
           `Recording saved as "DEF Recording"!`,
@@ -3409,12 +3477,12 @@ function testCases(): TestCase[] {
     },
     {
       name: "Deletes recording",
-      inputBoxResponses: [
-        "ABC Recording",
-        "DEF Recording",
-        "GHI Recording",
-      ],
       stubbablesConfig: {
+        inputBoxResponses: [
+          "ABC Recording",
+          "DEF Recording",
+          "GHI Recording",
+        ],
         quickPickActions: [
           new SelectItemQuickPickAction(["DEF Recording"]), // playNamedRecording (succeeds)
           new SelectItemQuickPickAction(["DEF Recording"]), // deleteRecording
@@ -3484,6 +3552,29 @@ function testCases(): TestCase[] {
           `Recording saved as "ABC Recording"!`,
           `Recording saved as "DEF Recording"!`,
           `Recording saved as "GHI Recording"!`,
+        ],
+        expectedInputBoxes: [
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+          },
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+          },
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+          },
         ],
       },
       stc: {
@@ -4210,10 +4301,10 @@ function testCases(): TestCase[] {
           cmd("groog.record.playNamedRecording"),
         ],
       },
-      inputBoxResponses: [
-        "My favorite recording",
-      ],
       stubbablesConfig: {
+        inputBoxResponses: [
+          "My favorite recording",
+        ],
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
           new NoOpQuickPickAction(), // type 'def'
@@ -4314,10 +4405,10 @@ function testCases(): TestCase[] {
         ],
         expectedSelections: [selection(5, 4)],
       },
-      inputBoxResponses: [
-        "My favorite recording",
-      ],
       stubbablesConfig: {
+        inputBoxResponses: [
+          "My favorite recording",
+        ],
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
           new NoOpQuickPickAction(), // type 'abc'
@@ -4478,13 +4569,23 @@ function testCases(): TestCase[] {
             }),
           ],
         ],
+        expectedInputBoxes: [
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+            validationMessage: undefined,
+          },
+        ],
         expectedInfoMessages: [
           `Recording saved as "My favorite recording"!`,
         ],
       },
     },
     {
-      name: "Save a recent recording",
+      name: "Playback a recent recording",
       stc: {
         text: [
           "",
@@ -5537,33 +5638,10 @@ suite('Groog commands', () => {
           await vscode.commands.executeCommand("groog.testReset");
         }
 
-        // Stub out input box interactions
-        const gotInputBoxValidationMessages: (string | vscode.InputBoxValidationMessage)[] = [];
-        vscode.window.showInputBox = async (options?: vscode.InputBoxOptions, token?: vscode.CancellationToken) => {
-          const response = tc.inputBoxResponses?.shift();
-          if (!response) {
-            return response;
-          }
-
-          if (options?.validateInput) {
-            const validationMessage = await options.validateInput(response);
-            if (validationMessage) {
-              gotInputBoxValidationMessages.push(validationMessage);
-              validationMessage;
-              return undefined;
-            }
-          }
-
-          return response;
-        };
-
         // Run the commands
         await new SimpleTestCase(tc.stc).runTest(stubbableTestFile, tc.stubbablesConfig).catch(e => {
           throw e;
         });
-
-        // Verify the outcome (assert in order of information (e.g. mismatch in error messages in more useful than text being mismatched)).
-        assert.deepStrictEqual(gotInputBoxValidationMessages, tc.wantInputBoxValidationMessages || [], "Expected INPUT BOX VALIDATION MESSAGES to be exactly equal");
       });
     });
   }
