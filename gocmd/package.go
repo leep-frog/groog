@@ -7,7 +7,7 @@ func groogPackage(versionOverride string) *Package {
 		Name:        "groog",
 		DisplayName: "groog",
 		Description: "",
-		Version:     "2.6.13",
+		Version:     "2.6.14",
 		Publisher:   "groogle",
 		Main:        "./out/extension.js",
 		Engines: map[string]string{
