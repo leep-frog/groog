@@ -1,3 +1,4 @@
+import { VSCODE_STUBS } from '@leep-frog/vscode-test-stubber';
 import * as vscode from 'vscode';
 import { Registerable } from './handler';
 import { Recorder } from './record';
@@ -109,7 +110,7 @@ export class Settings implements Registerable {
   }
 
   private static async updateSettings(): Promise<void> {
-    for (let s of this.settings()) {
+    for (const s of this.settings()) {
       await s.update();
     }
     vscode.window.showInformationMessage("Settings have been updated!");
@@ -129,25 +130,25 @@ export class GroogSetting implements Setting {
   private configSection: string;
   private subsection: string;
   private value: string;
-  private global: boolean;
+  private configurationTarget: vscode.ConfigurationTarget;
 
   constructor(configSection: string, subsection: string, value: any, workspaceSetting?: boolean) {
     this.configSection = configSection;
     this.subsection = subsection;
     this.value = value;
-    this.global = !workspaceSetting;
+    this.configurationTarget = workspaceSetting ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global;
   }
 
   async update(): Promise<void> {
-    await vscode.workspace.getConfiguration(this.configSection).update(this.subsection, this.value, this.global);
+    await VSCODE_STUBS.getConfiguration(this.configSection).update(this.subsection, this.value, this.configurationTarget);
   }
 }
 
-const configSection: string = "editor";
-const configSubsection: string = "wordSeparators";
-
 // WordSeparatorSetting *adds* the provided characters to the list of editor word-separators.
-class WordSeparatorSetting implements Setting {
+export class WordSeparatorSetting implements Setting {
+
+  static readonly configSection: string = "editor";
+  static readonly configSubsection: string = "wordSeparators";
 
   private addCharacters: string;
 
@@ -156,9 +157,9 @@ class WordSeparatorSetting implements Setting {
   }
 
   async update(): Promise<void> {
-    let [configuration, existing] = getWordSeparators();
+    let [configuration, existing] = WordSeparatorSetting.getWordSeparators();
     if (!existing) {
-      vscode.window.showErrorMessage("Failed to fetch setting %s");
+      vscode.window.showErrorMessage(`Failed to fetch ${WordSeparatorSetting.configSection}.${WordSeparatorSetting.configSubsection} setting`);
       return;
     }
     for (const char of this.addCharacters) {
@@ -166,13 +167,13 @@ class WordSeparatorSetting implements Setting {
         existing += char;
       }
     }
-    await configuration.update(configSubsection, existing, true);
+    await configuration.update(WordSeparatorSetting.configSubsection, existing, vscode.ConfigurationTarget.Global);
   }
-}
 
-export function getWordSeparators(): [vscode.WorkspaceConfiguration, string | undefined] {
-  const configuration = vscode.workspace.getConfiguration(configSection);
-  return [configuration, configuration.get(configSubsection)];
+  public static getWordSeparators(): [vscode.WorkspaceConfiguration, string | undefined] {
+    const configuration = VSCODE_STUBS.getConfiguration(this.configSection);
+    return [configuration, configuration.get(this.configSubsection)];
+  }
 }
 
 class LanguageSetting implements Setting {
@@ -190,6 +191,6 @@ class LanguageSetting implements Setting {
   }
 
   async update(): Promise<void> {
-    await vscode.workspace.getConfiguration(this.configSection, { "languageId": this.languageId }).update(this.subsection, this.value, true, true);
+    await VSCODE_STUBS.getConfiguration(this.configSection, { languageId: this.languageId }).update(this.subsection, this.value, vscode.ConfigurationTarget.Global, true);
   }
 }

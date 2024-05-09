@@ -1,6 +1,6 @@
 // Used https://github.com/genesy/auto-correct as guidance for this logic.
 import * as vscode from 'vscode';
-import { getWordSeparators } from './settings';
+import { WordSeparatorSetting } from './settings';
 import { Correction, defaultCorrections, globalLanguageKey } from './typos';
 
 const whitespaceCharBreakKey = "WHITESPACE";
@@ -56,7 +56,7 @@ export class TypoFixer {
     const config = vscode.workspace.getConfiguration("groog", vscode.window.activeTextEditor?.document.uri);
     const corrections = config.get<Correction[]>("typos");
 
-    const [_, separators] = getWordSeparators();
+    const [_, separators] = WordSeparatorSetting.getWordSeparators();
     if (!separators) {
       vscode.window.showErrorMessage("Failed to get editor.wordSeparator; defaulting to space character");
       this.defaultBreakCharacters = " ";

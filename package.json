@@ -30,7 +30,7 @@
     "watch": "tsc -watch -p ./"
   },
   "dependencies": {
-    "@leep-frog/vscode-test-stubber": "^1.6.6",
+    "@leep-frog/vscode-test-stubber": "^1.7.5",
     "await-lock": "^2.2.2",
     "escape-string-regexp": "^5.0.0",
     "json-ignore": "^0.4.0",

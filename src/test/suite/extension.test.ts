@@ -520,6 +520,9 @@ function testCases(): TestCase[] {
         expectedInfoMessages: [
           `Basic keyboard mode activated`,
         ],
+        expectedErrorMessages: [
+          `Failed to get editor.wordSeparator; defaulting to space character`,
+        ],
       },
     },
     // Typo tests
@@ -5611,6 +5614,85 @@ function testCases(): TestCase[] {
           "  ` eight nine `,",
           "  `ten`",
         ],
+      },
+    },
+    {
+      name: "Updates settings",
+      runSolo: true,
+      stc: {
+        userInteractions: [
+          cmd("groog.updateSettings"),
+        ],
+      },
+      stubbablesConfig: {
+        expectedInfoMessages: [
+          `Settings have been updated!`,
+        ],
+        expectedErrorMessages: [
+          `Failed to fetch editor.wordSeparators setting`,
+        ],
+        expectedWorkspaceConfiguration: {
+          configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
+            [vscode.ConfigurationTarget.Global, new Map<string, any>([
+              ["editor", new Map<string, any>([
+                ['autoClosingBrackets', 'never'],
+                ['autoClosingQuotes', 'never'],
+                ['codeActionsOnSave', {
+                  'source.fixAll.eslint': true,
+                  'source.organizeImports': true,
+                }],
+                ['cursorSurroundingLines', 6],
+                ['detectIndentation', false],
+                ['insertSpaces', true],
+                ['rulers', [
+                  80,
+                  200,
+                ]],
+                ['tabSize', 2],
+              ])],
+              ["files", new Map<string, any>([
+                ['eol', '\n'],
+                ['insertFinalNewline', true],
+                ['trimFinalNewlines', true],
+                ['trimTrailingWhitespace', true],
+              ])],
+              ["gopls", new Map<string, any>([
+                ['analyses', {
+                  composites: false,
+                }],
+              ])],
+              ["powershell", new Map<string, any>([
+                ['startAutomatically', false],
+              ])],
+              ["terminal", new Map<string, any>([
+                ['integrated', new Map<string, any>([
+                  ['allowChords', true],
+                  ['automationProfile', new Map<string, any>([
+                    ['windows', {
+                      path: 'C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+                    }],
+                  ])],
+                  ['commandsToSkipShell', [
+                    'workbench.action.terminal.sendSequence',
+                    'groog.message.info',
+                    'workbench.action.closePanel',
+                    'workbench.action.terminal.focusNext',
+                    'workbench.action.terminal.focusPrevious',
+                    'workbench.action.terminal.newWithProfile',
+                    'groog.terminal.find',
+                    'groog.terminal.reverseFind',
+                    'workbench.action.terminal.focusFind',
+                    'workbench.action.terminal.findNext',
+                    'workbench.action.terminal.findPrevious',
+                    'groog.ctrlG',
+                    'groog.multiCommand.execute',
+                    'termin-all-or-nothing.closePanel',
+                  ]],
+                ])],
+              ])],
+            ])],
+          ]),
+        },
       },
     },
   /* Useful for commenting out tests. */
