@@ -5618,7 +5618,6 @@ function testCases(): TestCase[] {
     },
     {
       name: "Updates settings when can't find word separators",
-      runSolo: true,
       stc: {
         userInteractions: [
           cmd("groog.updateSettings"),
@@ -5746,7 +5745,6 @@ function testCases(): TestCase[] {
     },
     {
       name: "Updates settings when can find word separators (and adds underscore to the list)",
-      runSolo: true,
       stc: {
         userInteractions: [
           cmd("groog.updateSettings"),
@@ -5881,7 +5879,6 @@ function testCases(): TestCase[] {
     },
     {
       name: "Updates settings when word separators already contains an underscore",
-      runSolo: true,
       stc: {
         userInteractions: [
           cmd("groog.updateSettings"),
