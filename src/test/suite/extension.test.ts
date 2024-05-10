@@ -5617,7 +5617,7 @@ function testCases(): TestCase[] {
       },
     },
     {
-      name: "Updates settings",
+      name: "Updates settings when can't find word separators",
       runSolo: true,
       stc: {
         userInteractions: [
@@ -5672,6 +5672,7 @@ function testCases(): TestCase[] {
                       path: 'C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
                     }],
                   ])],
+                  ['scrollback', 10000],
                   ['commandsToSkipShell', [
                     'workbench.action.terminal.sendSequence',
                     'groog.message.info',
@@ -5688,6 +5689,324 @@ function testCases(): TestCase[] {
                     'groog.multiCommand.execute',
                     'termin-all-or-nothing.closePanel',
                   ]],
+                  ['copyOnSelection', true],
+                  ['defaultProfile', new Map<string, any>([
+                    ['windows','PowerShell'],
+                  ])],
+                  ['profiles', new Map<string, any>([
+                    ['windows' , {
+                      MinGW: {
+                        args: ['--login', '-i'],
+                        color: 'terminal.ansiGreen',
+                        env: {
+                          GROOG_VSCODE: '1',
+                        },
+                        icon: 'hubot',
+                        overrideName: true,
+                        path: 'C:\\msys64\\usr\\bin\\bash.exe',
+                      },
+                    }],
+                  ])],
+                ])],
+              ])],
+              ['window', new Map<string, any>([
+                ['newWindowDimensions', 'maximized'],
+              ])],
+              ['workbench', new Map<string, any>([
+                ['colorCustomizations', {
+                  'editor.lineHighlightBorder': '#707070',
+                  'editorGutter.background': '#000000',
+                  'editorLineNumber.activeForeground': '#00ffff',
+                  'terminal.findMatchBackground': '#bb00bb',
+                  'terminal.findMatchHighlightBackground': '#00bbbb',
+                }],
+                ['editor', new Map<string, any>([
+                  ['limit', new Map<string, any>([
+                    ['enabled', true],
+                    ['perEditorGroup', true],
+                    ['value', 1],
+                  ])],
+                  ['showTabs', false],
+                ])],
+                ['startupEditor', 'none'],
+              ])],
+            ])],
+          ]),
+          languageConfiguration: new Map<string, Map<vscode.ConfigurationTarget, Map<string, any>>>([
+            ['typescript', new Map<vscode.ConfigurationTarget, Map<string, any>>([
+              [vscode.ConfigurationTarget.Global, new Map<string, any>([
+                ['editor', new Map<string, any>([
+                  ['formatOnSave', true],
+                ])],
+              ])],
+            ])],
+          ]),
+        },
+      },
+    },
+    {
+      name: "Updates settings when can find word separators (and adds underscore to the list)",
+      runSolo: true,
+      stc: {
+        userInteractions: [
+          cmd("groog.updateSettings"),
+        ],
+      },
+      stubbablesConfig: {
+        expectedInfoMessages: [
+          `Settings have been updated!`,
+        ],
+        workspaceConfiguration: {
+          configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
+            [vscode.ConfigurationTarget.Global, new Map<string, any>([
+              ["editor", new Map<string, any>([
+                ['wordSeparators', ' .?'],
+              ])],
+            ])],
+          ]),
+        },
+        expectedWorkspaceConfiguration: {
+          configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
+            [vscode.ConfigurationTarget.Global, new Map<string, any>([
+              ["editor", new Map<string, any>([
+                ['autoClosingBrackets', 'never'],
+                ['autoClosingQuotes', 'never'],
+                ['codeActionsOnSave', {
+                  'source.fixAll.eslint': true,
+                  'source.organizeImports': true,
+                }],
+                ['cursorSurroundingLines', 6],
+                ['detectIndentation', false],
+                ['insertSpaces', true],
+                ['rulers', [
+                  80,
+                  200,
+                ]],
+                ['wordSeparators', ' .?_'],
+                ['tabSize', 2],
+              ])],
+              ["files", new Map<string, any>([
+                ['eol', '\n'],
+                ['insertFinalNewline', true],
+                ['trimFinalNewlines', true],
+                ['trimTrailingWhitespace', true],
+              ])],
+              ["gopls", new Map<string, any>([
+                ['analyses', {
+                  composites: false,
+                }],
+              ])],
+              ["powershell", new Map<string, any>([
+                ['startAutomatically', false],
+              ])],
+              ["terminal", new Map<string, any>([
+                ['integrated', new Map<string, any>([
+                  ['allowChords', true],
+                  ['automationProfile', new Map<string, any>([
+                    ['windows', {
+                      path: 'C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+                    }],
+                  ])],
+                  ['scrollback', 10000],
+                  ['commandsToSkipShell', [
+                    'workbench.action.terminal.sendSequence',
+                    'groog.message.info',
+                    'workbench.action.closePanel',
+                    'workbench.action.terminal.focusNext',
+                    'workbench.action.terminal.focusPrevious',
+                    'workbench.action.terminal.newWithProfile',
+                    'groog.terminal.find',
+                    'groog.terminal.reverseFind',
+                    'workbench.action.terminal.focusFind',
+                    'workbench.action.terminal.findNext',
+                    'workbench.action.terminal.findPrevious',
+                    'groog.ctrlG',
+                    'groog.multiCommand.execute',
+                    'termin-all-or-nothing.closePanel',
+                  ]],
+                  ['copyOnSelection', true],
+                  ['defaultProfile', new Map<string, any>([
+                    ['windows','PowerShell'],
+                  ])],
+                  ['profiles', new Map<string, any>([
+                    ['windows' , {
+                      MinGW: {
+                        args: ['--login', '-i'],
+                        color: 'terminal.ansiGreen',
+                        env: {
+                          GROOG_VSCODE: '1',
+                        },
+                        icon: 'hubot',
+                        overrideName: true,
+                        path: 'C:\\msys64\\usr\\bin\\bash.exe',
+                      },
+                    }],
+                  ])],
+                ])],
+              ])],
+              ['window', new Map<string, any>([
+                ['newWindowDimensions', 'maximized'],
+              ])],
+              ['workbench', new Map<string, any>([
+                ['colorCustomizations', {
+                  'editor.lineHighlightBorder': '#707070',
+                  'editorGutter.background': '#000000',
+                  'editorLineNumber.activeForeground': '#00ffff',
+                  'terminal.findMatchBackground': '#bb00bb',
+                  'terminal.findMatchHighlightBackground': '#00bbbb',
+                }],
+                ['editor', new Map<string, any>([
+                  ['limit', new Map<string, any>([
+                    ['enabled', true],
+                    ['perEditorGroup', true],
+                    ['value', 1],
+                  ])],
+                  ['showTabs', false],
+                ])],
+                ['startupEditor', 'none'],
+              ])],
+            ])],
+          ]),
+          languageConfiguration: new Map<string, Map<vscode.ConfigurationTarget, Map<string, any>>>([
+            ['typescript', new Map<vscode.ConfigurationTarget, Map<string, any>>([
+              [vscode.ConfigurationTarget.Global, new Map<string, any>([
+                ['editor', new Map<string, any>([
+                  ['formatOnSave', true],
+                ])],
+              ])],
+            ])],
+          ]),
+        },
+      },
+    },
+    {
+      name: "Updates settings when word separators already contains an underscore",
+      runSolo: true,
+      stc: {
+        userInteractions: [
+          cmd("groog.updateSettings"),
+        ],
+      },
+      stubbablesConfig: {
+        expectedInfoMessages: [
+          `Settings have been updated!`,
+        ],
+        workspaceConfiguration: {
+          configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
+            [vscode.ConfigurationTarget.Global, new Map<string, any>([
+              ["editor", new Map<string, any>([
+                ['wordSeparators', ' ._?'],
+              ])],
+            ])],
+          ]),
+        },
+        expectedWorkspaceConfiguration: {
+          configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
+            [vscode.ConfigurationTarget.Global, new Map<string, any>([
+              ["editor", new Map<string, any>([
+                ['autoClosingBrackets', 'never'],
+                ['autoClosingQuotes', 'never'],
+                ['codeActionsOnSave', {
+                  'source.fixAll.eslint': true,
+                  'source.organizeImports': true,
+                }],
+                ['cursorSurroundingLines', 6],
+                ['detectIndentation', false],
+                ['insertSpaces', true],
+                ['rulers', [
+                  80,
+                  200,
+                ]],
+                ['wordSeparators', ' ._?'],
+                ['tabSize', 2],
+              ])],
+              ["files", new Map<string, any>([
+                ['eol', '\n'],
+                ['insertFinalNewline', true],
+                ['trimFinalNewlines', true],
+                ['trimTrailingWhitespace', true],
+              ])],
+              ["gopls", new Map<string, any>([
+                ['analyses', {
+                  composites: false,
+                }],
+              ])],
+              ["powershell", new Map<string, any>([
+                ['startAutomatically', false],
+              ])],
+              ["terminal", new Map<string, any>([
+                ['integrated', new Map<string, any>([
+                  ['allowChords', true],
+                  ['automationProfile', new Map<string, any>([
+                    ['windows', {
+                      path: 'C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+                    }],
+                  ])],
+                  ['scrollback', 10000],
+                  ['commandsToSkipShell', [
+                    'workbench.action.terminal.sendSequence',
+                    'groog.message.info',
+                    'workbench.action.closePanel',
+                    'workbench.action.terminal.focusNext',
+                    'workbench.action.terminal.focusPrevious',
+                    'workbench.action.terminal.newWithProfile',
+                    'groog.terminal.find',
+                    'groog.terminal.reverseFind',
+                    'workbench.action.terminal.focusFind',
+                    'workbench.action.terminal.findNext',
+                    'workbench.action.terminal.findPrevious',
+                    'groog.ctrlG',
+                    'groog.multiCommand.execute',
+                    'termin-all-or-nothing.closePanel',
+                  ]],
+                  ['copyOnSelection', true],
+                  ['defaultProfile', new Map<string, any>([
+                    ['windows','PowerShell'],
+                  ])],
+                  ['profiles', new Map<string, any>([
+                    ['windows' , {
+                      MinGW: {
+                        args: ['--login', '-i'],
+                        color: 'terminal.ansiGreen',
+                        env: {
+                          GROOG_VSCODE: '1',
+                        },
+                        icon: 'hubot',
+                        overrideName: true,
+                        path: 'C:\\msys64\\usr\\bin\\bash.exe',
+                      },
+                    }],
+                  ])],
+                ])],
+              ])],
+              ['window', new Map<string, any>([
+                ['newWindowDimensions', 'maximized'],
+              ])],
+              ['workbench', new Map<string, any>([
+                ['colorCustomizations', {
+                  'editor.lineHighlightBorder': '#707070',
+                  'editorGutter.background': '#000000',
+                  'editorLineNumber.activeForeground': '#00ffff',
+                  'terminal.findMatchBackground': '#bb00bb',
+                  'terminal.findMatchHighlightBackground': '#00bbbb',
+                }],
+                ['editor', new Map<string, any>([
+                  ['limit', new Map<string, any>([
+                    ['enabled', true],
+                    ['perEditorGroup', true],
+                    ['value', 1],
+                  ])],
+                  ['showTabs', false],
+                ])],
+                ['startupEditor', 'none'],
+              ])],
+            ])],
+          ]),
+          languageConfiguration: new Map<string, Map<vscode.ConfigurationTarget, Map<string, any>>>([
+            ['typescript', new Map<vscode.ConfigurationTarget, Map<string, any>>([
+              [vscode.ConfigurationTarget.Global, new Map<string, any>([
+                ['editor', new Map<string, any>([
+                  ['formatOnSave', true],
                 ])],
               ])],
             ])],

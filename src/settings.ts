@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { Registerable } from './handler';
 import { Recorder } from './record';
 
-export function colorCustomizationSetting(color?: string, workspaceSetting?: boolean): GroogSetting {
+export function colorCustomizationSetting(color?: string, workspaceTarget?: boolean): GroogSetting {
   const value = color === undefined ? undefined : {
     "editorGutter.background": "#000000",
     "editorLineNumber.activeForeground": "#00ffff",
@@ -11,7 +11,7 @@ export function colorCustomizationSetting(color?: string, workspaceSetting?: boo
     "terminal.findMatchHighlightBackground": "#00bbbb",
     "terminal.findMatchBackground": "#bb00bb",
   };
-  return new GroogSetting("workbench", "colorCustomizations", value, workspaceSetting);
+  return new GroogSetting("workbench", "colorCustomizations", value, workspaceTarget);
 }
 
 export class Settings implements Registerable {
@@ -132,11 +132,11 @@ export class GroogSetting implements Setting {
   private value: string;
   private configurationTarget: vscode.ConfigurationTarget;
 
-  constructor(configSection: string, subsection: string, value: any, workspaceSetting?: boolean) {
+  constructor(configSection: string, subsection: string, value: any, workspaceTarget?: boolean) {
     this.configSection = configSection;
     this.subsection = subsection;
     this.value = value;
-    this.configurationTarget = workspaceSetting ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global;
+    this.configurationTarget = workspaceTarget ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global;
   }
 
   async update(): Promise<void> {
