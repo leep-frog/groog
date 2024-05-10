@@ -9,8 +9,7 @@ import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
 import path = require('path');
 
 // Note: this needs to be identical to the value in .vscode-test.mjs (trying to have shared import there is awkward).
-// export const stubbableTestFile = path.resolve(".vscode-test", "stubbable-file.json");
-export const stubbableTestFile = `C:\\Users\\gleep\\Desktop\\Coding\\vs-code\\groog\\.vscode-test\\stubbable-file.json`;
+export const stubbableTestFile = path.resolve("..", "..", ".vscode-test", "stubbable-file.json");
 
 function startingFile(filename: string) {
   return path.resolve(__dirname, "..", "..", "..", "src", "test", "test-workspace", filename);
