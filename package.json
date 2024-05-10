@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.6.16",
+  "version": "2.6.17",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -30,10 +30,9 @@
     "watch": "tsc -watch -p ./"
   },
   "dependencies": {
-    "@leep-frog/vscode-test-stubber": "^1.8.3",
+    "@leep-frog/vscode-test-stubber": "^1.8.4",
     "await-lock": "^2.2.2",
     "escape-string-regexp": "^5.0.0",
-    "json-ignore": "^0.4.0",
     "node-html-parser": "^6.1.13",
     "sorted-array-functions": "^1.3.0"
   },
