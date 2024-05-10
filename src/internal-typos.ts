@@ -52,13 +52,15 @@ export class TypoFixer {
     }));
   }
 
-  private reload() : void {
+  public reload(silent?: boolean) : void {
     const config = vscode.workspace.getConfiguration("groog", vscode.window.activeTextEditor?.document.uri);
     const corrections = config.get<Correction[]>("typos");
 
     const [_, separators] = WordSeparatorSetting.getWordSeparators();
     if (!separators) {
-      vscode.window.showErrorMessage("Failed to get editor.wordSeparator; defaulting to space character");
+      if (!silent) {
+        vscode.window.showErrorMessage("Failed to get editor.wordSeparator; defaulting to space character");
+      }
       this.defaultBreakCharacters = " ";
     } else {
       this.defaultBreakCharacters = separators;

@@ -166,6 +166,7 @@ export class Emacs {
           await h.testReset();
         }
         miscTestReset();
+        this.typoFixer.reload(true);
       } else {
         vscode.window.showErrorMessage(`Cannot run testReset outside of test mode!`);
       }

@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
-import { CloseQuickPickAction, NoOpQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectItemQuickPickAction, SimpleTestCase, SimpleTestCaseProps, StubbablesConfig, UserInteraction, cmd } from '@leep-frog/vscode-test-stubber';
+import { CloseQuickPickAction, NoOpQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectItemQuickPickAction, SimpleTestCase, SimpleTestCaseProps, StubbablesConfig, UserInteraction, WorkspaceConfiguration, cmd, openFile } from '@leep-frog/vscode-test-stubber';
 import * as vscode from 'vscode';
 import { Document, FindRecord, Match } from '../../find';
 import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
@@ -19,6 +19,22 @@ function startingFile(filename: string) {
 interface TestMatch {
   range: vscode.Range;
   text: string;
+}
+
+function wordSeparatorConfiguration(sep: string): WorkspaceConfiguration {
+  return {
+    configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
+      [vscode.ConfigurationTarget.Global, new Map<string, any>([
+        ["editor", new Map<string, any>([
+          ['wordSeparators', sep],
+        ])],
+      ])],
+    ]),
+  };
+}
+
+function allWordSeparatorConfiguration() {
+  return wordSeparatorConfiguration("`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?_");
 }
 
 function convertTestMatches(pattern : RegExp | undefined, testMatches: TestMatch[]): Match[] {
@@ -536,6 +552,8 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
+        workspaceConfiguration: wordSeparatorConfiguration(' ^('),
+        expectedWorkspaceConfiguration: wordSeparatorConfiguration(' ^('),
         expectedErrorMessages: [
           `Couldn't find active editor`,
         ],
@@ -556,9 +574,12 @@ function testCases(): TestCase[] {
           type("l"),
         ],
       },
+      stubbablesConfig: {
+        workspaceConfiguration: wordSeparatorConfiguration(' ^('),
+      },
     },
     {
-      name: "Typo fixer fixes if word is over",
+      name: "Typo fixer fixes if word is over (no word separator defaults to space)",
       stc: {
         text: [],
         expectedSelections: [
@@ -572,6 +593,69 @@ function testCases(): TestCase[] {
           type("l"),
           type(" "),
         ],
+      },
+      stubbablesConfig: {
+        workspaceConfiguration: wordSeparatorConfiguration(' '),
+      },
+    },
+    {
+      name: "Typo fixer fixes if word is over (word separator setting with space)",
+      stc: {
+        text: [],
+        expectedSelections: [
+          selection(0, 6),
+        ],
+        expectedText: [
+          "build ",
+        ],
+        userInteractions: [
+          type("typobuid"),
+          type("l"),
+          type(" "),
+        ],
+      },
+      stubbablesConfig: {
+        workspaceConfiguration: wordSeparatorConfiguration(' '),
+      },
+    },
+    {
+      name: "Typo fixer fixes if word is over (word separator setting without space in setting, but whitespce)",
+      stc: {
+        text: [],
+        expectedSelections: [
+          selection(0, 6),
+        ],
+        expectedText: [
+          "build ",
+        ],
+        userInteractions: [
+          type("typobuid"),
+          type("l"),
+          type(" "),
+        ],
+      },
+      stubbablesConfig: {
+        workspaceConfiguration: wordSeparatorConfiguration('^?!'),
+      },
+    },
+    {
+      name: "Typo fixer fixes if word is over (word separator setting without char in setting, and not whitespce)",
+      stc: {
+        text: [],
+        expectedSelections: [
+          selection(0, 10),
+        ],
+        expectedText: [
+          "typobuidl-",
+        ],
+        userInteractions: [
+          type("typobuid"),
+          type("l"),
+          type("-"),
+        ],
+      },
+      stubbablesConfig: {
+        workspaceConfiguration: wordSeparatorConfiguration('^?!'),
       },
     },
     {
@@ -589,6 +673,9 @@ function testCases(): TestCase[] {
           type("l"),
           type("("),
         ],
+      },
+      stubbablesConfig: {
+        workspaceConfiguration: wordSeparatorConfiguration('('),
       },
     },
     {
@@ -610,6 +697,9 @@ function testCases(): TestCase[] {
           "typobuidl  ",
         ],
       },
+      stubbablesConfig: {
+        workspaceConfiguration: allWordSeparatorConfiguration(),
+      },
     },
     {
       name: "Doesn't run typo if not at the end of a word",
@@ -629,6 +719,9 @@ function testCases(): TestCase[] {
         text: [
           "typobuidl(",
         ],
+      },
+      stubbablesConfig: {
+        workspaceConfiguration: allWordSeparatorConfiguration(),
       },
     },
     {
@@ -656,6 +749,9 @@ function testCases(): TestCase[] {
           "",
         ],
       },
+      stubbablesConfig: {
+        workspaceConfiguration: allWordSeparatorConfiguration(),
+      },
     },
     {
       name: "Regular word is not changed if not a configured break character",
@@ -672,9 +768,12 @@ function testCases(): TestCase[] {
           "typoabc ",
         ],
       },
+      stubbablesConfig: {
+        workspaceConfiguration: allWordSeparatorConfiguration(),
+      },
     },
     {
-      name: "Proper break character replaces word",
+      name: "Proper break character replaces word if is a separator character",
       stc: {
         text: [],
         userInteractions: [
@@ -687,6 +786,29 @@ function testCases(): TestCase[] {
         expectedText: [
           "ABC^",
         ],
+      },
+      stubbablesConfig: {
+        workspaceConfiguration: wordSeparatorConfiguration('^'),
+      },
+    },
+    {
+      // TODO: Fix this
+      name: "Proper break character does not replace word if not a separator character",
+      stc: {
+        text: [],
+        userInteractions: [
+          type("typoabc"),
+          type("^"),
+        ],
+        expectedSelections: [
+          selection(0, 8),
+        ],
+        expectedText: [
+          "typoabc^",
+        ],
+      },
+      stubbablesConfig: {
+        workspaceConfiguration: wordSeparatorConfiguration(' '),
       },
     },
     {
@@ -704,6 +826,9 @@ function testCases(): TestCase[] {
           "ABC",
         ],
       },
+      stubbablesConfig: {
+        workspaceConfiguration: wordSeparatorConfiguration('.'),
+      },
     },
     {
       name: "Replacement suffix",
@@ -719,6 +844,9 @@ function testCases(): TestCase[] {
         expectedText: [
           "ABC$ef",
         ],
+      },
+      stubbablesConfig: {
+        workspaceConfiguration: wordSeparatorConfiguration('$'),
       },
     },
     {
@@ -736,6 +864,9 @@ function testCases(): TestCase[] {
           "ABC-EF",
         ],
       },
+      stubbablesConfig: {
+        workspaceConfiguration: wordSeparatorConfiguration('-'),
+      },
     },
     {
       name: "Replacement suffix before and after cursor",
@@ -751,6 +882,9 @@ function testCases(): TestCase[] {
         expectedText: [
           "ABCdeF",
         ],
+      },
+      stubbablesConfig: {
+        workspaceConfiguration: wordSeparatorConfiguration('&'),
       },
     },
     // Typo with multi-line suffix replacements
@@ -778,6 +912,9 @@ function testCases(): TestCase[] {
           "rstuvw",
           "xyz",
         ],
+      },
+      stubbablesConfig: {
+        workspaceConfiguration: wordSeparatorConfiguration(' '),
       },
     },
     // Keyboard toggle tests
@@ -4262,7 +4399,7 @@ function testCases(): TestCase[] {
                   queryText: "abc",
                   regex: false,
                   wholeWord: false,
-                }),
+                }, 4, 0),
                 new CommandRecord("groog.deleteLeft"),
                 new TypeRecord("xyz"),
               ]),
@@ -4305,14 +4442,11 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
-        inputBoxResponses: [
-          "My favorite recording",
-        ],
         quickPickActions: [
           new NoOpQuickPickAction(), // groog.find
           new NoOpQuickPickAction(), // type 'def'
 
-          // playNamedRecording
+          // playNamedRecording: press unknown button on Recent recording 0
           new PressUnknownButtonQuickPickAction("Recent recording 0"),
         ],
         expectedQuickPickExecutions:[
@@ -4472,7 +4606,7 @@ function testCases(): TestCase[] {
                   queryText: "ghi",
                   regex: false,
                   wholeWord: false,
-                }),
+                }, 0, -1),
                 new TypeRecord("trois"),
               ]),
               savable: true,
@@ -4487,7 +4621,7 @@ function testCases(): TestCase[] {
                   queryText: "def",
                   regex: false,
                   wholeWord: false,
-                }),
+                }, 0, -1),
                 new TypeRecord("deux"),
               ]),
               savable: true,
@@ -4502,7 +4636,7 @@ function testCases(): TestCase[] {
                   queryText: "abc",
                   regex: false,
                   wholeWord: false,
-                }),
+                }, 0, -1),
                 new TypeRecord("un"),
               ]),
               savable: true,
@@ -4520,7 +4654,7 @@ function testCases(): TestCase[] {
                   queryText: "ghi",
                   regex: false,
                   wholeWord: false,
-                }),
+                }, 0, -1),
                 new TypeRecord("trois"),
               ]),
               savable: true,
@@ -4535,7 +4669,7 @@ function testCases(): TestCase[] {
                   queryText: "def",
                   regex: false,
                   wholeWord: false,
-                }),
+                }, 1, 0),
                 new TypeRecord("deux"),
               ]),
               savable: true,
@@ -4550,7 +4684,7 @@ function testCases(): TestCase[] {
                   queryText: "abc",
                   regex: false,
                   wholeWord: false,
-                }),
+                }, 0, -1),
                 new TypeRecord("un"),
               ]),
               savable: true,
@@ -4565,7 +4699,7 @@ function testCases(): TestCase[] {
                   queryText: "def",
                   regex: false,
                   wholeWord: false,
-                }),
+                }, 1, 0),
                 new TypeRecord("deux"),
               ]),
               repeatable: true,
@@ -5449,10 +5583,10 @@ function testCases(): TestCase[] {
       },
     },
     {
-      name: "Fails to run test file if no file suffix",
+      name: "Fails to run test file if unsupported file suffix",
       stc: {
-        file: startingFile("greetings.txt"),
         userInteractions: [
+          openFile(startingFile("greetings.txt")),
           cmd("groog.testFile"),
         ],
         expectedText: [
@@ -5467,10 +5601,10 @@ function testCases(): TestCase[] {
       },
     },
     {
-      name: "Fails to run test file if no file suffix (message displayed at part 0)",
+      name: "Fails to run test file if unsupported file suffix (message displayed at part 0)",
       stc: {
-        file: startingFile("greetings.txt"),
         userInteractions: [
+          openFile(startingFile("greetings.txt")),
           cmd("groog.testFile", {part: 0}),
         ],
         expectedText: [
@@ -5485,10 +5619,10 @@ function testCases(): TestCase[] {
       },
     },
     {
-      name: "Fails to run test file if no file suffix (no message displayed at part 1)",
+      name: "Fails to run test file if unsupported file suffix (no message displayed at part 1)",
       stc: {
-        file: startingFile("greetings.txt"),
         userInteractions: [
+          openFile(startingFile("greetings.txt")),
           cmd("groog.testFile", {part: 1}),
         ],
         expectedText: [
@@ -5500,9 +5634,12 @@ function testCases(): TestCase[] {
     {
       name: "Fails to run test file if go file suffix",
       stc: {
-        file: startingFile("empty.go"),
         userInteractions: [
+          openFile(startingFile("empty.go")),
           cmd("groog.testFile"),
+        ],
+        expectedSelections: [
+          selection(1, 0),
         ],
         expectedText: [
           "package main",
@@ -5535,9 +5672,9 @@ function testCases(): TestCase[] {
     {
       name: "Toggles fixed test file to current active file",
       stc: {
-        file: startingFile("bloop.java"),
         expectedText: [""],
         userInteractions: [
+          openFile(startingFile("bloop.java")),
           cmd("groog.toggleFixedTestFile"),
         ],
       },
@@ -5550,9 +5687,9 @@ function testCases(): TestCase[] {
     {
       name: "Toggles ignore test file to false",
       stc: {
-        file: startingFile("bloop.java"),
         expectedText: [""],
         userInteractions: [
+          openFile(startingFile("bloop.java")),
           cmd("groog.toggleFixedTestFile"),
           cmd("groog.toggleFixedTestFile"),
         ],
@@ -6033,7 +6170,10 @@ suite('Groog commands', () => {
       test(`${iteration} ${tc.name}`, async () => {
 
         if (idx) {
-          await vscode.commands.executeCommand("groog.testReset");
+          tc.stc.userInteractions = [
+            cmd("groog.testReset"),
+            ...(tc.stc.userInteractions || []),
+          ];
         }
 
         // Run the commands

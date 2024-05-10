@@ -1,5 +1,4 @@
 import { VSCODE_STUBS } from '@leep-frog/vscode-test-stubber';
-import { jsonIgnore } from 'json-ignore';
 import * as vscode from 'vscode';
 import { ColorMode, HandlerColoring, gutterHandlerColoring } from './color_mode';
 import { Emacs, GlobalBoolTracker } from './emacs';
@@ -844,17 +843,15 @@ export class FindRecord implements Record {
   private nexts: number;
   private matchProps: RefreshMatchesProps;
 
-  @jsonIgnore() // Ignore this field in test comparison
-    numMatches: number;
+  numMatches: number;
 
-  @jsonIgnore() // Ignore this field in test comparison
-    matchIdx: number;
+  matchIdx: number;
 
-  constructor(nexts: number, props: RefreshMatchesProps) {
+  constructor(nexts: number, props: RefreshMatchesProps, numMatches?: number, matchIdx?: number) {
     this.nexts = nexts;
     this.matchProps = props;
-    this.numMatches = 0;
-    this.matchIdx = -1;
+    this.numMatches = numMatches ?? 0;
+    this.matchIdx = matchIdx ?? -1;
   }
 
   async playback(emacs: Emacs, repeatMode?: boolean): Promise<boolean> {
