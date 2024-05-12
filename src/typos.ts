@@ -7,8 +7,9 @@ export interface Words {
 }
 
 export interface Correction {
-  // The list of languages for which this correction applies.
+  // The list of language IDs for which this correction applies.
   // If not provided, then the correction is applied for all languages.
+  // (btw, why not juse use VS Code language-scoped settings instead of having our own disambiguation logic?)
   languages?: string[];
   // Map of all corrections.
   words: Words;

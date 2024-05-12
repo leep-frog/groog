@@ -53,7 +53,7 @@ export class TypoFixer {
   }
 
   public reload(silent?: boolean) : void {
-    const config = vscode.workspace.getConfiguration("groog", vscode.window.activeTextEditor?.document.uri);
+    const config = vscode.workspace.getConfiguration("groog");
     const corrections = config.get<Correction[]>("typos");
 
     const [_, separators] = WordSeparatorSetting.getWordSeparators();

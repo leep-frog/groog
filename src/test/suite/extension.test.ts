@@ -6,6 +6,7 @@ import { CloseQuickPickAction, NoOpQuickPickAction, PressItemButtonQuickPickActi
 import * as vscode from 'vscode';
 import { Document, FindRecord, Match } from '../../find';
 import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
+import { Correction } from '../../typos';
 import path = require('path');
 
 // Note: this needs to be identical to the value in .vscode-test.mjs (trying to have shared import there is awkward).
@@ -20,20 +21,23 @@ interface TestMatch {
   text: string;
 }
 
-function wordSeparatorConfiguration(sep: string): WorkspaceConfiguration {
+function wordSeparatorConfiguration(sep: string, ...corrections: Correction[]): WorkspaceConfiguration {
   return {
     configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
       [vscode.ConfigurationTarget.Global, new Map<string, any>([
         ["editor", new Map<string, any>([
           ['wordSeparators', sep],
         ])],
+        ["groog", new Map<string, any>([
+          ['typos', corrections],
+        ])],
       ])],
     ]),
   };
 }
 
-function allWordSeparatorConfiguration() {
-  return wordSeparatorConfiguration("`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?_");
+function allWordSeparatorConfiguration(...corrections: Correction[]) {
+  return wordSeparatorConfiguration("`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?_", ...corrections);
 }
 
 function convertTestMatches(pattern : RegExp | undefined, testMatches: TestMatch[]): Match[] {
@@ -594,7 +598,11 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
-        workspaceConfiguration: wordSeparatorConfiguration(' '),
+        workspaceConfiguration: wordSeparatorConfiguration(' ', {
+          words: {
+            typobuidl: "build",
+          },
+        }),
       },
     },
     {
@@ -614,7 +622,11 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
-        workspaceConfiguration: wordSeparatorConfiguration(' '),
+        workspaceConfiguration: wordSeparatorConfiguration(' ', {
+          words: {
+            typobuidl: "build",
+          },
+        }),
       },
     },
     {
@@ -634,7 +646,11 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
-        workspaceConfiguration: wordSeparatorConfiguration('^?!'),
+        workspaceConfiguration: wordSeparatorConfiguration('^?!', {
+          words: {
+            typobuidl: "build",
+          },
+        }),
       },
     },
     {
@@ -654,7 +670,11 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
-        workspaceConfiguration: wordSeparatorConfiguration('^?!'),
+        workspaceConfiguration: wordSeparatorConfiguration('^?!', {
+          words: {
+            typobuidl: "build",
+          },
+        }),
       },
     },
     {
@@ -674,7 +694,11 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
-        workspaceConfiguration: wordSeparatorConfiguration('('),
+        workspaceConfiguration: wordSeparatorConfiguration('(', {
+          words: {
+            typobuidl: "build",
+          },
+        }),
       },
     },
     {
@@ -697,7 +721,11 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
-        workspaceConfiguration: allWordSeparatorConfiguration(),
+        workspaceConfiguration: allWordSeparatorConfiguration({
+          words: {
+            typobuidl: "build",
+          },
+        }),
       },
     },
     {
@@ -720,7 +748,11 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
-        workspaceConfiguration: allWordSeparatorConfiguration(),
+        workspaceConfiguration: allWordSeparatorConfiguration({
+          words: {
+            typobuidl: "build",
+          },
+        }),
       },
     },
     {
@@ -749,6 +781,7 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
+        // Typo is a built-in typo
         workspaceConfiguration: allWordSeparatorConfiguration(),
       },
     },
@@ -768,7 +801,12 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
-        workspaceConfiguration: allWordSeparatorConfiguration(),
+        workspaceConfiguration: allWordSeparatorConfiguration({
+          words: {
+            typoabc: "ABC",
+          },
+          breakCharacters: "^",
+        }),
       },
     },
     {
@@ -787,7 +825,12 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
-        workspaceConfiguration: wordSeparatorConfiguration('^'),
+        workspaceConfiguration: wordSeparatorConfiguration("^", {
+          words: {
+            typoabc: "ABC",
+          },
+          breakCharacters: "^",
+        }),
       },
     },
     {
@@ -807,7 +850,12 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
-        workspaceConfiguration: wordSeparatorConfiguration(' '),
+        workspaceConfiguration: wordSeparatorConfiguration(" ", {
+          words: {
+            typoabc: "ABC",
+          },
+          breakCharacters: "^",
+        }),
       },
     },
     {
@@ -826,7 +874,13 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
-        workspaceConfiguration: wordSeparatorConfiguration('.'),
+        workspaceConfiguration: wordSeparatorConfiguration('.', {
+          words: {
+            typoabc: "ABC",
+          },
+          breakCharacters: '.',
+          excludeBreakCharacter: true,
+        }),
       },
     },
     {
@@ -845,7 +899,13 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
-        workspaceConfiguration: wordSeparatorConfiguration('$'),
+        workspaceConfiguration: wordSeparatorConfiguration('$', {
+          words: {
+            typoabc: "ABC",
+          },
+          breakCharacters: '$',
+          replacementSuffix: "ef",
+        }),
       },
     },
     {
@@ -864,7 +924,13 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
-        workspaceConfiguration: wordSeparatorConfiguration('-'),
+        workspaceConfiguration: wordSeparatorConfiguration('-', {
+          words: {
+            typoabc: "ABC",
+          },
+          breakCharacters: '-',
+          replacementSuffixAfterCursor: "EF",
+        }),
       },
     },
     {
@@ -883,7 +949,15 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
-        workspaceConfiguration: wordSeparatorConfiguration('&'),
+        workspaceConfiguration: wordSeparatorConfiguration('&', {
+          words: {
+            typoabc: "ABC",
+          },
+          breakCharacters: '&',
+          replacementSuffix: "de",
+          excludeBreakCharacter: true,
+          replacementSuffixAfterCursor: "F",
+        }),
       },
     },
     // Typo with multi-line suffix replacements
@@ -913,7 +987,14 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
-        workspaceConfiguration: wordSeparatorConfiguration(' '),
+        workspaceConfiguration: wordSeparatorConfiguration(' ', {
+          words: {
+            typoalphabet: "abcdef\nghij",
+          },
+          replacementSuffix: "kl\nmn\no",
+          excludeBreakCharacter: true,
+          replacementSuffixAfterCursor: "pq\nrstuvw\nxyz",
+        }),
       },
     },
     // Keyboard toggle tests
@@ -4606,7 +4687,7 @@ function testCases(): TestCase[] {
                   queryText: "ghi",
                   regex: false,
                   wholeWord: false,
-                }, 0, -1),
+                }),
                 new TypeRecord("trois"),
               ]),
               savable: true,
@@ -4621,7 +4702,7 @@ function testCases(): TestCase[] {
                   queryText: "def",
                   regex: false,
                   wholeWord: false,
-                }, 0, -1),
+                }, 1, 0),
                 new TypeRecord("deux"),
               ]),
               savable: true,

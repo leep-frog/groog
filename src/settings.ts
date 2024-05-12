@@ -1,4 +1,3 @@
-import { VSCODE_STUBS } from '@leep-frog/vscode-test-stubber';
 import * as vscode from 'vscode';
 import { Registerable } from './handler';
 import { Recorder } from './record';
@@ -140,7 +139,7 @@ export class GroogSetting implements Setting {
   }
 
   async update(): Promise<void> {
-    await VSCODE_STUBS.getConfiguration(this.configSection).update(this.subsection, this.value, this.configurationTarget);
+    await vscode.workspace.getConfiguration(this.configSection).update(this.subsection, this.value, this.configurationTarget);
   }
 }
 
@@ -171,7 +170,7 @@ export class WordSeparatorSetting implements Setting {
   }
 
   public static getWordSeparators(): [vscode.WorkspaceConfiguration, string | undefined] {
-    const configuration = VSCODE_STUBS.getConfiguration(this.configSection);
+    const configuration = vscode.workspace.getConfiguration(this.configSection);
     return [configuration, configuration.get(this.configSubsection)];
   }
 }
@@ -191,6 +190,6 @@ class LanguageSetting implements Setting {
   }
 
   async update(): Promise<void> {
-    await VSCODE_STUBS.getConfiguration(this.configSection, { languageId: this.languageId }).update(this.subsection, this.value, vscode.ConfigurationTarget.Global, true);
+    await vscode.workspace.getConfiguration(this.configSection, { languageId: this.languageId }).update(this.subsection, this.value, vscode.ConfigurationTarget.Global, true);
   }
 }
