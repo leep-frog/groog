@@ -2903,6 +2903,7 @@ function testCases(): TestCase[] {
         ],
       },
       stubbablesConfig: {
+        // TODO: Make quick pick actions UserInteractions instead and move them to userInteraction array
         quickPickActions: [
           new SelectItemQuickPickAction(["Recent recording 0"]),
         ],
