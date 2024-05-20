@@ -1,9 +1,6 @@
 import { defineConfig } from '@vscode/test-cli';
 import path from 'path';
 
-// Note: this needs to be identical to the value in extension.test.ts (trying to have shared import here is awkward).
-export const stubbableTestFile = path.resolve(".vscode-test", "stubbable-file.json");
-
 export default defineConfig({
 	files: 'out/test/**/*.test.js',
   useInstallation: {
@@ -13,10 +10,9 @@ export default defineConfig({
   },
   workspaceFolder: path.resolve("src", "test", "test-workspace"),
   env: {
-    VSCODE_STUBBABLE_TEST_FILE: stubbableTestFile,
+    TEST_MODE: true,
   },
   mocha: {
     timeout: 60000,
-    // bail: true,
   },
 });

@@ -1,4 +1,3 @@
-import { VSCODE_STUBS } from '@leep-frog/vscode-test-stubber';
 import * as vscode from 'vscode';
 import { ColorMode, HandlerColoring, gutterHandlerColoring } from './color_mode';
 import { Emacs, GlobalBoolTracker } from './emacs';
@@ -619,7 +618,7 @@ class FindContextCache {
         input.dispose();
       }),
     );
-    return VSCODE_STUBS.showQuickPick(input);
+    return input.show();
   }
 
   async prevMatch() {

@@ -2,15 +2,12 @@ import * as assert from 'assert';
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
-import { CloseQuickPickAction, NoOpQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectItemQuickPickAction, SimpleTestCase, SimpleTestCaseProps, StubbablesConfig, UserInteraction, WorkspaceConfiguration, cmd, openFile } from '@leep-frog/vscode-test-stubber';
+import { CloseQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectItemQuickPickAction, SimpleTestCase, SimpleTestCaseProps, UserInteraction, WorkspaceConfiguration, cmd, openFile } from '@leep-frog/vscode-test-stubber';
 import * as vscode from 'vscode';
 import { Document, FindRecord, Match } from '../../find';
 import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
 import { Correction } from '../../typos';
 import path = require('path');
-
-// Note: this needs to be identical to the value in .vscode-test.mjs (trying to have shared import there is awkward).
-export const stubbableTestFile = path.resolve("..", "..", ".vscode-test", "stubbable-file.json");
 
 function startingFile(filename: string) {
   return path.resolve(__dirname, "..", "..", "..", "src", "test", "test-workspace", filename);
@@ -518,7 +515,6 @@ function selection(line: number, char: number) : vscode.Selection {
 
 interface TestCase {
   name: string;
-  stubbablesConfig?: StubbablesConfig;
   stc: SimpleTestCaseProps;
   runSolo?: boolean;
 }
@@ -534,8 +530,6 @@ function testCases(): TestCase[] {
         userInteractions: [
           cmd("groog.cursorRight"), // Need command to activate extension.
         ],
-      },
-      stubbablesConfig: {
         expectedInfoMessages: [
           `Basic keyboard mode activated`,
         ],
@@ -553,8 +547,6 @@ function testCases(): TestCase[] {
           closeAllEditors,
           type(" "),
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: wordSeparatorConfiguration(' ^('),
         expectedWorkspaceConfiguration: wordSeparatorConfiguration(' ^('),
         expectedErrorMessages: [
@@ -576,8 +568,6 @@ function testCases(): TestCase[] {
           type("typobuid"),
           type("l"),
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: wordSeparatorConfiguration(' ^('),
       },
     },
@@ -596,8 +586,6 @@ function testCases(): TestCase[] {
           type("l"),
           type(" "),
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: wordSeparatorConfiguration(' ', {
           words: {
             typobuidl: "build",
@@ -620,8 +608,6 @@ function testCases(): TestCase[] {
           type("l"),
           type(" "),
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: wordSeparatorConfiguration(' ', {
           words: {
             typobuidl: "build",
@@ -644,8 +630,6 @@ function testCases(): TestCase[] {
           type("l"),
           type(" "),
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: wordSeparatorConfiguration('^?!', {
           words: {
             typobuidl: "build",
@@ -668,8 +652,6 @@ function testCases(): TestCase[] {
           type("l"),
           type("-"),
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: wordSeparatorConfiguration('^?!', {
           words: {
             typobuidl: "build",
@@ -692,8 +674,6 @@ function testCases(): TestCase[] {
           type("l"),
           type("("),
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: wordSeparatorConfiguration('(', {
           words: {
             typobuidl: "build",
@@ -719,8 +699,6 @@ function testCases(): TestCase[] {
         text: [
           "typobuidl  ",
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: allWordSeparatorConfiguration({
           words: {
             typobuidl: "build",
@@ -746,8 +724,6 @@ function testCases(): TestCase[] {
         text: [
           "typobuidl(",
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: allWordSeparatorConfiguration({
           words: {
             typobuidl: "build",
@@ -779,8 +755,6 @@ function testCases(): TestCase[] {
           "}",
           "",
         ],
-      },
-      stubbablesConfig: {
         // Typo is a built-in typo
         workspaceConfiguration: allWordSeparatorConfiguration(),
       },
@@ -799,8 +773,6 @@ function testCases(): TestCase[] {
         expectedText: [
           "typoabc ",
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: allWordSeparatorConfiguration({
           words: {
             typoabc: "ABC",
@@ -823,8 +795,6 @@ function testCases(): TestCase[] {
         expectedText: [
           "ABC^",
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: wordSeparatorConfiguration("^", {
           words: {
             typoabc: "ABC",
@@ -848,8 +818,6 @@ function testCases(): TestCase[] {
         expectedText: [
           "typoabc^",
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: wordSeparatorConfiguration(" ", {
           words: {
             typoabc: "ABC",
@@ -872,8 +840,6 @@ function testCases(): TestCase[] {
         expectedText: [
           "ABC",
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: wordSeparatorConfiguration('.', {
           words: {
             typoabc: "ABC",
@@ -897,8 +863,6 @@ function testCases(): TestCase[] {
         expectedText: [
           "ABC$ef",
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: wordSeparatorConfiguration('$', {
           words: {
             typoabc: "ABC",
@@ -922,8 +886,6 @@ function testCases(): TestCase[] {
         expectedText: [
           "ABC-EF",
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: wordSeparatorConfiguration('-', {
           words: {
             typoabc: "ABC",
@@ -947,8 +909,6 @@ function testCases(): TestCase[] {
         expectedText: [
           "ABCdeF",
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: wordSeparatorConfiguration('&', {
           words: {
             typoabc: "ABC",
@@ -985,8 +945,6 @@ function testCases(): TestCase[] {
           "rstuvw",
           "xyz",
         ],
-      },
-      stubbablesConfig: {
         workspaceConfiguration: wordSeparatorConfiguration(' ', {
           words: {
             typoalphabet: "abcdef\nghij",
@@ -1005,8 +963,6 @@ function testCases(): TestCase[] {
         userInteractions: [
           cmd("groog.toggleQMK"),
         ],
-      },
-      stubbablesConfig: {
         expectedInfoMessages: [
           `QMK keyboard mode activated`,
         ],
@@ -1019,8 +975,6 @@ function testCases(): TestCase[] {
         userInteractions: [
           cmd("groog.toggleQMK"),
         ],
-      },
-      stubbablesConfig: {
         expectedInfoMessages: [
           `Basic keyboard mode activated`,
         ],
@@ -1053,8 +1007,6 @@ function testCases(): TestCase[] {
         expectedText: [
           "abc",
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `Cannot replace matches when not in groog.find mode`,
         ],
@@ -1072,8 +1024,6 @@ function testCases(): TestCase[] {
         expectedText: [
           "abc",
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `Cannot replace matches when not in groog.find mode`,
         ],
@@ -1091,8 +1041,6 @@ function testCases(): TestCase[] {
         expectedText: [
           "abc",
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `groog.find.toggleReplaceMode can only be executed in find mode`,
         ],
@@ -1110,8 +1058,6 @@ function testCases(): TestCase[] {
         expectedText: [
           "abc",
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `groog.find.previous can only be executed in find mode`,
         ],
@@ -1129,8 +1075,6 @@ function testCases(): TestCase[] {
         expectedText: [
           "abc",
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `groog.find.next can only be executed in find mode`,
         ],
@@ -1144,8 +1088,6 @@ function testCases(): TestCase[] {
           closeAllEditors,
           cmd("groog.find"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `Cannot activate find mode from outside an editor`,
         ],
@@ -1158,8 +1100,6 @@ function testCases(): TestCase[] {
           closeAllEditors,
           cmd("groog.reverseFind"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `Cannot activate find mode from outside an editor`,
         ],
@@ -1177,13 +1117,7 @@ function testCases(): TestCase[] {
           closeAllEditors,
           type("c"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'ab'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks: [
           // groog.find
           [
             " ",
@@ -1220,14 +1154,7 @@ function testCases(): TestCase[] {
         expectedSelections: [
           new vscode.Selection(0, 0, 0, 3),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'ab'
-          new NoOpQuickPickAction(), // type 'c'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -1270,14 +1197,7 @@ function testCases(): TestCase[] {
         expectedSelections: [
           new vscode.Selection(0, 0, 0, 3),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'ab'
-          new NoOpQuickPickAction(), // type 'c'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -1321,13 +1241,7 @@ function testCases(): TestCase[] {
           cmd("groog.cursorLeft"),
           type("X"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'cde'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -1363,15 +1277,7 @@ function testCases(): TestCase[] {
           ctrlG,
           type("X"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'cd'
-          // deleteRight is ignored
-          new NoOpQuickPickAction(), // type 'e'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -1423,15 +1329,7 @@ function testCases(): TestCase[] {
           ctrlG,
           type(" HERE"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'abcX'
-          new NoOpQuickPickAction(), // deleteLeft
-          new NoOpQuickPickAction(), // type 'e'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -1489,15 +1387,7 @@ function testCases(): TestCase[] {
           ctrlG,
           type(" HERE"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'a'
-          new NoOpQuickPickAction(), // paste
-          new NoOpQuickPickAction(), // type '2'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -1559,15 +1449,7 @@ function testCases(): TestCase[] {
           ctrlG,
           type(" HERE"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'a'
-          new NoOpQuickPickAction(), // paste
-          new NoOpQuickPickAction(), // type '3'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -1623,14 +1505,7 @@ function testCases(): TestCase[] {
           cmd("groog.deleteLeft"),
           type("xyz"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // toggle case
-          new NoOpQuickPickAction(), // type 'abc'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -1684,14 +1559,7 @@ function testCases(): TestCase[] {
           cmd("groog.deleteWordLeft"),
           type("xyz "),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // toggle regex
-          new NoOpQuickPickAction(), // type 'abc'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -1737,14 +1605,7 @@ function testCases(): TestCase[] {
           cmd("groog.deleteLeft"),
           type("xyz"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // toggle whole word
-          new NoOpQuickPickAction(), // type 'abc'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -1812,14 +1673,7 @@ function testCases(): TestCase[] {
           type("?a"),
           cmd("groog.find.replaceOne"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // toggle regex
-          new NoOpQuickPickAction(), // type '?a'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -1861,13 +1715,7 @@ function testCases(): TestCase[] {
           type("xyz"),
           cmd("groog.find.replaceOne"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'xyz'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -1909,16 +1757,7 @@ function testCases(): TestCase[] {
           type("XYZ"),
           cmd("groog.find.replaceOne"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'bc'
-          new NoOpQuickPickAction(), // toggle replace mode
-          new NoOpQuickPickAction(), // type 'xyz'
-          new NoOpQuickPickAction(), // replace
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -1983,16 +1822,7 @@ function testCases(): TestCase[] {
           type("XYZ"),
           cmd("groog.find.replaceAll"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'bc'
-          new NoOpQuickPickAction(), // toggle replace mode
-          new NoOpQuickPickAction(), // type 'XYZ'
-          new NoOpQuickPickAction(), // replace
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -2062,17 +1892,7 @@ function testCases(): TestCase[] {
           type("X"),
           cmd("groog.find.replaceOne"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'bc'
-          new NoOpQuickPickAction(), // toggle replace mode
-          new NoOpQuickPickAction(), // toggle case sensitive
-          new NoOpQuickPickAction(), // type 'X'
-          new NoOpQuickPickAction(), // replace
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -2153,17 +1973,7 @@ function testCases(): TestCase[] {
           type("X"),
           cmd("groog.find.replaceAll"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'bc'
-          new NoOpQuickPickAction(), // toggle replace mode
-          new NoOpQuickPickAction(), // toggle case sensitive
-          new NoOpQuickPickAction(), // type 'X'
-          new NoOpQuickPickAction(), // replace
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -2244,17 +2054,7 @@ function testCases(): TestCase[] {
           type("X"),
           cmd("groog.find.replaceOne"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'bc'
-          new NoOpQuickPickAction(), // toggle replace mode
-          new NoOpQuickPickAction(), // toggle whole word
-          new NoOpQuickPickAction(), // type 'X'
-          new NoOpQuickPickAction(), // replace
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -2331,17 +2131,7 @@ function testCases(): TestCase[] {
           type("X"),
           cmd("groog.find.replaceAll"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'bc'
-          new NoOpQuickPickAction(), // toggle replace mode
-          new NoOpQuickPickAction(), // toggle whole word
-          new NoOpQuickPickAction(), // type 'X'
-          new NoOpQuickPickAction(), // replace
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -2435,15 +2225,7 @@ function testCases(): TestCase[] {
           cmd("groog.deleteLeft"),
           type("REPLACE"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'bc'
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // groog.find
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -2504,13 +2286,7 @@ function testCases(): TestCase[] {
           cmd("groog.deleteLeft"),
           type("ZZZ"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.reverseFind
-          new NoOpQuickPickAction(), // type 'bc'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.reverseFind
           [
             " ",
@@ -2564,18 +2340,7 @@ function testCases(): TestCase[] {
           cmd("groog.deleteLeft"),
           type("ZZZ"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'bc'
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // groog.reverseFind
-          new NoOpQuickPickAction(), // groog.reverseFind
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -2656,20 +2421,7 @@ function testCases(): TestCase[] {
           cmd("groog.deleteLeft"),
           type("REPLACE"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'bc'
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'de'
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'xyz'
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // groog.find.previous
-          new NoOpQuickPickAction(), // groog.find.previous
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -2765,23 +2517,7 @@ function testCases(): TestCase[] {
           cmd("groog.deleteLeft"),
           type("REPLACE"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'bc'
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'de'
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'xyz'
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // groog.find.previous
-          new NoOpQuickPickAction(), // groog.find.previous
-          new NoOpQuickPickAction(), // groog.find.next
-          new NoOpQuickPickAction(), // groog.find.previous
-          new NoOpQuickPickAction(), // type 'f'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -2870,8 +2606,6 @@ function testCases(): TestCase[] {
         userInteractions: [
           cmd("groog.record.playRecording"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `No recordings exist yet!`,
         ],
@@ -2889,8 +2623,6 @@ function testCases(): TestCase[] {
         userInteractions: [
           cmd("groog.record.playRecordingRepeatedly"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `No recordings exist yet!`,
         ],
@@ -2902,8 +2634,6 @@ function testCases(): TestCase[] {
         userInteractions: [
           cmd("groog.record.saveRecordingAs"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `Not recording!`,
         ],
@@ -2915,8 +2645,6 @@ function testCases(): TestCase[] {
         userInteractions: [
           cmd("groog.record.endRecording"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `Not recording!`,
         ],
@@ -2948,8 +2676,6 @@ function testCases(): TestCase[] {
           type("ghi\n"),
           cmd("groog.record.playRecording"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `Already recording!`,
         ],
@@ -2981,14 +2707,9 @@ function testCases(): TestCase[] {
           cmd("groog.cursorRight"), // to next line
 
           cmd("groog.record.playNamedRecording"),
-        ],
-      },
-      stubbablesConfig: {
-        // TODO: Make quick pick actions UserInteractions instead and move them to userInteraction array
-        quickPickActions: [
           new SelectItemQuickPickAction(["Recent recording 0"]),
         ],
-        expectedQuickPickExecutions:[[
+        expectedQuickPicks:[[
           recordingQuickPick({
             label: "Recent recording 0",
             recordBook: recordBook([
@@ -3022,8 +2743,6 @@ function testCases(): TestCase[] {
           type("\n"),
           cmd("groog.record.playRecording"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `Still recording!`,
         ],
@@ -3051,8 +2770,6 @@ function testCases(): TestCase[] {
           type("\n"),
           cmd("groog.record.playRecording"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `Still recording!`,
         ],
@@ -3069,11 +2786,9 @@ function testCases(): TestCase[] {
         ],
         userInteractions: [
           cmd("groog.record.playNamedRecording"),
+          new SelectItemQuickPickAction([]),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [new SelectItemQuickPickAction([])],
-        expectedQuickPickExecutions: [[]],
+        expectedQuickPicks: [[]],
         expectedErrorMessages: [
           `No named recording selection made`,
         ],
@@ -3101,8 +2816,6 @@ function testCases(): TestCase[] {
           type("\n"),
           cmd("groog.record.playRecording"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `Still recording!`,
         ],
@@ -3130,8 +2843,6 @@ function testCases(): TestCase[] {
           type("\n"),
           cmd("groog.record.playRecording"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `Still recording!`,
         ],
@@ -3259,17 +2970,7 @@ function testCases(): TestCase[] {
           cmd("groog.record.endRecording"),
           cmd("groog.record.playRecording"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find for abc
-          new NoOpQuickPickAction(), // groog.find for def
-          new NoOpQuickPickAction(), // groog.find for ghi
-          new NoOpQuickPickAction(), // groog.find for abc playback
-          new NoOpQuickPickAction(), // groog.find for def playback
-          new NoOpQuickPickAction(), // groog.find for ghi playback
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -3371,8 +3072,6 @@ function testCases(): TestCase[] {
           cmd("groog.record.saveRecordingAs"),
           cmd("groog.record.playRecording"),
         ],
-      },
-      stubbablesConfig: {
         inputBoxResponses: ["some-name"],
         expectedInfoMessages: [
           `Recording saved as "some-name"!`,
@@ -3384,7 +3083,6 @@ function testCases(): TestCase[] {
               title: "Save recording as:",
               validateInputProvided: true,
             },
-            validationMessage: undefined,
           },
         ],
       },
@@ -3412,8 +3110,6 @@ function testCases(): TestCase[] {
           cmd("groog.record.saveRecordingAs"),
           cmd("groog.record.playRecording"),
         ],
-      },
-      stubbablesConfig: {
         inputBoxResponses: [
           "Recent recording bleh",
         ],
@@ -3462,8 +3158,6 @@ function testCases(): TestCase[] {
           cmd("groog.record.saveRecordingAs"),
           cmd("groog.record.playRecording"),
         ],
-      },
-      stubbablesConfig: {
         inputBoxResponses: [
           "ABC Recording",
           "ABC Recording",
@@ -3527,16 +3221,14 @@ function testCases(): TestCase[] {
           type("i\n"),
           cmd("groog.record.saveRecordingAs"),
           cmd("groog.record.playNamedRecording"),
+          new SelectItemQuickPickAction(["DEF Recording"]),
         ],
-      },
-      stubbablesConfig: {
         inputBoxResponses: [
           "ABC Recording",
           "DEF Recording",
           "GHI Recording",
         ],
-        quickPickActions: [new SelectItemQuickPickAction(["DEF Recording"])],
-        expectedQuickPickExecutions:[[
+        expectedQuickPicks:[[
           recordingQuickPick({
             label: "Recent recording 0",
             recordBook: recordBook([new TypeRecord("ghi\n")]),
@@ -3625,16 +3317,14 @@ function testCases(): TestCase[] {
           type("i\n"),
           cmd("groog.record.saveRecordingAs"),
           cmd("groog.record.playNamedRecording"),
+          new SelectItemQuickPickAction(["ABC Recording", "DEF Recording"]),
         ],
-      },
-      stubbablesConfig: {
         inputBoxResponses: [
           "ABC Recording",
           "DEF Recording",
           "GHI Recording",
         ],
-        quickPickActions: [new SelectItemQuickPickAction(["ABC Recording", "DEF Recording"])],
-        expectedQuickPickExecutions:[[
+        expectedQuickPicks:[[
           recordingQuickPick({
             label: "Recent recording 0",
             recordBook: recordBook([new TypeRecord("ghi\n")]),
@@ -3698,18 +3388,13 @@ function testCases(): TestCase[] {
     },
     {
       name: "Deletes recording",
-      stubbablesConfig: {
+      stc: {
         inputBoxResponses: [
           "ABC Recording",
           "DEF Recording",
           "GHI Recording",
         ],
-        quickPickActions: [
-          new SelectItemQuickPickAction(["DEF Recording"]), // playNamedRecording (succeeds)
-          new SelectItemQuickPickAction(["DEF Recording"]), // deleteRecording
-          new CloseQuickPickAction(),                     // playNamedRecording (fails)
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // playNamedRecording
           [
             recordingQuickPick({
@@ -3797,8 +3482,6 @@ function testCases(): TestCase[] {
             },
           },
         ],
-      },
-      stc: {
         text: [
           "start text",
         ],
@@ -3823,8 +3506,11 @@ function testCases(): TestCase[] {
           type("ghi\n"),
           cmd("groog.record.saveRecordingAs"),
           cmd("groog.record.playNamedRecording"),
+          new SelectItemQuickPickAction(["DEF Recording"]),
           cmd("groog.record.deleteRecording"),
+          new SelectItemQuickPickAction(["DEF Recording"]),
           cmd("groog.record.playNamedRecording"),
+          new CloseQuickPickAction(),
         ],
       },
     },
@@ -3995,13 +3681,7 @@ function testCases(): TestCase[] {
           cmd("groog.record.endRecording"),
           cmd("groog.record.playRecording"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'abc'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -4037,8 +3717,6 @@ function testCases(): TestCase[] {
           cmd("groog.record.endRecording"),
           cmd("groog.record.playRecordingRepeatedly"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `This recording isn't repeatable`,
         ],
@@ -4074,13 +3752,7 @@ function testCases(): TestCase[] {
           cmd("groog.record.endRecording"),
           cmd("groog.record.playRecordingRepeatedly"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'abc'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -4137,15 +3809,7 @@ function testCases(): TestCase[] {
 
           cmd("groog.record.playRecordingRepeatedly"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'abc'
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'def'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -4207,13 +3871,7 @@ function testCases(): TestCase[] {
           cmd("groog.record.endRecording"),
           cmd("groog.record.playRecordingRepeatedly"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'abc'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -4264,14 +3922,7 @@ function testCases(): TestCase[] {
           cmd("groog.record.endRecording"),
           cmd("groog.record.playRecordingRepeatedly"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'abc'
-          new NoOpQuickPickAction(), // groog.find
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -4331,13 +3982,7 @@ function testCases(): TestCase[] {
           cmd("groog.record.endRecording"),
           cmd("groog.record.playRecordingRepeatedly"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'abc'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -4391,13 +4036,7 @@ function testCases(): TestCase[] {
           cmd("groog.record.endRecording"),
           cmd("groog.record.playRecordingRepeatedly"),
         ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'abc'
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -4446,17 +4085,9 @@ function testCases(): TestCase[] {
           type("xyz"),
           cmd("groog.record.endRecording"),
           cmd("groog.record.playNamedRecording"),
-        ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'abc'
-
-          // Save recording
           new PressItemButtonQuickPickAction("Recent recording 0", 1),
         ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -4480,7 +4111,7 @@ function testCases(): TestCase[] {
                   queryText: "abc",
                   regex: false,
                   wholeWord: false,
-                }, 4, 0),
+                }, 1, 0),
                 new CommandRecord("groog.deleteLeft"),
                 new TypeRecord("xyz"),
               ]),
@@ -4520,17 +4151,10 @@ function testCases(): TestCase[] {
           cmd("groog.record.endRecording"),
 
           cmd("groog.record.playNamedRecording"),
-        ],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'def'
-
-          // playNamedRecording: press unknown button on Recent recording 0
+          // press unknown button on Recent recording 0
           new PressUnknownButtonQuickPickAction("Recent recording 0"),
         ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -4619,27 +4243,15 @@ function testCases(): TestCase[] {
           cmd("groog.record.endRecording"),
 
           cmd("groog.record.playNamedRecording"),
+          new PressItemButtonQuickPickAction("Recent recording 1", 0),
           cmd("groog.record.playNamedRecording"),
+          new SelectItemQuickPickAction(["My favorite recording"]),
         ],
         expectedSelections: [selection(5, 4)],
-      },
-      stubbablesConfig: {
         inputBoxResponses: [
           "My favorite recording",
         ],
-        quickPickActions: [
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'abc'
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'def'
-          new NoOpQuickPickAction(), // groog.find
-          new NoOpQuickPickAction(), // type 'ghi'
-
-          // Save abc recording
-          new PressItemButtonQuickPickAction("Recent recording 1", 0),
-          new SelectItemQuickPickAction(["My favorite recording"]),
-        ],
-        expectedQuickPickExecutions:[
+        expectedQuickPicks:[
           // groog.find
           [
             " ",
@@ -4794,7 +4406,6 @@ function testCases(): TestCase[] {
               title: "Save recording as:",
               validateInputProvided: true,
             },
-            validationMessage: undefined,
           },
         ],
         expectedInfoMessages: [
@@ -4829,15 +4440,11 @@ function testCases(): TestCase[] {
           cmd("groog.record.endRecording"),
 
           cmd("groog.record.playNamedRecording"),
-        ],
-        expectedSelections: [selection(0, 15)],
-      },
-      stubbablesConfig: {
-        quickPickActions: [
-        // Run second to last recording (ghi)
+          // Run second to last recording (ghi)
           new SelectItemQuickPickAction(["Recent recording 1"]),
         ],
-        expectedQuickPickExecutions:[
+        expectedSelections: [selection(0, 15)],
+        expectedQuickPicks:[
           [
             recordingQuickPick({
               label: "Recent recording 0",
@@ -4871,8 +4478,6 @@ function testCases(): TestCase[] {
         userInteractions: [
           cmd("groog.record.undo"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `No recordings exist yet!`,
         ],
@@ -4897,8 +4502,6 @@ function testCases(): TestCase[] {
           cmd("groog.record.endRecording"),
           cmd("groog.record.undo"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           `Cannot undo a locked recording`,
         ],
@@ -4983,8 +4586,6 @@ function testCases(): TestCase[] {
           cmd("groog.record.endRecording"),
           cmd("groog.record.playRecording"),
         ],
-      },
-      stubbablesConfig: {
         expectedInfoMessages: [
           `Undo failed`,
         ],
@@ -5489,8 +5090,6 @@ function testCases(): TestCase[] {
         userInteractions: [
           cmd("groog.message.info"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           "No message set",
         ],
@@ -5502,8 +5101,6 @@ function testCases(): TestCase[] {
         userInteractions: [
           cmd("groog.message.info", {}),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           "No message set",
         ],
@@ -5517,8 +5114,6 @@ function testCases(): TestCase[] {
             badKey: "hello there",
           }),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           "No message set",
         ],
@@ -5532,8 +5127,6 @@ function testCases(): TestCase[] {
             message: "",
           }),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           "No message set",
         ],
@@ -5547,8 +5140,6 @@ function testCases(): TestCase[] {
             message: "Hello there",
           }),
         ],
-      },
-      stubbablesConfig: {
         expectedInfoMessages: [
           "Hello there",
         ],
@@ -5563,8 +5154,6 @@ function testCases(): TestCase[] {
             error: true,
           }),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           "General Kenobi",
         ],
@@ -5578,8 +5167,6 @@ function testCases(): TestCase[] {
           closeAllEditors,
           cmd("groog.copyFilename"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           "No active editor",
         ],
@@ -5602,8 +5189,6 @@ function testCases(): TestCase[] {
           cmd("groog.copyFilename"),
           cmd("groog.paste"),
         ],
-      },
-      stubbablesConfig: {
         expectedInfoMessages: [
           "Filename copied!",
         ],
@@ -5642,8 +5227,6 @@ function testCases(): TestCase[] {
             ],
           }),
         ],
-      },
-      stubbablesConfig: {
         expectedInfoMessages: [
           "hi",
         ],
@@ -5656,8 +5239,6 @@ function testCases(): TestCase[] {
         userInteractions: [
           cmd("groog.testFile"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           "Previous file not set",
         ],
@@ -5674,8 +5255,6 @@ function testCases(): TestCase[] {
           "Hello there",
           "",
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           "Unknown file suffix: txt",
         ],
@@ -5692,8 +5271,6 @@ function testCases(): TestCase[] {
           "Hello there",
           "",
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           "Unknown file suffix: txt",
         ],
@@ -5730,8 +5307,6 @@ function testCases(): TestCase[] {
           "}",
           "",
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           "go testing should be routed to custom command in keybindings.go",
         ],
@@ -5743,8 +5318,6 @@ function testCases(): TestCase[] {
         userInteractions: [
           cmd("groog.toggleFixedTestFile"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           "No active file",
         ],
@@ -5758,8 +5331,6 @@ function testCases(): TestCase[] {
           openFile(startingFile("bloop.java")),
           cmd("groog.toggleFixedTestFile"),
         ],
-      },
-      stubbablesConfig: {
         expectedInfoMessages: [
           `Set fixed test file to bloop.java`,
         ],
@@ -5774,8 +5345,6 @@ function testCases(): TestCase[] {
           cmd("groog.toggleFixedTestFile"),
           cmd("groog.toggleFixedTestFile"),
         ],
-      },
-      stubbablesConfig: {
         expectedInfoMessages: [
           `Set fixed test file to bloop.java`,
           "Unset fixed test file",
@@ -5789,8 +5358,6 @@ function testCases(): TestCase[] {
         userInteractions: [
           cmd("groog.script.replaceNewlineStringsWithQuotes"),
         ],
-      },
-      stubbablesConfig: {
         expectedErrorMessages: [
           "No active text editor.",
         ],
@@ -5840,8 +5407,6 @@ function testCases(): TestCase[] {
         userInteractions: [
           cmd("groog.updateSettings"),
         ],
-      },
-      stubbablesConfig: {
         expectedInfoMessages: [
           `Settings have been updated!`,
         ],
@@ -5967,8 +5532,6 @@ function testCases(): TestCase[] {
         userInteractions: [
           cmd("groog.updateSettings"),
         ],
-      },
-      stubbablesConfig: {
         expectedInfoMessages: [
           `Settings have been updated!`,
         ],
@@ -6101,8 +5664,6 @@ function testCases(): TestCase[] {
         userInteractions: [
           cmd("groog.updateSettings"),
         ],
-      },
-      stubbablesConfig: {
         expectedInfoMessages: [
           `Settings have been updated!`,
         ],
@@ -6258,7 +5819,7 @@ suite('Groog commands', () => {
         }
 
         // Run the commands
-        await new SimpleTestCase(tc.stc).runTest(stubbableTestFile, tc.stubbablesConfig).catch(e => {
+        await new SimpleTestCase(tc.stc).runTest().catch(e => {
           throw e;
         });
       });

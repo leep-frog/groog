@@ -1,4 +1,3 @@
-import { TEST_MODE } from '@leep-frog/vscode-test-stubber';
 import * as vscode from 'vscode';
 import { handleDeleteCharacter, handleTypedCharacter } from './character-functions';
 import { ColorMode } from './color_mode';
@@ -160,7 +159,7 @@ export class Emacs {
     miscCommands.forEach(mc => this.recorder.registerCommand(context, mc.name, (args) => mc.f(this, args), {noLock: mc.noLock}));
 
     this.recorder.registerCommand(context, 'testReset', async () => {
-      if (TEST_MODE) {
+      if (process.env.TEST_MODE) {
         this.lastVisitedFile = undefined;
         for (const h of this.typeHandlers) {
           await h.testReset();

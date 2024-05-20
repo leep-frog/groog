@@ -1,4 +1,3 @@
-import { VSCODE_STUBS } from '@leep-frog/vscode-test-stubber';
 import AwaitLock from 'await-lock';
 import * as vscode from 'vscode';
 import { ColorMode, HandlerColoring, gutterHandlerColoring } from './color_mode';
@@ -344,7 +343,7 @@ export class Recorder extends TypeHandler {
       }),
     );
 
-    return VSCODE_STUBS.showQuickPick(input);
+    return input.show();
   }
 
   async playbackNamedRecording() {
@@ -423,7 +422,7 @@ export class Recorder extends TypeHandler {
       }),
     );
 
-    return VSCODE_STUBS.showQuickPick(input);
+    return input.show();
   }
 
   async repeatPlayback(): Promise<void> {
