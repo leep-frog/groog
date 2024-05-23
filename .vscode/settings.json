@@ -11,5 +11,10 @@
   "coverage-gutters.manualCoverageFilePaths": [
     "C:\\Users\\gleep\\Desktop\\Coding\\vs-code\\groog\\coverage\\lcov.info",
   ],
-  "faves.favorites": [],
+  "faves.favorites": [
+    {
+      "path": "c:\\Users\\gleep\\Desktop\\Coding\\vs-code\\groog\\gocmd\\keybindings.go",
+      "alias": "kb"
+    }
+  ],
 }

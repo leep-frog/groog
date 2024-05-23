@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.6.19",
+  "version": "2.6.20",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -2063,11 +2063,17 @@
       },
       {
         "key": "ctrl+z f",
-        "command": "faves.search"
+        "command": "faves.search",
+        "args": {
+          "alias": true
+        }
       },
       {
         "key": "ctrl+z ctrl+f",
-        "command": "faves.search"
+        "command": "faves.search",
+        "args": {
+          "alias": true
+        }
       },
       {
         "key": "ctrl+z k",
@@ -2090,12 +2096,18 @@
       {
         "key": "ctrl+z right",
         "command": "faves.search",
-        "when": "groog.context.qmkMode"
+        "when": "groog.context.qmkMode",
+        "args": {
+          "alias": true
+        }
       },
       {
         "key": "ctrl+z ctrl+right",
         "command": "faves.search",
-        "when": "groog.context.qmkMode"
+        "when": "groog.context.qmkMode",
+        "args": {
+          "alias": true
+        }
       },
       {
         "key": "ctrl+z t",

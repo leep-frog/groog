@@ -425,8 +425,12 @@ var (
 		),
 		ctrlZ("v"):      only("faves.toggle"),
 		ctrlZ(pagedown): onlyWhen("faves.toggle", groogQMK),
-		ctrlZ("f"):      only("faves.search"),
-		ctrlZ(right):    onlyWhen("faves.search", groogQMK),
+		ctrlZ("f"): onlyArgs("faves.search", map[string]interface{}{
+			"alias": true,
+		}),
+		ctrlZ(right): onlyWhenArgs("faves.search", groogQMK, map[string]interface{}{
+			"alias": true,
+		}),
 		ctrlX("h"): onlyMC(
 			"workbench.action.splitEditorRight",
 		),
