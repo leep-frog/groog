@@ -276,9 +276,10 @@ var (
 			groogTerminalFindMode.value: kb("groog.terminal.reverseFind"),
 		},
 		enter: {
-			inSnippetMode.value:         kb("jumpToNextSnippetPlaceholder"),
-			groogTerminalFindMode.value: kb("groog.terminal.find"),
-			groogFindMode.value:         kb("editor.action.nextMatchFindAction"),
+			suggestWidgetVisible.value:                          kb("acceptSelectedSuggestion"),
+			suggestWidgetVisible.not().and(inSnippetMode).value: kb("jumpToNextSnippetPlaceholder"),
+			groogTerminalFindMode.value:                         kb("groog.terminal.find"),
+			groogFindMode.value:                                 kb("editor.action.nextMatchFindAction"),
 			// This is needed so enter hits are recorded
 			// Don't do for tab since that can add a variable
 			// number of spaces. If seems necessary, we can add

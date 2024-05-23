@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.6.18",
+  "version": "2.6.19",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -2185,6 +2185,11 @@
       },
       {
         "key": "enter",
+        "command": "jumpToNextSnippetPlaceholder",
+        "when": "!suggestWidgetVisible && inSnippetMode"
+      },
+      {
+        "key": "enter",
         "command": "editor.action.nextMatchFindAction",
         "when": "groog.context.findMode"
       },
@@ -2203,8 +2208,8 @@
       },
       {
         "key": "enter",
-        "command": "jumpToNextSnippetPlaceholder",
-        "when": "inSnippetMode"
+        "command": "acceptSelectedSuggestion",
+        "when": "suggestWidgetVisible"
       },
       {
         "key": "f",
