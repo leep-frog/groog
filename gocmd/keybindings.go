@@ -506,8 +506,9 @@ var (
 		// ctrlX("c"): panelSplit(sendSequence("\u0018\u0003"), nil),
 		ctrlX("c"): panelSplit(
 			mcWithArgs(
-				notification("Terminal output copied!"),
 				kb("workbench.action.terminal.copyLastCommandOutput"),
+				kb("groog.trimClipboard"),
+				notification("Terminal output copied!"),
 			),
 			nil),
 		ctrlZ("c"): only("groog.copyFilename"),

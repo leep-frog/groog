@@ -34,6 +34,10 @@ export const miscCommands: MiscCommand[] = [
     f: (e: Emacs, mc: TestFileArgs) => testFile(mc, e.lastVisitedFile),
   },
   {
+    name: "trimClipboard",
+    f: () => trimClipboard(),
+  },
+  {
     name: "toggleFixedTestFile",
     f: async () => {
       if (!fixedTestFile) {
@@ -164,4 +168,9 @@ export function positiveMod(k: number, mod: number) {
     return modded;
   }
   return modded + mod;
+}
+
+async function trimClipboard() {
+  const clipboard = await vscode.env.clipboard.readText();
+  return vscode.env.clipboard.writeText(clipboard.trim());
 }

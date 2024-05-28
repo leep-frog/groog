@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.6.21",
+  "version": "2.6.22",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -275,6 +275,10 @@
       {
         "command": "groog.toggleQMK",
         "title": "Emacs Toggle QMK"
+      },
+      {
+        "command": "groog.trimClipboard",
+        "title": "Groog Trim Clipboard"
       },
       {
         "command": "groog.tug",
@@ -1666,13 +1670,16 @@
         "args": {
           "sequence": [
             {
+              "command": "workbench.action.terminal.copyLastCommandOutput"
+            },
+            {
+              "command": "groog.trimClipboard"
+            },
+            {
               "command": "groog.message.info",
               "args": {
                 "message": "Terminal output copied!"
               }
-            },
-            {
-              "command": "workbench.action.terminal.copyLastCommandOutput"
             }
           ]
         }
@@ -1684,13 +1691,16 @@
         "args": {
           "sequence": [
             {
+              "command": "workbench.action.terminal.copyLastCommandOutput"
+            },
+            {
+              "command": "groog.trimClipboard"
+            },
+            {
               "command": "groog.message.info",
               "args": {
                 "message": "Terminal output copied!"
               }
-            },
-            {
-              "command": "workbench.action.terminal.copyLastCommandOutput"
             }
           ]
         }

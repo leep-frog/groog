@@ -82,6 +82,7 @@ var (
 		cc("groog.terminal.reverseFind", "Groog find in terminal"),
 		cc("groog.toggleMarkMode", "Emacs Toggle Mark Mode"),
 		cc("groog.toggleQMK", "Emacs Toggle QMK"),
+		cc("groog.trimClipboard", "Groog Trim Clipboard"),
 		cc("groog.type", "Groog Type"),
 		cc("groog.undo", "Groog Undo"),
 		cc("groog.redo", "Groog Redo"),
