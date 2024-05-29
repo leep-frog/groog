@@ -19,6 +19,7 @@ func cc(command string, title string) *Command {
 
 var (
 	CustomCommands = []*Command{
+		cc("groog.copyImport", "Copy import line for the file"),
 		cc("groog.cursorBottom", "Emacs Cursor Bottom"),
 		cc("groog.cursorDown", "Emacs Cursor Down"),
 		cc("groog.cursorEnd", "Emacs Cursor End"),
@@ -90,6 +91,7 @@ var (
 		cc("groog.yank", "Emacs Yank"),
 		cc("groog.tug", "Emacs Yank (copy only)"),
 		cc("groog.testReset", "Reset test setup"),
+		cc("groog.work.copyLink", "Copy work link for file"),
 
 		cc("groog.script.replaceNewlineStringsWithQuotes", "Groog Script: Replace Newline Strings with Quotes"),
 		cc("groog.script.replaceNewlineStringsWithTicks", "Groog Script: Replace Newline Strings with Ticks"),

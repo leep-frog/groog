@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.2",
+  "version": "2.7.3",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -59,6 +59,10 @@
       {
         "command": "groog.copyFilename",
         "title": "Groog Copy Filename"
+      },
+      {
+        "command": "groog.copyImport",
+        "title": "Copy import line for the file"
       },
       {
         "command": "groog.ctrlG",
@@ -295,6 +299,10 @@
       {
         "command": "groog.updateSettings",
         "title": "Groog update settings"
+      },
+      {
+        "command": "groog.work.copyLink",
+        "title": "Copy work link for file"
       },
       {
         "command": "groog.yank",

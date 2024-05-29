@@ -9,8 +9,12 @@ import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
 import { Correction } from '../../typos';
 import path = require('path');
 
-function startingFile(filename: string) {
-  return path.resolve(__dirname, "..", "..", "..", "src", "test", "test-workspace", filename);
+function startingFile(...fileParts: string[]) {
+  return path.resolve(__dirname, "..", "..", "..", "src", "test", "test-workspace", ...fileParts);
+}
+
+function pathParts(...fileParts: string[]) {
+  return vscode.Uri.file(startingFile(...fileParts)).path.split('/');
 }
 
 interface TestMatch {
@@ -5250,6 +5254,147 @@ function testCases(): TestCase[] {
       expectedInfoMessages: [
         "Filename copied!",
       ],
+    },
+    // Copy imports test
+    {
+      name: "Fails to copy import if no editor",
+      userInteractions: [
+        closeAllEditors,
+        cmd("groog.copyImport"),
+      ],
+      expectedErrorMessages: [
+        "No active editor",
+      ],
+    },
+    {
+      name: "Fails to copy import if not a supported language",
+      file: startingFile("empty.go"),
+      expectedText: [
+        "package main",
+        "",
+        "func main() {",
+        "",
+        "}",
+        "",
+      ],
+      userInteractions: [
+        cmd("groog.copyImport"),
+      ],
+      expectedErrorMessages: [
+        'No import copy support for language (go)',
+      ],
+    },
+    {
+      name: "Successfully copies import",
+      file: startingFile("copy-imports", "SimplePackage.java"),
+      expectedText: [
+        "package copy.imports.simple;",
+        // Added
+        "import copy.imports.simple.SimplePackage;",
+      ],
+      selections: [selection(1, 0)],
+      expectedSelections: [selection(1, 41)],
+      userInteractions: [
+        cmd("groog.copyImport"),
+        cmd("groog.paste"),
+      ],
+    },
+    {
+      name: "Successfully copies import ignoring whitespace",
+      file: startingFile("copy-imports", "Whitespace.java"),
+      expectedText: [
+        "package   copy.imports.ws    ;  ",
+        // Added
+        "import copy.imports.ws.Whitespace;",
+      ],
+      selections: [selection(1, 0)],
+      expectedSelections: [selection(1, 34)],
+      userInteractions: [
+        cmd("groog.copyImport"),
+        cmd("groog.paste"),
+      ],
+    },
+    {
+      name: "Successfully copies import ignoring comments",
+      file: startingFile("copy-imports", "Comment.java"),
+      expectedText: [
+        "// Package comment",
+        "package copy.imports.comment; // Hello there",
+        "// More comments",
+        // Added
+        "import copy.imports.comment.Comment;",
+      ],
+      selections: [selection(3, 0)],
+      expectedSelections: [selection(3, 36)],
+      userInteractions: [
+        cmd("groog.copyImport"),
+        cmd("groog.paste"),
+      ],
+    },
+    {
+      name: "Successfully copies import ignoring block comments",
+      file: startingFile("copy-imports", "BlockComment.java"),
+      expectedText: [
+        '/* Block',
+        ' * comment',
+        ' */',
+        'package copy.imports.comment; /* Suffix block comment */',
+        '/* Another block comment */',
+        // Added
+        "import copy.imports.comment.BlockComment;",
+      ],
+      selections: [selection(5, 0)],
+      expectedSelections: [selection(5, 41)],
+      userInteractions: [
+        cmd("groog.copyImport"),
+        cmd("groog.paste"),
+      ],
+    },
+    {
+      name: "Fails to copy import if no package",
+      file: startingFile("copy-imports", "Missing.java"),
+      expectedText: [
+        'public class Missing {}',
+        // Added
+        '',
+      ],
+      userInteractions: [
+        cmd("groog.copyImport"),
+      ],
+      expectedErrorMessages: [
+        'No import statement found!',
+      ],
+    },
+    // work.copyLink tests
+    {
+      runSolo: true,
+      name: "Fails to copy file link if no editor",
+      userInteractions: [
+        closeAllEditors,
+        cmd("groog.work.copyLink"),
+      ],
+      expectedErrorMessages: [
+        "No active editor",
+      ],
+    },
+    {
+      runSolo: true,
+      name: "Successfully copies file link",
+      file: startingFile("copy-imports", "SimplePackage.java"),
+      selections: [selection(1, 0)],
+      expectedText: [
+        'package copy.imports.simple;',
+        // Added
+        `https://code.amazon.com/packages/${pathParts()[5]}/blobs/mainline/--/${pathParts("copy-imports", "SimplePackage.java").slice(6).join('/')}`,
+      ],
+      expectedSelections: [selection(1, 127)],
+      userInteractions: [
+        cmd("groog.work.copyLink"),
+        cmd("groog.paste"),
+      ],
+      // expectedErrorMessages: [
+      // "No active editor",
+      // ],
     },
     // Multi-command tests
     {

@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { Emacs } from './emacs';
 import path = require('path');
 
-interface MiscCommand {
+export interface MiscCommand {
   name: string;
   f: (emacs: Emacs, ...args: any[]) => Thenable<any>;
   noLock?: boolean;
@@ -13,6 +13,17 @@ let fixedTestFile: vscode.Uri | undefined = undefined;
 
 export function miscTestReset() {
   fixedTestFile = undefined;
+}
+
+export function miscEditorFunc(f: (e: vscode.TextEditor) => Thenable<any>): () => Thenable<any> {
+  return async () => {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showErrorMessage(`No active editor`);
+      return;
+    }
+    return f(editor);
+  };
 }
 
 export const miscCommands: MiscCommand[] = [
@@ -27,7 +38,7 @@ export const miscCommands: MiscCommand[] = [
   },
   {
     name: "copyFilename",
-    f: () => copyFileName(),
+    f: miscEditorFunc(copyFileName),
   },
   {
     name: "testFile",
@@ -35,7 +46,11 @@ export const miscCommands: MiscCommand[] = [
   },
   {
     name: "trimClipboard",
-    f: () => trimClipboard(),
+    f: trimClipboard,
+  },
+  {
+    name: "copyImport",
+    f: miscEditorFunc(copyImport),
   },
   {
     name: "toggleFixedTestFile",
@@ -152,14 +167,9 @@ async function infoMessage(msg: Message | undefined) {
   }
 }
 
-async function copyFileName() {
-  const editor = vscode.window.activeTextEditor;
-  if (editor) {
-    vscode.env.clipboard.writeText(basename(editor.document.fileName));
-    vscode.window.showInformationMessage(`Filename copied!`);
-  } else {
-    vscode.window.showErrorMessage(`No active editor`);
-  }
+async function copyFileName(editor: vscode.TextEditor) {
+  vscode.env.clipboard.writeText(basename(editor.document.fileName));
+  vscode.window.showInformationMessage(`Filename copied!`);
 }
 
 export function positiveMod(k: number, mod: number) {
@@ -173,4 +183,24 @@ export function positiveMod(k: number, mod: number) {
 async function trimClipboard() {
   const clipboard = await vscode.env.clipboard.readText();
   return vscode.env.clipboard.writeText(clipboard.trim());
+}
+
+const PACKAGE_REGEX = /^package\s+([^\s;]+)\s*;/;
+
+async function copyImport(editor: vscode.TextEditor) {
+  switch (editor.document.languageId) {
+  case 'java':
+    const lines = editor.document.getText().split('\n');
+    for (const line of lines) {
+      const match = PACKAGE_REGEX.exec(line);
+      if (match) {
+        const classname = path.parse(editor.document.fileName).name;
+        return vscode.env.clipboard.writeText(`import ${match[1]}.${classname};`);
+      }
+    }
+    vscode.window.showErrorMessage(`No import statement found!`);
+    break;
+  default:
+    vscode.window.showErrorMessage(`No import copy support for language (${editor.document.languageId})`);
+  }
 }
