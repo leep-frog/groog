@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -490,12 +490,12 @@
       {
         "key": "alt+c",
         "command": "toggleSearchCaseSensitive",
-        "when": "!editorFocus && !inSearchEditor && !searchViewletFocus"
+        "when": "!groog.context.findMode && !inSearchEditor && !searchViewletFocus"
       },
       {
         "key": "alt+c",
         "command": "groog.find.toggleCaseSensitive",
-        "when": "editorFocus"
+        "when": "inQuickOpen && groog.context.findMode"
       },
       {
         "key": "alt+c",
@@ -542,12 +542,12 @@
       {
         "key": "alt+f4",
         "command": "toggleSearchWholeWord",
-        "when": "groog.context.qmkMode && !editorFocus && !inSearchEditor && !searchViewletFocus"
+        "when": "groog.context.qmkMode && !groog.context.findMode && !inSearchEditor && !searchViewletFocus"
       },
       {
         "key": "alt+f4",
         "command": "groog.find.toggleWholeWord",
-        "when": "groog.context.qmkMode && editorFocus"
+        "when": "groog.context.qmkMode && inQuickOpen && groog.context.findMode"
       },
       {
         "key": "alt+f4",
@@ -582,12 +582,12 @@
       {
         "key": "alt+r",
         "command": "toggleSearchRegex",
-        "when": "!editorFocus && !inSearchEditor && !searchViewletFocus"
+        "when": "!groog.context.findMode && !inSearchEditor && !searchViewletFocus"
       },
       {
         "key": "alt+r",
         "command": "groog.find.toggleRegex",
-        "when": "editorFocus"
+        "when": "inQuickOpen && groog.context.findMode"
       },
       {
         "key": "alt+r",
@@ -704,12 +704,12 @@
       {
         "key": "alt+w",
         "command": "toggleSearchWholeWord",
-        "when": "!editorFocus && !inSearchEditor && !searchViewletFocus"
+        "when": "!groog.context.findMode && !inSearchEditor && !searchViewletFocus"
       },
       {
         "key": "alt+w",
         "command": "groog.find.toggleWholeWord",
-        "when": "editorFocus"
+        "when": "inQuickOpen && groog.context.findMode"
       },
       {
         "key": "alt+w",

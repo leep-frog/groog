@@ -762,18 +762,18 @@ func (k Key) keyAliases() []string {
 
 func findToggler(suffix string, context *WhenContext, m map[string]*KB) map[string]*KB {
 	groogCmd := fmt.Sprintf("groog.find.toggle%s", suffix)
-	ef := editorFocus
+	gc := inQuickOpen.and(groogFindMode)
 	se := inSearchEditor
 	sv := searchViewletFocus
-	neg := editorFocus.not().and(inSearchEditor.not()).and(searchViewletFocus.not())
+	neg := groogFindMode.not().and(inSearchEditor.not()).and(searchViewletFocus.not())
 	if context != nil {
-		ef = context.and(ef)
+		gc = context.and(gc)
 		se = context.and(se)
 		sv = context.and(sv)
 		neg = context.and(neg)
 	}
 	r := map[string]*KB{
-		ef.value:  kb(groogCmd),
+		gc.value:  kb(groogCmd),
 		se.value:  kb(fmt.Sprintf("toggleSearchEditor%s", suffix)),
 		sv.value:  kb(fmt.Sprintf("toggleSearch%s", suffix)),
 		neg.value: kb(fmt.Sprintf("toggleSearch%s", suffix)),
