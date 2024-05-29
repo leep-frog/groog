@@ -489,63 +489,23 @@
       },
       {
         "key": "alt+c",
-        "command": "groog.multiCommand.execute",
-        "when": "!editorFocus && !inSearchEditor && !searchViewletFocus",
-        "args": {
-          "sequence": [
-            {
-              "command": "groog.find.toggleCaseSensitive"
-            },
-            {
-              "command": "toggleSearchCaseSensitive"
-            }
-          ]
-        }
+        "command": "toggleSearchCaseSensitive",
+        "when": "!editorFocus && !inSearchEditor && !searchViewletFocus"
       },
       {
         "key": "alt+c",
-        "command": "groog.multiCommand.execute",
-        "when": "editorFocus",
-        "args": {
-          "sequence": [
-            {
-              "command": "groog.find.toggleCaseSensitive"
-            },
-            {
-              "command": "toggleFindCaseSensitive"
-            }
-          ]
-        }
+        "command": "groog.find.toggleCaseSensitive",
+        "when": "editorFocus"
       },
       {
         "key": "alt+c",
-        "command": "groog.multiCommand.execute",
-        "when": "inSearchEditor",
-        "args": {
-          "sequence": [
-            {
-              "command": "groog.find.toggleCaseSensitive"
-            },
-            {
-              "command": "toggleSearchEditorCaseSensitive"
-            }
-          ]
-        }
+        "command": "toggleSearchEditorCaseSensitive",
+        "when": "inSearchEditor"
       },
       {
         "key": "alt+c",
-        "command": "groog.multiCommand.execute",
-        "when": "searchViewletFocus",
-        "args": {
-          "sequence": [
-            {
-              "command": "groog.find.toggleCaseSensitive"
-            },
-            {
-              "command": "toggleSearchCaseSensitive"
-            }
-          ]
-        }
+        "command": "toggleSearchCaseSensitive",
+        "when": "searchViewletFocus"
       },
       {
         "key": "alt+d",
@@ -581,63 +541,23 @@
       },
       {
         "key": "alt+f4",
-        "command": "groog.multiCommand.execute",
-        "when": "groog.context.qmkMode && !editorFocus && !inSearchEditor && !searchViewletFocus",
-        "args": {
-          "sequence": [
-            {
-              "command": "groog.find.toggleWholeWord"
-            },
-            {
-              "command": "toggleSearchWholeWord"
-            }
-          ]
-        }
+        "command": "toggleSearchWholeWord",
+        "when": "groog.context.qmkMode && !editorFocus && !inSearchEditor && !searchViewletFocus"
       },
       {
         "key": "alt+f4",
-        "command": "groog.multiCommand.execute",
-        "when": "groog.context.qmkMode && editorFocus",
-        "args": {
-          "sequence": [
-            {
-              "command": "groog.find.toggleWholeWord"
-            },
-            {
-              "command": "toggleFindWholeWord"
-            }
-          ]
-        }
+        "command": "groog.find.toggleWholeWord",
+        "when": "groog.context.qmkMode && editorFocus"
       },
       {
         "key": "alt+f4",
-        "command": "groog.multiCommand.execute",
-        "when": "groog.context.qmkMode && inSearchEditor",
-        "args": {
-          "sequence": [
-            {
-              "command": "groog.find.toggleWholeWord"
-            },
-            {
-              "command": "toggleSearchEditorWholeWord"
-            }
-          ]
-        }
+        "command": "toggleSearchEditorWholeWord",
+        "when": "groog.context.qmkMode && inSearchEditor"
       },
       {
         "key": "alt+f4",
-        "command": "groog.multiCommand.execute",
-        "when": "groog.context.qmkMode && searchViewletFocus",
-        "args": {
-          "sequence": [
-            {
-              "command": "groog.find.toggleWholeWord"
-            },
-            {
-              "command": "toggleSearchWholeWord"
-            }
-          ]
-        }
+        "command": "toggleSearchWholeWord",
+        "when": "groog.context.qmkMode && searchViewletFocus"
       },
       {
         "key": "alt+g",
@@ -661,63 +581,23 @@
       },
       {
         "key": "alt+r",
-        "command": "groog.multiCommand.execute",
-        "when": "!editorFocus && !inSearchEditor && !searchViewletFocus",
-        "args": {
-          "sequence": [
-            {
-              "command": "groog.find.toggleRegex"
-            },
-            {
-              "command": "toggleSearchRegex"
-            }
-          ]
-        }
+        "command": "toggleSearchRegex",
+        "when": "!editorFocus && !inSearchEditor && !searchViewletFocus"
       },
       {
         "key": "alt+r",
-        "command": "groog.multiCommand.execute",
-        "when": "editorFocus",
-        "args": {
-          "sequence": [
-            {
-              "command": "groog.find.toggleRegex"
-            },
-            {
-              "command": "toggleFindRegex"
-            }
-          ]
-        }
+        "command": "groog.find.toggleRegex",
+        "when": "editorFocus"
       },
       {
         "key": "alt+r",
-        "command": "groog.multiCommand.execute",
-        "when": "inSearchEditor",
-        "args": {
-          "sequence": [
-            {
-              "command": "groog.find.toggleRegex"
-            },
-            {
-              "command": "toggleSearchEditorRegex"
-            }
-          ]
-        }
+        "command": "toggleSearchEditorRegex",
+        "when": "inSearchEditor"
       },
       {
         "key": "alt+r",
-        "command": "groog.multiCommand.execute",
-        "when": "searchViewletFocus",
-        "args": {
-          "sequence": [
-            {
-              "command": "groog.find.toggleRegex"
-            },
-            {
-              "command": "toggleSearchRegex"
-            }
-          ]
-        }
+        "command": "toggleSearchRegex",
+        "when": "searchViewletFocus"
       },
       {
         "key": "alt+s",
@@ -823,63 +703,23 @@
       },
       {
         "key": "alt+w",
-        "command": "groog.multiCommand.execute",
-        "when": "!editorFocus && !inSearchEditor && !searchViewletFocus",
-        "args": {
-          "sequence": [
-            {
-              "command": "groog.find.toggleWholeWord"
-            },
-            {
-              "command": "toggleSearchWholeWord"
-            }
-          ]
-        }
+        "command": "toggleSearchWholeWord",
+        "when": "!editorFocus && !inSearchEditor && !searchViewletFocus"
       },
       {
         "key": "alt+w",
-        "command": "groog.multiCommand.execute",
-        "when": "editorFocus",
-        "args": {
-          "sequence": [
-            {
-              "command": "groog.find.toggleWholeWord"
-            },
-            {
-              "command": "toggleFindWholeWord"
-            }
-          ]
-        }
+        "command": "groog.find.toggleWholeWord",
+        "when": "editorFocus"
       },
       {
         "key": "alt+w",
-        "command": "groog.multiCommand.execute",
-        "when": "inSearchEditor",
-        "args": {
-          "sequence": [
-            {
-              "command": "groog.find.toggleWholeWord"
-            },
-            {
-              "command": "toggleSearchEditorWholeWord"
-            }
-          ]
-        }
+        "command": "toggleSearchEditorWholeWord",
+        "when": "inSearchEditor"
       },
       {
         "key": "alt+w",
-        "command": "groog.multiCommand.execute",
-        "when": "searchViewletFocus",
-        "args": {
-          "sequence": [
-            {
-              "command": "groog.find.toggleWholeWord"
-            },
-            {
-              "command": "toggleSearchWholeWord"
-            }
-          ]
-        }
+        "command": "toggleSearchWholeWord",
+        "when": "searchViewletFocus"
       },
       {
         "key": "alt+x",

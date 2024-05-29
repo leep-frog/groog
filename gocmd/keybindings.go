@@ -773,10 +773,10 @@ func findToggler(suffix string, context *WhenContext, m map[string]*KB) map[stri
 		neg = context.and(neg)
 	}
 	r := map[string]*KB{
-		ef.value:  mc(groogCmd, fmt.Sprintf("toggleFind%s", suffix)),
-		se.value:  mc(groogCmd, fmt.Sprintf("toggleSearchEditor%s", suffix)),
-		sv.value:  mc(groogCmd, fmt.Sprintf("toggleSearch%s", suffix)),
-		neg.value: mc(groogCmd, fmt.Sprintf("toggleSearch%s", suffix)),
+		ef.value:  kb(groogCmd),
+		se.value:  kb(fmt.Sprintf("toggleSearchEditor%s", suffix)),
+		sv.value:  kb(fmt.Sprintf("toggleSearch%s", suffix)),
+		neg.value: kb(fmt.Sprintf("toggleSearch%s", suffix)),
 	}
 	for k, v := range m {
 		r[k] = v
