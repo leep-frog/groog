@@ -211,18 +211,26 @@ class MatchTracker {
     };
   }
 
-  public nextMatch() {
-    this.nextOrPrevMatch(1);
+  public nextMatch(): boolean {
+    return this.nextOrPrevMatch(1);
   }
 
-  public prevMatch() {
-    this.nextOrPrevMatch(-1);
+  public prevMatch(): boolean {
+    return this.nextOrPrevMatch(-1);
   }
 
-  public nextOrPrevMatch(offset: number) {
+  public nextOrPrevMatch(offset: number): boolean {
     if (this.matchInfo !== undefined) {
       this.setMatchIndex(positiveMod(this.matchInfo.match.index + offset, this.matchInfo.matches.length));
+      return true;
     }
+
+    if (offset > 0) {
+      vscode.commands.executeCommand('workbench.action.quickOpenNavigateNextInFilePicker');
+    } else {
+      vscode.commands.executeCommand('workbench.action.quickOpenNavigatePreviousInFilePicker');
+    }
+    return false;
   }
 
   public updateCursor() {
@@ -592,7 +600,6 @@ class FindContextCache {
 
     if (suggestibleMatches.length > 0) {
       input.activeItems = [suggestibleItems[0]];
-      input.selectedItems = [suggestibleItems[0]];
     }
 
     disposables.push(
@@ -604,12 +611,15 @@ class FindContextCache {
       input.onDidAccept(e => {
         if (input.selectedItems.length > 1) {
           vscode.window.showErrorMessage(`Multiple selections made somehow?!`);
-        }
-        if (input.selectedItems.length === 0) {
           return;
         }
 
-        const item = input.selectedItems[0];
+        const item = input.selectedItems.at(0);
+        if (!item) {
+          vscode.window.showErrorMessage(`No find item selected!`);
+          return;
+        }
+
         if (!item.pickable) {
           return;
         }
@@ -640,14 +650,18 @@ class FindContextCache {
       return this.focusMatch();
     }
 
+    let matchChange = false;
     if (prev) {
       this.nexts--;
-      this.matchTracker!.prevMatch();
+      matchChange = this.matchTracker!.prevMatch();
     } else {
       this.nexts++;
-      this.matchTracker!.nextMatch();
+      matchChange = this.matchTracker!.nextMatch();
     };
-    this.focusMatch();
+
+    if (matchChange) {
+      this.focusMatch();
+    }
     this.matchTracker!.updateCursor();
   }
 }
@@ -906,6 +920,6 @@ export class FindRecord implements Record {
   }
 }
 
-interface FindQuickPickItem extends vscode.QuickPickItem {
+export interface FindQuickPickItem extends vscode.QuickPickItem {
   pickable?: boolean;
 }

@@ -2,9 +2,9 @@ import * as assert from 'assert';
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
-import { CloseQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectItemQuickPickAction, SimpleTestCase, SimpleTestCaseProps, UserInteraction, WorkspaceConfiguration, cmd, openFile } from '@leep-frog/vscode-test-stubber';
+import { CloseQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectActiveItems, SelectItemQuickPickAction, SimpleTestCase, SimpleTestCaseProps, UserInteraction, WorkspaceConfiguration, cmd, openFile } from '@leep-frog/vscode-test-stubber';
 import * as vscode from 'vscode';
-import { Document, FindRecord, Match } from '../../find';
+import { Document, FindQuickPickItem, FindRecord, Match } from '../../find';
 import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
 import { Correction } from '../../typos';
 import path = require('path');
@@ -45,6 +45,11 @@ function convertTestMatches(pattern : RegExp | undefined, testMatches: TestMatch
       index,
     };
   });
+}
+
+// Need to use this due to pickable being in FindQuickPickItem, but not vscode.QuickPickItem.
+function findItem(f: FindQuickPickItem): FindQuickPickItem {
+  return f;
 }
 
 interface DocumentTest {
@@ -1576,6 +1581,319 @@ function testCases(): TestCase[] {
     //     selection(2, 3),
     //   ],
     // },
+    {
+      name: "Find with whole word fails on multiple active items",
+      text: [
+        "abcd",
+        "bcd2",
+        "bcd1",
+        "bcd3",
+      ],
+      expectedText: [
+        "abcd",
+        "bcd2",
+        "bcd1",
+        "bcd3",
+      ],
+      userInteractions: [
+        cmd("groog.find"),
+        cmd("groog.find.toggleWholeWord"),
+        type("b"),
+        new SelectItemQuickPickAction(['bcd1', 'bcd2']),
+      ],
+      expectedErrorMessages: [
+        `Multiple selections made somehow?!`,
+      ],
+      expectedQuickPicks:[
+        // groog.find
+        [
+          " ",
+          "Flags: []",
+          "No results",
+        ],
+        // toggle whole word
+        [
+          " ",
+          "Flags: [W]",
+          "No results",
+        ],
+        // type 'b'
+        [
+          "b",
+          "Flags: [W]",
+          "No results",
+          findItem({
+            label: "bcd1",
+            pickable: true,
+          }),
+          findItem({
+            label: "bcd2",
+            pickable: true,
+          }),
+          findItem({
+            label: "bcd3",
+            pickable: true,
+          }),
+        ],
+      ],
+    },
+    {
+      name: "Find with whole word fails on empty active items",
+      text: [
+        "abcd",
+        "bcd2",
+        "bcd1",
+        "bcd3",
+      ],
+      expectedText: [
+        "abcd",
+        "bcd2",
+        "bcd1",
+        "bcd3",
+      ],
+      userInteractions: [
+        cmd("groog.find"),
+        cmd("groog.find.toggleWholeWord"),
+        type("b"),
+        new SelectItemQuickPickAction([]),
+      ],
+      expectedErrorMessages: [
+        `No find item selected!`,
+      ],
+      expectedQuickPicks:[
+        // groog.find
+        [
+          " ",
+          "Flags: []",
+          "No results",
+        ],
+        // toggle whole word
+        [
+          " ",
+          "Flags: [W]",
+          "No results",
+        ],
+        // type 'b'
+        [
+          "b",
+          "Flags: [W]",
+          "No results",
+          findItem({
+            label: "bcd1",
+            pickable: true,
+          }),
+          findItem({
+            label: "bcd2",
+            pickable: true,
+          }),
+          findItem({
+            label: "bcd3",
+            pickable: true,
+          }),
+        ],
+      ],
+    },
+    {
+      name: "Find with whole word starts active on first suggestion",
+      text: [
+        "abcd",
+        // This order ensures that labels are sorted in alphabetical order
+        "bcd2",
+        "bcd1",
+        "bcd3",
+      ],
+      expectedText: [
+        "abcd",
+        "bcd2",
+        "xyz",
+        "bcd3",
+      ],
+      expectedSelections: [
+        selection(2, 3),
+      ],
+      userInteractions: [
+        cmd("groog.find"),
+        cmd("groog.find.toggleWholeWord"),
+        type("b"),
+        new SelectActiveItems(),
+        ctrlG,
+        cmd("groog.deleteLeft"),
+        type("xyz"),
+      ],
+      expectedQuickPicks:[
+        // groog.find
+        [
+          " ",
+          "Flags: []",
+          "No results",
+        ],
+        // toggle whole word
+        [
+          " ",
+          "Flags: [W]",
+          "No results",
+        ],
+        // type 'b'
+        [
+          "b",
+          "Flags: [W]",
+          "No results",
+          findItem({
+            label: "bcd1",
+            pickable: true,
+          }),
+          findItem({
+            label: "bcd2",
+            pickable: true,
+          }),
+          findItem({
+            label: "bcd3",
+            pickable: true,
+          }),
+        ],
+        // SelectActiveItems
+        [
+          "bcd1",
+          "Flags: [W]",
+          "1 of 1",
+        ],
+      ],
+    },
+    {
+      name: "Find with whole word starts active on first suggestion and moves",
+      text: [
+        "abcd",
+        // This order ensures that labels are sorted in alphabetical order
+        "bcd2",
+        "bcd1",
+        "bcd3",
+      ],
+      expectedText: [
+        "abcd",
+        "xyz",
+        "bcd1",
+        "bcd3",
+      ],
+      expectedSelections: [
+        selection(1, 3),
+      ],
+      userInteractions: [
+        cmd("groog.find"),
+        cmd("groog.find.toggleWholeWord"),
+        type("b"),
+        cmd('workbench.action.quickOpenNavigateNextInFilePicker'),
+        cmd('workbench.action.quickOpenNavigateNextInFilePicker'),
+        cmd('workbench.action.quickOpenNavigatePreviousInFilePicker'),
+        new SelectActiveItems(),
+        ctrlG,
+        cmd("groog.deleteLeft"),
+        type("xyz"),
+      ],
+      expectedQuickPicks:[
+        // groog.find
+        [
+          " ",
+          "Flags: []",
+          "No results",
+        ],
+        // toggle whole word
+        [
+          " ",
+          "Flags: [W]",
+          "No results",
+        ],
+        // type 'b'
+        [
+          "b",
+          "Flags: [W]",
+          "No results",
+          findItem({
+            label: "bcd1",
+            pickable: true,
+          }),
+          findItem({
+            label: "bcd2",
+            pickable: true,
+          }),
+          findItem({
+            label: "bcd3",
+            pickable: true,
+          }),
+        ],
+        // SelectActiveItems on bcd2
+        [
+          "bcd2",
+          "Flags: [W]",
+          "1 of 1",
+        ],
+      ],
+    },
+    {
+      name: "Ignores non-pickable items (e.g. informational options)",
+      text: [
+        "abcd",
+        "bcd2",
+        "bcd1",
+        "bcd3",
+      ],
+      expectedText: [
+        "xyzabcd",
+        "bcd2",
+        "bcd1",
+        "bcd3",
+      ],
+      expectedSelections: [
+        selection(0, 3),
+      ],
+      userInteractions: [
+        cmd("groog.find"),
+        cmd("groog.find.toggleWholeWord"),
+        type("b"),
+        cmd('workbench.action.quickOpenNavigatePreviousInFilePicker'),
+        new SelectActiveItems(),
+        ctrlG,
+        cmd("groog.deleteLeft"),
+        type("xyz"),
+      ],
+      expectedQuickPicks:[
+        // groog.find
+        [
+          " ",
+          "Flags: []",
+          "No results",
+        ],
+        // toggle whole word
+        [
+          " ",
+          "Flags: [W]",
+          "No results",
+        ],
+        // type 'b'
+        [
+          "b",
+          "Flags: [W]",
+          "No results",
+          findItem({
+            label: "bcd1",
+            pickable: true,
+          }),
+          findItem({
+            label: "bcd2",
+            pickable: true,
+          }),
+          findItem({
+            label: "bcd3",
+            pickable: true,
+          }),
+        ],
+        // SelectActiveItems on bcd2
+        // [
+        //   "bcd2",
+        //   "Flags: [W]",
+        //   "1 of 1",
+        // ],
+      ],
+    },
     // Replace tests
     {
       name: "Replace fails if match failure",
@@ -2084,12 +2402,10 @@ function testCases(): TestCase[] {
           "Flags: [W]",
           "No results",
           // Whole-word suggestibles
-          (() => { // Need to do this due to pickable being in FindQuickPickItem, but not vscode.QuickPickItem.
-            return {
-              label: "bcd",
-              pickable: true,
-            };
-          })(),
+          findItem({
+            label: "bcd",
+            pickable: true,
+          }),
         ],
       ],
     },
