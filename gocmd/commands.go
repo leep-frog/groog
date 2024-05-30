@@ -19,6 +19,7 @@ func cc(command string, title string) *Command {
 
 var (
 	CustomCommands = []*Command{
+		cc("groog.clearRunSolo", "Clear runSolo tests"),
 		cc("groog.copyImport", "Copy import line for the file"),
 		cc("groog.cursorBottom", "Emacs Cursor Bottom"),
 		cc("groog.cursorDown", "Emacs Cursor Down"),

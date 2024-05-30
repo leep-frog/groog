@@ -549,7 +549,6 @@ function testCases(): TestCase[] {
     {
       name: "Typo does nothing if typing with no editor",
       userInteractions: [
-        closeAllEditors,
         type(" "),
       ],
       workspaceConfiguration: wordSeparatorConfiguration(' ^('),
@@ -1038,7 +1037,6 @@ function testCases(): TestCase[] {
     {
       name: "groog.find fails if no editor",
       userInteractions: [
-        closeAllEditors,
         cmd("groog.find"),
       ],
       expectedErrorMessages: [
@@ -1048,7 +1046,6 @@ function testCases(): TestCase[] {
     {
       name: "groog.reverseFind fails if no editor",
       userInteractions: [
-        closeAllEditors,
         cmd("groog.reverseFind"),
       ],
       expectedErrorMessages: [
@@ -5550,7 +5547,6 @@ function testCases(): TestCase[] {
     {
       name: "Fails to copy file name if no editor",
       userInteractions: [
-        closeAllEditors,
         cmd("groog.copyFilename"),
       ],
       expectedErrorMessages: [
@@ -5581,7 +5577,6 @@ function testCases(): TestCase[] {
     {
       name: "Fails to copy import if no editor",
       userInteractions: [
-        closeAllEditors,
         cmd("groog.copyImport"),
       ],
       expectedErrorMessages: [
@@ -5689,9 +5684,48 @@ function testCases(): TestCase[] {
     },
     // work.copyLink tests
     {
+      name: "Fails to clear run solo if no editor",
+      userInteractions: [
+        cmd("groog.clearRunSolo"),
+      ],
+      expectedErrorMessages: [
+        "No active editor",
+      ],
+    },
+    {
+      name: "Clears all instancds of 'runSolo: true'",
+      text: [
+        'hello',
+        // Minimal text
+        'runSolo:true',
+        'abc',
+        // Minimal text with comma
+        'runSolo:true,',
+        'def',
+        'ghi',
+        // Regular
+        '  runSolo: true,',
+        // Lots of whitespace
+        '\t \trunSolo\t \t: \t true \t ',
+        'jkl',
+        // Lots of whitespace with comma
+        '\t \trunSolo\t \t: \t true \t , \t ',
+      ],
+      expectedText: [
+        'hello',
+        'abc',
+        'def',
+        'ghi',
+        'jkl',
+      ],
+      userInteractions: [
+        cmd("groog.clearRunSolo"),
+      ],
+    },
+    // work.copyLink tests
+    {
       name: "Fails to copy file link if no editor",
       userInteractions: [
-        closeAllEditors,
         cmd("groog.work.copyLink"),
       ],
       expectedErrorMessages: [

@@ -125,3 +125,8 @@ function deleteSpaceRight(editor: vscode.TextEditor, selection: vscode.Selection
   ));
   return [selection, true];
 }
+
+export function endDocumentPosition(editor: vscode.TextEditor): vscode.Position {
+  const doc = editor.document;
+  return doc.lineAt(doc.lineCount-1).range.end;
+}

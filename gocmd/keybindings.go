@@ -526,7 +526,8 @@ var (
 		ctrlX(tab):       only("groog.format"),
 		ctrl("i"):        only("editor.action.indentLines"),
 		ctrl(shift("i")): only("editor.action.outdentLines"),
-		ctrlX("i"):       only("editor.action.organizeImports"),
+		ctrlX("i"):       only("groog.copyImport"),
+		ctrlZ("i"):       only("editor.action.organizeImports"),
 		alt("i"):         only("groog.indentToPreviousLine"),
 		alt(shift("i")): {
 			always.value:          kb("groog.indentToNextLine"),

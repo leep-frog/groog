@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.4",
+  "version": "2.7.5",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -57,6 +57,10 @@
   "activationEvents": [],
   "contributes": {
     "commands": [
+      {
+        "command": "groog.clearRunSolo",
+        "title": "Clear runSolo tests"
+      },
       {
         "command": "groog.copyFilename",
         "title": "Groog Copy Filename"
@@ -1622,11 +1626,11 @@
       },
       {
         "key": "ctrl+x i",
-        "command": "editor.action.organizeImports"
+        "command": "groog.copyImport"
       },
       {
         "key": "ctrl+x ctrl+i",
-        "command": "editor.action.organizeImports"
+        "command": "groog.copyImport"
       },
       {
         "key": "ctrl+x k",
@@ -1927,6 +1931,14 @@
       {
         "key": "ctrl+z ctrl+f",
         "command": "faves.aliasSearch"
+      },
+      {
+        "key": "ctrl+z i",
+        "command": "editor.action.organizeImports"
+      },
+      {
+        "key": "ctrl+z ctrl+i",
+        "command": "editor.action.organizeImports"
       },
       {
         "key": "ctrl+z k",

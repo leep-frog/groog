@@ -1,5 +1,6 @@
 import { basename } from 'path';
 import * as vscode from 'vscode';
+import { endDocumentPosition } from './character-functions';
 import { Emacs } from './emacs';
 import path = require('path');
 
@@ -51,6 +52,10 @@ export const miscCommands: MiscCommand[] = [
   {
     name: "copyImport",
     f: miscEditorFunc(copyImport),
+  },
+  {
+    name: "clearRunSolo",
+    f: miscEditorFunc(clearRunSolo),
   },
   {
     name: "toggleFixedTestFile",
@@ -183,6 +188,19 @@ export function positiveMod(k: number, mod: number) {
 async function trimClipboard() {
   const clipboard = await vscode.env.clipboard.readText();
   return vscode.env.clipboard.writeText(clipboard.trim());
+}
+
+const RUN_SOLO_REGEX = /^\s*runSolo\s*:\s*true\s*,?\s*$/;
+
+async function clearRunSolo(editor: vscode.TextEditor) {
+  const lines = editor.document.getText().split('\n');
+  const filteredLines = lines.filter(value => !RUN_SOLO_REGEX.test(value));
+
+  const range = new vscode.Range(new vscode.Position(0, 0), endDocumentPosition(editor));
+
+  return editor.edit(eb => {
+    eb.replace(range, filteredLines.join('\n'));
+  });
 }
 
 const PACKAGE_REGEX = /^package\s+([^\s;]+)\s*;/;
