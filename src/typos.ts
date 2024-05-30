@@ -31,6 +31,7 @@ const javaLanguageKey = "java";
 const jsonLanguageKey = "json";
 export const globalLanguageKey = "*";
 const typescriptLanguageKey = "typescript";
+const javascriptLanguageKey = "javascript";
 
 export function defaultCorrections(): Correction[] {
   return [
@@ -47,10 +48,12 @@ export function defaultCorrections(): Correction[] {
     {
       languages: [
         typescriptLanguageKey,
+        javascriptLanguageKey,
       ],
       words: {
         "si": "vscode.window.showInformationMessage",
         "se": "vscode.window.showErrorMessage",
+        "cl": "console.log",
       },
       replacementSuffix: "(\`",
       replacementSuffixAfterCursor: "\`);",
