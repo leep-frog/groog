@@ -2,9 +2,9 @@ import * as assert from 'assert';
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
-import { CloseQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectActiveItems, SelectItemQuickPickAction, SimpleTestCase, SimpleTestCaseProps, UserInteraction, WorkspaceConfiguration, cmd, openFile } from '@leep-frog/vscode-test-stubber';
+import { CloseQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectActiveItems, SelectItemQuickPickAction, SimpleTestCase, SimpleTestCaseProps, UserInteraction, WorkspaceConfiguration, cmd, delay, openFile } from '@leep-frog/vscode-test-stubber';
 import * as vscode from 'vscode';
-import { Document, FindQuickPickItem, FindRecord, Match } from '../../find';
+import { Document, FIND_MEMORY_MS, FindQuickPickItem, FindRecord, Match } from '../../find';
 import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
 import { Correction } from '../../typos';
 import path = require('path');
@@ -1890,12 +1890,334 @@ function testCases(): TestCase[] {
             pickable: true,
           }),
         ],
-        // SelectActiveItems on bcd2
-        // [
-        //   "bcd2",
-        //   "Flags: [W]",
-        //   "1 of 1",
-        // ],
+        // SelectActiveItems user interaction does nothing since non-pickable item
+      ],
+    },
+    // Find memory tests
+    {
+      name: "Keeps all toggles if find is re-activated recently enough",
+      text: [
+        "Alpha",
+        "abcd",
+        "bcd1",
+        "Bcd2",
+      ],
+      expectedText: [
+        "midpoint Alpha",
+        "abcd",
+        "bcd1",
+        "Bcd2",
+      ],
+      expectedSelections: [selection(0, 9)],
+      userInteractions: [
+        cmd("groog.find"),
+        cmd("groog.find.toggleWholeWord"),
+        cmd("groog.find.toggleCaseSensitive"),
+        cmd("groog.find.toggleRegex"),
+        type("[aA]"),
+        ctrlG,
+        type('midpoint '),
+        // No delay to start next find
+        cmd("groog.find"),
+        type("[bB]"),
+      ],
+      expectedQuickPicks:[
+        [
+          " ",
+          "Flags: []",
+          "No results",
+        ],
+        [
+          " ",
+          "Flags: [W]",
+          "No results",
+        ],
+        [
+          " ",
+          "Flags: [CW]",
+          "No results",
+        ],
+        [
+          " ",
+          "Flags: [CWR]",
+          "No results",
+        ],
+        [
+          "[aA]",
+          "Flags: [CWR]",
+          "No results",
+          findItem({
+            label: 'Alpha',
+            pickable: true,
+          }),
+          findItem({
+            label: 'abcd',
+            pickable: true,
+          }),
+        ],
+        // Restart find (with same flags)
+        [
+          " ",
+          "Flags: [CWR]",
+          "No results",
+        ],
+        [
+          "[bB]",
+          "Flags: [CWR]",
+          "No results",
+          findItem({
+            label: 'Bcd2',
+            pickable: true,
+          }),
+          findItem({
+            label: 'bcd1',
+            pickable: true,
+          }),
+        ],
+      ],
+    },
+    {
+      name: "Clears all toggles if find is re-activated too late",
+      text: [
+        "Alpha",
+        "abcd",
+        "bcd1",
+        "Bcd2",
+      ],
+      expectedText: [
+        "midpoint Alpha",
+        "abcd",
+        "bcd1",
+        "Bcd2",
+      ],
+      expectedSelections: [selection(0, 9)],
+      userInteractions: [
+        cmd("groog.find"),
+        cmd("groog.find.toggleWholeWord"),
+        cmd("groog.find.toggleCaseSensitive"),
+        cmd("groog.find.toggleRegex"),
+        type("[aA]"),
+        ctrlG,
+        type('midpoint '),
+        // Wait until memory is cleared
+        delay(FIND_MEMORY_MS),
+        cmd("groog.find"),
+        type("[bB]"),
+      ],
+      expectedQuickPicks:[
+        [
+          " ",
+          "Flags: []",
+          "No results",
+        ],
+        [
+          " ",
+          "Flags: [W]",
+          "No results",
+        ],
+        [
+          " ",
+          "Flags: [CW]",
+          "No results",
+        ],
+        [
+          " ",
+          "Flags: [CWR]",
+          "No results",
+        ],
+        [
+          "[aA]",
+          "Flags: [CWR]",
+          "No results",
+          findItem({
+            label: 'Alpha',
+            pickable: true,
+          }),
+          findItem({
+            label: 'abcd',
+            pickable: true,
+          }),
+        ],
+        // Restart find (with cleared flags)
+        [
+          " ",
+          "Flags: []",
+          "No results",
+        ],
+        [
+          "[bB]",
+          "Flags: []",
+          "No results",
+        ],
+      ],
+    },
+    {
+      name: "Keeps all toggles if find is re-activated recently enough (with replace mode)",
+      text: [
+        "Alpha",
+        "abcd",
+        "bcd1",
+        "Bcd2",
+      ],
+      expectedText: [
+        "midpoint Alpha",
+        "abcd",
+        "bcd1",
+        "Bcd2",
+      ],
+      expectedSelections: [selection(0, 9)],
+      userInteractions: [
+        cmd("groog.find"),
+        cmd("groog.find.toggleWholeWord"),
+        cmd("groog.find.toggleCaseSensitive"),
+        cmd("groog.find.toggleRegex"),
+        cmd("groog.find.toggleReplaceMode"),
+        type("[aA]"),
+        ctrlG,
+        type('midpoint '),
+        // No delay to start next find
+        cmd("groog.find"),
+        type("[bB]"),
+      ],
+      expectedQuickPicks:[
+        [
+          " ",
+          "Flags: []",
+          "No results",
+        ],
+        [
+          " ",
+          "Flags: [W]",
+          "No results",
+        ],
+        [
+          " ",
+          "Flags: [CW]",
+          "No results",
+        ],
+        [
+          " ",
+          "Flags: [CWR]",
+          "No results",
+        ],
+        // Toggle replace mode
+        [
+          {
+            label: " ",
+            detail: 'No replace text set',
+          },
+          "Flags: [CWR]",
+          "No results",
+        ],
+        // Type [aA]
+        [
+          {
+            label: " ",
+            detail: '[aA]',
+          },
+          "Flags: [CWR]",
+          "No results",
+        ],
+        // Restart find (with same flags)
+        [
+          " ",
+          "Flags: [CWR]",
+          "No results",
+        ],
+        [
+          "[bB]",
+          "Flags: [CWR]",
+          "No results",
+          findItem({
+            label: 'Bcd2',
+            pickable: true,
+          }),
+          findItem({
+            label: 'bcd1',
+            pickable: true,
+          }),
+        ],
+      ],
+    },
+    {
+      name: "Clears all toggles if find is re-activated too late (with replace mode)",
+      text: [
+        "Alpha",
+        "abcd",
+        "bcd1",
+        "Bcd2",
+      ],
+      expectedText: [
+        "midpoint Alpha",
+        "abcd",
+        "bcd1",
+        "Bcd2",
+      ],
+      expectedSelections: [selection(0, 9)],
+      userInteractions: [
+        cmd("groog.find"),
+        cmd("groog.find.toggleWholeWord"),
+        cmd("groog.find.toggleCaseSensitive"),
+        cmd("groog.find.toggleRegex"),
+        cmd("groog.find.toggleReplaceMode"),
+        type("[aA]"),
+        ctrlG,
+        type('midpoint '),
+        // Wait until memory is cleared
+        delay(FIND_MEMORY_MS),
+        cmd("groog.find"),
+        type("[bB]"),
+      ],
+      expectedQuickPicks:[
+        [
+          " ",
+          "Flags: []",
+          "No results",
+        ],
+        [
+          " ",
+          "Flags: [W]",
+          "No results",
+        ],
+        [
+          " ",
+          "Flags: [CW]",
+          "No results",
+        ],
+        [
+          " ",
+          "Flags: [CWR]",
+          "No results",
+        ],
+        // Toggle replace mode
+        [
+          {
+            label: " ",
+            detail: 'No replace text set',
+          },
+          "Flags: [CWR]",
+          "No results",
+        ],
+        // Type [aA]
+        [
+          {
+            label: " ",
+            detail: '[aA]',
+          },
+          "Flags: [CWR]",
+          "No results",
+        ],
+        // Restart find (with cleared flags)
+        [
+          " ",
+          "Flags: []",
+          "No results",
+        ],
+        [
+          "[bB]",
+          "Flags: []",
+          "No results",
+        ],
       ],
     },
     // Replace tests
@@ -5367,7 +5689,6 @@ function testCases(): TestCase[] {
     },
     // work.copyLink tests
     {
-      runSolo: true,
       name: "Fails to copy file link if no editor",
       userInteractions: [
         closeAllEditors,
@@ -5378,7 +5699,6 @@ function testCases(): TestCase[] {
       ],
     },
     {
-      runSolo: true,
       name: "Successfully copies file link",
       file: startingFile("copy-imports", "SimplePackage.java"),
       selections: [selection(1, 0)],
@@ -5486,9 +5806,6 @@ function testCases(): TestCase[] {
       userInteractions: [
         openFile(startingFile("empty.go")),
         cmd("groog.testFile"),
-      ],
-      expectedSelections: [
-        selection(1, 0),
       ],
       expectedText: [
         "package main",

@@ -1,3 +1,4 @@
+import { Dayjs } from 'dayjs';
 import * as vscode from 'vscode';
 import { ColorMode, HandlerColoring, gutterHandlerColoring } from './color_mode';
 import { Emacs, GlobalBoolTracker } from './emacs';
@@ -5,6 +6,7 @@ import { TypeHandler } from './handler';
 import { CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { positiveMod } from './misc-command';
 import { Record, Recorder } from './record';
+import dayjs = require('dayjs');
 
 function findColor(opacity?: number): string{
   return `rgba(200, 120, 0, ${opacity ?? 1})`;
@@ -311,6 +313,13 @@ class FindContextCache {
       regex: false,
       wholeWord: false,
     };
+  }
+
+  public clearToggles() {
+    this.regexToggle = false;
+    this.caseToggle = false;
+    this.wholeWordToggle = false;
+    // replaceMode is cleared on `end()`, so we don't need to do that here.
   }
 
   public toggleRegex() {
@@ -666,6 +675,8 @@ class FindContextCache {
   }
 }
 
+// Time between find deactivation and re-activation that determines whether toggles (e.g. case) are cleared or not.
+export const FIND_MEMORY_MS = process.env.TEST_MODE ? 400 : 2 * 60 * 1000;
 
 export class FindHandler extends TypeHandler {
   readonly whenContext: string = "find";
@@ -676,6 +687,7 @@ export class FindHandler extends TypeHandler {
   // refreshMatches on every type).
   simpleModeTracker : GlobalBoolTracker;
   recorder: Recorder;
+  lastDeactivation : Dayjs;
 
   constructor(cm: ColorMode, recorder: Recorder) {
     super(cm);
@@ -689,6 +701,7 @@ export class FindHandler extends TypeHandler {
       return setGroogContext("find.simple", false);
     });
     this.recorder = recorder;
+    this.lastDeactivation = dayjs();
   }
 
   getColoring(context: vscode.ExtensionContext): HandlerColoring {
@@ -779,6 +792,10 @@ export class FindHandler extends TypeHandler {
   }
 
   async handleActivation() {
+    const now = dayjs();
+    if (now.isAfter(this.lastDeactivation.add(FIND_MEMORY_MS, 'ms'))) {
+      this.cache.clearToggles();
+    };
     let started = false;
     if (this.simpleModeTracker.get()) {
       const searchQuery = await vscode.window.showInputBox({
@@ -796,6 +813,7 @@ export class FindHandler extends TypeHandler {
   onRedundantActivate(): void {}
 
   async deactivateCommands() {
+    this.lastDeactivation = dayjs();
     // Don't `cancelSelection` as we select the previously matched text.
     vscode.commands.executeCommand("workbench.action.closeQuickOpen");
     vscode.window.activeTextEditor?.setDecorations(allMatchDecorationType, []);

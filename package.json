@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.3",
+  "version": "2.7.4",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -32,6 +32,7 @@
   "dependencies": {
     "@leep-frog/vscode-test-stubber": "^1.11.2",
     "await-lock": "^2.2.2",
+    "dayjs": "^1.11.11",
     "escape-string-regexp": "^5.0.0",
     "node-html-parser": "^6.1.13",
     "sorted-array-functions": "^1.3.0"
