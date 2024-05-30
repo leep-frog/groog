@@ -5682,7 +5682,62 @@ function testCases(): TestCase[] {
         'No import statement found!',
       ],
     },
-    // work.copyLink tests
+    // groog.trimClipboard tests
+    // Use `editor.action.clipboardPasteAction` instead of `groog.paste` because we're
+    // testing the raw clipboard value (not groog.paste logic, e.g. whitespace indenting/custom trimming)
+    {
+      name: "Trims the clipboard of whitespace",
+      text: [
+        ' \t abc\t def\t \t',
+        '',
+      ],
+      expectedText: [
+        ' \t abc\t def\t \t',
+        'abc\t def',
+      ],
+      expectedSelections: [selection(1, 8)],
+      userInteractions: [
+        cmd('groog.toggleMarkMode'),
+        cmd('groog.cursorEnd'),
+        cmd("editor.action.clipboardCopyAction"),
+        ctrlG,
+        cmd('groog.cursorEnd'),
+        cmd('groog.cursorRight'),
+        cmd("groog.trimClipboard"),
+        cmd("editor.action.clipboardPasteAction"),
+      ],
+    },
+    {
+      name: "Trims the clipboard of whitespace and newlines",
+      text: [
+        'abc def\t \t',
+        '\t \t ',
+        '',
+      ],
+      expectedText: [
+        'abc def\t \t',
+        '\t \t ',
+        '',
+        'abc def\t \t',
+        '\t \t ',
+        '',
+        'abc def',
+      ],
+      expectedSelections: [selection(6, 7)],
+      userInteractions: [
+        cmd('groog.toggleMarkMode'),
+        cmd('groog.cursorDown'),
+        cmd('groog.cursorDown'),
+        cmd("editor.action.clipboardCopyAction"),
+        ctrlG,
+        type('\n'),
+        cmd("editor.action.clipboardPasteAction"),
+        type('\n'),
+        cmd("groog.trimClipboard"),
+        cmd("editor.action.clipboardPasteAction"),
+      ],
+    },
+    // groog.clearRunSolo tests
     {
       name: "Fails to clear run solo if no editor",
       userInteractions: [

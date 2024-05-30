@@ -136,7 +136,7 @@ async function testFile(args: TestFileArgs, lastFile?: vscode.Uri) {
   switch (suffix) {
   case "go":
     vscode.window.showErrorMessage(`go testing should be routed to custom command in keybindings.go`);
-    return;
+    break;
   case "ts":
     // It's possible to run launch.json configurations with `vscode.debug.startDebugging(fs, "Extension Tests");`
     // But `npm run test` currently does everything we need, but an option to keep in mind if ever needed.
@@ -150,7 +150,7 @@ async function testFile(args: TestFileArgs, lastFile?: vscode.Uri) {
     if (!args || args.part === 0) {
       vscode.window.showErrorMessage(`Unknown file suffix: ${suffix}`);
     }
-    return;
+    break;
   }
 }
 
