@@ -36,7 +36,7 @@ export class MarkHandler extends TypeHandler {
         // Use runHandlers to check if other handlers should handle the pasting instead.
         return this.emacs.runHandlers(
           async (th: TypeHandler) => th.onEmacsPaste(this.yanked),
-          async () => this.paste(this.yankedPrefix, this.yanked),
+          async () => this.paste(this.yanked, this.yankedPrefix),
         );
       });
     });
@@ -47,27 +47,68 @@ export class MarkHandler extends TypeHandler {
         // Use runHandlers to check if other handlers should handle the pasting isntead.
         return this.emacs.runHandlers(
           async (th: TypeHandler) => th.onPaste(text),
-          async () => {
-            const prefixRegex = /^(\s*)/;
-            let prefix: string = prefixRegex.exec(text)?.[0] || "";
-
-            // If no prefix, then check the second line of the copied text (if it exists)
-            if (!prefix) {
-              const lines: string[] = text.split("\n");
-              if (lines.length > 1) {
-                prefix = prefixRegex.exec(lines[1])?.[0] || "";
-              }
-            }
-
-            const pasteText: string = text.replace(prefixRegex, "");
-            return this.paste(prefix, pasteText).then(pasted => pasted ? false : vscode.commands.executeCommand("editor.action.clipboardPasteAction"));
-          },
+          async () => this.paste(text).then(pasted => pasted ? false : vscode.commands.executeCommand("editor.action.clipboardPasteAction")),
         );
       });
     });
   }
 
-  async paste(prefixText: string, text: string): Promise<boolean> {
+  private indentInferred(firstLine: string, secondLine: string) {
+    // If opening more things than closing, then assume an indent
+    const charMap = new Map<string, number>();
+    for (const char of firstLine) {
+      charMap.set(char, (charMap.get(char) || 0) + 1);
+    }
+    if (((charMap.get("(") || 0) > (charMap.get(")") || 0)) || ((charMap.get("{") || 0) > (charMap.get("}") || 0)) || ((charMap.get("[") || 0) > (charMap.get("]") || 0))) {
+      return true;
+    }
+
+    // If second line is a nested function, then assume an indent
+    return secondLine.trim().startsWith(".");
+  }
+
+  private getReplacement(editor: vscode.TextEditor, text: string, prefix?: string): [string, string | undefined] {
+    const lines = text.split('\n');
+
+    if (prefix !== undefined) {
+      return [text, prefix];
+    }
+
+    const prefixRegex = /^\s+/;
+
+    // Use whitespace prefix of first line
+    const firstLinePrefix = prefixRegex.exec(lines.at(0)!)?.at(0)!;
+    if (firstLinePrefix) {
+      return [text.replace(firstLinePrefix, ''), firstLinePrefix];
+    }
+
+    // Otherwise, try to infer from the second line
+    if (lines.length <= 1) {
+      return [text, undefined];
+    }
+
+    const secondLinePrefix = prefixRegex.exec(lines.at(1)!)?.at(0)!;
+
+    // If the second line has no whitespace prefix, then indented the same as the first line
+    if (!secondLinePrefix) {
+      return [text, secondLinePrefix];
+    }
+
+    // If not, then try to infer the indentation of the first line from the indentation of the second line
+
+    // If we expect the second line to be extra indented, however, we need to adjust
+    if (this.indentInferred(lines[0], lines[1])) {
+      // Assume the first line is indented one less than the second line, in which case we should remove an indent (i.e. tab or set of spaces)
+      const whitespaceReplacer = secondLinePrefix.endsWith('\t') ? '\t' : ' '.repeat(editor.options.tabSize as number);
+      return [text, secondLinePrefix.replace(whitespaceReplacer, '')];
+
+    }
+    // Otherwise, second line is indented the same as the first line, so just use that
+    return [text, secondLinePrefix];
+  }
+
+  // fixedPrefixText must be used if provided
+  async paste(text: string, prefixText?: string): Promise<boolean> {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       return false;
@@ -75,10 +116,15 @@ export class MarkHandler extends TypeHandler {
 
     return editor.edit(editBuilder => {
       for (const sel of editor.selections) {
-        const curPrefix = getPrefixText(editor, new vscode.Range(sel.start, sel.end));
-        const whitespaceRegex = /^\s*$/;
-        const prefixesWhitespaceOnly = whitespaceRegex.test(prefixText) && (!curPrefix || whitespaceRegex.test(curPrefix));
-        const replacement = prefixesWhitespaceOnly ? replaceAll(text, "\n" + prefixText, "\n" + curPrefix) : text;
+        // Get all text in the line behind start of current selection cursor
+        const curPrefix = getPrefixText(editor, new vscode.Range(sel.start, sel.end)) || "";
+
+        const [newText, replacementPrefix] = this.getReplacement(editor, text, prefixText);
+
+        // If all preceding text is whitespace, then trim text
+        const replacement = replaceAll(newText, "\n" + (replacementPrefix || ""), "\n" + curPrefix);
+
+        // Update the doc
         editBuilder.delete(sel);
         editBuilder.insert(sel.start, replacement);
       }

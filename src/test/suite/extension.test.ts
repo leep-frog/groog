@@ -9,6 +9,321 @@ import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
 import { Correction } from '../../typos';
 import path = require('path');
 
+// TODO: Move paste stuff to other file
+interface PasteTestCase {
+  name: string;
+  runSolo?: boolean;
+  selections?: vscode.Selection[],
+  clipboard?: string[];
+  text?: string[];
+  expectedText?: string[];
+}
+
+const pasteTestCases: PasteTestCase[] = [
+  // TODO: Paste with no editor (but how to test this?)
+  {
+    name: "Pastes vanilla text",
+    text: [],
+    clipboard: ['hello there'],
+    expectedText: ['hello there'],
+  },
+  {
+    name: "Pastes text and trims prefix",
+    text: [],
+    clipboard: [' \t hello there  '],
+    expectedText: ['hello there  '],
+  },
+  {
+    name: "Pastes indented blob of text",
+    text: ['\t \t'],
+    selections: [selection(0, 3)],
+    clipboard: [
+      'hello',
+      'there',
+      'general',
+      'kenobi',
+    ],
+    expectedText: [
+      '\t \thello',
+      '\t \tthere',
+      '\t \tgeneral',
+      '\t \tkenobi',
+    ],
+  },
+  {
+    name: "Pastes text and uses existing whitespace prefix",
+    text: ['\t\t'],
+    selections: [selection(0, 2)],
+    clipboard: ['  hello there  '],
+    expectedText: ['\t\thello there  '],
+  },
+  {
+    name: "Pastes trimmed text if existing prefix doesn't have whitespace at beginning",
+    text: ['Z\t\t'],
+    selections: [selection(0, 3)],
+    clipboard: ['  hello there  '],
+    expectedText: ['Z\t\thello there  '],
+  },
+  {
+    name: "Pastes trimmed text if existing prefix doesn't have whitespace at end",
+    text: ['\t\tZ'],
+    selections: [selection(0, 3)],
+    clipboard: ['  hello there  '],
+    expectedText: ['\t\tZhello there  '],
+  },
+  {
+    name: "Pastes text with indented lines replaced",
+    text: ['\t\t'],
+    selections: [selection(0, 2)],
+    clipboard: [
+      '  hello',
+      '    there',
+      '  good',
+      'bye',
+    ],
+    // Only existing text whiespace is included (not clipboard whitespace)
+    expectedText: [
+      '\t\thello',
+      '\t\t  there',
+      '\t\tgood',
+      'bye',
+    ],
+  },
+  {
+    name: "Pastes text, inferring prefix from second line",
+    text: ['\t\t'],
+    selections: [selection(0, 2)],
+    clipboard: [
+      'hello',
+      '  there',
+      '    good',
+      '  bye',
+      'then',
+    ],
+    // Only existing text whiespace is included (not clipboard whitespace)
+    expectedText: [
+      '\t\thello',
+      '\t\tthere',
+      '\t\t  good',
+      '\t\tbye',
+      'then',
+    ],
+  },
+  {
+    name: "Pastes text, inferring prefix from second line (but no whitespace prefix in second line)",
+    text: ['\t\t'],
+    selections: [selection(0, 2)],
+    clipboard: [
+      'hello',
+      'abc  there',
+      '    good',
+      '  bye',
+      'then',
+    ],
+    // Only existing text whiespace is included (not clipboard whitespace)
+    expectedText: [
+      '\t\thello',
+      '\t\tabc  there',
+      '\t\t    good',
+      '\t\t  bye',
+      '\t\tthen',
+    ],
+  },
+  {
+    name: "Pastes text, inferring spacing prefix from second line with extra indent (due to open bracket)",
+    text: ['\t\t'],
+    selections: [selection(0, 2)],
+    clipboard: [
+      'hello {',
+      '    there',
+      '    good',
+      '      bye',
+      'then',
+      '  fin',
+    ],
+    // Only existing text whiespace is included (not clipboard whitespace)
+    expectedText: [
+      '\t\thello {',
+      '\t\t  there',
+      '\t\t  good',
+      '\t\t    bye',
+      // Given the inference that hello is nested two spaces in,
+      // we'd need to remove from curPrefix which is doable, but probably not worth tbh
+      // hence why we are fine with curPrefix being removed entirely
+      'then',
+      '\t\tfin',
+    ],
+  },
+  {
+    name: "Pastes text, inferring tabbing prefix from second line with extra indent (due to open bracket)",
+    text: ['\t\t'],
+    selections: [selection(0, 2)],
+    clipboard: [
+      'hello {',
+      '\t\tthere',
+      '\t\tgood',
+      '\t\t\t\tbye',
+      'then',
+      '\tfin',
+    ],
+    // Only existing text whiespace is included (not clipboard whitespace)
+    expectedText: [
+      '\t\thello {',
+      '\t\t\tthere',
+      '\t\t\tgood',
+      '\t\t\t\t\tbye',
+      // Given the inference that hello is nested a tab in,
+      // we'd need to remove from curPrefix which is doable, but probably not worth tbh
+      // hence why we are fine with curPrefix being removed entirely
+      'then',
+      '\t\tfin',
+    ],
+  },
+  {
+    name: "Pastes text, inferring spacing prefix from second line with extra indent (due to open paren)",
+    text: ['\t\t'],
+    selections: [selection(0, 2)],
+    clipboard: [
+      'hello (',
+      '    there',
+      '    good',
+      '      bye',
+      'then',
+      '  fin',
+    ],
+    // Only existing text whiespace is included (not clipboard whitespace)
+    expectedText: [
+      '\t\thello (',
+      '\t\t  there',
+      '\t\t  good',
+      '\t\t    bye',
+      // Given the inference that hello is nested two spaces in,
+      // we'd need to remove from curPrefix which is doable, but probably not worth tbh
+      // hence why we are fine with curPrefix being removed entirely
+      'then',
+      '\t\tfin',
+    ],
+  },
+  {
+    name: "Pastes text, inferring tabbing prefix from second line with extra indent (due to open square bracket)",
+    text: ['\t\t'],
+    selections: [selection(0, 2)],
+    clipboard: [
+      'hello [',
+      '\t\tthere',
+      '\t\tgood',
+      '\t\t\t\tbye',
+      'then',
+      '\tfin',
+    ],
+    // Only existing text whiespace is included (not clipboard whitespace)
+    expectedText: [
+      '\t\thello [',
+      '\t\t\tthere',
+      '\t\t\tgood',
+      '\t\t\t\t\tbye',
+      // Given the inference that hello is nested a tab in,
+      // we'd need to remove from curPrefix which is doable, but probably not worth tbh
+      // hence why we are fine with curPrefix being removed entirely
+      'then',
+      '\t\tfin',
+    ],
+  },
+  {
+    name: "Pastes text, inferring spacing prefix from second line with extra indent (due to dot)",
+    text: ['\t\t'],
+    selections: [selection(0, 2)],
+    clipboard: [
+      'hello',
+      '    .there()',
+      '    good',
+      '      bye',
+      'then',
+      '  fin',
+    ],
+    // Only existing text whiespace is included (not clipboard whitespace)
+    expectedText: [
+      '\t\thello',
+      '\t\t  .there()',
+      '\t\t  good',
+      '\t\t    bye',
+      // Given the inference that hello is nested two spaces in,
+      // we'd need to remove from curPrefix which is doable, but probably not worth tbh
+      // hence why we are fine with curPrefix being removed entirely
+      'then',
+      '\t\tfin',
+    ],
+  },
+  {
+    name: "Pastes text, inferring tabbing prefix from second line with extra indent (due to dot)",
+    text: ['\t\t'],
+    selections: [selection(0, 2)],
+    clipboard: [
+      'hello',
+      '\t\t.there()',
+      '\t\tgood',
+      '\t\t\t\tbye',
+      'then',
+      '\tfin',
+    ],
+    // Only existing text whiespace is included (not clipboard whitespace)
+    expectedText: [
+      '\t\thello',
+      '\t\t\t.there()',
+      '\t\t\tgood',
+      '\t\t\t\t\tbye',
+      // Given the inference that hello is nested a tab in,
+      // we'd need to remove from curPrefix which is doable, but probably not worth tbh
+      // hence why we are fine with curPrefix being removed entirely
+      'then',
+      '\t\tfin',
+    ],
+  },
+  /* Useful for commenting out tests. */
+];
+
+export function getPasteTestCases(): TestCase[] {
+  return [
+    // groog.paste test cases
+    ...pasteTestCases.map(tc => {
+      return {
+        ...tc,
+        userInteractions: [
+          cmd("groog.paste"),
+          cmd("groog.cursorTop"),
+          // Move cursor to home position (bring to end b/c not sure if in text or initial whitespace
+          cmd("groog.cursorEnd"),
+          // Bring cursor to beginning of text
+          cmd("groog.cursorHome"),
+          // Bring cursor to beginning of line
+          cmd("groog.cursorHome"),
+        ],
+        expectedSelections: [selection(0, 0)],
+      };
+    }),
+    // TODO: groog.emacsPaste test cases
+    // ...pasteTestCases.map(tc => {
+    //   return {
+    //     ...tc,
+    //     runSolo: true,
+    //     text: tc.clipboard,
+    //     userInteractions: [
+    //       cmd("groog.toggleMarkMode"),
+    //       cmd("groog.cursorTop"),
+    //       // Move cursor to home position (bring to end b/c not sure if in text or initial whitespace
+    //       cmd("groog.cursorEnd"),
+    //       // Bring cursor to beginning of text
+    //       cmd("groog.cursorHome"),
+    //       // Bring cursor to beginning of line
+    //       cmd("groog.cursorHome"),
+    //     ],
+    //     expectedSelections: [selection(0, 0)],
+    //   };
+    // }),
+  ];
+}
+
+
 function startingFile(...fileParts: string[]) {
   return path.resolve(__dirname, "..", "..", "..", "src", "test", "test-workspace", ...fileParts);
 }
@@ -518,13 +833,14 @@ function type(text: string) : UserInteraction {
   return cmd("groog.type", { "text": text });
 }
 
-function selection(line: number, char: number) : vscode.Selection {
+export function selection(line: number, char: number) : vscode.Selection {
   return new vscode.Selection(line, char, line, char);
 }
 
-interface TestCase extends SimpleTestCaseProps {
+export interface TestCase extends SimpleTestCaseProps {
   name: string;
   runSolo?: boolean;
+  clipboard?: string[];
 }
 
 const TEST_ITERATIONS = 1;
@@ -5801,9 +6117,6 @@ function testCases(): TestCase[] {
         cmd("groog.work.copyLink"),
         cmd("groog.paste"),
       ],
-      // expectedErrorMessages: [
-      // "No active editor",
-      // ],
     },
     // Multi-command tests
     {
@@ -6368,6 +6681,7 @@ function testCases(): TestCase[] {
         ]),
       },
     },
+    ...getPasteTestCases(),
   /* Useful for commenting out tests. */
   ];
 }
@@ -6394,6 +6708,10 @@ suite('Groog commands', () => {
             cmd("groog.testReset"),
             ...(tc.userInteractions || []),
           ];
+        }
+
+        if (tc.clipboard !== undefined) {
+          await vscode.env.clipboard.writeText(tc.clipboard.join('\n'));
         }
 
         // Run the commands
