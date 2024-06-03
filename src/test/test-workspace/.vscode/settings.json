@@ -1,4 +1,15 @@
 {
   "extensions.ignoreRecommendations": false,
   "files.eol": "\n",
+  "[go]": {
+    "editor.insertSpaces": false,
+  },
+  "[java]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 4
+  },
+  "[typescript]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  }
 }

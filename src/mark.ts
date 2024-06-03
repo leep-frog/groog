@@ -53,12 +53,101 @@ export class MarkHandler extends TypeHandler {
     });
   }
 
+  private lineParts(line: string) {
+    const partsRegex = /^(\s*)(.*)$/;
+    const match = partsRegex.exec(line)!;
+    const whitespacePrefix = match.at(1)!;
+    const lineText = match.at(2)!;
+    return {
+      whitespacePrefix,
+      lineText,
+    };
+  }
+
+  async paste(text: string, pasteIndent?: string): Promise<boolean> {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      return false;
+    }
+
+    // Calculate the current editor's whitespacing configuration
+    const fileIndent = editor.options.insertSpaces ? ' '.repeat(editor.options.indentSize as number) : '\t';
+    const fileNumSpaces = (editor.options.indentSize || editor.options.tabSize) as number;
+
+    // Convert the paste lines into lineParts objects
+    const rawLineInfo = text.split('\n').map(this.lineParts);
+
+
+    // Infer what the indentation used by the paste is.
+    const lineInfosWithWhitespace = rawLineInfo.filter(a => a.whitespacePrefix);
+
+    if (pasteIndent !== undefined) {
+      // Use provided value if given
+    } else if (lineInfosWithWhitespace.length === 0) {
+      // Doesn't matter if none of the lines are indented
+      pasteIndent = '';
+    } else if (lineInfosWithWhitespace.some(a => a.whitespacePrefix.includes('\t'))) {
+      // If any tabs, then assume tabs
+      pasteIndent = '\t';
+    } else if (lineInfosWithWhitespace.map(a => whitespaceSubstringCount(a.whitespacePrefix, ' ')).some(spaceCount => spaceCount % 4 === 2)) {
+      // Otherwise, determine if two spaces or four
+      pasteIndent = '  ';
+    } else {
+      pasteIndent = '    ';
+    }
+
+    // TODO: Can this method just update reference instead of setting?
+    rawLineInfo[0] = this.getFirstLine(pasteIndent, rawLineInfo[0], rawLineInfo[1]);
+    const pasteBaseIndents = whitespaceSubstringCount(rawLineInfo[0].whitespacePrefix, pasteIndent);
+
+    // Make the document edits
+    return editor.edit(editBuilder => {
+
+      // Iterate over all selections
+      for (const sel of editor.selections) {
+
+        // Get all text in the line behind start of current selection cursor
+        const curPrefix = getPrefixText(editor, new vscode.Range(sel.start, sel.end)) || "";
+
+        // Generate the single replacement string from the list of paste line infos.
+        const replacement = rawLineInfo.map((lineInfo, idx) => {
+          const lineIndentCount = whitespaceSubstringCount(lineInfo.whitespacePrefix, pasteIndent!);
+          let newIndentCount = lineIndentCount - pasteBaseIndents;
+
+          // If relevant (newIndentCount is negative), then remove
+          let endIndex = curPrefix.length;
+          for (; newIndentCount < 0; newIndentCount++) {
+            if (curPrefix.at(endIndex - 1) === '\t') {
+              endIndex--;
+            } else {
+              // Otherwise, remove up to the number of spaces
+              for (let j = 0; j < fileNumSpaces && curPrefix.at(endIndex-1) === ' '; j++) {
+                endIndex--;
+              }
+            }
+          }
+
+          // Construct the final replacement string
+          //     (removed indents if negative indentation detected)     + (   additional indents to add   ) + (remaining text)
+          //     (  This is not needed for first, since curPrefix is
+          //     (  always on first line and will never be negative)
+          return (idx ? curPrefix.slice(0, Math.max(0, endIndex)) : '') + fileIndent.repeat(newIndentCount) + lineInfo.lineText;
+        }).join('\n');
+
+        // Update the document
+        editBuilder.delete(sel);
+        editBuilder.insert(sel.start, replacement);
+      }
+    }).then(() => true);
+  }
+
   private indentInferred(firstLine: string, secondLine: string) {
     // If opening more things than closing, then assume an indent
     const charMap = new Map<string, number>();
     for (const char of firstLine) {
       charMap.set(char, (charMap.get(char) || 0) + 1);
     }
+
     if (((charMap.get("(") || 0) > (charMap.get(")") || 0)) || ((charMap.get("{") || 0) > (charMap.get("}") || 0)) || ((charMap.get("[") || 0) > (charMap.get("]") || 0))) {
       return true;
     }
@@ -67,68 +156,38 @@ export class MarkHandler extends TypeHandler {
     return secondLine.trim().startsWith(".");
   }
 
-  private getReplacement(editor: vscode.TextEditor, text: string, prefix?: string): [string, string | undefined] {
-    const lines = text.split('\n');
-
-    if (prefix !== undefined) {
-      return [text, prefix];
-    }
-
-    const prefixRegex = /^\s+/;
-
-    // Use whitespace prefix of first line
-    const firstLinePrefix = prefixRegex.exec(lines.at(0)!)?.at(0)!;
-    if (firstLinePrefix) {
-      return [text.replace(firstLinePrefix, ''), firstLinePrefix];
+  private getFirstLine(indent: string, firstLineInfo: {lineText: string, whitespacePrefix: string}, secondLineInfo?: {lineText: string, whitespacePrefix: string}) {
+    // If first line already has whitespace prefix, then no inferrence needed
+    if (firstLineInfo.whitespacePrefix) {
+      return firstLineInfo;
     }
 
     // Otherwise, try to infer from the second line
-    if (lines.length <= 1) {
-      return [text, undefined];
+    if (!secondLineInfo) {
+      return firstLineInfo;
     }
 
-    const secondLinePrefix = prefixRegex.exec(lines.at(1)!)?.at(0)!;
-
     // If the second line has no whitespace prefix, then indented the same as the first line
-    if (!secondLinePrefix) {
-      return [text, secondLinePrefix];
+    if (!secondLineInfo.whitespacePrefix) {
+      return firstLineInfo;
     }
 
     // If not, then try to infer the indentation of the first line from the indentation of the second line
 
     // If we expect the second line to be extra indented, however, we need to adjust
-    if (this.indentInferred(lines[0], lines[1])) {
+    if (this.indentInferred(firstLineInfo.lineText, secondLineInfo.lineText)) {
       // Assume the first line is indented one less than the second line, in which case we should remove an indent (i.e. tab or set of spaces)
-      const whitespaceReplacer = secondLinePrefix.endsWith('\t') ? '\t' : ' '.repeat(editor.options.tabSize as number);
-      return [text, secondLinePrefix.replace(whitespaceReplacer, '')];
-
+      return {
+        lineText: firstLineInfo.lineText,
+        whitespacePrefix: secondLineInfo.whitespacePrefix.replace(indent, ''),
+      };
     }
+
     // Otherwise, second line is indented the same as the first line, so just use that
-    return [text, secondLinePrefix];
-  }
-
-  // fixedPrefixText must be used if provided
-  async paste(text: string, prefixText?: string): Promise<boolean> {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) {
-      return false;
-    }
-
-    return editor.edit(editBuilder => {
-      for (const sel of editor.selections) {
-        // Get all text in the line behind start of current selection cursor
-        const curPrefix = getPrefixText(editor, new vscode.Range(sel.start, sel.end)) || "";
-
-        const [newText, replacementPrefix] = this.getReplacement(editor, text, prefixText);
-
-        // If all preceding text is whitespace, then trim text
-        const replacement = replaceAll(newText, "\n" + (replacementPrefix || ""), "\n" + curPrefix);
-
-        // Update the doc
-        editBuilder.delete(sel);
-        editBuilder.insert(sel.start, replacement);
-      }
-    }).then(() => true);
+    return {
+      lineText: firstLineInfo.lineText,
+      whitespacePrefix: secondLineInfo.whitespacePrefix,
+    };
   }
 
   async handleActivation() {}
@@ -195,6 +254,13 @@ export class MarkHandler extends TypeHandler {
   async testReset() {}
 }
 
-function replaceAll(str: string, remove: string, replace: string): string {
-  return str.split(remove).join(replace);
+function whitespaceSubstringCount(str: string, ws: string): number {
+  if (!str || !ws) {
+    return 0;
+  }
+
+  // This is sometimes zero if we ultimately run ` ''.split('') `
+  // hence why we use regex instead
+  const r = new RegExp(ws, 'g');
+  return str.match(r)?.length || 0;
 }

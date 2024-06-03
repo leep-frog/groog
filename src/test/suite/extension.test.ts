@@ -15,9 +15,14 @@ interface PasteTestCase {
   runSolo?: boolean;
   selections?: vscode.Selection[],
   clipboard?: string[];
+  startingFile?: string;
   text?: string[];
   expectedText?: string[];
 }
+
+const TABS_FILE = startingFile('whitespace', 'tabs.go');
+const TWO_SPACES_FILE = startingFile('whitespace', 'twoSpaces.ts');
+const FOUR_SPACES_FILE = startingFile('whitespace', 'fourSpaces.java');
 
 const pasteTestCases: PasteTestCase[] = [
   // TODO: Paste with no editor (but how to test this?)
@@ -35,6 +40,23 @@ const pasteTestCases: PasteTestCase[] = [
   },
   {
     name: "Pastes indented blob of text",
+    text: ['\t\t'],
+    selections: [selection(0, 3)],
+    clipboard: [
+      'hello',
+      'there',
+      'general',
+      'kenobi',
+    ],
+    expectedText: [
+      '\t\thello',
+      '\t\tthere',
+      '\t\tgeneral',
+      '\t\tkenobi',
+    ],
+  },
+  {
+    name: "Pastes indented blob of text for weird prefix",
     text: ['\t \t'],
     selections: [selection(0, 3)],
     clipboard: [
@@ -48,6 +70,215 @@ const pasteTestCases: PasteTestCase[] = [
       '\t \tthere',
       '\t \tgeneral',
       '\t \tkenobi',
+    ],
+  },
+  {
+    name: "Pastes text with tab indents",
+    text: ['\t\t'],
+    selections: [selection(0, 2)],
+    clipboard: [
+      '  hello',
+      '  there',
+      '    general',
+      '      ken',
+      'obi',
+      '  fin',
+    ],
+    expectedText: [
+      '\t\thello',
+      '\t\tthere',
+      '\t\t\tgeneral',
+      '\t\t\t\tken',
+      '\tobi',
+      '\t\tfin',
+    ],
+  },
+  {
+    name: "Pastes text with two-space indents",
+    text: ['\t\t'],
+    startingFile: TWO_SPACES_FILE,
+    selections: [selection(0, 2)],
+    clipboard: [
+      '  hello',
+      '  there',
+      '    general',
+      '      ken',
+      'obi',
+      '  fin',
+    ],
+    expectedText: [
+      '\t\thello',
+      '\t\tthere',
+      '\t\t  general',
+      '\t\t    ken',
+      '\tobi',
+      '\t\tfin',
+    ],
+  },
+  {
+    name: "Pastes text with four-space indents",
+    text: ['\t\t'],
+    startingFile: FOUR_SPACES_FILE,
+    selections: [selection(0, 2)],
+    clipboard: [
+      '  hello',
+      '  there',
+      '    general',
+      '      ken',
+      'obi',
+      '  fin',
+    ],
+    expectedText: [
+      '\t\thello',
+      '\t\tthere',
+      '\t\t    general',
+      '\t\t        ken',
+      '\tobi',
+      '\t\tfin',
+    ],
+  },
+  {
+    name: "Paste text inferred as four-space indent",
+    text: ['\t\t'],
+    selections: [selection(0, 2)],
+    clipboard: [
+      '    hello',
+      '    there',
+      '        general',
+      '            ken',
+      'obi',
+      '    fin',
+    ],
+    expectedText: [
+      '\t\thello',
+      '\t\tthere',
+      '\t\t\tgeneral',
+      '\t\t\t\tken',
+      '\tobi',
+      '\t\tfin',
+    ],
+  },
+  {
+    name: "Pastes text with indent and inferred first line indent (because of open bracket)",
+    startingFile: TWO_SPACES_FILE,
+    text: ['    '],
+    selections: [selection(0, 4)],
+    clipboard: [
+      'hello {',
+      '\tthere',
+      '\t\tgeneral',
+      'kenobi',
+      '\tfin',
+    ],
+    expectedText: [
+      '    hello {',
+      '      there',
+      '        general',
+      '    kenobi',
+      '      fin',
+    ],
+  },
+  {
+    name: "Pastes text with indent and inferred first line indent (because of more open parens than close)",
+    text: ['    '],
+    startingFile: TWO_SPACES_FILE,
+    selections: [selection(0, 4)],
+    clipboard: [
+      'hello(()',
+      '    there',
+      '      general',
+      '  ken',
+      'obi',
+      '    fin',
+    ],
+    expectedText: [
+      '    hello(()',
+      '      there',
+      '        general',
+      '    ken',
+      '  obi',
+      '      fin',
+    ],
+  },
+  {
+    name: "Pastes text with indent and inferred first line indent (because of dot on second line)",
+    startingFile: FOUR_SPACES_FILE,
+    text: ['        '],
+    selections: [selection(0, 2)],
+    clipboard: [
+      // Inferred as two-space indents from clipboard
+      'hello',
+      '      .there',
+      '        general',
+      '    ken',
+      '  o',
+      'bi',
+      '    fin',
+    ],
+    expectedText: [
+      '        hello',
+      '            .there',
+      '                general',
+      '        ken',
+      '    o',
+      'bi',
+      '        fin',
+    ],
+  },
+  {
+    name: "Pastes text with indent and inferred first line indent (because of extra open square brackets)",
+    startingFile: TWO_SPACES_FILE,
+    text: ['\t\t'],
+    selections: [selection(0, 2)],
+    clipboard: [
+      'hello]][[[',
+      '        there',
+      '          general',
+      '      ken',
+      '    o',
+      '  b',
+      'i',
+      '    fin',
+    ],
+    expectedText: [
+      '\t\thello]][[[',
+      '\t\t  there',
+      '\t\t    general',
+      '\t\tken',
+      '\to',
+      'b',
+      'i',
+      '\tfin',
+    ],
+  },
+  {
+    name: "Pasted text removes existing indents regardless if spaces or tabs",
+    startingFile: TWO_SPACES_FILE,
+    text: ['   \t  \t '],
+    selections: [selection(0, 8)],
+    clipboard: [
+      'hello',
+      '              there',
+      '                general',
+      '            ken',
+      '          o',
+      '        b',
+      '      i',
+      '    a',
+      'b',
+      'c',
+    ],
+    expectedText: [
+      '   \t  \t hello',
+      '   \t  \t there',
+      '   \t  \t   general',
+      '   \t  \tken',
+      '   \t  o',
+      '   \tb',
+      '   i',
+      ' a',
+      'b',
+      'c',
     ],
   },
   {
@@ -73,6 +304,7 @@ const pasteTestCases: PasteTestCase[] = [
   },
   {
     name: "Pastes text with indented lines replaced",
+    startingFile: TWO_SPACES_FILE,
     text: ['\t\t'],
     selections: [selection(0, 2)],
     clipboard: [
@@ -86,11 +318,12 @@ const pasteTestCases: PasteTestCase[] = [
       '\t\thello',
       '\t\t  there',
       '\t\tgood',
-      'bye',
+      '\tbye',
     ],
   },
   {
     name: "Pastes text, inferring prefix from second line",
+    startingFile: TWO_SPACES_FILE,
     text: ['\t\t'],
     selections: [selection(0, 2)],
     clipboard: [
@@ -106,11 +339,12 @@ const pasteTestCases: PasteTestCase[] = [
       '\t\tthere',
       '\t\t  good',
       '\t\tbye',
-      'then',
+      '\tthen',
     ],
   },
   {
     name: "Pastes text, inferring prefix from second line (but no whitespace prefix in second line)",
+    startingFile: TWO_SPACES_FILE,
     text: ['\t\t'],
     selections: [selection(0, 2)],
     clipboard: [
@@ -131,6 +365,7 @@ const pasteTestCases: PasteTestCase[] = [
   },
   {
     name: "Pastes text, inferring spacing prefix from second line with extra indent (due to open bracket)",
+    startingFile: TWO_SPACES_FILE,
     text: ['\t\t'],
     selections: [selection(0, 2)],
     clipboard: [
@@ -147,15 +382,13 @@ const pasteTestCases: PasteTestCase[] = [
       '\t\t  there',
       '\t\t  good',
       '\t\t    bye',
-      // Given the inference that hello is nested two spaces in,
-      // we'd need to remove from curPrefix which is doable, but probably not worth tbh
-      // hence why we are fine with curPrefix being removed entirely
-      'then',
+      '\tthen',
       '\t\tfin',
     ],
   },
   {
     name: "Pastes text, inferring tabbing prefix from second line with extra indent (due to open bracket)",
+    startingFile: TABS_FILE,
     text: ['\t\t'],
     selections: [selection(0, 2)],
     clipboard: [
@@ -172,15 +405,13 @@ const pasteTestCases: PasteTestCase[] = [
       '\t\t\tthere',
       '\t\t\tgood',
       '\t\t\t\t\tbye',
-      // Given the inference that hello is nested a tab in,
-      // we'd need to remove from curPrefix which is doable, but probably not worth tbh
-      // hence why we are fine with curPrefix being removed entirely
-      'then',
+      '\tthen',
       '\t\tfin',
     ],
   },
   {
     name: "Pastes text, inferring spacing prefix from second line with extra indent (due to open paren)",
+    startingFile: TWO_SPACES_FILE,
     text: ['\t\t'],
     selections: [selection(0, 2)],
     clipboard: [
@@ -197,10 +428,7 @@ const pasteTestCases: PasteTestCase[] = [
       '\t\t  there',
       '\t\t  good',
       '\t\t    bye',
-      // Given the inference that hello is nested two spaces in,
-      // we'd need to remove from curPrefix which is doable, but probably not worth tbh
-      // hence why we are fine with curPrefix being removed entirely
-      'then',
+      '\tthen',
       '\t\tfin',
     ],
   },
@@ -222,15 +450,13 @@ const pasteTestCases: PasteTestCase[] = [
       '\t\t\tthere',
       '\t\t\tgood',
       '\t\t\t\t\tbye',
-      // Given the inference that hello is nested a tab in,
-      // we'd need to remove from curPrefix which is doable, but probably not worth tbh
-      // hence why we are fine with curPrefix being removed entirely
-      'then',
+      '\tthen',
       '\t\tfin',
     ],
   },
   {
     name: "Pastes text, inferring spacing prefix from second line with extra indent (due to dot)",
+    startingFile: TWO_SPACES_FILE,
     text: ['\t\t'],
     selections: [selection(0, 2)],
     clipboard: [
@@ -247,10 +473,7 @@ const pasteTestCases: PasteTestCase[] = [
       '\t\t  .there()',
       '\t\t  good',
       '\t\t    bye',
-      // Given the inference that hello is nested two spaces in,
-      // we'd need to remove from curPrefix which is doable, but probably not worth tbh
-      // hence why we are fine with curPrefix being removed entirely
-      'then',
+      '\tthen',
       '\t\tfin',
     ],
   },
@@ -272,10 +495,7 @@ const pasteTestCases: PasteTestCase[] = [
       '\t\t\t.there()',
       '\t\t\tgood',
       '\t\t\t\t\tbye',
-      // Given the inference that hello is nested a tab in,
-      // we'd need to remove from curPrefix which is doable, but probably not worth tbh
-      // hence why we are fine with curPrefix being removed entirely
-      'then',
+      '\tthen',
       '\t\tfin',
     ],
   },
@@ -288,7 +508,10 @@ export function getPasteTestCases(): TestCase[] {
     ...pasteTestCases.map(tc => {
       return {
         ...tc,
+        text: [], // Done as a user interaction
+        file: tc.startingFile || TABS_FILE,
         userInteractions: [
+          type(tc.text?.join('\n') || ''),
           cmd("groog.paste"),
           cmd("groog.cursorTop"),
           // Move cursor to home position (bring to end b/c not sure if in text or initial whitespace
@@ -6701,7 +6924,7 @@ suite('Groog commands', () => {
         return;
       }
 
-      test(`${iteration} ${tc.name}`, async () => {
+      test(iteration ? `${iteration} ${tc.name}` : tc.name, async () => {
 
         if (idx) {
           tc.userInteractions = [
