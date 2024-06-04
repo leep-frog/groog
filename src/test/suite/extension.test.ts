@@ -6914,7 +6914,8 @@ suite('Groog commands', () => {
   const requireRunSolo = testCases().some(tc => tc.runSolo);
 
   for (let iteration = 0; iteration < TEST_ITERATIONS; iteration++) {
-    testCases().forEach((tc, idx) => {
+    const tcs = testCases();
+    tcs.forEach((tc, idx) => {
       if (requireRunSolo && !(tc.runSolo || idx === 0)) {
         return;
       }
@@ -6924,7 +6925,8 @@ suite('Groog commands', () => {
         return;
       }
 
-      test(iteration ? `${iteration} ${tc.name}` : tc.name, async () => {
+      const testName = `[${idx+1}/${tcs.length}] ${tc.name}`;
+      test(TEST_ITERATIONS > 1 ? `{${iteration+1}/${TEST_ITERATIONS}} ${testName}` : testName, async () => {
 
         if (idx) {
           tc.userInteractions = [
