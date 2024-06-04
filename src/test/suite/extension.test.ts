@@ -638,13 +638,15 @@ export function getPasteTestCases(): TestCase[] {
       };
     }),
 
-    // Test cases where entire thing is yanked and groog.emacsPaste
+    // Test cases where entire text with no whitespace prefix is yanked and groog.emacsPaste
     ...pasteTestCases.map(tc => {
 
-      const clipText = tc.clipboard?.join('\n') || '';
+      // If we use \n, then vs code does clever indentation for us which we don't want.
+      // Using \r does the trick (and actually just inserts a newline character.
+      const clipText = tc.clipboard?.join('\r') || '';
 
       const clipWhitespace = /^\s*/.exec(clipText)?.at(0)!;
-      const clipMainText = clipText.slice(clipWhitespace.length).replace(/\n/g, '\r');
+      const clipMainText = clipText.slice(clipWhitespace.length);
 
       return {
         ...tc,
@@ -676,7 +678,31 @@ export function getPasteTestCases(): TestCase[] {
       };
     }),
 
-    // TODO: Test cases where leading whitespace is not yanked
+    // Test cases where entire text with whitespace prefix is yanked and groog.emacsPaste
+    ...pasteTestCases.map(tc => {
+      return {
+        ...tc,
+        file: tc.startingFile || TABS_FILE,
+        runSolo: true,
+        expectedText: tc.expectedEmacsText || tc.expectedText,
+        userInteractions: [
+          // Yank only the main text
+          type(tc.clipboard?.join('\r') || ''),
+          cmd("groog.cursorTop"),
+          cmd("groog.toggleMarkMode"),
+          cmd("groog.cursorBottom"),
+          cmd("groog.yank"),
+
+          // Type the actual starting text
+          type(tc.text?.join('\n') || ''),
+          cmd("groog.emacsPaste"),
+
+          // Put the cursor at the top cuz we don't care about testing that here
+          cmd("groog.cursorTop"),
+        ],
+        expectedSelections: [selection(0, 0)],
+      };
+    }),
   ];
 }
 
