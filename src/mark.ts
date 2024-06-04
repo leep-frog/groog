@@ -37,8 +37,19 @@ export class MarkHandler extends TypeHandler {
         return this.emacs.runHandlers(
           async (th: TypeHandler) => th.onEmacsPaste(this.yanked),
           async () => {
-            const extraPrefix = /^\s*/.exec(this.yanked)?.at(0)!;
-            return this.paste(this.yanked.slice(extraPrefix.length), this.yankedPrefix + extraPrefix);
+            const extraWhitespace = /^\s*/.exec(this.yanked)?.at(0)!;
+            const slicedText = this.yanked.slice(extraWhitespace.length);
+
+            const nonWhitespacePrefix = /[^\s]/.test(this.yankedPrefix);
+
+            // If only whitespace before copied text, then we want to make guesses about
+            if (!nonWhitespacePrefix) {
+              return this.paste(slicedText, this.yankedPrefix + extraWhitespace);
+            }
+
+            // Otherwise, we want to use all of the copied text, and the prefix
+            // is just the leading whitespace
+            return this.paste(this.yanked, /^\s*/.exec(this.yankedPrefix)?.at(0)!);
           },
         );
       });
@@ -57,6 +68,7 @@ export class MarkHandler extends TypeHandler {
   }
 
   private lineParts(line: string) {
+    // TODO: test with CRLF line endings
     const partsRegex = /^(\s*)(.*)$/;
     const match = partsRegex.exec(line)!;
     const whitespacePrefix = match.at(1)!;
@@ -110,7 +122,9 @@ export class MarkHandler extends TypeHandler {
       for (const sel of editor.selections) {
 
         // Get all text in the line behind start of current selection cursor
-        const curPrefix = getPrefixText(editor, new vscode.Range(sel.start, sel.end)) || "";
+        const linePrefix = getPrefixText(editor, new vscode.Range(sel.start, sel.end)) || "";
+
+        const curPrefix = /^\s*/.exec(linePrefix)?.at(0)!;
 
         // Generate the single replacement string from the list of paste line infos.
         const replacement = rawLineInfo.map((lineInfo, idx) => {

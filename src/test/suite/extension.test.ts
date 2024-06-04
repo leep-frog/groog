@@ -77,6 +77,23 @@ const pasteTestCases: PasteTestCase[] = [
     ],
   },
   {
+    name: "Pastes indented blob of text when non-whitespace in prefix",
+    text: ['\tX\t'],
+    selections: [selection(0, 3)],
+    clipboard: [
+      'hello',
+      'there',
+      'general',
+      'kenobi',
+    ],
+    expectedText: [
+      '\tX\thello',
+      '\tthere',
+      '\tgeneral',
+      '\tkenobi',
+    ],
+  },
+  {
     name: "Pastes indented blob of text for weird prefix",
     text: ['\t \t'],
     selections: [selection(0, 3)],
@@ -625,6 +642,7 @@ export function getPasteTestCases(): TestCase[] {
     ...pasteTestCases.map(tc => {
       return {
         ...tc,
+        name: `[patse] ${tc.name}`,
         file: tc.startingFile || TABS_FILE,
         userInteractions: [
           // Write the text
@@ -650,8 +668,8 @@ export function getPasteTestCases(): TestCase[] {
 
       return {
         ...tc,
+        name: `[emacs paste no whitespace] ${tc.name}`,
         file: tc.startingFile || TABS_FILE,
-        runSolo: true,
         expectedText: tc.expectedEmacsText || tc.expectedText,
         userInteractions: [
           // Yank only the main text
@@ -682,8 +700,8 @@ export function getPasteTestCases(): TestCase[] {
     ...pasteTestCases.map(tc => {
       return {
         ...tc,
+        name: `[emacs paste with whitespace] ${tc.name}`,
         file: tc.startingFile || TABS_FILE,
-        runSolo: true,
         expectedText: tc.expectedEmacsText || tc.expectedText,
         userInteractions: [
           // Yank only the main text
