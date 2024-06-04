@@ -369,3 +369,7 @@ const defaultJumpDist: JumpDist = {
 function isFileUri(uri: vscode.Uri): boolean {
   return uri.scheme === "file";
 }
+
+export function tabbify(s: string): string {
+  return s.replace(/\t/g, '\\t');
+}

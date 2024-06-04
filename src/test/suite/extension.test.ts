@@ -4,10 +4,30 @@ import * as assert from 'assert';
 // as well as import your extension to test it
 import { CloseQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectActiveItems, SelectItemQuickPickAction, SimpleTestCase, SimpleTestCaseProps, UserInteraction, WorkspaceConfiguration, cmd, delay, openFile } from '@leep-frog/vscode-test-stubber';
 import * as vscode from 'vscode';
+import { tabbify } from '../../emacs';
 import { Document, FIND_MEMORY_MS, FindQuickPickItem, FindRecord, Match } from '../../find';
 import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
 import { Correction } from '../../typos';
 import path = require('path');
+
+const tabbifyTestCases = [
+  {
+    input: ' \n abc def\n ',
+    expectedOutput: ' \n abc def\n ',
+  },
+  {
+    input: ' \n \t abc\t\tdef\n \t',
+    expectedOutput: ' \n \\t abc\\t\\tdef\n \\t',
+  },
+];
+
+suite('tabbify tests', () => {
+  tabbifyTestCases.forEach(tc => {
+    test(tc.input, () => {
+      assert.deepStrictEqual(tabbify(tc.input), tc.expectedOutput);
+    });
+  });
+});
 
 // TODO: Move paste stuff to other file
 interface PasteTestCase {
@@ -18,6 +38,7 @@ interface PasteTestCase {
   startingFile?: string;
   text?: string[];
   expectedText?: string[];
+  expectedEmacsText?: string[];
 }
 
 const TABS_FILE = startingFile('whitespace', 'tabs.go');
@@ -199,6 +220,15 @@ const pasteTestCases: PasteTestCase[] = [
       '  obi',
       '      fin',
     ],
+    // yank knows the actual perfix, so no inference is done
+    expectedEmacsText: [
+      '    hello(()',
+      '        there',
+      '          general',
+      '      ken',
+      '    obi',
+      '        fin',
+    ],
   },
   {
     name: "Pastes text with indent and inferred first line indent (because of dot on second line)",
@@ -223,6 +253,16 @@ const pasteTestCases: PasteTestCase[] = [
       '    o',
       'bi',
       '        fin',
+    ],
+    // yank knows the actual perfix, so no inference is done
+    expectedEmacsText: [
+      '        hello',
+      '                    .there',
+      '                        general',
+      '                ken',
+      '            o',
+      '        bi',
+      '                fin',
     ],
   },
   {
@@ -249,6 +289,16 @@ const pasteTestCases: PasteTestCase[] = [
       'b',
       'i',
       '\tfin',
+    ],
+    expectedEmacsText: [
+      '\t\thello]][[[',
+      '\t\t        there',
+      '\t\t          general',
+      '\t\t      ken',
+      '\t\t    o',
+      '\t\t  b',
+      '\t\ti',
+      '\t\t    fin',
     ],
   },
   {
@@ -279,6 +329,18 @@ const pasteTestCases: PasteTestCase[] = [
       ' a',
       'b',
       'c',
+    ],
+    expectedEmacsText: [
+      '   \t  \t hello',
+      '   \t  \t               there',
+      '   \t  \t                 general',
+      '   \t  \t             ken',
+      '   \t  \t           o',
+      '   \t  \t         b',
+      '   \t  \t       i',
+      '   \t  \t     a',
+      '   \t  \t b',
+      '   \t  \t c',
     ],
   },
   {
@@ -341,6 +403,13 @@ const pasteTestCases: PasteTestCase[] = [
       '\t\tbye',
       '\tthen',
     ],
+    expectedEmacsText: [
+      '\t\thello',
+      '\t\t  there',
+      '\t\t    good',
+      '\t\t  bye',
+      '\t\tthen',
+    ],
   },
   {
     name: "Pastes text, inferring prefix from second line (but no whitespace prefix in second line)",
@@ -385,6 +454,14 @@ const pasteTestCases: PasteTestCase[] = [
       '\tthen',
       '\t\tfin',
     ],
+    expectedEmacsText: [
+      '\t\thello {',
+      '\t\t    there',
+      '\t\t    good',
+      '\t\t      bye',
+      '\t\tthen',
+      '\t\t  fin',
+    ],
   },
   {
     name: "Pastes text, inferring tabbing prefix from second line with extra indent (due to open bracket)",
@@ -407,6 +484,14 @@ const pasteTestCases: PasteTestCase[] = [
       '\t\t\t\t\tbye',
       '\tthen',
       '\t\tfin',
+    ],
+    expectedEmacsText: [
+      '\t\thello {',
+      '\t\t\t\tthere',
+      '\t\t\t\tgood',
+      '\t\t\t\t\t\tbye',
+      '\t\tthen',
+      '\t\t\tfin',
     ],
   },
   {
@@ -431,6 +516,14 @@ const pasteTestCases: PasteTestCase[] = [
       '\tthen',
       '\t\tfin',
     ],
+    expectedEmacsText: [
+      '\t\thello (',
+      '\t\t    there',
+      '\t\t    good',
+      '\t\t      bye',
+      '\t\tthen',
+      '\t\t  fin',
+    ],
   },
   {
     name: "Pastes text, inferring tabbing prefix from second line with extra indent (due to open square bracket)",
@@ -452,6 +545,14 @@ const pasteTestCases: PasteTestCase[] = [
       '\t\t\t\t\tbye',
       '\tthen',
       '\t\tfin',
+    ],
+    expectedEmacsText: [
+      '\t\thello [',
+      '\t\t\t\tthere',
+      '\t\t\t\tgood',
+      '\t\t\t\t\t\tbye',
+      '\t\tthen',
+      '\t\t\tfin',
     ],
   },
   {
@@ -476,6 +577,14 @@ const pasteTestCases: PasteTestCase[] = [
       '\tthen',
       '\t\tfin',
     ],
+    expectedEmacsText: [
+      '\t\thello',
+      '\t\t    .there()',
+      '\t\t    good',
+      '\t\t      bye',
+      '\t\tthen',
+      '\t\t  fin',
+    ],
   },
   {
     name: "Pastes text, inferring tabbing prefix from second line with extra indent (due to dot)",
@@ -498,6 +607,14 @@ const pasteTestCases: PasteTestCase[] = [
       '\tthen',
       '\t\tfin',
     ],
+    expectedEmacsText: [
+      '\t\thello',
+      '\t\t\t\t.there()',
+      '\t\t\t\tgood',
+      '\t\t\t\t\t\tbye',
+      '\t\tthen',
+      '\t\t\tfin',
+    ],
   },
   /* Useful for commenting out tests. */
 ];
@@ -508,41 +625,58 @@ export function getPasteTestCases(): TestCase[] {
     ...pasteTestCases.map(tc => {
       return {
         ...tc,
-        text: [], // Done as a user interaction
         file: tc.startingFile || TABS_FILE,
         userInteractions: [
+          // Write the text
           type(tc.text?.join('\n') || ''),
           cmd("groog.paste"),
+
+          // Put the cursor at the top cuz we don't care about testing that here
           cmd("groog.cursorTop"),
-          // Move cursor to home position (bring to end b/c not sure if in text or initial whitespace
-          cmd("groog.cursorEnd"),
-          // Bring cursor to beginning of text
-          cmd("groog.cursorHome"),
-          // Bring cursor to beginning of line
-          cmd("groog.cursorHome"),
         ],
         expectedSelections: [selection(0, 0)],
       };
     }),
-    // TODO: groog.emacsPaste test cases
-    // ...pasteTestCases.map(tc => {
-    //   return {
-    //     ...tc,
-    //     runSolo: true,
-    //     text: tc.clipboard,
-    //     userInteractions: [
-    //       cmd("groog.toggleMarkMode"),
-    //       cmd("groog.cursorTop"),
-    //       // Move cursor to home position (bring to end b/c not sure if in text or initial whitespace
-    //       cmd("groog.cursorEnd"),
-    //       // Bring cursor to beginning of text
-    //       cmd("groog.cursorHome"),
-    //       // Bring cursor to beginning of line
-    //       cmd("groog.cursorHome"),
-    //     ],
-    //     expectedSelections: [selection(0, 0)],
-    //   };
-    // }),
+
+    // Test cases where entire thing is yanked and groog.emacsPaste
+    ...pasteTestCases.map(tc => {
+
+      const clipText = tc.clipboard?.join('\n') || '';
+
+      const clipWhitespace = /^\s*/.exec(clipText)?.at(0)!;
+      const clipMainText = clipText.slice(clipWhitespace.length).replace(/\n/g, '\r');
+
+      return {
+        ...tc,
+        file: tc.startingFile || TABS_FILE,
+        runSolo: true,
+        expectedText: tc.expectedEmacsText || tc.expectedText,
+        userInteractions: [
+          // Yank only the main text
+          type(clipMainText),
+          cmd("groog.cursorTop"),
+          type(clipWhitespace),
+          cmd("groog.toggleMarkMode"),
+          cmd("groog.cursorBottom"),
+          cmd("groog.yank"),
+
+          // Clear all text
+          cmd("groog.toggleMarkMode"),
+          cmd("groog.cursorTop"),
+          cmd("groog.deleteLeft"),
+
+          // Type the actual starting text
+          type(tc.text?.join('\n') || ''),
+          cmd("groog.emacsPaste"),
+
+          // Put the cursor at the top cuz we don't care about testing that here
+          cmd("groog.cursorTop"),
+        ],
+        expectedSelections: [selection(0, 0)],
+      };
+    }),
+
+    // TODO: Test cases where leading whitespace is not yanked
   ];
 }
 

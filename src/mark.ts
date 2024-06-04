@@ -36,7 +36,10 @@ export class MarkHandler extends TypeHandler {
         // Use runHandlers to check if other handlers should handle the pasting instead.
         return this.emacs.runHandlers(
           async (th: TypeHandler) => th.onEmacsPaste(this.yanked),
-          async () => this.paste(this.yanked, this.yankedPrefix),
+          async () => {
+            const extraPrefix = /^\s*/.exec(this.yanked)?.at(0)!;
+            return this.paste(this.yanked.slice(extraPrefix.length), this.yankedPrefix + extraPrefix);
+          },
         );
       });
     });
@@ -64,7 +67,7 @@ export class MarkHandler extends TypeHandler {
     };
   }
 
-  async paste(text: string, pasteIndent?: string): Promise<boolean> {
+  async paste(text: string, firstLinePrefix?: string, pasteIndent?: string): Promise<boolean> {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       return false;
@@ -76,7 +79,6 @@ export class MarkHandler extends TypeHandler {
 
     // Convert the paste lines into lineParts objects
     const rawLineInfo = text.split('\n').map(this.lineParts);
-
 
     // Infer what the indentation used by the paste is.
     const lineInfosWithWhitespace = rawLineInfo.filter(a => a.whitespacePrefix);
@@ -97,7 +99,8 @@ export class MarkHandler extends TypeHandler {
     }
 
     // TODO: Can this method just update reference instead of setting?
-    rawLineInfo[0] = this.getFirstLine(pasteIndent, rawLineInfo[0], rawLineInfo[1]);
+    // Infer the whitespace prefix of the first line
+    rawLineInfo[0] = firstLinePrefix === undefined ? this.getFirstLine(pasteIndent, rawLineInfo[0], rawLineInfo[1]) : {lineText:rawLineInfo[0].lineText, whitespacePrefix: firstLinePrefix};
     const pasteBaseIndents = whitespaceSubstringCount(rawLineInfo[0].whitespacePrefix, pasteIndent);
 
     // Make the document edits
@@ -238,7 +241,7 @@ export class MarkHandler extends TypeHandler {
   async onKill(s: string | undefined) {
     await this.deactivate();
     s ? this.yanked = s : this.yanked = "";
-    // Yanked text is one line so need to consider the prefix context in this case.
+    // Yanked text is one line so no need to consider the prefix context in this case.
     this.yankedPrefix = "";
   }
 
