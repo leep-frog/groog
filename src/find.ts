@@ -849,7 +849,7 @@ export class FindHandler extends TypeHandler {
   // TODO: do something like error message or deactivate
   async onYank() { }
   alwaysOnYank: boolean = false;
-  async onKill(s: string | undefined) { }
+  async onKill() { }
   alwaysOnKill: boolean = false;
 
   async onPaste(text: string): Promise<boolean> {

@@ -104,7 +104,7 @@ export class Emacs {
   register(context: vscode.ExtensionContext) {
     for (var move of Object.values(CursorMove)) {
       const m = move;
-      this.recorder.registerCommand(context, move, () => this.move(m));
+      this.recorder.registerCommand(context, move, (...args: any[]) => this.move(m, ...args));
     }
     for (var dc of Object.values(DeleteCommand)) {
       const d = dc;

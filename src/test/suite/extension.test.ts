@@ -2067,6 +2067,100 @@ function testCases(): TestCase[] {
         `No earlier find contexts available`,
       ],
     },
+    // Mark mode misc. tests
+    {
+      name: "Highlights text",
+      text: [
+        "abcdef",
+        "ghijkl",
+      ],
+      expectedText: [
+        "abcdef",
+        "ghijkl",
+      ],
+      userInteractions: [
+        cmd("groog.cursorRight"),
+        cmd("groog.toggleMarkMode"),
+        cmd("groog.cursorRight"),
+        cmd("groog.cursorDown"),
+        cmd("groog.cursorRight"),
+      ],
+      expectedSelections: [
+        new vscode.Selection(0, 1, 1, 3),
+      ],
+    },
+    {
+      name: "Deactivating mark mode deselects",
+      text: [
+        "abcdef",
+        "ghijkl",
+      ],
+      expectedText: [
+        "abcdef",
+        "ghijkl",
+      ],
+      userInteractions: [
+        cmd("groog.cursorRight"),
+        cmd("groog.toggleMarkMode"),
+        cmd("groog.cursorRight"),
+        cmd("groog.cursorDown"),
+        cmd("groog.cursorRight"),
+        cmd("groog.toggleMarkMode"),
+      ],
+      expectedSelections: [selection(1, 3)],
+    },
+    {
+      name: "Handles move commands with select set to true",
+      text: [
+        "abcdef",
+        "ghijkl",
+        "mnopqr",
+      ],
+      expectedText: [
+        "abcdef",
+        "ghijkl",
+        "mnopqr",
+      ],
+      userInteractions: [
+        cmd("groog.cursorRight"),
+        cmd("groog.toggleMarkMode"),
+        cmd("groog.cursorMove",{
+          to: 'right',
+          by: 'character',
+          value: 2,
+        }),
+        cmd("groog.cursorMove",{
+          to: 'down',
+        }),
+      ],
+      expectedSelections: [
+        new vscode.Selection(0, 1, 1, 3),
+      ],
+    },
+    {
+      name: "Yanked text replaces selected text",
+      text: [
+        "  abc",
+        "    def",
+        "      ghi",
+      ],
+      selections: [selection(1, 4)],
+      expectedText: [
+        "  def",
+        "    ghi",
+      ],
+      expectedSelections: [selection(1, 7)],
+      userInteractions: [
+        cmd("groog.toggleMarkMode"),
+        cmd("groog.cursorDown"),
+        cmd("groog.cursorEnd"),
+        cmd("groog.yank"),
+        cmd("groog.toggleMarkMode"),
+        cmd("groog.cursorUp"),
+        cmd("groog.cursorHome"),
+        cmd("groog.emacsPaste"),
+      ],
+    },
     // Find tests
     {
       name: "Moving deactivates find",
@@ -2262,7 +2356,7 @@ function testCases(): TestCase[] {
         "abc4",
       ],
       expectedText: [
-        "bcX",
+        "X",
         "abc1",
         "abc2",
         "abc3 HERE",
@@ -2275,7 +2369,6 @@ function testCases(): TestCase[] {
         cmd("groog.toggleMarkMode"),
         cmd("groog.cursorEnd"),
         cmd("editor.action.clipboardCopyAction"),
-        ctrlG,
         type("X"),
         cmd("groog.find"),
         type("a"),

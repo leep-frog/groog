@@ -479,7 +479,7 @@ export class Recorder extends TypeHandler {
 
   // All these functions are associated with a "groog.*" command so these are
   // already added to the record book via the "type" command handling
-  async onKill(s: string | undefined) { }
+  async onKill() { }
   alwaysOnKill: boolean = false;
   async ctrlG() {
     return true;

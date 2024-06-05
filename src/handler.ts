@@ -86,9 +86,9 @@ export abstract class TypeHandler implements Registerable {
   // This will only be run if the handler is active.
   abstract onEmacsPaste(text: string): Thenable<boolean>;
 
-  abstract onYank(prefixText: string | undefined, text: string | undefined, indentation: string): Thenable<void>;
+  abstract onYank(prefixText: string, text: string, indentation: string): Thenable<void>;
   abstract alwaysOnYank: boolean;
-  abstract onKill(text: string | undefined): Thenable<void>;
+  abstract onKill(text: string): Thenable<void>;
   abstract alwaysOnKill: boolean;
 
   // Returns whether or not to still send the code
@@ -100,7 +100,7 @@ export abstract class TypeHandler implements Registerable {
   abstract testReset() : Promise<void>;
 }
 
-export function getPrefixText(editor: vscode.TextEditor | undefined, range: vscode.Range) : string | undefined {
+export function getPrefixText(editor: vscode.TextEditor, range: vscode.Range) : string {
   const preRange = new vscode.Range(range.start.line, 0, range.start.line, range.start.character);
-  return editor?.document.getText(preRange);
+  return editor.document.getText(preRange);
 }

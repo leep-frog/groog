@@ -33,6 +33,7 @@ export class MarkHandler extends TypeHandler {
       return this.activate();
     });
     recorder.registerCommand(context, 'emacsPaste', async (): Promise<any> => {
+      this.keepSelectionOnDeactivation = true;
       return this.deactivate().then(() => {
         // Use runHandlers to check if other handlers should handle the pasting instead.
         return this.emacs.runHandlers(
@@ -88,7 +89,7 @@ export class MarkHandler extends TypeHandler {
 
     // Calculate the current editor's whitespacing configuration
     const fileIndent = editor.options.insertSpaces ? ' '.repeat(editor.options.indentSize as number) : '\t';
-    const fileNumSpaces = (editor.options.indentSize || editor.options.tabSize) as number;
+    const fileNumSpaces = (editor.options.insertSpaces ? editor.options.indentSize : editor.options.tabSize) as number;
 
     // Convert the paste lines into lineParts objects
     const rawLineInfo = text.split('\n').map(this.lineParts);
@@ -123,7 +124,7 @@ export class MarkHandler extends TypeHandler {
       for (const sel of editor.selections) {
 
         // Get all text in the line behind start of current selection cursor
-        const linePrefix = getPrefixText(editor, new vscode.Range(sel.start, sel.end)) || "";
+        const linePrefix = getPrefixText(editor, new vscode.Range(sel.start, sel.end));
 
         const curPrefix = /^\s*/.exec(linePrefix)?.at(0)!;
 
@@ -216,7 +217,7 @@ export class MarkHandler extends TypeHandler {
     if (this.keepSelectionOnDeactivation) {
       this.keepSelectionOnDeactivation = false;
     } else {
-      vscode.commands.executeCommand(CtrlGCommand.CancelSelection);
+      await vscode.commands.executeCommand(CtrlGCommand.CancelSelection);
     }
   }
 
@@ -230,14 +231,16 @@ export class MarkHandler extends TypeHandler {
     return this.deactivate().then(() => true);
   }
 
-  async moveHandler(vsCommand: CursorMove, ...rest: any[]): Promise<boolean> {
+  async moveHandler(vsCommand: CursorMove, ...args: any[]): Promise<boolean> {
     // See below link for cusorMove args (including "select" keyword)
     // https://code.visualstudio.com/api/references/commands
     if (vsCommand === CursorMove.Move) {
-      rest[0].select = true;
-      return vscode.commands.executeCommand(vsCommand, ...rest).then(() => false);
+      // Only the first arg is considered by cursorMove command (I tested with
+      // multiple cursorMove argument objects, but the second one was ignored).
+      args[0].select = true;
+      return vscode.commands.executeCommand(vsCommand, ...args).then(() => false);
     }
-    return vscode.commands.executeCommand(vsCommand + "Select", ...rest).then(() => false);
+    return vscode.commands.executeCommand(vsCommand + "Select", ...args).then(() => false);
   }
 
   async delHandler(s: DeleteCommand): Promise<boolean> {
@@ -245,28 +248,28 @@ export class MarkHandler extends TypeHandler {
     return this.deactivate().then(() => true);
   }
 
-  async onYank(prefixText: string | undefined, text: string | undefined, indentation: string) {
+  async onYank(prefixText: string, text: string, indentation: string) {
     await this.deactivate();
-    this.yankedPrefix = prefixText ?? "";
-    this.yanked = text ?? "";
+    this.yankedPrefix = prefixText;
+    this.yanked = text;
     this.yankedIndentation = indentation;
   }
 
   alwaysOnYank: boolean = true;
 
-  async onKill(s: string | undefined) {
+  async onKill(s: string) {
     await this.deactivate();
-    s ? this.yanked = s : this.yanked = "";
+    this.yanked = s;
     // Yanked text is one line so no need to consider the prefix context in this case.
     this.yankedPrefix = "";
   }
 
   alwaysOnKill: boolean = true;
 
-  async onPaste(text: string): Promise<boolean> {
+  async onPaste(): Promise<boolean> {
     return true;
   }
-  async onEmacsPaste(text: string): Promise<boolean> {
+  async onEmacsPaste(): Promise<boolean> {
     return true;
   }
 
