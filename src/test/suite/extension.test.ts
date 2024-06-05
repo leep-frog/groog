@@ -704,7 +704,7 @@ export function getPasteTestCases(): TestCase[] {
         file: tc.startingFile || TABS_FILE,
         expectedText: tc.expectedEmacsText || tc.expectedText,
         userInteractions: [
-          // Yank only the main text
+          // Yank all the text
           type(tc.clipboard?.join('\r') || ''),
           cmd("groog.cursorTop"),
           cmd("groog.toggleMarkMode"),
@@ -721,6 +721,98 @@ export function getPasteTestCases(): TestCase[] {
         expectedSelections: [selection(0, 0)],
       };
     }),
+
+    // One-off test cases
+    {
+      name: "Emacs paste uses preceding whitespace on first line (when no whitespace)",
+      file: TWO_SPACES_FILE,
+      runSolo: true,
+      expectedText: [
+        '  def',
+        '    ghi',
+      ],
+      userInteractions: [
+        type([
+          'abc  def',
+          '  ghi',
+        ].join('\r')),
+        cmd("groog.toggleMarkMode"),
+        cmd("groog.cursorUp"),
+        cmd("groog.cursorEnd"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.yank"),
+        cmd('editor.action.selectAll'),
+        cmd('groog.deleteLeft'),
+        type('  '),
+        cmd("groog.cursorEnd"),
+        cmd("groog.emacsPaste"),
+
+        // Put the cursor at the top cuz we don't care about testing that here
+        cmd("groog.cursorTop"),
+      ],
+    },
+    {
+      name: "Emacs paste uses preceding whitespace on line (when one indent)",
+      file: TWO_SPACES_FILE,
+      runSolo: true,
+      expectedText: [
+        '  def',
+        '  ghi',
+      ],
+      userInteractions: [
+        type([
+          '  abc  def',
+          '  ghi',
+        ].join('\r')),
+        cmd("groog.toggleMarkMode"),
+        cmd("groog.cursorUp"),
+        cmd("groog.cursorEnd"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.yank"),
+        cmd('editor.action.selectAll'),
+        cmd('groog.deleteLeft'),
+        type('  '),
+        cmd("groog.cursorEnd"),
+        cmd("groog.emacsPaste"),
+
+        // Put the cursor at the top cuz we don't care about testing that here
+        cmd("groog.cursorTop"),
+      ],
+    },
+    {
+      name: "Emacs paste uses preceding whitespace on line (when two indents)",
+      file: TWO_SPACES_FILE,
+      runSolo: true,
+      expectedText: [
+        '  def',
+        'ghi',
+      ],
+      userInteractions: [
+        type([
+          '    abc  def',
+          '  ghi',
+        ].join('\r')),
+        cmd("groog.toggleMarkMode"),
+        cmd("groog.cursorUp"),
+        cmd("groog.cursorEnd"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.yank"),
+        cmd('editor.action.selectAll'),
+        cmd('groog.deleteLeft'),
+        type('  '),
+        cmd("groog.cursorEnd"),
+        cmd("groog.emacsPaste"),
+
+        // Put the cursor at the top cuz we don't care about testing that here
+        cmd("groog.cursorTop"),
+      ],
+    },
   ];
 }
 
