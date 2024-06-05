@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.7",
+  "version": "2.7.8",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -1058,18 +1058,13 @@
       },
       {
         "key": "ctrl+n",
-        "command": "groog.find",
-        "when": "groog.context.findMode"
-      },
-      {
-        "key": "ctrl+n",
         "command": "groog.terminal.find",
         "when": "groog.context.terminal.findMode"
       },
       {
         "key": "ctrl+n",
         "command": "workbench.action.quickOpenNavigateNextInFilePicker",
-        "when": "inQuickOpen && !groog.context.findMode"
+        "when": "inQuickOpen"
       },
       {
         "key": "ctrl+n",
@@ -1107,18 +1102,13 @@
       },
       {
         "key": "ctrl+p",
-        "command": "groog.reverseFind",
-        "when": "groog.context.findMode"
-      },
-      {
-        "key": "ctrl+p",
         "command": "groog.terminal.reverseFind",
         "when": "groog.context.terminal.findMode"
       },
       {
         "key": "ctrl+p",
         "command": "workbench.action.quickOpenNavigatePreviousInFilePicker",
-        "when": "inQuickOpen && !groog.context.findMode"
+        "when": "inQuickOpen"
       },
       {
         "key": "ctrl+p",
@@ -2023,18 +2013,13 @@
       },
       {
         "key": "down",
-        "command": "groog.find",
-        "when": "groog.context.findMode"
-      },
-      {
-        "key": "down",
         "command": "groog.terminal.find",
         "when": "groog.context.terminal.findMode"
       },
       {
         "key": "down",
         "command": "workbench.action.quickOpenNavigateNextInFilePicker",
-        "when": "inQuickOpen && !groog.context.findMode"
+        "when": "inQuickOpen"
       },
       {
         "key": "down",
@@ -2765,18 +2750,13 @@
       },
       {
         "key": "up",
-        "command": "groog.reverseFind",
-        "when": "groog.context.findMode"
-      },
-      {
-        "key": "up",
         "command": "groog.terminal.reverseFind",
         "when": "groog.context.terminal.findMode"
       },
       {
         "key": "up",
         "command": "workbench.action.quickOpenNavigatePreviousInFilePicker",
-        "when": "inQuickOpen && !groog.context.findMode"
+        "when": "inQuickOpen"
       },
       {
         "key": "up",

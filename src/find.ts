@@ -227,11 +227,6 @@ class MatchTracker {
       return true;
     }
 
-    if (offset > 0) {
-      vscode.commands.executeCommand('workbench.action.quickOpenNavigateNextInFilePicker');
-    } else {
-      vscode.commands.executeCommand('workbench.action.quickOpenNavigatePreviousInFilePicker');
-    }
     return false;
   }
 

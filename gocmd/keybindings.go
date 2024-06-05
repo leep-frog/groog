@@ -906,9 +906,8 @@ func upBindings() map[string]*KB {
 		always.value:                kb("-workbench.action.quickOpen"),
 		editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorUp"),
 		editorTextFocus.and(suggestWidgetVisible).value:       kb("selectPrevSuggestion"),
-		inQuickOpen.and(groogFindMode.not()).value:            kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
-		groogFindMode.value:                                   kb("groog.reverseFind"),
-		searchViewletFocus.value:                              kb("list.focusUp"),
+		inQuickOpen.value:        kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
+		searchViewletFocus.value: kb("list.focusUp"),
 	}
 }
 
@@ -916,11 +915,10 @@ func downBindings() map[string]*KB {
 	return map[string]*KB{
 		groogTerminalFindMode.value: kb("groog.terminal.find"),
 		always.value:                kb("-workbench.action.files.newUntitledFile"),
-		editorTextFocus.and(suggestWidgetVisible.not()).value:   kb("groog.cursorDown"),
-		editorTextFocus.and(suggestWidgetVisible).value:         kb("selectNextSuggestion"),
-		inQuickOpen.and(groogFindMode.not()).value:              kb("workbench.action.quickOpenNavigateNextInFilePicker"),
-		groogFindMode.value:                                     kb("groog.find"),
-		searchInputBoxFocus.value:                               kb("search.action.focusSearchList"),
+		editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorDown"),
+		editorTextFocus.and(suggestWidgetVisible).value:       kb("selectNextSuggestion"),
+		inQuickOpen.value:         kb("workbench.action.quickOpenNavigateNextInFilePicker"),
+		searchInputBoxFocus.value: kb("search.action.focusSearchList"),
 		searchInputBoxFocus.not().and(searchViewletFocus).value: kb("list.focusDown"),
 	}
 }
