@@ -7276,15 +7276,15 @@ function testCases(): TestCase[] {
 
 // Run `npm run test` to execute these tests.
 suite('Groog commands', () => {
-  const requireRunSolo = testCases().some(tc => tc.runSolo);
-
   for (let iteration = 0; iteration < TEST_ITERATIONS; iteration++) {
-    const tcs = testCases();
-    tcs.forEach((tc, idx) => {
-      if (requireRunSolo && !(tc.runSolo || idx === 0)) {
-        return;
-      }
+    let tcs = testCases();
+    const requireRunSolo = tcs.some(tc => tc.runSolo);
+    if (requireRunSolo) {
+      tcs = tcs.filter((tc, idx) => tc.runSolo || idx === 0);
+    }
 
+
+    tcs.forEach((tc, idx) => {
       // Don't check for opening info message more than once
       if (idx === 0 && iteration !== 0) {
         return;
