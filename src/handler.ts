@@ -86,7 +86,7 @@ export abstract class TypeHandler implements Registerable {
   // This will only be run if the handler is active.
   abstract onEmacsPaste(text: string): Thenable<boolean>;
 
-  abstract onYank(prefixText: string | undefined, text: string | undefined): Thenable<void>;
+  abstract onYank(prefixText: string | undefined, text: string | undefined, indentation: string): Thenable<void>;
   abstract alwaysOnYank: boolean;
   abstract onKill(text: string | undefined): Thenable<void>;
   abstract alwaysOnKill: boolean;

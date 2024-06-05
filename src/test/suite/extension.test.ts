@@ -111,8 +111,9 @@ const pasteTestCases: PasteTestCase[] = [
     ],
   },
   {
-    name: "Pastes text with tab indents",
+    name: "Pastes text with tab indents (TABS_FILE with space clipboard prefix)",
     text: ['\t\t'],
+    startingFile: TABS_FILE,
     selections: [selection(0, 2)],
     clipboard: [
       '  hello',
@@ -121,6 +122,38 @@ const pasteTestCases: PasteTestCase[] = [
       '      ken',
       'obi',
       '  fin',
+    ],
+    expectedText: [
+      '\t\thello',
+      '\t\tthere',
+      '\t\t\tgeneral',
+      '\t\t\t\tken',
+      '\tobi',
+      '\t\tfin',
+    ],
+    // This isn't indented because the yanking logic is looking for tab prefixes,
+    // but the clipboard pastes space indents.
+    expectedEmacsText: [
+      '\t\thello',
+      '\t\tthere',
+      '\t\tgeneral',
+      '\t\tken',
+      '\t\tobi',
+      '\t\tfin',
+    ],
+  },
+  {
+    name: "Pastes text with tab indents (TABS_FILE with tabbed clipboard prefix)",
+    text: ['\t\t'],
+    startingFile: TABS_FILE,
+    selections: [selection(0, 2)],
+    clipboard: [
+      '\thello',
+      '\tthere',
+      '\t\tgeneral',
+      '\t\t\tken',
+      'obi',
+      '\tfin',
     ],
     expectedText: [
       '\t\thello',
@@ -154,7 +187,7 @@ const pasteTestCases: PasteTestCase[] = [
     ],
   },
   {
-    name: "Pastes text with four-space indents",
+    name: "Pastes text with four-space indents (but two space indents in yanked)",
     text: ['\t\t'],
     startingFile: FOUR_SPACES_FILE,
     selections: [selection(0, 2)],
@@ -174,10 +207,43 @@ const pasteTestCases: PasteTestCase[] = [
       '\tobi',
       '\t\tfin',
     ],
+    // This isn't indented because the yanking logic is looking for tab prefixes,
+    // but the clipboard pastes space indents.
+    expectedEmacsText: [
+      '\t\thello',
+      '\t\tthere',
+      '\t\t    general',
+      '\t\t    ken',
+      '\t\tobi',
+      '\t\tfin',
+    ],
   },
   {
-    name: "Paste text inferred as four-space indent",
+    name: "Pastes text with four-space indents (with four space indents in yanked)",
     text: ['\t\t'],
+    startingFile: FOUR_SPACES_FILE,
+    selections: [selection(0, 2)],
+    clipboard: [
+      '    hello',
+      '    there',
+      '        general',
+      '            ken',
+      'obi',
+      '    fin',
+    ],
+    expectedText: [
+      '\t\thello',
+      '\t\tthere',
+      '\t\t    general',
+      '\t\t        ken',
+      '\tobi',
+      '\t\tfin',
+    ],
+  },
+  {
+    name: "Paste text inferred as four-space indent (with TABS_FILE)",
+    text: ['\t\t'],
+    startingFile: TABS_FILE,
     selections: [selection(0, 2)],
     clipboard: [
       '    hello',
@@ -195,6 +261,38 @@ const pasteTestCases: PasteTestCase[] = [
       '\tobi',
       '\t\tfin',
     ],
+    // This isn't indented because the yanking logic is looking for tab prefixes,
+    // but the clipboard pastes space indents.
+    expectedEmacsText: [
+      '\t\thello',
+      '\t\tthere',
+      '\t\tgeneral',
+      '\t\tken',
+      '\t\tobi',
+      '\t\tfin',
+    ],
+  },
+  {
+    name: "Paste text inferred as four-space indent (with FOUR_SPACES_FILE)",
+    text: ['\t\t'],
+    startingFile: FOUR_SPACES_FILE,
+    selections: [selection(0, 2)],
+    clipboard: [
+      '    hello',
+      '    there',
+      '        general',
+      '            ken',
+      'obi',
+      '    fin',
+    ],
+    expectedText: [
+      '\t\thello',
+      '\t\tthere',
+      '\t\t    general',
+      '\t\t        ken',
+      '\tobi',
+      '\t\tfin',
+    ],
   },
   {
     name: "Pastes text with indent and inferred first line indent (because of open bracket)",
@@ -203,10 +301,10 @@ const pasteTestCases: PasteTestCase[] = [
     selections: [selection(0, 4)],
     clipboard: [
       'hello {',
-      '\tthere',
-      '\t\tgeneral',
+      '  there',
+      '    general',
       'kenobi',
-      '\tfin',
+      '  fin',
     ],
     expectedText: [
       '    hello {',
@@ -237,7 +335,7 @@ const pasteTestCases: PasteTestCase[] = [
       '  obi',
       '      fin',
     ],
-    // yank knows the actual perfix, so no inference is done
+    // yank knows the actual prefix, so no inference is done
     expectedEmacsText: [
       '    hello(()',
       '        there',
@@ -271,15 +369,15 @@ const pasteTestCases: PasteTestCase[] = [
       'bi',
       '        fin',
     ],
-    // yank knows the actual perfix, so no inference is done
+    // yank knows the actual prefix, so no inference is done (and just use floor(spaces/4))
     expectedEmacsText: [
       '        hello',
-      '                    .there',
-      '                        general',
-      '                ken',
-      '            o',
+      '            .there',
+      '                general',
+      '            ken',
+      '        o',
       '        bi',
-      '                fin',
+      '            fin',
     ],
   },
   {
@@ -646,7 +744,7 @@ export function getPasteTestCases(): TestCase[] {
         file: tc.startingFile || TABS_FILE,
         userInteractions: [
           // Write the text
-          type(tc.text?.join('\n') || ''),
+          type(tc.text?.join('\r') || ''),
           cmd("groog.paste"),
 
           // Put the cursor at the top cuz we don't care about testing that here
@@ -686,7 +784,7 @@ export function getPasteTestCases(): TestCase[] {
           cmd("groog.deleteLeft"),
 
           // Type the actual starting text
-          type(tc.text?.join('\n') || ''),
+          type(tc.text?.join('\r') || ''),
           cmd("groog.emacsPaste"),
 
           // Put the cursor at the top cuz we don't care about testing that here
@@ -712,7 +810,7 @@ export function getPasteTestCases(): TestCase[] {
           cmd("groog.yank"),
 
           // Type the actual starting text
-          type(tc.text?.join('\n') || ''),
+          type(tc.text?.join('\r') || ''),
           cmd("groog.emacsPaste"),
 
           // Put the cursor at the top cuz we don't care about testing that here
@@ -726,7 +824,6 @@ export function getPasteTestCases(): TestCase[] {
     {
       name: "Emacs paste uses preceding whitespace on first line (when no whitespace)",
       file: TWO_SPACES_FILE,
-      runSolo: true,
       expectedText: [
         '  def',
         '    ghi',
@@ -756,7 +853,6 @@ export function getPasteTestCases(): TestCase[] {
     {
       name: "Emacs paste uses preceding whitespace on line (when one indent)",
       file: TWO_SPACES_FILE,
-      runSolo: true,
       expectedText: [
         '  def',
         '  ghi',
@@ -786,7 +882,6 @@ export function getPasteTestCases(): TestCase[] {
     {
       name: "Emacs paste uses preceding whitespace on line (when two indents)",
       file: TWO_SPACES_FILE,
-      runSolo: true,
       expectedText: [
         '  def',
         'ghi',

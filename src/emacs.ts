@@ -228,9 +228,11 @@ export class Emacs {
     const maybeText = editor.document.getText(range);
     const prefixText = getPrefixText(editor, range);
 
+    const indentation = editor.options.insertSpaces ? ' '.repeat(editor.options.indentSize as number) : '\t';
+
     for (var th of this.typeHandlers) {
       if (th.isActive() || th.alwaysOnYank) {
-        await th.onYank(prefixText, maybeText);
+        await th.onYank(prefixText, maybeText, indentation);
       }
     }
 

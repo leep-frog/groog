@@ -8,6 +8,7 @@ import { Recorder } from './record';
 export class MarkHandler extends TypeHandler {
   yanked: string;
   yankedPrefix: string;
+  yankedIndentation?: string;
   readonly whenContext: string = "mark";
   private emacs: Emacs;
   private keepSelectionOnDeactivation: boolean;
@@ -44,12 +45,12 @@ export class MarkHandler extends TypeHandler {
 
             // If only whitespace before copied text, then we want to make guesses about
             if (!nonWhitespacePrefix) {
-              return this.paste(slicedText, this.yankedPrefix + extraWhitespace);
+              return this.paste(slicedText, this.yankedPrefix + extraWhitespace, this.yankedIndentation);
             }
 
             // Otherwise, we want to use all of the copied text, and the prefix
             // is just the leading whitespace
-            return this.paste(this.yanked, /^\s*/.exec(this.yankedPrefix)?.at(0)!);
+            return this.paste(this.yanked, /^\s*/.exec(this.yankedPrefix)?.at(0)!, this.yankedIndentation);
           },
         );
       });
@@ -244,10 +245,11 @@ export class MarkHandler extends TypeHandler {
     return this.deactivate().then(() => true);
   }
 
-  async onYank(prefixText: string | undefined, text: string | undefined) {
+  async onYank(prefixText: string | undefined, text: string | undefined, indentation: string) {
     await this.deactivate();
     this.yankedPrefix = prefixText ?? "";
     this.yanked = text ?? "";
+    this.yankedIndentation = indentation;
   }
 
   alwaysOnYank: boolean = true;
