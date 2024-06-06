@@ -37,7 +37,7 @@ func groogPackage(versionOverride string) *Package {
 			"coverage": "c8 --reporter lcov --check-coverage npm run test",
 		},
 		Dependencies: map[string]string{
-			"@leep-frog/vscode-test-stubber": "^1.11.2",
+			"@leep-frog/vscode-test-stubber": "^1.11.5",
 			"await-lock":                     "^2.2.2",
 			"dayjs":                          "^1.11.11",
 			"escape-string-regexp":           "^5.0.0",

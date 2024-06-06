@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
-import { CloseQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectActiveItems, SelectItemQuickPickAction, SimpleTestCase, SimpleTestCaseProps, UserInteraction, WorkspaceConfiguration, cmd, delay, openFile } from '@leep-frog/vscode-test-stubber';
+import { CloseQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectActiveItems, SelectItemQuickPickAction, SimpleTestCase, SimpleTestCaseProps, UserInteraction, Waiter, WorkspaceConfiguration, cmd, delay, openFile } from '@leep-frog/vscode-test-stubber';
 import * as vscode from 'vscode';
 import { tabbify } from '../../emacs';
 import { Document, FIND_MEMORY_MS, FindQuickPickItem, FindRecord, Match } from '../../find';
@@ -28,6 +28,13 @@ suite('tabbify tests', () => {
     });
   });
 });
+
+function textContainsWaiter(text: string): Waiter {
+  return new Waiter(10, () => {
+    const editor = vscode.window.activeTextEditor;
+    return !!(editor && editor.document.getText().includes(text));
+  });
+}
 
 // TODO: Move paste stuff to other file
 interface PasteTestCase {
@@ -2161,6 +2168,29 @@ function testCases(): TestCase[] {
         cmd("groog.emacsPaste"),
       ],
     },
+    {
+      name: "Falls back to regular pasting if no editor",
+      clipboard: [
+        'aSdF',
+      ],
+      expectedText: [
+        '1 result - 1 file',
+        '',
+        'search.txt:',
+        '  4  ',
+        '  5: aSdF',
+        '  6  ',
+        '',
+      ],
+      expectedSelections: [selection(6, 0)],
+      userInteractions: [
+        cmd("search.action.openNewEditor"),
+        cmd("toggleSearchEditorWholeWord"),
+        cmd("toggleSearchEditorCaseSensitive"),
+        cmd("editor.action.clipboardPasteAction"),
+        textContainsWaiter('search.txt'),
+      ],
+    },
     // Find tests
     {
       name: "Moving deactivates find",
@@ -2369,6 +2399,7 @@ function testCases(): TestCase[] {
         cmd("groog.toggleMarkMode"),
         cmd("groog.cursorEnd"),
         cmd("editor.action.clipboardCopyAction"),
+        // ctrlG, uncommenting this causes flaky test execution. Possibly related to ctrl+j locking?!
         type("X"),
         cmd("groog.find"),
         type("a"),
