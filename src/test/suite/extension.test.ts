@@ -2174,20 +2174,36 @@ function testCases(): TestCase[] {
         'aSdF',
       ],
       expectedText: [
-        '1 result - 1 file',
+        '// search.txt',
         '',
-        'search.txt:',
-        '  4  ',
-        '  5: aSdF',
-        '  6  ',
+        'asdf',
+        '',
+        'aSdF',
+        '',
+        'xaSdF',
         '',
       ],
+      expectedSelections: [new vscode.Selection(4, 0, 4, 4)],
       userInteractions: [
-        cmd("search.action.openNewEditor"),
-        cmd("toggleSearchEditorWholeWord"),
-        cmd("toggleSearchEditorCaseSensitive"),
-        cmd("editor.action.clipboardPasteAction"),
-        textContainsWaiter('search.txt'),
+        cmd("workbench.action.findInFiles"),
+        cmd("toggleSearchWholeWord"),
+        cmd("toggleSearchCaseSensitive"),
+        cmd("groog.paste"),
+        cmd("search.action.focusSearchList"),
+        new Waiter(10, () => {
+          if (vscode.window.activeTextEditor) {
+            return true;
+          }
+
+          // TODO: make this method async so we can wait
+          vscode.commands.executeCommand("list.focusDown");
+
+          return false;
+        }),
+        // Clean up
+        cmd("toggleSearchWholeWord"),
+        cmd("toggleSearchCaseSensitive"),
+        cmd("workbench.action.toggleSidebarVisibility"),
       ],
     },
     // Find tests
