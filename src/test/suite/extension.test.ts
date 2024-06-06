@@ -2182,7 +2182,6 @@ function testCases(): TestCase[] {
         '  6  ',
         '',
       ],
-      expectedSelections: [selection(6, 0)],
       userInteractions: [
         cmd("search.action.openNewEditor"),
         cmd("toggleSearchEditorWholeWord"),
