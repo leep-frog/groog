@@ -209,7 +209,11 @@ export class MarkHandler extends TypeHandler {
     };
   }
 
-  async handleActivation() {}
+  async handleActivation() {
+    // This can be set (and never unset) when running emacsPaste command when this isn't active
+    // Rather than only fix there, be sure to always clear this when activating
+    this.keepSelectionOnDeactivation = false;
+  }
   onRedundantActivate(): void {}
 
   async handleDeactivation() {

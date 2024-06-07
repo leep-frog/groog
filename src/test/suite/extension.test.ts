@@ -21,6 +21,8 @@ const tabbifyTestCases = [
   },
 ];
 
+const endCommentString = "*" + "/";
+
 suite('tabbify tests', () => {
   tabbifyTestCases.forEach(tc => {
     test(tc.input, () => {
@@ -2401,7 +2403,7 @@ function testCases(): TestCase[] {
         "abc4",
       ],
       expectedText: [
-        "X",
+        "bcX",
         "abc1",
         "abc2",
         "abc3 HERE",
@@ -2414,7 +2416,7 @@ function testCases(): TestCase[] {
         cmd("groog.toggleMarkMode"),
         cmd("groog.cursorEnd"),
         cmd("editor.action.clipboardCopyAction"),
-        // ctrlG, uncommenting this causes flaky test execution. Possibly related to ctrl+j locking?!
+        ctrlG,
         type("X"),
         cmd("groog.find"),
         type("a"),
@@ -6697,9 +6699,9 @@ function testCases(): TestCase[] {
       expectedText: [
         '/* Block',
         ' * comment',
-        ' */',
-        'package copy.imports.comment; /* Suffix block comment */',
-        '/* Another block comment */',
+        ` ${endCommentString}`,
+        `package copy.imports.comment; /* Suffix block comment ${endCommentString}`,
+        `/* Another block comment ${endCommentString}`,
         // Added
         "import copy.imports.comment.BlockComment;",
       ],
