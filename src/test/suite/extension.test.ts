@@ -2208,6 +2208,37 @@ function testCases(): TestCase[] {
         cmd("workbench.action.toggleSidebarVisibility"),
       ],
     },
+    {
+      name: "keepSelectionOnDeactivation gets cleared after emacs paste",
+      runSolo: true,
+      text: [
+        "abc",
+        "def",
+        "ghi",
+        "jkl",
+      ],
+      expectedText: [
+        "",
+        "dabcef",
+        "ghiX",
+        "jkl",
+      ],
+      expectedSelections: [
+        selection(2, 4),
+      ],
+      userInteractions: [
+        cmd("groog.kill"),
+        cmd("groog.cursorDown"),
+        cmd("groog.cursorRight"),
+        cmd("groog.emacsPaste"),
+        cmd("groog.cursorDown"),
+        cmd("groog.cursorHome"),
+        cmd("groog.toggleMarkMode"),
+        cmd("groog.cursorEnd"),
+        cmd("groog.toggleMarkMode"), // deactivate should not keep selection
+        type("X"),
+      ],
+    },
     // Find tests
     {
       name: "Moving deactivates find",
