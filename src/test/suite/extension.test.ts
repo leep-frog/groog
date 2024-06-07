@@ -2210,7 +2210,6 @@ function testCases(): TestCase[] {
     },
     {
       name: "keepSelectionOnDeactivation gets cleared after emacs paste",
-      runSolo: true,
       text: [
         "abc",
         "def",
