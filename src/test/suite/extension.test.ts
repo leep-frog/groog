@@ -831,6 +831,27 @@ export function getPasteTestCases(): TestCase[] {
 
     // One-off test cases
     {
+      name: 'wtf',
+      text: [''],
+      expectedText: [
+        'abc',
+        'abc',
+        '',
+      ],
+      expectedSelections: [selection(2, 0)],
+      userInteractions: [
+        type('abc\n'),
+        cmd('groog.toggleMarkMode'),
+        cmd('groog.cursorUp'),
+        cmd("editor.action.clipboardCopyAction"),
+        ctrlG,
+        cmd('groog.cursorDown'),
+        delay(1500),
+        cmd('groog.paste'),
+        delay(1500),
+      ],
+    },
+    {
       name: "Emacs paste uses preceding whitespace on first line (when no whitespace)",
       file: TWO_SPACES_FILE,
       expectedText: [

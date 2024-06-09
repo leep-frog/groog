@@ -70,9 +70,13 @@ export class MarkHandler extends TypeHandler {
   }
 
   private lineParts(line: string) {
-    // TODO: test with CRLF line endings
     const partsRegex = /^(\s*)(.*)$/;
-    const match = partsRegex.exec(line)!;
+
+    // For some reason copying sometimes adds an \r character and pasting that
+    // causes an issue in the above regex (removing the '$' works for some
+    // reason, but so does removing \r characters and would rather this solution
+    // so we don't paste \r in windows copying contexts).
+    const match = partsRegex.exec(line.replace(/\r/g, ''))!;
     const whitespacePrefix = match.at(1)!;
     const lineText = match.at(2)!;
     return {
