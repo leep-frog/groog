@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.11",
+  "version": "2.7.12",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -1916,11 +1916,23 @@
       },
       {
         "key": "ctrl+z f",
-        "command": "faves.aliasSearch"
+        "command": "faves.aliasSearch",
+        "when": "!groog.context.qmkMode"
       },
       {
         "key": "ctrl+z ctrl+f",
-        "command": "faves.aliasSearch"
+        "command": "faves.aliasSearch",
+        "when": "!groog.context.qmkMode"
+      },
+      {
+        "key": "ctrl+z f",
+        "command": "workbench.action.files.saveWithoutFormatting",
+        "when": "groog.context.qmkMode"
+      },
+      {
+        "key": "ctrl+z ctrl+f",
+        "command": "workbench.action.files.saveWithoutFormatting",
+        "when": "groog.context.qmkMode"
       },
       {
         "key": "ctrl+z i",
@@ -1957,6 +1969,14 @@
         "key": "ctrl+z ctrl+right",
         "command": "faves.aliasSearch",
         "when": "groog.context.qmkMode"
+      },
+      {
+        "key": "ctrl+z s",
+        "command": "workbench.action.files.saveWithoutFormatting"
+      },
+      {
+        "key": "ctrl+z ctrl+s",
+        "command": "workbench.action.files.saveWithoutFormatting"
       },
       {
         "key": "ctrl+z t",

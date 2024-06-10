@@ -425,7 +425,8 @@ var (
 		),
 		ctrlZ("v"):      only("faves.toggle"),
 		ctrlZ(pagedown): onlyWhen("faves.toggle", groogQMK),
-		ctrlZ("f"):      only("faves.aliasSearch"),
+		ctrlZ("s"):      only("workbench.action.files.saveWithoutFormatting"),
+		ctrlZ("f"):      keyboardSplit(kb("faves.aliasSearch"), kb("workbench.action.files.saveWithoutFormatting")),
 		ctrlZ(right):    onlyWhen("faves.aliasSearch", groogQMK),
 		ctrlX("h"): onlyMC(
 			"workbench.action.splitEditorRight",
