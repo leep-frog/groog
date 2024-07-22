@@ -6890,9 +6890,24 @@ function testCases(): TestCase[] {
       expectedText: [
         'package copy.imports.simple;',
         // Added
-        `https://code.amazon.com/packages/${pathParts()[5]}/blobs/mainline/--/${pathParts("copy-imports", "SimplePackage.java").slice(6).join('/')}`,
+        `https://code.amazon.com/packages/${pathParts()[5]}/blobs/mainline/--/${pathParts("copy-imports", "SimplePackage.java").slice(6).join('/')}#L2`,
       ],
-      expectedSelections: [selection(1, 127)],
+      expectedSelections: [selection(1, 130)],
+      userInteractions: [
+        cmd("groog.work.copyLink"),
+        cmd("groog.paste"),
+      ],
+    },
+    {
+      name: "Successfully copies file link when multi-line",
+      file: startingFile("copy-imports", "SimplePackage.java"),
+      selections: [
+        new vscode.Selection(0, 0, 1, 0),
+      ],
+      expectedText: [
+        `https://code.amazon.com/packages/${pathParts()[5]}/blobs/mainline/--/${pathParts("copy-imports", "SimplePackage.java").slice(6).join('/')}#L1-L2`,
+      ],
+      expectedSelections: [selection(0, 133)],
       userInteractions: [
         cmd("groog.work.copyLink"),
         cmd("groog.paste"),
