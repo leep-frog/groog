@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.13",
+  "version": "2.7.14",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -593,6 +593,11 @@
         "command": "workbench.action.editor.previousChange"
       },
       {
+        "key": "alt+pageup",
+        "command": "editor.action.selectHighlights",
+        "when": "editorFocus"
+      },
+      {
         "key": "alt+r",
         "command": "toggleSearchRegex",
         "when": "!groog.context.findMode && !inSearchEditor && !searchViewletFocus"
@@ -847,6 +852,11 @@
         "key": "ctrl+a",
         "command": "editor.action.selectAll",
         "when": "groog.context.qmkMode"
+      },
+      {
+        "key": "ctrl+alt+l",
+        "command": "editor.action.selectHighlights",
+        "when": "editorFocus"
       },
       {
         "key": "ctrl+b",
@@ -1236,6 +1246,13 @@
         "when": "groog.context.findMode"
       },
       {
+        "key": "ctrl+shift+l",
+        "command": "groog.jump",
+        "args": {
+          "lines": 100
+        }
+      },
+      {
         "key": "ctrl+shift+n",
         "command": "workbench.action.files.newUntitledFile",
         "when": "!groog.context.findMode"
@@ -1296,6 +1313,13 @@
         "key": "ctrl+shift+tab",
         "command": "workbench.action.terminal.focusPrevious",
         "when": "terminalFocus"
+      },
+      {
+        "key": "ctrl+shift+v",
+        "command": "groog.fall",
+        "args": {
+          "lines": 100
+        }
       },
       {
         "key": "ctrl+t",
@@ -2628,9 +2652,18 @@
         }
       },
       {
+        "key": "shift+pagedown",
+        "command": "groog.fall",
+        "args": {
+          "lines": 100
+        }
+      },
+      {
         "key": "shift+pageup",
-        "command": "editor.action.selectHighlights",
-        "when": "editorFocus"
+        "command": "groog.jump",
+        "args": {
+          "lines": 100
+        }
       },
       {
         "key": "shift+q",

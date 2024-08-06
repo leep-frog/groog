@@ -330,9 +330,13 @@ var (
 			groogFindMode.not().value: kb("groog.kill"),
 		},
 		ctrl("l"):        ctrlLBindings(),
+		ctrl(shift("l")): ctrlShiftLBindings(),
 		pageup:           ctrlLBindings(),
+		shift(pageup):    ctrlShiftLBindings(),
 		ctrl("v"):        ctrlVBindings(),
+		ctrl(shift("v")): ctrlShiftVBindings(),
 		pagedown:         ctrlVBindings(),
+		shift(pagedown):  ctrlShiftVBindings(),
 		ctrl(shift("p")): only("groog.find.previous"),
 		alt("s"):         only("groog.find.toggleSimpleMode"),
 		shift(up): {
@@ -628,10 +632,14 @@ var (
 		// ensures we don't change focus to the menu bar (File, Edit, ...).
 		alt("g"):   only("noop"),
 		ctrlX("o"): only("workbench.action.openRecent"),
-		// ctrl+shift+l in qmk mode
-		shift(pageup): {
+
+		ctrl(alt("l")): {
 			editorFocus.value: kb("editor.action.selectHighlights"),
 		},
+		alt(pageup): { // ctrl+alt+l in qmk mode
+			editorFocus.value: kb("editor.action.selectHighlights"),
+		},
+
 		ctrlZ("k"): only("groog.toggleQMK"),
 		ctrlX("e"): onlyMC(
 			"workbench.view.extensions",
@@ -898,6 +906,22 @@ func ctrlVBindings() map[string]*KB {
 		inQuickOpen.not().and(terminalFocus.not()).value: kb("groog.fall"),
 		// See ctrlLBindings function for description of what this means
 		inQuickOpen.not().and(terminalFocus).value: sendSequence("\u001b[6~"),
+	}
+}
+
+func ctrlShiftLBindings() map[string]*KB {
+	return map[string]*KB{
+		always.value: kbArgs("groog.jump", map[string]interface{}{
+			"lines": 100,
+		}),
+	}
+}
+
+func ctrlShiftVBindings() map[string]*KB {
+	return map[string]*KB{
+		always.value: kbArgs("groog.fall", map[string]interface{}{
+			"lines": 100,
+		}),
 	}
 }
 
