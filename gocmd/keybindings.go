@@ -909,10 +909,14 @@ func ctrlVBindings() map[string]*KB {
 	}
 }
 
+const (
+	superJump = 50
+)
+
 func ctrlShiftLBindings() map[string]*KB {
 	return map[string]*KB{
 		always.value: kbArgs("groog.jump", map[string]interface{}{
-			"lines": 100,
+			"lines": superJump,
 		}),
 	}
 }
@@ -920,7 +924,7 @@ func ctrlShiftLBindings() map[string]*KB {
 func ctrlShiftVBindings() map[string]*KB {
 	return map[string]*KB{
 		always.value: kbArgs("groog.fall", map[string]interface{}{
-			"lines": 100,
+			"lines": superJump,
 		}),
 	}
 }

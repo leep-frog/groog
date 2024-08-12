@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.14",
+  "version": "2.7.15",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -1249,7 +1249,7 @@
         "key": "ctrl+shift+l",
         "command": "groog.jump",
         "args": {
-          "lines": 100
+          "lines": 50
         }
       },
       {
@@ -1318,7 +1318,7 @@
         "key": "ctrl+shift+v",
         "command": "groog.fall",
         "args": {
-          "lines": 100
+          "lines": 50
         }
       },
       {
@@ -2655,14 +2655,14 @@
         "key": "shift+pagedown",
         "command": "groog.fall",
         "args": {
-          "lines": 100
+          "lines": 50
         }
       },
       {
         "key": "shift+pageup",
         "command": "groog.jump",
         "args": {
-          "lines": 100
+          "lines": 50
         }
       },
       {
