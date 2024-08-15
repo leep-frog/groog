@@ -633,10 +633,7 @@ var (
 		alt("g"):   only("noop"),
 		ctrlX("o"): only("workbench.action.openRecent"),
 
-		ctrl(alt("l")): {
-			editorFocus.value: kb("editor.action.selectHighlights"),
-		},
-		alt(pageup): { // ctrl+alt+l in qmk mode
+		alt("l"): {
 			editorFocus.value: kb("editor.action.selectHighlights"),
 		},
 

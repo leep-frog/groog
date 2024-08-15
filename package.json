@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.15",
+  "version": "2.7.16",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -585,17 +585,17 @@
         "command": "groog.indentToPreviousLine"
       },
       {
+        "key": "alt+l",
+        "command": "editor.action.selectHighlights",
+        "when": "editorFocus"
+      },
+      {
         "key": "alt+n",
         "command": "workbench.action.editor.nextChange"
       },
       {
         "key": "alt+p",
         "command": "workbench.action.editor.previousChange"
-      },
-      {
-        "key": "alt+pageup",
-        "command": "editor.action.selectHighlights",
-        "when": "editorFocus"
       },
       {
         "key": "alt+r",
@@ -852,11 +852,6 @@
         "key": "ctrl+a",
         "command": "editor.action.selectAll",
         "when": "groog.context.qmkMode"
-      },
-      {
-        "key": "ctrl+alt+l",
-        "command": "editor.action.selectHighlights",
-        "when": "editorFocus"
       },
       {
         "key": "ctrl+b",
