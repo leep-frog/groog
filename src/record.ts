@@ -522,7 +522,7 @@ export class TypeRecord implements Record {
   }
 
   async playback(emacs: Emacs): Promise<boolean> {
-    return emacs.typeBonusFeatures(this.text).then(() => true);
+    return emacs.typeBonusFeatures(this.text, true).then(() => true);
   }
 
   noop(): boolean {

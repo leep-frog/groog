@@ -197,14 +197,29 @@ export class Emacs {
     );
   }
 
-  public async typeBonusFeatures(s: string): Promise<void> {
-    // Check for a dictionary replacement
-    if ((await this.typoFixer.check(s))) {
-      return;
-    }
+  public async typeBonusFeatures(s: string, skipBonusFeatures?: boolean): Promise<void> {
 
-    if (await handleTypedCharacter(s)) {
-      return;
+    // We don't want to execute typo fixes or auto-close characters in record mode
+    // because it can lead to unexpected behavior (e.g. if we want to add ` next` to each line, and our text is:
+    // sa
+    // se
+    // Then, running the recording on each line would produce the following (due to se->showErrorMessage mapping):
+    // sa next
+    // vscode.window.showErrorMessage(`next`);
+    //
+    // Similarly, type-over might lead to unexpedted behavior if some lines have nested parens and others don't.
+    if (!this.recorder.isActive() && !skipBonusFeatures) {
+
+      // Check for a dictionary replacement
+      // This handles replacements like se -> vscode.window.showErrorMessage(``);
+      if ((await this.typoFixer.check(s))) {
+        return;
+      }
+
+      // This handles auto-open and auto-close characters (like `{}`)
+      if (await handleTypedCharacter(s)) {
+        return;
+      }
     }
 
     return await vscode.commands.executeCommand("default:type", {text: s});

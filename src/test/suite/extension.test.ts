@@ -1858,6 +1858,43 @@ function testCases(): TestCase[] {
         replacementSuffixAfterCursor: "pq\nrstuvw\nxyz",
       }),
     },
+    // Typo while recording tests
+    {
+      name: "Typo fixer isn't run while recording",
+      text: [],
+      expectedSelections: [
+        selection(4, 0),
+      ],
+      expectedText: [
+        // Regular type
+        "ABCDEF ",
+        // Recording
+        "abc ",
+        // End recording
+        "playback",
+        // Play recording
+        "abc ",
+        "",
+      ],
+      userInteractions: [
+        // Type while not recording
+        type("abc"),
+        type(" "),
+        type("\n"),
+        cmd("groog.record.startRecording"),
+        type("abc"),
+        type(" "),
+        type("\n"),
+        cmd("groog.record.endRecording"),
+        type("playback\n"),
+        cmd("groog.record.playRecording"),
+      ],
+      workspaceConfiguration: wordSeparatorConfiguration(' ', {
+        words: {
+          abc: "ABCDEF",
+        },
+      }),
+    },
     // Keyboard toggle tests
     {
       name: "Toggles to QMK mode",
@@ -1879,7 +1916,7 @@ function testCases(): TestCase[] {
         `Basic keyboard mode activated`,
       ],
     },
-    // { TODOOOOOO
+    // { TODO
     // name: "Works for empty file and no changes",
     // },
     {
@@ -6324,6 +6361,58 @@ function testCases(): TestCase[] {
       expectedSelections: [selection(0, 1)],
       userInteractions: [
         type("]"),
+      ],
+    },
+    // Type over while recording tests
+    {
+      name: "Does not type over when recording or playing back",
+      text: [
+        "}",
+        "",
+        "}",
+        "",
+        "}",
+        "",
+        "}}}",
+        "abcde",
+        "012345",
+      ],
+      expectedText: [
+        // Lines edited while not recording
+        "}",
+        "}",
+        // Lines edited while recording
+        "}}",
+        "}",
+        // Lines edited during first playback
+        "end}}",
+        "}",
+        // Lines edited during second playback
+        "}}}}",
+        "a}bcde",
+        "012345",
+      ],
+      expectedSelections: [selection(8, 0)],
+      userInteractions: [
+        // Type it without recording
+        type("}"),
+        cmd('groog.cursorDown'),
+        type("}"),
+        cmd('groog.cursorDown'),
+        cmd('groog.cursorHome'),
+        // Type it with recording
+        cmd("groog.record.startRecording"),
+        type("}"),
+        cmd('groog.cursorDown'),
+        type("}"),
+        cmd('groog.cursorDown'),
+        cmd('groog.cursorHome'),
+        cmd("groog.record.endRecording"),
+        // Type other stuff
+        type("end"),
+        // Playback the recording
+        cmd("groog.record.playRecording"),
+        cmd("groog.record.playRecording"),
       ],
     },
     // Delete right at end of line
