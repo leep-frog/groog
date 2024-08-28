@@ -7565,8 +7565,166 @@ function testCases(): TestCase[] {
         ]),
       },
     },
+    // Jump and fall tests
+    {
+      name: "Jump jumps ten lines by default",
+      text: fileGrid(20, 3),
+      expectedText: fileGrid(20, 3),
+      selections: [selection(17, 1)],
+      expectedSelections: [selection(7, 1)],
+      userInteractions: [
+        cmd("groog.jump"),
+      ],
+    },
+    {
+      name: "Fall falls ten lines by default",
+      text: fileGrid(20, 3),
+      expectedText: fileGrid(20, 3),
+      selections: [selection(7, 1)],
+      expectedSelections: [selection(17, 1)],
+      userInteractions: [
+        cmd("groog.fall"),
+      ],
+    },
+    {
+      name: "Jump goes to beginning of line if too few lines above",
+      text: fileGrid(15, 3),
+      expectedText: fileGrid(15, 3),
+      selections: [selection(4, 2)],
+      expectedSelections: [selection(0, 0)],
+      userInteractions: [
+        cmd("groog.jump"),
+      ],
+    },
+    {
+      name: "Fall goes to end of line if too few lines below",
+      text: fileGrid(15, 3),
+      expectedText: fileGrid(15, 3),
+      selections: [selection(11, 1)],
+      expectedSelections: [selection(14, 3)],
+      userInteractions: [
+        cmd("groog.fall"),
+      ],
+    },
+    {
+      name: "Jump jumps a custom amount",
+      text: fileGrid(15, 3),
+      expectedText: fileGrid(15, 3),
+      selections: [selection(9, 2)],
+      expectedSelections: [selection(5, 2)],
+      userInteractions: [
+        cmd("groog.jump", {
+          lines: 4,
+        }),
+      ],
+    },
+    {
+      name: "Fall falls a custom amount",
+      text: fileGrid(15, 3),
+      expectedText: fileGrid(15, 3),
+      selections: [selection(9, 2)],
+      expectedSelections: [selection(13, 2)],
+      userInteractions: [
+        cmd("groog.fall", {
+          lines: 4,
+        }),
+      ],
+    },
+    // Yank, tug, kill, and maim tests
+    {
+      name: "Yank when no editor does nothing",
+      userInteractions: [
+        cmd("groog.yank"),
+      ],
+    },
+    {
+      name: "Kill when no editor does nothing",
+      userInteractions: [
+        cmd("groog.kill"),
+      ],
+    },
+    {
+      name: "Kill when no text does nothing editor does nothing",
+      text: [
+        "abc",
+      ],
+      expectedText: [
+        "abcdefabcghiabc",
+      ],
+      expectedSelections: [selection(0, 15)],
+      userInteractions: [
+        cmd("groog.kill"),
+        cmd("groog.emacsPaste"),
+        type("def"),
+        cmd("groog.emacsPaste"),
+        cmd("groog.kill"), // Kill at end of line so nothing to get
+        type("ghi"),
+        cmd("groog.emacsPaste"), // Should still paste 'abc'
+      ],
+    },
+    {
+      name: "Maim",
+      text: [
+        "abcdef",
+      ],
+      selections: [selection(0, 3)],
+      expectedText: [
+        "adefbcdef",
+      ],
+      expectedSelections: [selection(0, 4)],
+      userInteractions: [
+        cmd("groog.maim"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.emacsPaste"),
+      ],
+    },
+    {
+      name: "Tug",
+      text: [
+        "abcdef",
+      ],
+      selections: [new vscode.Selection(0, 2, 0, 4)],
+      expectedText: [
+        "cdabcdef",
+      ],
+      expectedSelections: [selection(0, 2)],
+      userInteractions: [
+        cmd("groog.tug"),
+        cmd("groog.cursorHome"),
+        cmd("groog.emacsPaste"),
+      ],
+    },
+    {
+      name: "Highlighting is ended after tugging when active cursor in front",
+      text: [
+        "abcdef",
+      ],
+      selections: [new vscode.Selection(0, 2, 0, 4)],
+      expectedText: [
+        "abcdef",
+      ],
+      expectedSelections: [selection(0, 4)],
+      userInteractions: [
+        cmd("groog.tug"),
+      ],
+    },
+    {
+      name: "Highlighting is ended after tugging when active cursor in back",
+      text: [
+        "abcdef",
+      ],
+      selections: [new vscode.Selection(0, 5, 0, 3)],
+      expectedText: [
+        "abcdef",
+      ],
+      expectedSelections: [selection(0, 3)],
+      userInteractions: [
+        cmd("groog.tug"),
+      ],
+    },
     ...getPasteTestCases(),
-  /* Useful for commenting out tests. */
+    /* Useful for commenting out tests. */
   ];
 }
 
@@ -7616,4 +7774,8 @@ function assertDefined<T>(t: T | undefined, objectName: string): T {
 
 function assertUndefined<T>(t: T | undefined, objectName: string) {
   assert.equal(t, undefined, `Expected ${objectName} to be undefined, but it was defined: ${t}`);
+}
+
+function fileGrid(lines: number, chars: number): string[] {
+  return Array(lines).fill("_".repeat(chars));
 }
