@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.17",
+  "version": "2.7.18",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -1527,6 +1527,16 @@
       },
       {
         "key": "ctrl+x c",
+        "command": "groog.copyFilename",
+        "when": "!activePanel"
+      },
+      {
+        "key": "ctrl+x ctrl+c",
+        "command": "groog.copyFilename",
+        "when": "!activePanel"
+      },
+      {
+        "key": "ctrl+x c",
         "command": "groog.multiCommand.execute",
         "when": "activePanel",
         "args": {
@@ -1924,14 +1934,6 @@
         "args": {
           "text": "\u001f"
         }
-      },
-      {
-        "key": "ctrl+z c",
-        "command": "groog.copyFilename"
-      },
-      {
-        "key": "ctrl+z ctrl+c",
-        "command": "groog.copyFilename"
       },
       {
         "key": "ctrl+z f",
