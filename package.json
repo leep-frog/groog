@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.18",
+  "version": "2.7.19",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -2107,6 +2107,11 @@
         "key": "enter",
         "command": "acceptSelectedSuggestion",
         "when": "suggestWidgetVisible"
+      },
+      {
+        "key": "escape",
+        "command": "groog.ctrlG",
+        "when": "groog.context.terminal.findMode"
       },
       {
         "key": "f",

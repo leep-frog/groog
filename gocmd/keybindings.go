@@ -158,6 +158,7 @@ const (
 	tab       = "tab"
 	enter     = "enter"
 	space     = "space"
+	escape    = "escape"
 )
 
 func kbDefsToBindings() []*Keybinding {
@@ -644,6 +645,7 @@ var (
 		),
 		// Prevent focus mode from ever being activated.
 		ctrl("m"): only("-editor.action.toggleTabFocusMode"),
+		escape:    onlyKBWhen(kb("groog.ctrlG"), groogTerminalFindMode),
 	}
 )
 
