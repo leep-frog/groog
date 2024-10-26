@@ -146,6 +146,9 @@ async function testFile(args: TestFileArgs, lastFile?: vscode.Uri) {
     const javaTestCommand = `zts ${path.parse(file.fsPath).name}`;
     sendTerminalCommand(args, javaTestCommand);
     break;
+  case "py":
+    sendTerminalCommand(args, `prt ${path.parse(file.fsPath)}`);
+    break;
   default:
     if (!args || args.part === 0) {
       vscode.window.showErrorMessage(`Unknown file suffix: ${suffix}`);
