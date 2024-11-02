@@ -11,7 +11,6 @@ import { Recorder } from './record';
 import { Scripts } from './scripts';
 import { Settings } from './settings';
 import { TerminalFindHandler } from './terminal-find';
-import { workCommands } from './work';
 
 export class GlobalBoolTracker {
   private stateTracker: GlobalStateTracker<boolean>;
@@ -159,7 +158,6 @@ export class Emacs {
 
     [
       ...miscCommands,
-      ...workCommands,
     ].forEach(mc => this.recorder.registerCommand(context, mc.name, (args) => mc.f(this, args), {noLock: mc.noLock}));
 
     this.recorder.registerCommand(context, 'testReset', async () => {

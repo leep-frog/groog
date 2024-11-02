@@ -92,7 +92,6 @@ var (
 		cc("groog.yank", "Emacs Yank"),
 		cc("groog.tug", "Emacs Yank (copy only)"),
 		cc("groog.testReset", "Reset test setup"),
-		cc("groog.work.copyLink", "Copy work link for file"),
 
 		cc("groog.script.replaceNewlineStringsWithQuotes", "Groog Script: Replace Newline Strings with Quotes"),
 		cc("groog.script.replaceNewlineStringsWithTicks", "Groog Script: Replace Newline Strings with Ticks"),

@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.20",
+  "version": "2.7.21",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -304,10 +304,6 @@
       {
         "command": "groog.updateSettings",
         "title": "Groog update settings"
-      },
-      {
-        "command": "groog.work.copyLink",
-        "title": "Copy work link for file"
       },
       {
         "command": "groog.yank",
