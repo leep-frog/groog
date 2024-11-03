@@ -14,3 +14,5 @@ vsc-extension-quickstart.md
 coverage/**
 node_modules/**
 gocmd/**
+# I use bundled-out for packaging
+out/**

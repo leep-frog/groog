@@ -2,9 +2,9 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.24",
+  "version": "2.7.27",
   "publisher": "groogle",
-  "main": "./out/extension.js",
+  "main": "./bundled-out/extension.js",
   "engines": {
     "vscode": "^1.81.0"
   },
@@ -19,7 +19,7 @@
     "compile": "tsc -p ./",
     "coverage": "c8 --reporter lcov --check-coverage npm run test",
     "esbuild": "npm run esbuild-base -- --sourcemap",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=bundled-out/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
     "lint": "eslint src --fix --ext ts",
     "posttest": "echo 'Open the following file for html coverage report:\nfile:///C:/Users/gleep/Desktop/Coding/vs-code/groog/coverage/index.html'",

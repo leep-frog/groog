@@ -7,9 +7,9 @@ func groogPackage(versionOverride string) *Package {
 		Name:        "groog",
 		DisplayName: "groog",
 		Description: "",
-		Version:     "2.7.24",
+		Version:     "2.7.27",
 		Publisher:   "groogle",
-		Main:        "./out/extension.js",
+		Main:        "./bundled-out/extension.js",
 		Engines: map[string]string{
 			"vscode": "^1.81.0",
 		},
@@ -23,7 +23,7 @@ func groogPackage(versionOverride string) *Package {
 		Scripts: map[string]string{
 
 			"vscode:prepublish": "npm run esbuild-base -- --minify",
-			"esbuild-base":      "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+			"esbuild-base":      "esbuild ./src/extension.ts --bundle --outfile=bundled-out/extension.js --external:vscode --format=cjs --platform=node",
 			"esbuild":           "npm run esbuild-base -- --sourcemap",
 			"esbuild-watch":     "npm run esbuild-base -- --sourcemap --watch",
 			"test-compile":      "tsc -p ./",
