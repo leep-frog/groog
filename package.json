@@ -4,7 +4,7 @@
   "description": "",
   "version": "2.7.23",
   "publisher": "groogle",
-  "main": "./out/extension.js",
+  "main": "./dist/extension.js",
   "engines": {
     "vscode": "^1.81.0"
   },
