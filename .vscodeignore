@@ -14,5 +14,3 @@ vsc-extension-quickstart.md
 coverage/**
 node_modules/**
 gocmd/**
-# out directory is only used for tests
-out/**
