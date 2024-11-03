@@ -1,4 +1,3 @@
-# Files that were automatically added
 .vscode/**
 .vscode-test/**
 src/**
@@ -9,10 +8,3 @@ vsc-extension-quickstart.md
 **/.eslintrc.json
 **/*.map
 **/*.ts
-
-# Files I added
-coverage/**
-node_modules/**
-gocmd/**
-# out directory is only used for tests
-out/**
