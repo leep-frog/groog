@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { handleDeleteCharacter, handleTypedCharacter } from './character-functions';
 import { ColorMode } from './color_mode';
 import { FindHandler } from './find';
-import { Registerable, TypeHandler, getPrefixText } from './handler';
+import { getPrefixText, Registerable, TypeHandler } from './handler';
 import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { TypoFixer } from './internal-typos';
 import { MarkHandler } from './mark';
@@ -10,6 +10,7 @@ import { miscCommands, miscTestReset, multiCommand } from './misc-command';
 import { Recorder } from './record';
 import { Scripts } from './scripts';
 import { Settings } from './settings';
+import { stubs, TestResetArgs } from './stubs';
 import { TerminalFindHandler } from './terminal-find';
 
 export class GlobalBoolTracker {
@@ -160,7 +161,7 @@ export class Emacs {
       ...miscCommands,
     ].forEach(mc => this.recorder.registerCommand(context, mc.name, (args) => mc.f(this, args), {noLock: mc.noLock}));
 
-    this.recorder.registerCommand(context, 'testReset', async () => {
+    this.recorder.registerCommand(context, 'testReset', async (trArgs: TestResetArgs) => {
       if (process.env.TEST_MODE) {
         this.lastVisitedFile = undefined;
         for (const h of this.typeHandlers) {
@@ -168,8 +169,17 @@ export class Emacs {
         }
         miscTestReset();
         this.typoFixer.reload(true);
+        stubs.configureForTest(trArgs.execStubs || []);
       } else {
         vscode.window.showErrorMessage(`Cannot run testReset outside of test mode!`);
+      }
+    });
+
+    this.recorder.registerCommand(context, 'testVerify', async () => {
+      if (process.env.TEST_MODE) {
+        stubs.verify();
+      } else {
+        vscode.window.showErrorMessage(`Cannot run testVerify outside of test mode!`);
       }
     });
 

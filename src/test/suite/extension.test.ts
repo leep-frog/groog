@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import { tabbify } from '../../emacs';
 import { Document, FIND_MEMORY_MS, FindQuickPickItem, FindRecord, Match } from '../../find';
 import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
+import { ExecStub, TestResetArgs } from '../../stubs';
 import { Correction } from '../../typos';
 import path = require('path');
 
@@ -1459,6 +1460,7 @@ export interface TestCase extends SimpleTestCaseProps {
   name: string;
   runSolo?: boolean;
   clipboard?: string[];
+  execStubs?: ExecStub[];
 }
 
 const TEST_ITERATIONS = 1;
@@ -6728,7 +6730,7 @@ function testCases(): TestCase[] {
         "General Kenobi",
       ],
     },
-    // Copy file name tests
+    // Copy file link tests
     {
       name: "Fails to copy file name if no editor",
       userInteractions: [
@@ -6739,23 +6741,98 @@ function testCases(): TestCase[] {
       ],
     },
     {
-      name: "Copies file name",
+      name: "Fails to copy file link if exec error",
       file: startingFile("empty.go"),
       expectedText: [
-        "empty.gopackage main",
+        "package main",
         "",
         "func main() {",
         "",
         "}",
         "",
       ],
-      expectedSelections: [selection(0, 8)],
+      execStubs: [{
+        wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
+        err: "oops",
+      }],
+      expectedErrorMessages: [
+        `Failed to get git repository info: oops; stderr:\n`,
+      ],
+      userInteractions: [
+        cmd("groog.copyFilename"),
+      ],
+    },
+    {
+      name: "Fails to copy file link if exec stderr",
+      file: startingFile("empty.go"),
+      expectedText: [
+        "package main",
+        "",
+        "func main() {",
+        "",
+        "}",
+        "",
+      ],
+      execStubs: [{
+        wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
+        stderr: "whoops",
+      }],
+      expectedErrorMessages: [
+        `Failed to get git repository info: undefined; stderr:\nwhoops`,
+      ],
+      userInteractions: [
+        cmd("groog.copyFilename"),
+      ],
+    },
+    {
+      name: "Copies file link",
+      file: startingFile("empty.go"),
+      expectedText: [
+        "package main",
+        "https://www.github.com/some-user/arbitrary-repo/path/blob/main/src/test/test-workspace/empty.go#L2",
+        "func main() {",
+        "",
+        "}",
+        "",
+      ],
+      selections: [selection(1, 0)],
+      expectedSelections: [selection(1, 98)],
+      execStubs: [{
+        wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
+        stdout: "git@github.com:some-user/arbitrary-repo/path.git",
+      }],
+      expectedInfoMessages: [
+        `File link copied!`,
+      ],
       userInteractions: [
         cmd("groog.copyFilename"),
         cmd("groog.paste"),
       ],
+    },
+    {
+      name: "Copies file link from more nested directory",
+      file: startingFile("copy-imports", "BlockComment.java"),
+      expectedText: [
+        `/* Block`,
+        ` * comment`,
+        ` */`,
+        `package copy.imports.comment; /* Suffix block comment */`,
+        `/* Another block comment */`,
+        `https://www.github.com/some-user/arbitrary-repo/path/blob/main/src/test/test-workspace/copy-imports/BlockComment.java#L3-L5`,
+      ],
+      selections: [new vscode.Selection(2, 2, 4, 1)],
+      expectedSelections: [selection(5, 123)],
+      execStubs: [{
+        wantArgs: `cd ${startingFile("copy-imports").replace(/^C/, 'c')} && git ls-remote --get-url`,
+        stdout: "git@github.com:some-user/arbitrary-repo/path.git",
+      }],
       expectedInfoMessages: [
-        "Filename copied!",
+        `File link copied!`,
+      ],
+      userInteractions: [
+        cmd("groog.copyFilename"),
+        cmd("groog.cursorBottom"),
+        cmd("groog.paste"),
       ],
     },
     // Copy imports test
@@ -6960,46 +7037,6 @@ function testCases(): TestCase[] {
       ],
       userInteractions: [
         cmd("groog.clearRunSolo"),
-      ],
-    },
-    // work.copyLink tests
-    {
-      name: "Fails to copy file link if no editor",
-      userInteractions: [
-        cmd("groog.work.copyLink"),
-      ],
-      expectedErrorMessages: [
-        "No active editor",
-      ],
-    },
-    {
-      name: "Successfully copies file link",
-      file: startingFile("copy-imports", "SimplePackage.java"),
-      selections: [selection(1, 0)],
-      expectedText: [
-        'package copy.imports.simple;',
-        // Added
-        `https://code.amazon.com/packages/${pathParts()[5]}/blobs/mainline/--/${pathParts("copy-imports", "SimplePackage.java").slice(6).join('/')}#L2`,
-      ],
-      expectedSelections: [selection(1, 130)],
-      userInteractions: [
-        cmd("groog.work.copyLink"),
-        cmd("groog.paste"),
-      ],
-    },
-    {
-      name: "Successfully copies file link when multi-line",
-      file: startingFile("copy-imports", "SimplePackage.java"),
-      selections: [
-        new vscode.Selection(0, 0, 1, 0),
-      ],
-      expectedText: [
-        `https://code.amazon.com/packages/${pathParts()[5]}/blobs/mainline/--/${pathParts("copy-imports", "SimplePackage.java").slice(6).join('/')}#L1-L2`,
-      ],
-      expectedSelections: [selection(0, 133)],
-      userInteractions: [
-        cmd("groog.work.copyLink"),
-        cmd("groog.paste"),
       ],
     },
     // Multi-command tests
@@ -7748,9 +7785,13 @@ suite('Groog commands', () => {
       test(TEST_ITERATIONS > 1 ? `{${iteration+1}/${TEST_ITERATIONS}} ${testName}` : testName, async () => {
 
         if (idx) {
+          const trArgs : TestResetArgs = {
+            execStubs: tc.execStubs,
+          };
           tc.userInteractions = [
-            cmd("groog.testReset"),
+            cmd("groog.testReset", trArgs),
             ...(tc.userInteractions || []),
+            cmd("groog.testVerify"),
           ];
         }
 

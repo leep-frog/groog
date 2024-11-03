@@ -2,6 +2,7 @@ import { basename } from 'path';
 import * as vscode from 'vscode';
 import { endDocumentPosition } from './character-functions';
 import { Emacs } from './emacs';
+import { stubs } from './stubs';
 import path = require('path');
 import gitRepoInfo = require('git-repo-info');
 const { exec } = require('child_process');
@@ -189,17 +190,19 @@ export function getLineNumbers(editor: vscode.TextEditor) {
   }).join(",");
 }
 
+
+
 async function copyFileName(editor: vscode.TextEditor) {
-  exec(`cd ${path.dirname(editor.document.uri.fsPath)} && git ls-remote --get-url`, (err: any, stdout: string, stderr: string) => {
+  stubs.execFunc(`cd ${path.dirname(editor.document.uri.fsPath)} && git ls-remote --get-url`, (err: any, stdout: string, stderr: string) => {
     if (err || stderr) {
-      vscode.window.showErrorMessage(`Failed to get git repository info: ${err}; stderr: \n${stderr}`);
+      vscode.window.showErrorMessage(`Failed to get git repository info: ${err}; stderr:\n${stderr}`);
       return;
     }
     const remoteURL = stdout.trim().replace(/^git@/, "").replace(/\.git$/, "").replace(":", "/");
 
     // Get the relative path
     const repoInfo = gitRepoInfo(editor.document.uri.fsPath);
-    const relativePath = path.relative(repoInfo.root, editor.document.uri.fsPath);
+    const relativePath = path.relative(repoInfo.root, editor.document.uri.fsPath).replace(/\\/g, '/');
 
     // Copy link
     vscode.env.clipboard.writeText(`https://www.${remoteURL}/blob/${repoInfo.branch}/${relativePath}#${getLineNumbers(editor)}`);
