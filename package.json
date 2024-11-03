@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.23",
+  "version": "2.7.22",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -16,19 +16,18 @@
     "Other"
   ],
   "scripts": {
-    "check-types": "tsc --noEmit",
-    "compile": "npm run check-types && node esbuild.js",
-    "compile-tests": "tsc -p . --outDir out",
+    "compile": "tsc -p ./",
     "coverage": "c8 --reporter lcov --check-coverage npm run test",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
     "lint": "eslint src --fix --ext ts",
-    "package": "npm run check-types && node esbuild.js --production",
     "posttest": "echo 'Open the following file for html coverage report:\nfile:///C:/Users/gleep/Desktop/Coding/vs-code/groog/coverage/index.html'",
-    "pretest": "npm run compile-tests",
+    "pretest": "npm run compile",
     "test": "vscode-test --coverage --coverageReporter lcov --coverageReporter html && ts-node ./src/scripts/html-editor.ts ./coverage/index.html",
-    "vscode:prepublish": "npm run package",
-    "watch": "npm-run-all -p watch:*",
-    "watch:esbuild": "node esbuild.js --watch",
-    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json"
+    "test-compile": "tsc -p ./",
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "watch": "tsc -watch -p ./"
   },
   "dependencies": {
     "@leep-frog/vscode-test-stubber": "^1.11.5",
