@@ -7789,9 +7789,9 @@ suite('Groog commands', () => {
             execStubs: tc.execStubs,
           };
           tc.userInteractions = [
-            cmd("groog.testReset", trArgs),
+            cmd("groog.test.reset", trArgs),
             ...(tc.userInteractions || []),
-            cmd("groog.testVerify"),
+            cmd("groog.test.verify"),
           ];
         }
 

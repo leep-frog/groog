@@ -161,7 +161,7 @@ export class Emacs {
       ...miscCommands,
     ].forEach(mc => this.recorder.registerCommand(context, mc.name, (args) => mc.f(this, args), {noLock: mc.noLock}));
 
-    this.recorder.registerCommand(context, 'testReset', async (trArgs: TestResetArgs) => {
+    this.recorder.registerCommand(context, 'test.reset', async (trArgs: TestResetArgs) => {
       if (process.env.TEST_MODE) {
         this.lastVisitedFile = undefined;
         for (const h of this.typeHandlers) {
@@ -171,15 +171,15 @@ export class Emacs {
         this.typoFixer.reload(true);
         stubs.configureForTest(trArgs.execStubs || []);
       } else {
-        vscode.window.showErrorMessage(`Cannot run testReset outside of test mode!`);
+        vscode.window.showErrorMessage(`Cannot run test.reset outside of test mode!`);
       }
     });
 
-    this.recorder.registerCommand(context, 'testVerify', async () => {
+    this.recorder.registerCommand(context, 'test.verify', async () => {
       if (process.env.TEST_MODE) {
         stubs.verify();
       } else {
-        vscode.window.showErrorMessage(`Cannot run testVerify outside of test mode!`);
+        vscode.window.showErrorMessage(`Cannot run test.verify outside of test mode!`);
       }
     });
 

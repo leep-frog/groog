@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.21",
+  "version": "2.7.22",
   "publisher": "groogle",
   "main": "./out/extension.js",
   "engines": {
@@ -274,8 +274,12 @@
         "title": "Groog find in terminal"
       },
       {
-        "command": "groog.testReset",
-        "title": "Reset test setup"
+        "command": "groog.test.reset",
+        "title": "Reset test execution"
+      },
+      {
+        "command": "groog.test.verify",
+        "title": "Verify test execution"
       },
       {
         "command": "groog.toggleMarkMode",
