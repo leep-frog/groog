@@ -109,10 +109,19 @@ export class Settings implements Registerable {
   }
 
   private static async updateSettings(): Promise<void> {
-    for (const s of this.settings()) {
-      await s.update();
+    const missingConfigs : string[] = [];
+    for (const setting of this.settings()) {
+      const missingConfig = await setting.update();
+      if (missingConfig) {
+        missingConfigs.push(missingConfig);
+      }
     }
-    vscode.window.showInformationMessage("Settings have been updated!");
+
+    if (missingConfigs) {
+      vscode.window.showErrorMessage(`The following settings are not registered: ${missingConfigs.join(", ")}`);
+    } else {
+      vscode.window.showInformationMessage("Settings have been updated!");
+    }
   }
 
   register(context: vscode.ExtensionContext, recorder: Recorder): void {
@@ -121,7 +130,7 @@ export class Settings implements Registerable {
 }
 
 interface Setting {
-  update(): Promise<void>;
+  update(): Promise<string | undefined>;
 }
 
 export class GroogSetting implements Setting {
@@ -138,8 +147,14 @@ export class GroogSetting implements Setting {
     this.configurationTarget = workspaceTarget ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global;
   }
 
-  async update(): Promise<void> {
-    await vscode.workspace.getConfiguration(this.configSection).update(this.subsection, this.value, this.configurationTarget);
+  async update(): Promise<string | undefined> {
+    const vsConfig = vscode.workspace.getConfiguration(this.configSection);
+    console.log("ON IT: " + JSON.stringify(vsConfig));
+    if (!vsConfig.has(this.subsection)) {
+      return `${this.configSection}.${this.subsection}`;
+    }
+
+    await vsConfig.update(this.subsection, this.value, this.configurationTarget);
   }
 }
 
@@ -155,7 +170,7 @@ export class WordSeparatorSetting implements Setting {
     this.addCharacters = addCharacters;
   }
 
-  async update(): Promise<void> {
+  async update(): Promise<string | undefined> {
     let [configuration, existing] = WordSeparatorSetting.getWordSeparators();
     if (!existing) {
       vscode.window.showErrorMessage(`Failed to fetch ${WordSeparatorSetting.configSection}.${WordSeparatorSetting.configSubsection} setting`);
@@ -167,6 +182,7 @@ export class WordSeparatorSetting implements Setting {
       }
     }
     await configuration.update(WordSeparatorSetting.configSubsection, existing, vscode.ConfigurationTarget.Global);
+    return;
   }
 
   public static getWordSeparators(): [vscode.WorkspaceConfiguration, string | undefined] {
@@ -189,7 +205,8 @@ class LanguageSetting implements Setting {
     this.value = value;
   }
 
-  async update(): Promise<void> {
+  async update(): Promise<string | undefined> {
     await vscode.workspace.getConfiguration(this.configSection, { languageId: this.languageId }).update(this.subsection, this.value, vscode.ConfigurationTarget.Global, true);
+    return;
   }
 }
