@@ -117,8 +117,8 @@ export class Settings implements Registerable {
       }
     }
 
-    if (missingConfigs) {
-      vscode.window.showErrorMessage(`The following settings are not registered: ${missingConfigs.join(", ")}`);
+    if (missingConfigs.length > 0) {
+      vscode.window.showErrorMessage(`The following errors occurred while updating settings: ${missingConfigs.join(", ")}`);
     } else {
       vscode.window.showInformationMessage("Settings have been updated!");
     }
@@ -149,12 +149,11 @@ export class GroogSetting implements Setting {
 
   async update(): Promise<string | undefined> {
     const vsConfig = vscode.workspace.getConfiguration(this.configSection);
-    console.log("ON IT: " + JSON.stringify(vsConfig));
-    if (!vsConfig.has(this.subsection)) {
-      return `${this.configSection}.${this.subsection}`;
+    try {
+      await vsConfig.update(this.subsection, this.value, this.configurationTarget);
+    } catch (e) {
+      return `${e}`;
     }
-
-    await vsConfig.update(this.subsection, this.value, this.configurationTarget);
   }
 }
 
