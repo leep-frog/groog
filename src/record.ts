@@ -402,6 +402,7 @@ export class Recorder extends TypeHandler {
       buttons: [
         new SaveRecentRecordingButton(),
         recordBook.repeatable() ? new RepeatRecordingButton() : undefined,
+        new NTimesRecordingButton(),
       ].filter(btn => btn) as vscode.QuickInputButton[],
       label: `${RECENT_RECORDING_PREFIX} ${this.recordBooks.length - 1 - idx}`,
     };
@@ -413,6 +414,7 @@ export class Recorder extends TypeHandler {
         label: a[0],
         buttons: [
           a[1].repeatable() ? new RepeatRecordingButton() : undefined,
+          new NTimesRecordingButton(),
         ].filter(btn => btn) as vscode.QuickInputButton[],
       };})
       .sort((a, b) => a.label.localeCompare(b.label));
@@ -435,13 +437,17 @@ export class Recorder extends TypeHandler {
       // When pressing a button
       input.onDidTriggerItemButton(async (event: vscode.QuickPickItemButtonEvent<RecordBookQuickPickItem>): Promise<any> => {
         switch (event.button.constructor) {
+        case SaveRecentRecordingButton:
+          input.dispose();
+          this.saveNewRec(event.item.recordBook);
+          break;
         case RepeatRecordingButton:
           input.dispose();
           await event.item.recordBook.repeatedPlayback(this.emacs);
           break;
-        case SaveRecentRecordingButton:
+        case NTimesRecordingButton:
           input.dispose();
-          this.saveNewRec(event.item.recordBook);
+          await event.item.recordBook.nPlaybacks(this.emacs);
           break;
         default:
           vscode.window.showErrorMessage(`Unknown item button`);
@@ -654,5 +660,14 @@ class RepeatRecordingButton implements vscode.QuickInputButton {
     // Considered options for this were `sync`, `debug-rerun`, `run-all`
     this.iconPath = new vscode.ThemeIcon("debug-rerun");
     this.tooltip = "Run repeatedly";
+  }
+}
+
+class NTimesRecordingButton implements vscode.QuickInputButton {
+  readonly iconPath: vscode.ThemeIcon;
+  readonly tooltip?: string;
+  constructor() {
+    this.iconPath = new vscode.ThemeIcon("run-all"); // Or maybe `symbol-number` for icon?
+    this.tooltip = "Run N times";
   }
 }

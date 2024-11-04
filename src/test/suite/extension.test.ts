@@ -1415,6 +1415,13 @@ function recordingQuickPick(props: RecordingQuickPickProps) {
     });
   }
 
+  buttons.push({
+    iconPath: {
+      id: "run-all",
+    },
+    tooltip: "Run N times",
+  });
+
   return {
     buttons,
     label: props.label,
@@ -5900,6 +5907,198 @@ function testCases(): TestCase[] {
       ],
     },
     {
+      name: "Repeat n-times recording works with button",
+      text: [
+        "def",
+      ],
+      expectedText: [
+        "abcabcabcabcdef",
+      ],
+      expectedSelections: [
+        selection(0, 12),
+      ],
+      userInteractions: [
+        cmd("groog.record.startRecording"),
+        type("abc"),
+        cmd("groog.record.endRecording"),
+        cmd("groog.record.playNamedRecording"),
+        new PressItemButtonQuickPickAction("Recent recording 0", 1),
+      ],
+      inputBoxResponses: [
+        "3",
+      ],
+      expectedInputBoxes: [
+        {
+          options: {
+            prompt: "17",
+            title: "Number of times to playback the recording",
+            validateInputProvided: true,
+          },
+        },
+      ],
+      expectedQuickPicks:[
+        [
+          recordingQuickPick({
+            label: "Recent recording 0",
+            recordBook: recordBook([
+              new TypeRecord("abc"),
+            ]),
+            savable: true,
+          }),
+        ],
+      ],
+    },
+    {
+      name: "Repeat n-times recording works with button for saved recording",
+      text: [
+        "def",
+      ],
+      expectedText: [
+        "abcabcabcabcabcabcabcabcabcabcabcabcdef",
+      ],
+      expectedSelections: [
+        selection(0, 36),
+      ],
+      userInteractions: [
+        cmd("groog.record.startRecording"),
+        type("abc"),
+        cmd("groog.record.saveRecordingAs"),
+        cmd("groog.record.playNamedRecording"),
+        new PressItemButtonQuickPickAction("some-recording", 0),
+      ],
+      expectedInfoMessages: [
+        `Recording saved as "some-recording"!`,
+      ],
+      inputBoxResponses: [
+        "some-recording",
+        "11",
+      ],
+      expectedInputBoxes: [
+        {
+          options: {
+            placeHolder: "Recording name",
+            title: "Save recording as:",
+            validateInputProvided: true,
+          },
+        },
+        {
+          options: {
+            prompt: "17",
+            title: "Number of times to playback the recording",
+            validateInputProvided: true,
+          },
+        },
+      ],
+      expectedQuickPicks:[
+        [
+          recordingQuickPick({
+            label: "Recent recording 0",
+            recordBook: recordBook([
+              new TypeRecord("abc"),
+            ]),
+            savable: true,
+          }),
+          recordingQuickPick({
+            label: "some-recording",
+            recordBook: recordBook([
+              new TypeRecord("abc"),
+            ]),
+          }),
+        ],
+      ],
+    },
+    {
+      name: "Repeat n-times recording works with button for repeatable recording",
+      text: [
+        "abc",
+        "def",
+        "ghi",
+        "abc",
+        "def",
+        "ghi",
+        "abc",
+        "def",
+        "ghi",
+        "abc",
+        "def",
+        "ghi",
+      ],
+      expectedText: [
+        "abc",
+        "defxyzxyz",
+        "ghi",
+        "abc",
+        "defxyzxyz",
+        "ghi",
+        "abc",
+        "defxyz",
+        "ghi",
+        "abc",
+        "defxyz",
+        "ghi",
+      ],
+      expectedSelections: [
+        selection(4, 6),
+      ],
+      userInteractions: [
+        cmd("groog.record.startRecording"),
+        cmd("groog.find"),
+        type("def"),
+        ctrlG,
+        ctrlG,
+        type("xyz"),
+        cmd("groog.record.endRecording"),
+        cmd("groog.record.playNamedRecording"),
+        new PressItemButtonQuickPickAction("Recent recording 0", 2),
+      ],
+      inputBoxResponses: [
+        "5",
+      ],
+      expectedInputBoxes: [
+        {
+          options: {
+            title: "Number of times to playback the recording (4 matches found)",
+            value: "4",
+            prompt: undefined,
+            validateInputProvided: true,
+          },
+        },
+      ],
+      expectedQuickPicks:[
+        // groog.find
+        [
+          " ",
+          "Flags: []",
+          "No results",
+        ],
+        // type 'def'
+        [
+          "def",
+          "Flags: []",
+          "1 of 4",
+        ],
+        // playNamedRecording (to save)
+        [
+          recordingQuickPick({
+            label: "Recent recording 0",
+            recordBook: recordBook([
+              new FindRecord(0, {
+                caseInsensitive: true,
+                prevMatchOnChange: false,
+                queryText: "def",
+                regex: false,
+                wholeWord: false,
+              }, 4, 1),
+              new CommandRecord("groog.ctrlG"),
+              new TypeRecord("xyz"),
+            ]),
+            savable: true,
+            repeatable: true,
+          }),
+        ],
+      ],
+    },
+    {
       name: "Repeat findable recording n times when n < numberOfMatches",
       text: [
         "abc",
@@ -6108,7 +6307,7 @@ function testCases(): TestCase[] {
           "Flags: []",
           "No results",
         ],
-        // type 'abc'
+        // type 'def'
         [
           "def",
           "Flags: []",
