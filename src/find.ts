@@ -880,6 +880,11 @@ export class FindRecord implements Record {
     this.matchIdx = matchIdx ?? -1;
   }
 
+  numberOfMatches(editor: vscode.TextEditor): number {
+    const mt = new Document(editor.document.getText()).matches(this.matchProps);
+    return mt[0].length;
+  }
+
   async playback(emacs: Emacs, repeatMode?: boolean): Promise<boolean> {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {

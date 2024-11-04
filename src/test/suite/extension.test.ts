@@ -1456,6 +1456,41 @@ export function selection(line: number, char: number) : vscode.Selection {
   return new vscode.Selection(line, char, line, char);
 }
 
+function nTimesRecordValidationTestCase(name: string, input: string): TestCase {
+  return {
+    name,
+    text: [
+      "def",
+    ],
+    expectedText: [
+      "abcdef",
+    ],
+    expectedSelections: [
+      selection(0, 3),
+    ],
+    userInteractions: [
+      cmd("groog.record.startRecording"),
+      type("abc"),
+      cmd("groog.record.endRecording"),
+      cmd("groog.record.playRecordingNTimes"),
+    ],
+    inputBoxResponses: [
+      input,
+    ],
+    expectedInputBoxes: [
+      {
+        options: {
+          prompt: "17",
+          title: "Number of times to playback the recording",
+          value: undefined,
+          validateInputProvided: true,
+        },
+        validationMessage: "Input must be a positive integer",
+      },
+    ],
+  };
+}
+
 export interface TestCase extends SimpleTestCaseProps {
   name: string;
   runSolo?: boolean;
@@ -4277,7 +4312,7 @@ function testCases(): TestCase[] {
       ],
     },
     {
-      name: "Record playback fails if no recording set",
+      name: "Record playback repeatedly fails if no recording set",
       text: [
         "abc",
       ],
@@ -4286,6 +4321,21 @@ function testCases(): TestCase[] {
       ],
       userInteractions: [
         cmd("groog.record.playRecordingRepeatedly"),
+      ],
+      expectedErrorMessages: [
+        `No recordings exist yet!`,
+      ],
+    },
+    {
+      name: "Record playback n times fails if no recording set",
+      text: [
+        "abc",
+      ],
+      expectedText: [
+        "abc",
+      ],
+      userInteractions: [
+        cmd("groog.record.playRecordingNTimes"),
       ],
       expectedErrorMessages: [
         `No recordings exist yet!`,
@@ -4484,6 +4534,31 @@ function testCases(): TestCase[] {
         cmd("groog.record.startRecording"),
         type("x"),
         cmd("groog.record.playRecordingRepeatedly"),
+        type("y"),
+        cmd("groog.record.endRecording"),
+        type("\n"),
+        cmd("groog.record.playRecording"),
+      ],
+      expectedErrorMessages: [
+        `Still recording!`,
+      ],
+    },
+    {
+      name: "Fails to n-times playback if actively recording",
+      text: [
+        "abc",
+      ],
+      expectedText: [
+        "xy",
+        "xyabc",
+      ],
+      expectedSelections: [
+        selection(1, 2),
+      ],
+      userInteractions: [
+        cmd("groog.record.startRecording"),
+        type("x"),
+        cmd("groog.record.playRecordingNTimes"),
         type("y"),
         cmd("groog.record.endRecording"),
         type("\n"),
@@ -5720,6 +5795,285 @@ function testCases(): TestCase[] {
       ],
       expectedErrorMessages: [
         `No match found during recording playback`,
+      ],
+    },
+    // Repeat recording N times
+    {
+      name: "Repeat n-times fails if no active editor",
+      text: [
+        "abc",
+        " def_",
+        "  ghi__",
+        " def_",
+        "abc",
+      ],
+      userInteractions: [
+        cmd("groog.record.startRecording"),
+        cmd("groog.find"),
+        type("def"),
+        ctrlG,
+        type("XYZ"),
+        cmd("groog.record.endRecording"),
+        closeAllEditors,
+        cmd("groog.record.playRecordingNTimes"),
+      ],
+      expectedQuickPicks:[
+        // groog.find
+        [
+          " ",
+          "Flags: []",
+          "No results",
+        ],
+        // type 'def'
+        [
+          "def",
+          "Flags: []",
+          "1 of 2",
+        ],
+      ],
+      expectedErrorMessages: [
+        "No active text editor",
+      ],
+    },
+    nTimesRecordValidationTestCase("Repeat n-times recording disallows empty input", ""),
+    nTimesRecordValidationTestCase("Repeat n-times recording disallows string input", "x"),
+    nTimesRecordValidationTestCase("Repeat n-times recording disallows negative number input", "-1"),
+    nTimesRecordValidationTestCase("Repeat n-times recording disallows zero input", "0"),
+    nTimesRecordValidationTestCase("Repeat n-times recording disallows leading zero input", "03"),
+    {
+      name: "Repeat n-times recording works",
+      text: [
+        "def",
+      ],
+      expectedText: [
+        "abcabcdef",
+      ],
+      expectedSelections: [
+        selection(0, 6),
+      ],
+      userInteractions: [
+        cmd("groog.record.startRecording"),
+        type("abc"),
+        cmd("groog.record.endRecording"),
+        cmd("groog.record.playRecordingNTimes"),
+      ],
+      inputBoxResponses: [
+        "1",
+      ],
+      expectedInputBoxes: [
+        {
+          options: {
+            prompt: "17",
+            title: "Number of times to playback the recording",
+            value: undefined,
+            validateInputProvided: true,
+          },
+        },
+      ],
+    },
+    {
+      name: "Repeat n-times recording works",
+      text: [
+        "def",
+      ],
+      expectedText: [
+        "abcabcabcabcabcabcabcabcdef",
+      ],
+      expectedSelections: [
+        selection(0, 24),
+      ],
+      userInteractions: [
+        cmd("groog.record.startRecording"),
+        type("abc"),
+        cmd("groog.record.endRecording"),
+        cmd("groog.record.playRecordingNTimes"),
+      ],
+      inputBoxResponses: [
+        "7",
+      ],
+      expectedInputBoxes: [
+        {
+          options: {
+            prompt: "17",
+            title: "Number of times to playback the recording",
+            value: undefined,
+            validateInputProvided: true,
+          },
+        },
+      ],
+    },
+    {
+      name: "Repeat findable recording n times when n < numberOfMatches",
+      text: [
+        "abc",
+        "1",
+        "defabc",
+        "2",
+        ".abcabc...abc.....",
+      ],
+      expectedText: [
+        "xyz",
+        "1",
+        "defxyz",
+        "2",
+        ".xyzabc...abc.....",
+      ],
+      expectedSelections: [
+        selection(4, 4),
+      ],
+      userInteractions: [
+        cmd("groog.record.startRecording"),
+        cmd("groog.find"),
+        type("abc"),
+        ctrlG,
+        cmd("groog.deleteLeft"),
+        type("xyz"),
+        cmd("groog.record.endRecording"),
+        cmd("groog.record.playRecordingNTimes"),
+      ],
+      expectedQuickPicks:[
+        // groog.find
+        [
+          " ",
+          "Flags: []",
+          "No results",
+        ],
+        // type 'abc'
+        [
+          "abc",
+          "Flags: []",
+          "1 of 5",
+        ],
+      ],
+      inputBoxResponses: [
+        "2",
+      ],
+      expectedInputBoxes: [
+        {
+          options: {
+            prompt: undefined,
+            title: "Number of times to playback the recording",
+            value: "4",
+            validateInputProvided: true,
+          },
+        },
+      ],
+    },
+    {
+      name: "Repeat findable recording n times when n == numberOfMatches",
+      text: [
+        "abc",
+        "1",
+        "defabc",
+        "2",
+        ".abcabc...abc.....",
+      ],
+      expectedText: [
+        "xyz",
+        "1",
+        "defxyz",
+        "2",
+        ".xyzxyz...xyz.....",
+      ],
+      expectedSelections: [
+        selection(4, 13),
+      ],
+      userInteractions: [
+        cmd("groog.record.startRecording"),
+        cmd("groog.find"),
+        type("abc"),
+        ctrlG,
+        cmd("groog.deleteLeft"),
+        type("xyz"),
+        cmd("groog.record.endRecording"),
+        cmd("groog.record.playRecordingNTimes"),
+      ],
+      expectedQuickPicks:[
+        // groog.find
+        [
+          " ",
+          "Flags: []",
+          "No results",
+        ],
+        // type 'abc'
+        [
+          "abc",
+          "Flags: []",
+          "1 of 5",
+        ],
+      ],
+      inputBoxResponses: [
+        "4",
+      ],
+      expectedInputBoxes: [
+        {
+          options: {
+            prompt: undefined,
+            title: "Number of times to playback the recording",
+            value: "4",
+            validateInputProvided: true,
+          },
+        },
+      ],
+    },
+    {
+      name: "Repeat findable recording n times when n > numberOfMatches",
+      text: [
+        "abc",
+        "1",
+        "defabc",
+        "2",
+        ".abcabc...abc.....",
+      ],
+      expectedText: [
+        "xyz",
+        "1",
+        "defxyz",
+        "2",
+        ".xyzxyz...xyz.....",
+      ],
+      expectedSelections: [
+        selection(4, 13),
+      ],
+      userInteractions: [
+        cmd("groog.record.startRecording"),
+        cmd("groog.find"),
+        type("abc"),
+        ctrlG,
+        cmd("groog.deleteLeft"),
+        type("xyz"),
+        cmd("groog.record.endRecording"),
+        cmd("groog.record.playRecordingNTimes"),
+      ],
+      expectedQuickPicks:[
+        // groog.find
+        [
+          " ",
+          "Flags: []",
+          "No results",
+        ],
+        // type 'abc'
+        [
+          "abc",
+          "Flags: []",
+          "1 of 5",
+        ],
+      ],
+      inputBoxResponses: [
+        "10",
+      ],
+      expectedErrorMessages: [
+        "No match found during recording playback",
+      ],
+      expectedInputBoxes: [
+        {
+          options: {
+            prompt: undefined,
+            title: "Number of times to playback the recording",
+            value: "4",
+            validateInputProvided: true,
+          },
+        },
       ],
     },
     // SaveRecentRecordingButton

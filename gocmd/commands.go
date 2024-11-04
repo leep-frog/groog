@@ -74,6 +74,7 @@ var (
 		cc("groog.record.playNamedRecording", "Groog Play Named Recording..."),
 		cc("groog.record.playRecording", "Groog Play Recording"),
 		cc("groog.record.playRecordingRepeatedly", "Groog Play Recording Repeatedly"),
+		cc("groog.record.playRecordingNTimes", "Groog Play Recording N Times"),
 		cc("groog.record.deleteRecording", "Groog Delete Recording"),
 		cc("groog.record.saveRecordingAs", "Groog Save Recording As..."),
 		cc("groog.record.startRecording", "Groog Start Recording"),

@@ -51,13 +51,14 @@ export class RecordBook {
     this.records.push(r);
   }
 
-  async playback(emacs: Emacs): Promise<void> {
+  async playback(emacs: Emacs): Promise<boolean> {
     this.trimAndLock();
     for (var r of this.records) {
       if (!await r.playback(emacs)) {
-        break;
+        return false;
       };
     }
+    return true;
   }
 
   private checkRepeatable(): FindRecord | undefined {
@@ -127,6 +128,45 @@ export class RecordBook {
           return;
         };
       }
+    }
+  }
+
+  async nPlaybacks(emacs: Emacs) {
+    let value : string | undefined;
+    let prompt : string | undefined = "17";
+    const findRecord = this.checkRepeatable();
+    if (findRecord) {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        vscode.window.showErrorMessage(`No active text editor`);
+        return;
+      }
+      value = `${findRecord.numberOfMatches(editor)}`;
+      prompt = undefined;
+    }
+
+    const timesStr = await vscode.window.showInputBox({
+      title: "Number of times to playback the recording",
+      value,
+      prompt,
+      // Need the wrapping, otherwise hangs for some reason.
+      validateInput: (input => {
+        if (!/^\s*[1-9][0-9]*\s*$/.test(input)) {
+          return "Input must be a positive integer";
+        };
+      }),
+    });
+
+    if (!timesStr) {
+      // If exitted input focus without entering
+      return;
+    }
+
+    const times = +timesStr;
+    for (let i = 0; i < times; i++) {
+      if (!await this.playback(emacs)) {
+        break;
+      };
     }
   }
 
@@ -223,6 +263,7 @@ export class Recorder extends TypeHandler {
     // We don't lock on playbacks because they are nested commands.
     recorder.registerCommand(context, "record.playRecording", () => recorder.playback(), {noLock: true});
     recorder.registerCommand(context, "record.playRecordingRepeatedly", () => recorder.repeatPlayback(), {noLock: true});
+    recorder.registerCommand(context, "record.playRecordingNTimes", () => recorder.nPlayback(), {noLock: true});
     recorder.registerCommand(context, "record.playNamedRecording", () => recorder.playbackNamedRecording(), {noLock: true});
   }
 
@@ -425,7 +466,7 @@ export class Recorder extends TypeHandler {
     return input.show();
   }
 
-  async repeatPlayback(): Promise<void> {
+  async playbackAction(f: (rb: RecordBook) => Promise<any>): Promise<any> {
     if (this.isActive()) {
       vscode.window.showErrorMessage("Still recording!");
       return;
@@ -435,20 +476,19 @@ export class Recorder extends TypeHandler {
       vscode.window.showErrorMessage(`No recordings exist yet!`);
       return;
     }
-    return recordBook.repeatedPlayback(this.emacs);
+    return f(recordBook);
   }
 
-  async playback(): Promise<void> {
-    if (this.isActive()) {
-      vscode.window.showErrorMessage("Still recording!");
-      return;
-    }
-    const recordBook = this.getOptionalRecordBook();
-    if (!recordBook) {
-      vscode.window.showErrorMessage(`No recordings exist yet!`);
-      return;
-    }
-    return recordBook.playback(this.emacs);
+  async repeatPlayback(): Promise<void> {
+    return this.playbackAction((rb: RecordBook) => rb.repeatedPlayback(this.emacs));
+  }
+
+  async nPlayback(): Promise<void> {
+    return this.playbackAction((rb: RecordBook) => rb.nPlaybacks(this.emacs));
+  }
+
+  async playback(): Promise<any> {
+    return this.playbackAction((rb: RecordBook) => rb.playback(this.emacs));
   }
 
   async handleActivation() {
