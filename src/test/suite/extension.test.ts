@@ -1482,7 +1482,6 @@ function nTimesRecordValidationTestCase(name: string, input: string): TestCase {
         options: {
           prompt: "17",
           title: "Number of times to playback the recording",
-          value: undefined,
           validateInputProvided: true,
         },
         validationMessage: "Input must be a positive integer",
@@ -5865,14 +5864,13 @@ function testCases(): TestCase[] {
           options: {
             prompt: "17",
             title: "Number of times to playback the recording",
-            value: undefined,
             validateInputProvided: true,
           },
         },
       ],
     },
     {
-      name: "Repeat n-times recording works",
+      name: "Repeat n-times recording works with larger value",
       text: [
         "def",
       ],
@@ -5896,7 +5894,6 @@ function testCases(): TestCase[] {
           options: {
             prompt: "17",
             title: "Number of times to playback the recording",
-            value: undefined,
             validateInputProvided: true,
           },
         },
@@ -5952,7 +5949,7 @@ function testCases(): TestCase[] {
         {
           options: {
             prompt: undefined,
-            title: "Number of times to playback the recording",
+            title: "Number of times to playback the recording (4 matches found)",
             value: "4",
             validateInputProvided: true,
           },
@@ -6009,7 +6006,7 @@ function testCases(): TestCase[] {
         {
           options: {
             prompt: undefined,
-            title: "Number of times to playback the recording",
+            title: "Number of times to playback the recording (4 matches found)",
             value: "4",
             validateInputProvided: true,
           },
@@ -6069,7 +6066,7 @@ function testCases(): TestCase[] {
         {
           options: {
             prompt: undefined,
-            title: "Number of times to playback the recording",
+            title: "Number of times to playback the recording (4 matches found)",
             value: "4",
             validateInputProvided: true,
           },

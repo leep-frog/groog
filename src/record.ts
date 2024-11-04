@@ -132,8 +132,18 @@ export class RecordBook {
   }
 
   async nPlaybacks(emacs: Emacs) {
-    let value : string | undefined;
-    let prompt : string | undefined = "17";
+
+    const opts : vscode.InputBoxOptions = {
+      title: "Number of times to playback the recording",
+      // Need the wrapping, otherwise hangs for some reason.
+      validateInput: (input => {
+        if (!/^\s*[1-9][0-9]*\s*$/.test(input)) {
+          return "Input must be a positive integer";
+        };
+      }),
+      prompt: "17",
+    };
+
     const findRecord = this.checkRepeatable();
     if (findRecord) {
       const editor = vscode.window.activeTextEditor;
@@ -141,21 +151,14 @@ export class RecordBook {
         vscode.window.showErrorMessage(`No active text editor`);
         return;
       }
-      value = `${findRecord.numberOfMatches(editor)}`;
-      prompt = undefined;
+
+      const numMatches = findRecord.numberOfMatches(editor);
+      opts.title += ` (${numMatches} matches found)`;
+      opts.value = `${numMatches}`;
+      opts.prompt = undefined;
     }
 
-    const timesStr = await vscode.window.showInputBox({
-      title: "Number of times to playback the recording",
-      value,
-      prompt,
-      // Need the wrapping, otherwise hangs for some reason.
-      validateInput: (input => {
-        if (!/^\s*[1-9][0-9]*\s*$/.test(input)) {
-          return "Input must be a positive integer";
-        };
-      }),
-    });
+    const timesStr = await vscode.window.showInputBox(opts);
 
     if (!timesStr) {
       // If exitted input focus without entering
