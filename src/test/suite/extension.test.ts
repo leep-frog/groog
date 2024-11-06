@@ -7335,7 +7335,6 @@ function testCases(): TestCase[] {
       ],
     },
     {
-      runSolo: true,
       name: "Copies file link for git",
       file: startingFile("empty.go"),
       expectedText: [
@@ -7361,7 +7360,6 @@ function testCases(): TestCase[] {
       ],
     },
     {
-      runSolo: true,
       name: "Copies file link for http",
       file: startingFile("empty.go"),
       expectedText: [
@@ -7376,7 +7374,7 @@ function testCases(): TestCase[] {
       expectedSelections: [selection(1, 98)],
       execStubs: [{
         wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
-        stdout: "https://www.github.com:some-user/arbitrary-repo/path.git",
+        stdout: "https://www.github.com/some-user/arbitrary-repo/path",
       }],
       expectedInfoMessages: [
         `File link copied!`,
@@ -7387,7 +7385,6 @@ function testCases(): TestCase[] {
       ],
     },
     {
-      runSolo: true,
       name: "Copies file link from more nested directory",
       file: startingFile("copy-imports", "BlockComment.java"),
       expectedText: [

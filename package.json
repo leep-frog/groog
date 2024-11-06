@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.31",
+  "version": "2.7.32",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -23,7 +23,7 @@
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
     "lint": "eslint src --fix --ext ts",
     "posttest": "echo 'Open the following file for html coverage report:\nfile:///C:/Users/gleep/Desktop/Coding/vs-code/groog/coverage/index.html'",
-    "pretest": "npm run compile",
+    "pretest": "npm run compile && npm run esbuild-base",
     "test": "vscode-test --coverage --coverageReporter lcov --coverageReporter html && ts-node ./src/scripts/html-editor.ts ./coverage/index.html",
     "test-compile": "tsc -p ./",
     "vscode:prepublish": "npm run esbuild-base -- --minify",

@@ -198,9 +198,9 @@ async function copyFileName(editor: vscode.TextEditor) {
       vscode.window.showErrorMessage(`Failed to get git repository info: ${err}; stderr:\n${stderr}`);
       return;
     }
-    let remoteURL = stdout.trim().replace(/^git@/, "").replace(/\.git$/, "").replace(":", "/");
+    let remoteURL = stdout.trim();
     if (!remoteURL.startsWith("http")) {
-      remoteURL = `https://www.${remoteURL}`;
+      remoteURL = `https://www.${remoteURL.replace(/^git@/, "").replace(/\.git$/, "").replace(":", "/")}`;
     }
 
     // Get the relative path
