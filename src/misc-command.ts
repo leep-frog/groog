@@ -198,14 +198,17 @@ async function copyFileName(editor: vscode.TextEditor) {
       vscode.window.showErrorMessage(`Failed to get git repository info: ${err}; stderr:\n${stderr}`);
       return;
     }
-    const remoteURL = stdout.trim().replace(/^git@/, "").replace(/\.git$/, "").replace(":", "/");
+    let remoteURL = stdout.trim().replace(/^git@/, "").replace(/\.git$/, "").replace(":", "/");
+    if (!remoteURL.startsWith("http")) {
+      remoteURL = `https://www.${remoteURL}`;
+    }
 
     // Get the relative path
     const repoInfo = gitRepoInfo(editor.document.uri.fsPath);
     const relativePath = path.relative(repoInfo.root, editor.document.uri.fsPath).replace(/\\/g, '/');
 
     // Copy link
-    vscode.env.clipboard.writeText(`https://www.${remoteURL}/blob/${repoInfo.branch}/${relativePath}#${getLineNumbers(editor)}`);
+    vscode.env.clipboard.writeText(`${remoteURL}/blob/${repoInfo.branch}/${relativePath}#${getLineNumbers(editor)}`);
     vscode.window.showInformationMessage(`File link copied!`);
   });
 

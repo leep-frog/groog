@@ -7335,7 +7335,8 @@ function testCases(): TestCase[] {
       ],
     },
     {
-      name: "Copies file link",
+      runSolo: true,
+      name: "Copies file link for git",
       file: startingFile("empty.go"),
       expectedText: [
         "package main",
@@ -7360,6 +7361,33 @@ function testCases(): TestCase[] {
       ],
     },
     {
+      runSolo: true,
+      name: "Copies file link for http",
+      file: startingFile("empty.go"),
+      expectedText: [
+        "package main",
+        "https://www.github.com/some-user/arbitrary-repo/path/blob/main/src/test/test-workspace/empty.go#L2",
+        "func main() {",
+        "",
+        "}",
+        "",
+      ],
+      selections: [selection(1, 0)],
+      expectedSelections: [selection(1, 98)],
+      execStubs: [{
+        wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
+        stdout: "https://www.github.com:some-user/arbitrary-repo/path.git",
+      }],
+      expectedInfoMessages: [
+        `File link copied!`,
+      ],
+      userInteractions: [
+        cmd("groog.copyFilename"),
+        cmd("groog.paste"),
+      ],
+    },
+    {
+      runSolo: true,
       name: "Copies file link from more nested directory",
       file: startingFile("copy-imports", "BlockComment.java"),
       expectedText: [
