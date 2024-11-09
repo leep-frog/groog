@@ -7374,7 +7374,7 @@ function testCases(): TestCase[] {
       expectedSelections: [selection(1, 98)],
       execStubs: [{
         wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
-        stdout: "https://www.github.com/some-user/arbitrary-repo/path",
+        stdout: "https://www.github.com/some-user/arbitrary-repo/path.git",
       }],
       expectedInfoMessages: [
         `File link copied!`,
