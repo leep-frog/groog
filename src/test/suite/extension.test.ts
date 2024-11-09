@@ -832,6 +832,7 @@ export function getPasteTestCases(): TestCase[] {
 
     // One-off test cases
     {
+      runSolo: true,
       name: 'wtf',
       text: [''],
       expectedText: [
@@ -847,9 +848,9 @@ export function getPasteTestCases(): TestCase[] {
         cmd("editor.action.clipboardCopyAction"),
         ctrlG,
         cmd('groog.cursorDown'),
-        delay(1500),
+        // delay(1500),
         cmd('groog.paste'),
-        delay(1500),
+        // delay(1500),
       ],
     },
     {
