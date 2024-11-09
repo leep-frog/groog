@@ -832,7 +832,6 @@ export function getPasteTestCases(): TestCase[] {
 
     // One-off test cases
     {
-      runSolo: true,
       name: 'wtf',
       text: [''],
       expectedText: [
