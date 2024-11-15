@@ -7280,14 +7280,45 @@ function testCases(): TestCase[] {
         "General Kenobi",
       ],
     },
-    // Copy file link tests
+    // Copy file name/link tests
     {
       name: "Fails to copy file name if no editor",
       userInteractions: [
-        cmd("groog.copyFilename"),
+        cmd("groog.copyFilePath"),
       ],
       expectedErrorMessages: [
         "No active editor",
+      ],
+    },
+    {
+      name: "Fails to copy file link if no editor",
+      userInteractions: [
+        cmd("groog.copyFileLink"),
+      ],
+      expectedErrorMessages: [
+        "No active editor",
+      ],
+    },
+    {
+      name: "Fails to copy file name if exec error",
+      file: startingFile("empty.go"),
+      expectedText: [
+        "package main",
+        "",
+        "func main() {",
+        "",
+        "}",
+        "",
+      ],
+      execStubs: [{
+        wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
+        err: "oops",
+      }],
+      expectedErrorMessages: [
+        `Failed to get git repository info: oops; stderr:\n`,
+      ],
+      userInteractions: [
+        cmd("groog.copyFilePath"),
       ],
     },
     {
@@ -7309,7 +7340,29 @@ function testCases(): TestCase[] {
         `Failed to get git repository info: oops; stderr:\n`,
       ],
       userInteractions: [
-        cmd("groog.copyFilename"),
+        cmd("groog.copyFileLink"),
+      ],
+    },
+    {
+      name: "Fails to copy file name if exec stderr",
+      file: startingFile("empty.go"),
+      expectedText: [
+        "package main",
+        "",
+        "func main() {",
+        "",
+        "}",
+        "",
+      ],
+      execStubs: [{
+        wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
+        stderr: "whoops",
+      }],
+      expectedErrorMessages: [
+        `Failed to get git repository info: undefined; stderr:\nwhoops`,
+      ],
+      userInteractions: [
+        cmd("groog.copyFilePath"),
       ],
     },
     {
@@ -7331,7 +7384,32 @@ function testCases(): TestCase[] {
         `Failed to get git repository info: undefined; stderr:\nwhoops`,
       ],
       userInteractions: [
-        cmd("groog.copyFilename"),
+        cmd("groog.copyFileLink"),
+      ],
+    },
+    {
+      name: "Copies file path",
+      file: startingFile("empty.go"),
+      expectedText: [
+        "package main",
+        "src/test/test-workspace/empty.go",
+        "func main() {",
+        "",
+        "}",
+        "",
+      ],
+      selections: [selection(1, 0)],
+      expectedSelections: [selection(1, 32)],
+      execStubs: [{
+        wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
+        stdout: "git@github.com:some-user/arbitrary-repo/path.git",
+      }],
+      expectedInfoMessages: [
+        `File path copied!`,
+      ],
+      userInteractions: [
+        cmd("groog.copyFilePath"),
+        cmd("groog.paste"),
       ],
     },
     {
@@ -7355,7 +7433,7 @@ function testCases(): TestCase[] {
         `File link copied!`,
       ],
       userInteractions: [
-        cmd("groog.copyFilename"),
+        cmd("groog.copyFileLink"),
         cmd("groog.paste"),
       ],
     },
@@ -7380,7 +7458,7 @@ function testCases(): TestCase[] {
         `File link copied!`,
       ],
       userInteractions: [
-        cmd("groog.copyFilename"),
+        cmd("groog.copyFileLink"),
         cmd("groog.paste"),
       ],
     },
@@ -7405,7 +7483,7 @@ function testCases(): TestCase[] {
         `File link copied!`,
       ],
       userInteractions: [
-        cmd("groog.copyFilename"),
+        cmd("groog.copyFileLink"),
         cmd("groog.cursorBottom"),
         cmd("groog.paste"),
       ],

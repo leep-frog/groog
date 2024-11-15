@@ -41,8 +41,12 @@ export const miscCommands: MiscCommand[] = [
     f: (e: Emacs, msg: Message | undefined) => infoMessage(msg),
   },
   {
-    name: "copyFilename",
-    f: miscEditorFunc(copyFileName),
+    name: "copyFilePath",
+    f: miscEditorFunc((e: vscode.TextEditor) => copyFilePath(e, false)),
+  },
+  {
+    name: "copyFileLink",
+    f: miscEditorFunc((e: vscode.TextEditor) => copyFilePath(e, true)),
   },
   {
     name: "testFile",
@@ -192,7 +196,7 @@ export function getLineNumbers(editor: vscode.TextEditor) {
 
 
 
-async function copyFileName(editor: vscode.TextEditor) {
+async function copyFilePath(editor: vscode.TextEditor, link: boolean) {
   stubs.execFunc(`cd ${path.dirname(editor.document.uri.fsPath)} && git ls-remote --get-url`, (err: any, stdout: string, stderr: string) => {
     if (err || stderr) {
       vscode.window.showErrorMessage(`Failed to get git repository info: ${err}; stderr:\n${stderr}`);
@@ -207,9 +211,11 @@ async function copyFileName(editor: vscode.TextEditor) {
     const repoInfo = gitRepoInfo(editor.document.uri.fsPath);
     const relativePath = path.relative(repoInfo.root, editor.document.uri.fsPath).replace(/\\/g, '/');
 
+    const copyText = (!link) ? relativePath :`${remoteURL}/blob/${repoInfo.branch}/${relativePath}#${getLineNumbers(editor)}`;
+
     // Copy link
-    vscode.env.clipboard.writeText(`${remoteURL}/blob/${repoInfo.branch}/${relativePath}#${getLineNumbers(editor)}`);
-    vscode.window.showInformationMessage(`File link copied!`);
+    vscode.env.clipboard.writeText(copyText);
+    vscode.window.showInformationMessage(link ? `File link copied!` : `File path copied!`);
   });
 
 }
