@@ -28,10 +28,11 @@ func groogPackage(versionOverride string) *Package {
 			"esbuild-watch":     "npm run esbuild-base -- --sourcemap --watch",
 			"test-compile":      "tsc -p ./",
 
-			"compile":  "tsc -p ./",
-			"watch":    "tsc -watch -p ./",
-			"pretest":  "npm run compile && npm run esbuild-base",
-			"lint":     "eslint src --fix --ext ts",
+			"compile": "tsc -p ./",
+			"watch":   "tsc -watch -p ./",
+			"pretest": "npm run compile && npm run esbuild-base",
+			"lint":    "eslint src --fix --ext ts",
+			// TODO: coverage doesn't work because of bundling. Fix test compiling setup to fix that
 			"test":     "vscode-test --coverage --coverageReporter lcov --coverageReporter html && ts-node ./src/scripts/html-editor.ts ./coverage/index.html",
 			"posttest": "echo 'Open the following file for html coverage report:\nfile:///C:/Users/gleep/Desktop/Coding/vs-code/groog/coverage/index.html'",
 			"coverage": "c8 --reporter lcov --check-coverage npm run test",
