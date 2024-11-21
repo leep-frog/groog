@@ -6,6 +6,7 @@ import { CloseQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButto
 import * as vscode from 'vscode';
 import { tabbify } from '../../emacs';
 import { Document, FIND_MEMORY_MS, FindQuickPickItem, FindRecord, Match } from '../../find';
+import { TestFileArgs } from '../../misc-command';
 import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
 import { ExecStub, TestResetArgs } from '../../stubs';
 import { Correction } from '../../typos';
@@ -1502,6 +1503,7 @@ export interface TestCase extends SimpleTestCaseProps {
   runSolo?: boolean;
   clipboard?: string[];
   execStubs?: ExecStub[];
+  wantSendTerminalCommands?: [TestFileArgs | undefined, string][];
 }
 
 const TEST_ITERATIONS = 1;
@@ -8414,6 +8416,60 @@ function testCases(): TestCase[] {
       ],
     },
     ...getPasteTestCases(),
+    // misc-commands tests
+    {
+      name: "test file shows error message for go file",
+      file: startingFile("empty.go"),
+      expectedText: [
+        `package main`,
+        ``,
+        `func main() {`,
+        ``,
+        `}`,
+        ``,
+      ],
+      userInteractions: [
+        cmd("workbench.action.splitEditorDown"),
+        cmd("groog.focusNextEditor"),
+        cmd("groog.testFile"),
+      ],
+      expectedErrorMessages: [
+        "go testing should be routed to custom command in keybindings.go",
+      ],
+    },
+    {
+      name: "test file works for typescript file",
+      file: startingFile('whitespace', 'twoSpaces.ts'),
+      expectedText: [``],
+      userInteractions: [
+        cmd("workbench.action.splitEditorDown"),
+        cmd("groog.focusNextEditor"),
+        cmd("groog.testFile"),
+      ],
+      wantSendTerminalCommands: [
+        [undefined, "npm run test"],
+      ],
+    },
+    {
+      name: "test file works for java file",
+      file: startingFile("copy-imports", "BlockComment.java"),
+      expectedText: [
+        `/* Block`,
+        ` * comment`,
+        ` */`,
+        `package copy.imports.comment; /* Suffix block comment */`,
+        `/* Another block comment */`,
+        ``,
+      ],
+      userInteractions: [
+        cmd("workbench.action.splitEditorDown"),
+        cmd("groog.focusNextEditor"),
+        cmd("groog.testFile"),
+      ],
+      wantSendTerminalCommands: [
+        [undefined, "zts BlockComment"],
+      ],
+    },
     /* Useful for commenting out tests. */
   ];
 }
@@ -8440,6 +8496,7 @@ suite('Groog commands', () => {
         if (idx) {
           const trArgs : TestResetArgs = {
             execStubs: tc.execStubs,
+            wantSendTerminalCommandArgs: tc.wantSendTerminalCommands,
           };
           tc.userInteractions = [
             cmd("groog.test.reset", trArgs),

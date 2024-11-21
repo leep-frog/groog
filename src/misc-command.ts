@@ -110,7 +110,7 @@ export async function multiCommand(mc: MultiCommand) {
 const HOME_UNICODE_CHAR = "\u0001";
 const TERMINAL_KILL_CHAR = "\u000B";
 
-function sendTerminalCommand(args: TestFileArgs, command: string) {
+export function sendTerminalCommand(args: TestFileArgs, command: string) {
   const terminal = vscode.window.activeTerminal ?? vscode.window.createTerminal();
 
   const text = args.part === 0 ? [
@@ -128,7 +128,7 @@ function sendTerminalCommand(args: TestFileArgs, command: string) {
   }
 }
 
-interface TestFileArgs {
+export interface TestFileArgs {
   part: number;
 }
 
@@ -147,14 +147,14 @@ async function testFile(args: TestFileArgs, lastFile?: vscode.Uri) {
   case "ts":
     // It's possible to run launch.json configurations with `vscode.debug.startDebugging(fs, "Extension Tests");`
     // But `npm run test` currently does everything we need, but an option to keep in mind if ever needed.
-    sendTerminalCommand(args, `npm run test`);
+    stubs.sendTerminalCommandFunc(args, `npm run test`);
     break;
   case "java":
     const javaTestCommand = `zts ${path.parse(file.fsPath).name}`;
-    sendTerminalCommand(args, javaTestCommand);
+    stubs.sendTerminalCommandFunc(args, javaTestCommand);
     break;
   case "py":
-    sendTerminalCommand(args, `prt ${path.parse(file.fsPath)}`);
+    stubs.sendTerminalCommandFunc(args, `prt ${file.fsPath}`);
     break;
   default:
     if (!args || args.part === 0) {

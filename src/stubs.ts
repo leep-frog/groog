@@ -1,9 +1,11 @@
 import * as assert from 'assert';
 import { exec } from "child_process";
 import * as vscode from 'vscode';
+import { sendTerminalCommand, TestFileArgs } from './misc-command';
 
 export interface TestResetArgs {
   execStubs?: ExecStub[];
+  wantSendTerminalCommandArgs?: [TestFileArgs | undefined, string][];
 }
 
 export interface ExecStub {
@@ -18,13 +20,21 @@ export class Stubbers {
   gotExecArgs: string[];
   wantExecArgs: string[];
 
-  constructor(execFunc: (cmd: string, f: (err: any, stdout: string, stderr: string) => any) => any) {
+  sendTerminalCommandFunc: (args: TestFileArgs, command: string) => any;
+  gotTerminalArgs: [TestFileArgs | undefined, string][];
+  wantTerminalArgs: [TestFileArgs | undefined, string][];
+
+  constructor(execFunc: (cmd: string, f: (err: any, stdout: string, stderr: string) => any) => any, sendTerminalCommandFunc: (args: TestFileArgs, command: string) => any) {
     this.execFunc = execFunc;
     this.gotExecArgs = [];
     this.wantExecArgs = [];
+
+    this.sendTerminalCommandFunc = sendTerminalCommandFunc;
+    this.gotTerminalArgs = [];
+    this.wantTerminalArgs = [];
   };
 
-  configureForTest(stubs: ExecStub[]) {
+  configureForTest(stubs: ExecStub[], wantSendTerminalCommandArgs: [TestFileArgs | undefined, string][]) {
     this.gotExecArgs = [];
     this.wantExecArgs = stubs.map(es => es.wantArgs);
     this.execFunc = (cmd: string, f: (err: any, stdout: string, stderr: string) => any): any => {
@@ -38,11 +48,18 @@ export class Stubbers {
 
       return f(resp.err, resp.stdout || "", resp.stderr || "");
     };
+
+    this.gotTerminalArgs = [];
+    this.wantTerminalArgs = wantSendTerminalCommandArgs;
+    this.sendTerminalCommandFunc = (args: TestFileArgs, command: string) => {
+      this.gotTerminalArgs.push([args, command]);
+    };
   }
 
   verify() {
-    assert.deepStrictEqual(this.gotExecArgs, this.wantExecArgs, "Expected exec executions to be equal");
+    assert.deepStrictEqual(this.wantExecArgs, this.gotExecArgs, "Expected exec executions to be equal");
+    assert.deepStrictEqual(this.wantTerminalArgs, this.gotTerminalArgs, "Expected sendTerminalCommand executions to be equal");
   }
 }
 
-export const stubs: Stubbers = new Stubbers(exec);
+export const stubs: Stubbers = new Stubbers(exec, sendTerminalCommand);
