@@ -8416,10 +8416,9 @@ function testCases(): TestCase[] {
       ],
     },
     ...getPasteTestCases(),
-    // misc-commands tests
+    // groog.testFile tests
     {
       name: "test file shows error message for go file",
-      file: startingFile("empty.go"),
       expectedText: [
         `package main`,
         ``,
@@ -8429,8 +8428,7 @@ function testCases(): TestCase[] {
         ``,
       ],
       userInteractions: [
-        cmd("workbench.action.splitEditorDown"),
-        cmd("groog.focusNextEditor"),
+        openFile(startingFile("empty.go")),
         cmd("groog.testFile"),
       ],
       expectedErrorMessages: [
@@ -8438,12 +8436,10 @@ function testCases(): TestCase[] {
       ],
     },
     {
-      name: "test file works for typescript file",
-      file: startingFile('whitespace', 'twoSpaces.ts'),
+      name: "testFile works for typescript file",
       expectedText: [``],
       userInteractions: [
-        cmd("workbench.action.splitEditorDown"),
-        cmd("groog.focusNextEditor"),
+        openFile(startingFile('whitespace', 'twoSpaces.ts')),
         cmd("groog.testFile"),
       ],
       wantSendTerminalCommands: [
@@ -8451,8 +8447,18 @@ function testCases(): TestCase[] {
       ],
     },
     {
-      name: "test file works for java file",
-      file: startingFile("copy-imports", "BlockComment.java"),
+      name: "testFile works for python file",
+      expectedText: [``],
+      userInteractions: [
+        openFile(startingFile("blank.py")),
+        cmd("groog.testFile"),
+      ],
+      wantSendTerminalCommands: [
+        [undefined, `prt ${startingFile("blank.py").replace(/^C/, 'c')}`],
+      ],
+    },
+    {
+      name: "testFile works for java file",
       expectedText: [
         `/* Block`,
         ` * comment`,
@@ -8461,13 +8467,51 @@ function testCases(): TestCase[] {
         `/* Another block comment */`,
         ``,
       ],
+      expectedSelections: [selection(5, 0)],
       userInteractions: [
-        cmd("workbench.action.splitEditorDown"),
-        cmd("groog.focusNextEditor"),
+        openFile(startingFile("copy-imports", "BlockComment.java")),
         cmd("groog.testFile"),
       ],
       wantSendTerminalCommands: [
         [undefined, "zts BlockComment"],
+      ],
+    },
+    {
+      name: "test file fails if unsupported suffix",
+      expectedText: [
+        `Hello there`,
+        ``,
+      ],
+      userInteractions: [
+        openFile(startingFile("greetings.txt")),
+        cmd("groog.testFile"),
+      ],
+      expectedErrorMessages: [
+        "Unknown file suffix: txt",
+      ],
+    },
+    {
+      name: "uses fixed test file",
+      expectedText: [``],
+      userInteractions: [
+        openFile(startingFile("copy-imports", "BlockComment.java")),
+        openFile(startingFile('whitespace', 'twoSpaces.ts')),
+        cmd("groog.toggleFixedTestFile"),
+        openFile(startingFile("greetings.txt")),
+        openFile(startingFile("blank.py")),
+        cmd("groog.testFile"),
+        cmd("groog.toggleFixedTestFile"),
+        cmd("groog.testFile"),
+      ],
+      wantSendTerminalCommands: [
+        // typescript file
+        [undefined, "npm run test"],
+        // python file
+        [undefined, `prt ${startingFile("blank.py").replace(/^C/, 'c')}`],
+      ],
+      expectedInfoMessages: [
+        "Set fixed test file to twoSpaces.ts",
+        "Unset fixed test file",
       ],
     },
     /* Useful for commenting out tests. */
