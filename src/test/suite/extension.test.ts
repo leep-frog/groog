@@ -976,7 +976,7 @@ function allWordSeparatorConfiguration(...corrections: Correction[]) {
   return wordSeparatorConfiguration("`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?_", ...corrections);
 }
 
-function convertTestMatches(pattern : RegExp | undefined, testMatches: TestMatch[]): Match[] {
+function convertTestMatches(pattern: RegExp | undefined, testMatches: TestMatch[]): Match[] {
   return testMatches.map((tm, index) => {
     return {
       ...tm,
@@ -1456,11 +1456,11 @@ suite('Document.matches Test Suite', () => {
 const ctrlG = cmd("groog.ctrlG");
 const closeAllEditors = cmd("workbench.action.closeEditorsAndGroup");
 
-function type(text: string) : UserInteraction {
+function type(text: string): UserInteraction {
   return cmd("groog.type", { "text": text });
 }
 
-export function selection(line: number, char: number) : vscode.Selection {
+export function selection(line: number, char: number): vscode.Selection {
   return new vscode.Selection(line, char, line, char);
 }
 
@@ -1482,19 +1482,21 @@ function nTimesRecordValidationTestCase(name: string, input: string): TestCase {
       cmd("groog.record.endRecording"),
       cmd("groog.record.playRecordingNTimes"),
     ],
-    inputBoxResponses: [
-      input,
-    ],
-    expectedInputBoxes: [
-      {
-        options: {
-          prompt: "17",
-          title: "Number of times to playback the recording",
-          validateInputProvided: true,
+    inputBox: {
+      expectedInputBoxes: [
+        {
+          options: {
+            prompt: "17",
+            title: "Number of times to playback the recording",
+            validateInputProvided: true,
+          },
+          validationMessage: "Input must be a positive integer",
         },
-        validationMessage: "Input must be a positive integer",
-      },
-    ],
+      ],
+      inputBoxResponses: [
+        input,
+      ],
+    },
   };
 }
 
@@ -1516,12 +1518,16 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.cursorRight"), // Need command to activate extension.
       ],
-      expectedInfoMessages: [
-        `Basic keyboard mode activated`,
-      ],
-      expectedErrorMessages: [
-        `Failed to get editor.wordSeparator; defaulting to space character`,
-      ],
+      informationMessage: {
+        expectedMessages: [
+          `Basic keyboard mode activated`,
+        ],
+      },
+      errorMessage: {
+        expectedMessages: [
+          `Failed to get editor.wordSeparator; defaulting to space character`,
+        ],
+      },
     },
     // Typo tests
     // Note: These typos are configured in src/test/test-workspace/.vscode/settings.json
@@ -1530,11 +1536,15 @@ function testCases(): TestCase[] {
       userInteractions: [
         type(" "),
       ],
-      workspaceConfiguration: wordSeparatorConfiguration(' ^('),
-      expectedWorkspaceConfiguration: wordSeparatorConfiguration(' ^('),
-      expectedErrorMessages: [
-        `Couldn't find active editor`,
-      ],
+      workspaceConfiguration: {
+        workspaceConfiguration: wordSeparatorConfiguration(' ^('),
+        expectedWorkspaceConfiguration: wordSeparatorConfiguration(' ^('),
+      },
+      errorMessage: {
+        expectedMessages: [
+          `Couldn't find active editor`,
+        ],
+      },
     },
     {
       name: "Typo fixer doesn't do anything if still typing",
@@ -1549,7 +1559,9 @@ function testCases(): TestCase[] {
         type("typobuid"),
         type("l"),
       ],
-      workspaceConfiguration: wordSeparatorConfiguration(' ^('),
+      workspaceConfiguration: {
+        workspaceConfiguration: wordSeparatorConfiguration(' ^('),
+      },
     },
     {
       name: "Typo fixer fixes if word is over (no word separator defaults to space)",
@@ -1565,11 +1577,13 @@ function testCases(): TestCase[] {
         type("l"),
         type(" "),
       ],
-      workspaceConfiguration: wordSeparatorConfiguration(' ', {
-        words: {
-          typobuidl: "build",
-        },
-      }),
+      workspaceConfiguration: {
+        workspaceConfiguration: wordSeparatorConfiguration(' ', {
+          words: {
+            typobuidl: "build",
+          },
+        }),
+      },
     },
     {
       name: "Typo fixer fixes if word is over (word separator setting with space)",
@@ -1585,11 +1599,13 @@ function testCases(): TestCase[] {
         type("l"),
         type(" "),
       ],
-      workspaceConfiguration: wordSeparatorConfiguration(' ', {
-        words: {
-          typobuidl: "build",
-        },
-      }),
+      workspaceConfiguration: {
+        workspaceConfiguration: wordSeparatorConfiguration(' ', {
+          words: {
+            typobuidl: "build",
+          },
+        }),
+      },
     },
     {
       name: "Typo fixer fixes if word is over (word separator setting without space in setting, but whitespce)",
@@ -1605,11 +1621,13 @@ function testCases(): TestCase[] {
         type("l"),
         type(" "),
       ],
-      workspaceConfiguration: wordSeparatorConfiguration('^?!', {
-        words: {
-          typobuidl: "build",
-        },
-      }),
+      workspaceConfiguration: {
+        workspaceConfiguration: wordSeparatorConfiguration('^?!', {
+          words: {
+            typobuidl: "build",
+          },
+        }),
+      },
     },
     {
       name: "Typo fixer fixes if word is over (word separator setting without char in setting, and not whitespce)",
@@ -1625,11 +1643,13 @@ function testCases(): TestCase[] {
         type("l"),
         type("-"),
       ],
-      workspaceConfiguration: wordSeparatorConfiguration('^?!', {
-        words: {
-          typobuidl: "build",
-        },
-      }),
+      workspaceConfiguration: {
+        workspaceConfiguration: wordSeparatorConfiguration('^?!', {
+          words: {
+            typobuidl: "build",
+          },
+        }),
+      },
     },
     {
       name: "Typo fixer fixes if word is over with other word break character",
@@ -1645,11 +1665,13 @@ function testCases(): TestCase[] {
         type("l"),
         type("("),
       ],
-      workspaceConfiguration: wordSeparatorConfiguration('(', {
-        words: {
-          typobuidl: "build",
-        },
-      }),
+      workspaceConfiguration: {
+        workspaceConfiguration: wordSeparatorConfiguration('(', {
+          words: {
+            typobuidl: "build",
+          },
+        }),
+      },
     },
     {
       name: "Doesn't run typo if typing over a selection",
@@ -1668,11 +1690,13 @@ function testCases(): TestCase[] {
       text: [
         "typobuidl  ",
       ],
-      workspaceConfiguration: allWordSeparatorConfiguration({
-        words: {
-          typobuidl: "build",
-        },
-      }),
+      workspaceConfiguration: {
+        workspaceConfiguration: allWordSeparatorConfiguration({
+          words: {
+            typobuidl: "build",
+          },
+        }),
+      },
     },
     {
       name: "Doesn't run typo if not at the end of a word",
@@ -1691,11 +1715,13 @@ function testCases(): TestCase[] {
       text: [
         "typobuidl(",
       ],
-      workspaceConfiguration: allWordSeparatorConfiguration({
-        words: {
-          typobuidl: "build",
-        },
-      }),
+      workspaceConfiguration: {
+        workspaceConfiguration: allWordSeparatorConfiguration({
+          words: {
+            typobuidl: "build",
+          },
+        }),
+      },
     },
     {
       name: "Language specific typo runs in that language",
@@ -1721,7 +1747,9 @@ function testCases(): TestCase[] {
         "",
       ],
       // Typo is a built-in typo
-      workspaceConfiguration: allWordSeparatorConfiguration(),
+      workspaceConfiguration: {
+        workspaceConfiguration: allWordSeparatorConfiguration(),
+      },
     },
     {
       name: "Regular word is not changed if not a configured break character",
@@ -1736,12 +1764,14 @@ function testCases(): TestCase[] {
       expectedText: [
         "typoabc ",
       ],
-      workspaceConfiguration: allWordSeparatorConfiguration({
-        words: {
-          typoabc: "ABC",
-        },
-        breakCharacters: "^",
-      }),
+      workspaceConfiguration: {
+        workspaceConfiguration: allWordSeparatorConfiguration({
+          words: {
+            typoabc: "ABC",
+          },
+          breakCharacters: "^",
+        }),
+      },
     },
     {
       name: "Proper break character replaces word if is a separator character",
@@ -1756,12 +1786,14 @@ function testCases(): TestCase[] {
       expectedText: [
         "ABC^",
       ],
-      workspaceConfiguration: wordSeparatorConfiguration("^", {
-        words: {
-          typoabc: "ABC",
-        },
-        breakCharacters: "^",
-      }),
+      workspaceConfiguration: {
+        workspaceConfiguration: wordSeparatorConfiguration("^", {
+          words: {
+            typoabc: "ABC",
+          },
+          breakCharacters: "^",
+        }),
+      },
     },
     {
       // TODO: Fix this
@@ -1777,12 +1809,14 @@ function testCases(): TestCase[] {
       expectedText: [
         "typoabc^",
       ],
-      workspaceConfiguration: wordSeparatorConfiguration(" ", {
-        words: {
-          typoabc: "ABC",
-        },
-        breakCharacters: "^",
-      }),
+      workspaceConfiguration: {
+        workspaceConfiguration: wordSeparatorConfiguration(" ", {
+          words: {
+            typoabc: "ABC",
+          },
+          breakCharacters: "^",
+        }),
+      },
     },
     {
       name: "Exclude break character replaces word without character",
@@ -1797,13 +1831,15 @@ function testCases(): TestCase[] {
       expectedText: [
         "ABC",
       ],
-      workspaceConfiguration: wordSeparatorConfiguration('.', {
-        words: {
-          typoabc: "ABC",
-        },
-        breakCharacters: '.',
-        excludeBreakCharacter: true,
-      }),
+      workspaceConfiguration: {
+        workspaceConfiguration: wordSeparatorConfiguration('.', {
+          words: {
+            typoabc: "ABC",
+          },
+          breakCharacters: '.',
+          excludeBreakCharacter: true,
+        }),
+      },
     },
     {
       name: "Replacement suffix",
@@ -1818,13 +1854,15 @@ function testCases(): TestCase[] {
       expectedText: [
         "ABC$ef",
       ],
-      workspaceConfiguration: wordSeparatorConfiguration('$', {
-        words: {
-          typoabc: "ABC",
-        },
-        breakCharacters: '$',
-        replacementSuffix: "ef",
-      }),
+      workspaceConfiguration: {
+        workspaceConfiguration: wordSeparatorConfiguration('$', {
+          words: {
+            typoabc: "ABC",
+          },
+          breakCharacters: '$',
+          replacementSuffix: "ef",
+        }),
+      },
     },
     {
       name: "Replacement suffix after cursor",
@@ -1839,13 +1877,15 @@ function testCases(): TestCase[] {
       expectedText: [
         "ABC-EF",
       ],
-      workspaceConfiguration: wordSeparatorConfiguration('-', {
-        words: {
-          typoabc: "ABC",
-        },
-        breakCharacters: '-',
-        replacementSuffixAfterCursor: "EF",
-      }),
+      workspaceConfiguration: {
+        workspaceConfiguration: wordSeparatorConfiguration('-', {
+          words: {
+            typoabc: "ABC",
+          },
+          breakCharacters: '-',
+          replacementSuffixAfterCursor: "EF",
+        }),
+      },
     },
     {
       name: "Replacement suffix before and after cursor",
@@ -1860,15 +1900,17 @@ function testCases(): TestCase[] {
       expectedText: [
         "ABCdeF",
       ],
-      workspaceConfiguration: wordSeparatorConfiguration('&', {
-        words: {
-          typoabc: "ABC",
-        },
-        breakCharacters: '&',
-        replacementSuffix: "de",
-        excludeBreakCharacter: true,
-        replacementSuffixAfterCursor: "F",
-      }),
+      workspaceConfiguration: {
+        workspaceConfiguration: wordSeparatorConfiguration('&', {
+          words: {
+            typoabc: "ABC",
+          },
+          breakCharacters: '&',
+          replacementSuffix: "de",
+          excludeBreakCharacter: true,
+          replacementSuffixAfterCursor: "F",
+        }),
+      },
     },
     // Typo with multi-line suffix replacements
     {
@@ -1894,14 +1936,16 @@ function testCases(): TestCase[] {
         "rstuvw",
         "xyz",
       ],
-      workspaceConfiguration: wordSeparatorConfiguration(' ', {
-        words: {
-          typoalphabet: "abcdef\nghij",
-        },
-        replacementSuffix: "kl\nmn\no",
-        excludeBreakCharacter: true,
-        replacementSuffixAfterCursor: "pq\nrstuvw\nxyz",
-      }),
+      workspaceConfiguration: {
+        workspaceConfiguration: wordSeparatorConfiguration(' ', {
+          words: {
+            typoalphabet: "abcdef\nghij",
+          },
+          replacementSuffix: "kl\nmn\no",
+          excludeBreakCharacter: true,
+          replacementSuffixAfterCursor: "pq\nrstuvw\nxyz",
+        }),
+      },
     },
     // Typo while recording tests
     {
@@ -1934,11 +1978,13 @@ function testCases(): TestCase[] {
         type("playback\n"),
         cmd("groog.record.playRecording"),
       ],
-      workspaceConfiguration: wordSeparatorConfiguration(' ', {
-        words: {
-          abc: "ABCDEF",
-        },
-      }),
+      workspaceConfiguration: {
+        workspaceConfiguration: wordSeparatorConfiguration(' ', {
+          words: {
+            abc: "ABCDEF",
+          },
+        }),
+      },
     },
     // Keyboard toggle tests
     {
@@ -1947,9 +1993,11 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.toggleQMK"),
       ],
-      expectedInfoMessages: [
-        `QMK keyboard mode activated`,
-      ],
+      informationMessage: {
+        expectedMessages: [
+          `QMK keyboard mode activated`,
+        ],
+      },
     },
     {
       name: "Toggles back to basic keyboard mode",
@@ -1957,13 +2005,12 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.toggleQMK"),
       ],
-      expectedInfoMessages: [
-        `Basic keyboard mode activated`,
-      ],
+      informationMessage: {
+        expectedMessages: [
+          `Basic keyboard mode activated`,
+        ],
+      },
     },
-    // { TODO
-    // name: "Works for empty file and no changes",
-    // },
     {
       name: "Writes text to file",
       text: [
@@ -1985,9 +2032,11 @@ function testCases(): TestCase[] {
       expectedText: [
         "abc",
       ],
-      expectedErrorMessages: [
-        `Cannot replace matches when not in groog.find mode`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Cannot replace matches when not in groog.find mode`,
+        ],
+      },
     },
     {
       name: "groog.find.replaceAll if not in find mode",
@@ -2000,9 +2049,11 @@ function testCases(): TestCase[] {
       expectedText: [
         "abc",
       ],
-      expectedErrorMessages: [
-        `Cannot replace matches when not in groog.find mode`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Cannot replace matches when not in groog.find mode`,
+        ],
+      },
     },
     {
       name: "groog.find.toggleReplaceMode if not in find mode",
@@ -2015,9 +2066,11 @@ function testCases(): TestCase[] {
       expectedText: [
         "abc",
       ],
-      expectedErrorMessages: [
-        `groog.find.toggleReplaceMode can only be executed in find mode`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `groog.find.toggleReplaceMode can only be executed in find mode`,
+        ],
+      },
     },
     {
       name: "groog.find.previous if not in find mode",
@@ -2030,9 +2083,11 @@ function testCases(): TestCase[] {
       expectedText: [
         "abc",
       ],
-      expectedErrorMessages: [
-        `groog.find.previous can only be executed in find mode`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `groog.find.previous can only be executed in find mode`,
+        ],
+      },
     },
     {
       name: "groog.find.next if not in find mode",
@@ -2045,9 +2100,11 @@ function testCases(): TestCase[] {
       expectedText: [
         "abc",
       ],
-      expectedErrorMessages: [
-        `groog.find.next can only be executed in find mode`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `groog.find.next can only be executed in find mode`,
+        ],
+      },
     },
     // Find no editor tests
     {
@@ -2055,18 +2112,22 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.find"),
       ],
-      expectedErrorMessages: [
-        `Cannot activate find mode from outside an editor`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Cannot activate find mode from outside an editor`,
+        ],
+      },
     },
     {
       name: "groog.reverseFind fails if no editor",
       userInteractions: [
         cmd("groog.reverseFind"),
       ],
-      expectedErrorMessages: [
-        `Cannot activate find mode from outside an editor`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Cannot activate find mode from outside an editor`,
+        ],
+      },
     },
     {
       name: "groog.find deactivate fails if no editor",
@@ -2079,23 +2140,27 @@ function testCases(): TestCase[] {
         closeAllEditors,
         type("c"),
       ],
-      expectedQuickPicks: [
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'ab'
+          [
+            "ab",
+            "Flags: []",
+            "1 of 1",
+          ],
         ],
-        // type 'ab'
-        [
-          "ab",
-          "Flags: []",
-          "1 of 1",
+      },
+      errorMessage: {
+        expectedMessages: [
+          `Cannot select text from outside the editor`,
         ],
-      ],
-      expectedErrorMessages: [
-        `Cannot select text from outside the editor`,
-      ],
+      },
     },
     {
       name: "End of find cache",
@@ -2114,29 +2179,33 @@ function testCases(): TestCase[] {
       expectedSelections: [
         new vscode.Selection(0, 0, 0, 3),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'ab'
+          [
+            "ab",
+            "Flags: []",
+            "1 of 1",
+          ],
+          // type 'c'
+          [
+            "abc",
+            "Flags: []",
+            "1 of 1",
+          ],
         ],
-        // type 'ab'
-        [
-          "ab",
-          "Flags: []",
-          "1 of 1",
+      },
+      informationMessage: {
+        expectedMessages: [
+          `End of find cache`,
         ],
-        // type 'c'
-        [
-          "abc",
-          "Flags: []",
-          "1 of 1",
-        ],
-      ],
-      expectedInfoMessages: [
-        `End of find cache`,
-      ],
+      },
     },
     {
       name: "Beginning of find cache",
@@ -2155,29 +2224,33 @@ function testCases(): TestCase[] {
       expectedSelections: [
         new vscode.Selection(0, 0, 0, 3),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'ab'
+          [
+            "ab",
+            "Flags: []",
+            "1 of 1",
+          ],
+          // type 'c'
+          [
+            "abc",
+            "Flags: []",
+            "1 of 1",
+          ],
         ],
-        // type 'ab'
-        [
-          "ab",
-          "Flags: []",
-          "1 of 1",
+      },
+      informationMessage: {
+        expectedMessages: [
+          `No earlier find contexts available`,
         ],
-        // type 'c'
-        [
-          "abc",
-          "Flags: []",
-          "1 of 1",
-        ],
-      ],
-      expectedInfoMessages: [
-        `No earlier find contexts available`,
-      ],
+      },
     },
     // Mark mode misc. tests
     {
@@ -2236,12 +2309,12 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.cursorRight"),
         cmd("groog.toggleMarkMode"),
-        cmd("groog.cursorMove",{
+        cmd("groog.cursorMove", {
           to: 'right',
           by: 'character',
           value: 2,
         }),
-        cmd("groog.cursorMove",{
+        cmd("groog.cursorMove", {
           to: 'down',
         }),
       ],
@@ -2295,13 +2368,12 @@ function testCases(): TestCase[] {
         cmd("toggleSearchCaseSensitive"),
         cmd("groog.paste"),
         cmd("search.action.focusSearchList"),
-        new Waiter(10, () => {
+        new Waiter(10, async () => {
           if (vscode.window.activeTextEditor) {
             return true;
           }
 
-          // TODO: make this method async so we can wait
-          vscode.commands.executeCommand("list.focusDown");
+          await vscode.commands.executeCommand("list.focusDown");
 
           return false;
         }),
@@ -2359,20 +2431,22 @@ function testCases(): TestCase[] {
         cmd("groog.cursorLeft"),
         type("X"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'cde'
+          [
+            "cde",
+            "Flags: []",
+            "1 of 1",
+          ],
         ],
-        // type 'cde'
-        [
-          "cde",
-          "Flags: []",
-          "1 of 1",
-        ],
-      ],
+      },
     },
     {
       name: "Unsupported delete command is ignored",
@@ -2393,29 +2467,33 @@ function testCases(): TestCase[] {
         ctrlG,
         type("X"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'cd'
+          [
+            "cd",
+            "Flags: []",
+            "1 of 1",
+          ],
+          // type 'e'
+          [
+            "cde",
+            "Flags: []",
+            "1 of 1",
+          ],
         ],
-        // type 'cd'
-        [
-          "cd",
-          "Flags: []",
-          "1 of 1",
+      },
+      errorMessage: {
+        expectedMessages: [
+          `Unsupported find command: groog.deleteRight`,
         ],
-        // type 'e'
-        [
-          "cde",
-          "Flags: []",
-          "1 of 1",
-        ],
-      ],
-      expectedErrorMessages: [
-        `Unsupported find command: groog.deleteRight`,
-      ],
+      },
     },
     {
       name: "Supports groog.deleteLeft",
@@ -2443,32 +2521,34 @@ function testCases(): TestCase[] {
         ctrlG,
         type(" HERE"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'abcX'
+          [
+            "abcX",
+            "Flags: []",
+            "No results",
+          ],
+          // deleteLeft
+          [
+            "abc",
+            "Flags: []",
+            "1 of 4",
+          ],
+          // type '3'
+          [
+            "abc3",
+            "Flags: []",
+            "1 of 1",
+          ],
         ],
-        // type 'abcX'
-        [
-          "abcX",
-          "Flags: []",
-          "No results",
-        ],
-        // deleteLeft
-        [
-          "abc",
-          "Flags: []",
-          "1 of 4",
-        ],
-        // type '3'
-        [
-          "abc3",
-          "Flags: []",
-          "1 of 1",
-        ],
-      ],
+      },
     },
     {
       name: "Works with emacs pasting",
@@ -2499,32 +2579,34 @@ function testCases(): TestCase[] {
         ctrlG,
         type(" HERE"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'a'
+          [
+            "a",
+            "Flags: []",
+            "1 of 4",
+          ],
+          // paste
+          [
+            "abc",
+            "Flags: []",
+            "1 of 4",
+          ],
+          // type '2'
+          [
+            "abc2",
+            "Flags: []",
+            "1 of 1",
+          ],
         ],
-        // type 'a'
-        [
-          "a",
-          "Flags: []",
-          "1 of 4",
-        ],
-        // paste
-        [
-          "abc",
-          "Flags: []",
-          "1 of 4",
-        ],
-        // type '2'
-        [
-          "abc2",
-          "Flags: []",
-          "1 of 1",
-        ],
-      ],
+      },
     },
     {
       name: "Works with regular pasting",
@@ -2559,32 +2641,34 @@ function testCases(): TestCase[] {
         ctrlG,
         type(" HERE"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'a'
+          [
+            "a",
+            "Flags: []",
+            "1 of 4",
+          ],
+          // paste
+          [
+            "abc",
+            "Flags: []",
+            "1 of 4",
+          ],
+          // type '3'
+          [
+            "abc3",
+            "Flags: []",
+            "1 of 1",
+          ],
         ],
-        // type 'a'
-        [
-          "a",
-          "Flags: []",
-          "1 of 4",
-        ],
-        // paste
-        [
-          "abc",
-          "Flags: []",
-          "1 of 4",
-        ],
-        // type '3'
-        [
-          "abc3",
-          "Flags: []",
-          "1 of 1",
-        ],
-      ],
+      },
     },
     {
       name: "Matches case word",
@@ -2613,26 +2697,28 @@ function testCases(): TestCase[] {
         cmd("groog.deleteLeft"),
         type("xyz"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // toggle case
+          [
+            " ",
+            "Flags: [C]",
+            "No results",
+          ],
+          // type 'abc'
+          [
+            "abc",
+            "Flags: [C]",
+            "1 of 1",
+          ],
         ],
-        // toggle case
-        [
-          " ",
-          "Flags: [C]",
-          "No results",
-        ],
-        // type 'abc'
-        [
-          "abc",
-          "Flags: [C]",
-          "1 of 1",
-        ],
-      ],
+      },
     },
     {
       name: "Matches regex",
@@ -2665,26 +2751,28 @@ function testCases(): TestCase[] {
         cmd("groog.deleteWordLeft"),
         type("xyz "),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // toggle regex
+          [
+            " ",
+            "Flags: [R]",
+            "No results",
+          ],
+          // type 'abc'
+          [
+            "^1.*3$",
+            "Flags: [R]",
+            "1 of 1",
+          ],
         ],
-        // toggle regex
-        [
-          " ",
-          "Flags: [R]",
-          "No results",
-        ],
-        // type 'abc'
-        [
-          "^1.*3$",
-          "Flags: [R]",
-          "1 of 1",
-        ],
-      ],
+      },
     },
     {
       name: "Matches whole word",
@@ -2709,26 +2797,28 @@ function testCases(): TestCase[] {
         cmd("groog.deleteLeft"),
         type("xyz"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // toggle whole word
+          [
+            " ",
+            "Flags: [W]",
+            "No results",
+          ],
+          // type 'abc'
+          [
+            "bcd",
+            "Flags: [W]",
+            "1 of 1",
+          ],
         ],
-        // toggle whole word
-        [
-          " ",
-          "Flags: [W]",
-          "No results",
-        ],
-        // type 'abc'
-        [
-          "bcd",
-          "Flags: [W]",
-          "1 of 1",
-        ],
-      ],
+      },
     },
     // Find whole word item accept logic
     // {
@@ -2780,41 +2870,45 @@ function testCases(): TestCase[] {
         type("b"),
         new SelectItemQuickPickAction(['bcd1', 'bcd2']),
       ],
-      expectedErrorMessages: [
-        `Multiple selections made somehow?!`,
-      ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      errorMessage: {
+        expectedMessages: [
+          `Multiple selections made somehow?!`,
         ],
-        // toggle whole word
-        [
-          " ",
-          "Flags: [W]",
-          "No results",
+      },
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // toggle whole word
+          [
+            " ",
+            "Flags: [W]",
+            "No results",
+          ],
+          // type 'b'
+          [
+            "b",
+            "Flags: [W]",
+            "No results",
+            findItem({
+              label: "bcd1",
+              pickable: true,
+            }),
+            findItem({
+              label: "bcd2",
+              pickable: true,
+            }),
+            findItem({
+              label: "bcd3",
+              pickable: true,
+            }),
+          ],
         ],
-        // type 'b'
-        [
-          "b",
-          "Flags: [W]",
-          "No results",
-          findItem({
-            label: "bcd1",
-            pickable: true,
-          }),
-          findItem({
-            label: "bcd2",
-            pickable: true,
-          }),
-          findItem({
-            label: "bcd3",
-            pickable: true,
-          }),
-        ],
-      ],
+      },
     },
     {
       name: "Find with whole word fails on empty active items",
@@ -2836,41 +2930,45 @@ function testCases(): TestCase[] {
         type("b"),
         new SelectItemQuickPickAction([]),
       ],
-      expectedErrorMessages: [
-        `No find item selected!`,
-      ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      errorMessage: {
+        expectedMessages: [
+          `No find item selected!`,
         ],
-        // toggle whole word
-        [
-          " ",
-          "Flags: [W]",
-          "No results",
+      },
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // toggle whole word
+          [
+            " ",
+            "Flags: [W]",
+            "No results",
+          ],
+          // type 'b'
+          [
+            "b",
+            "Flags: [W]",
+            "No results",
+            findItem({
+              label: "bcd1",
+              pickable: true,
+            }),
+            findItem({
+              label: "bcd2",
+              pickable: true,
+            }),
+            findItem({
+              label: "bcd3",
+              pickable: true,
+            }),
+          ],
         ],
-        // type 'b'
-        [
-          "b",
-          "Flags: [W]",
-          "No results",
-          findItem({
-            label: "bcd1",
-            pickable: true,
-          }),
-          findItem({
-            label: "bcd2",
-            pickable: true,
-          }),
-          findItem({
-            label: "bcd3",
-            pickable: true,
-          }),
-        ],
-      ],
+      },
     },
     {
       name: "Find with whole word starts active on first suggestion",
@@ -2899,44 +2997,46 @@ function testCases(): TestCase[] {
         cmd("groog.deleteLeft"),
         type("xyz"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // toggle whole word
+          [
+            " ",
+            "Flags: [W]",
+            "No results",
+          ],
+          // type 'b'
+          [
+            "b",
+            "Flags: [W]",
+            "No results",
+            findItem({
+              label: "bcd1",
+              pickable: true,
+            }),
+            findItem({
+              label: "bcd2",
+              pickable: true,
+            }),
+            findItem({
+              label: "bcd3",
+              pickable: true,
+            }),
+          ],
+          // SelectActiveItems
+          [
+            "bcd1",
+            "Flags: [W]",
+            "1 of 1",
+          ],
         ],
-        // toggle whole word
-        [
-          " ",
-          "Flags: [W]",
-          "No results",
-        ],
-        // type 'b'
-        [
-          "b",
-          "Flags: [W]",
-          "No results",
-          findItem({
-            label: "bcd1",
-            pickable: true,
-          }),
-          findItem({
-            label: "bcd2",
-            pickable: true,
-          }),
-          findItem({
-            label: "bcd3",
-            pickable: true,
-          }),
-        ],
-        // SelectActiveItems
-        [
-          "bcd1",
-          "Flags: [W]",
-          "1 of 1",
-        ],
-      ],
+      },
     },
     {
       name: "Find with whole word starts active on first suggestion and moves",
@@ -2968,44 +3068,46 @@ function testCases(): TestCase[] {
         cmd("groog.deleteLeft"),
         type("xyz"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // toggle whole word
+          [
+            " ",
+            "Flags: [W]",
+            "No results",
+          ],
+          // type 'b'
+          [
+            "b",
+            "Flags: [W]",
+            "No results",
+            findItem({
+              label: "bcd1",
+              pickable: true,
+            }),
+            findItem({
+              label: "bcd2",
+              pickable: true,
+            }),
+            findItem({
+              label: "bcd3",
+              pickable: true,
+            }),
+          ],
+          // SelectActiveItems on bcd2
+          [
+            "bcd2",
+            "Flags: [W]",
+            "1 of 1",
+          ],
         ],
-        // toggle whole word
-        [
-          " ",
-          "Flags: [W]",
-          "No results",
-        ],
-        // type 'b'
-        [
-          "b",
-          "Flags: [W]",
-          "No results",
-          findItem({
-            label: "bcd1",
-            pickable: true,
-          }),
-          findItem({
-            label: "bcd2",
-            pickable: true,
-          }),
-          findItem({
-            label: "bcd3",
-            pickable: true,
-          }),
-        ],
-        // SelectActiveItems on bcd2
-        [
-          "bcd2",
-          "Flags: [W]",
-          "1 of 1",
-        ],
-      ],
+      },
     },
     {
       name: "Ignores non-pickable items (e.g. informational options)",
@@ -3034,39 +3136,41 @@ function testCases(): TestCase[] {
         cmd("groog.deleteLeft"),
         type("xyz"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // toggle whole word
+          [
+            " ",
+            "Flags: [W]",
+            "No results",
+          ],
+          // type 'b'
+          [
+            "b",
+            "Flags: [W]",
+            "No results",
+            findItem({
+              label: "bcd1",
+              pickable: true,
+            }),
+            findItem({
+              label: "bcd2",
+              pickable: true,
+            }),
+            findItem({
+              label: "bcd3",
+              pickable: true,
+            }),
+          ],
+          // SelectActiveItems user interaction does nothing since non-pickable item
         ],
-        // toggle whole word
-        [
-          " ",
-          "Flags: [W]",
-          "No results",
-        ],
-        // type 'b'
-        [
-          "b",
-          "Flags: [W]",
-          "No results",
-          findItem({
-            label: "bcd1",
-            pickable: true,
-          }),
-          findItem({
-            label: "bcd2",
-            pickable: true,
-          }),
-          findItem({
-            label: "bcd3",
-            pickable: true,
-          }),
-        ],
-        // SelectActiveItems user interaction does nothing since non-pickable item
-      ],
+      },
     },
     // Find memory tests
     {
@@ -3096,60 +3200,62 @@ function testCases(): TestCase[] {
         cmd("groog.find"),
         type("[bB]"),
       ],
-      expectedQuickPicks:[
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          [
+            " ",
+            "Flags: [W]",
+            "No results",
+          ],
+          [
+            " ",
+            "Flags: [CW]",
+            "No results",
+          ],
+          [
+            " ",
+            "Flags: [CWR]",
+            "No results",
+          ],
+          [
+            "[aA]",
+            "Flags: [CWR]",
+            "No results",
+            findItem({
+              label: 'Alpha',
+              pickable: true,
+            }),
+            findItem({
+              label: 'abcd',
+              pickable: true,
+            }),
+          ],
+          // Restart find (with same flags)
+          [
+            " ",
+            "Flags: [CWR]",
+            "No results",
+          ],
+          [
+            "[bB]",
+            "Flags: [CWR]",
+            "No results",
+            findItem({
+              label: 'Bcd2',
+              pickable: true,
+            }),
+            findItem({
+              label: 'bcd1',
+              pickable: true,
+            }),
+          ],
         ],
-        [
-          " ",
-          "Flags: [W]",
-          "No results",
-        ],
-        [
-          " ",
-          "Flags: [CW]",
-          "No results",
-        ],
-        [
-          " ",
-          "Flags: [CWR]",
-          "No results",
-        ],
-        [
-          "[aA]",
-          "Flags: [CWR]",
-          "No results",
-          findItem({
-            label: 'Alpha',
-            pickable: true,
-          }),
-          findItem({
-            label: 'abcd',
-            pickable: true,
-          }),
-        ],
-        // Restart find (with same flags)
-        [
-          " ",
-          "Flags: [CWR]",
-          "No results",
-        ],
-        [
-          "[bB]",
-          "Flags: [CWR]",
-          "No results",
-          findItem({
-            label: 'Bcd2',
-            pickable: true,
-          }),
-          findItem({
-            label: 'bcd1',
-            pickable: true,
-          }),
-        ],
-      ],
+      },
     },
     {
       name: "Clears all toggles if find is re-activated too late",
@@ -3179,52 +3285,54 @@ function testCases(): TestCase[] {
         cmd("groog.find"),
         type("[bB]"),
       ],
-      expectedQuickPicks:[
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          [
+            " ",
+            "Flags: [W]",
+            "No results",
+          ],
+          [
+            " ",
+            "Flags: [CW]",
+            "No results",
+          ],
+          [
+            " ",
+            "Flags: [CWR]",
+            "No results",
+          ],
+          [
+            "[aA]",
+            "Flags: [CWR]",
+            "No results",
+            findItem({
+              label: 'Alpha',
+              pickable: true,
+            }),
+            findItem({
+              label: 'abcd',
+              pickable: true,
+            }),
+          ],
+          // Restart find (with cleared flags)
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          [
+            "[bB]",
+            "Flags: []",
+            "No results",
+          ],
         ],
-        [
-          " ",
-          "Flags: [W]",
-          "No results",
-        ],
-        [
-          " ",
-          "Flags: [CW]",
-          "No results",
-        ],
-        [
-          " ",
-          "Flags: [CWR]",
-          "No results",
-        ],
-        [
-          "[aA]",
-          "Flags: [CWR]",
-          "No results",
-          findItem({
-            label: 'Alpha',
-            pickable: true,
-          }),
-          findItem({
-            label: 'abcd',
-            pickable: true,
-          }),
-        ],
-        // Restart find (with cleared flags)
-        [
-          " ",
-          "Flags: []",
-          "No results",
-        ],
-        [
-          "[bB]",
-          "Flags: []",
-          "No results",
-        ],
-      ],
+      },
     },
     {
       name: "Keeps all toggles if find is re-activated recently enough (with replace mode)",
@@ -3254,65 +3362,67 @@ function testCases(): TestCase[] {
         cmd("groog.find"),
         type("[bB]"),
       ],
-      expectedQuickPicks:[
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          [
+            " ",
+            "Flags: [W]",
+            "No results",
+          ],
+          [
+            " ",
+            "Flags: [CW]",
+            "No results",
+          ],
+          [
+            " ",
+            "Flags: [CWR]",
+            "No results",
+          ],
+          // Toggle replace mode
+          [
+            {
+              label: " ",
+              detail: 'No replace text set',
+            },
+            "Flags: [CWR]",
+            "No results",
+          ],
+          // Type [aA]
+          [
+            {
+              label: " ",
+              detail: '[aA]',
+            },
+            "Flags: [CWR]",
+            "No results",
+          ],
+          // Restart find (with same flags)
+          [
+            " ",
+            "Flags: [CWR]",
+            "No results",
+          ],
+          [
+            "[bB]",
+            "Flags: [CWR]",
+            "No results",
+            findItem({
+              label: 'Bcd2',
+              pickable: true,
+            }),
+            findItem({
+              label: 'bcd1',
+              pickable: true,
+            }),
+          ],
         ],
-        [
-          " ",
-          "Flags: [W]",
-          "No results",
-        ],
-        [
-          " ",
-          "Flags: [CW]",
-          "No results",
-        ],
-        [
-          " ",
-          "Flags: [CWR]",
-          "No results",
-        ],
-        // Toggle replace mode
-        [
-          {
-            label: " ",
-            detail: 'No replace text set',
-          },
-          "Flags: [CWR]",
-          "No results",
-        ],
-        // Type [aA]
-        [
-          {
-            label: " ",
-            detail: '[aA]',
-          },
-          "Flags: [CWR]",
-          "No results",
-        ],
-        // Restart find (with same flags)
-        [
-          " ",
-          "Flags: [CWR]",
-          "No results",
-        ],
-        [
-          "[bB]",
-          "Flags: [CWR]",
-          "No results",
-          findItem({
-            label: 'Bcd2',
-            pickable: true,
-          }),
-          findItem({
-            label: 'bcd1',
-            pickable: true,
-          }),
-        ],
-      ],
+      },
     },
     {
       name: "Clears all toggles if find is re-activated too late (with replace mode)",
@@ -3343,57 +3453,59 @@ function testCases(): TestCase[] {
         cmd("groog.find"),
         type("[bB]"),
       ],
-      expectedQuickPicks:[
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          [
+            " ",
+            "Flags: [W]",
+            "No results",
+          ],
+          [
+            " ",
+            "Flags: [CW]",
+            "No results",
+          ],
+          [
+            " ",
+            "Flags: [CWR]",
+            "No results",
+          ],
+          // Toggle replace mode
+          [
+            {
+              label: " ",
+              detail: 'No replace text set',
+            },
+            "Flags: [CWR]",
+            "No results",
+          ],
+          // Type [aA]
+          [
+            {
+              label: " ",
+              detail: '[aA]',
+            },
+            "Flags: [CWR]",
+            "No results",
+          ],
+          // Restart find (with cleared flags)
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          [
+            "[bB]",
+            "Flags: []",
+            "No results",
+          ],
         ],
-        [
-          " ",
-          "Flags: [W]",
-          "No results",
-        ],
-        [
-          " ",
-          "Flags: [CW]",
-          "No results",
-        ],
-        [
-          " ",
-          "Flags: [CWR]",
-          "No results",
-        ],
-        // Toggle replace mode
-        [
-          {
-            label: " ",
-            detail: 'No replace text set',
-          },
-          "Flags: [CWR]",
-          "No results",
-        ],
-        // Type [aA]
-        [
-          {
-            label: " ",
-            detail: '[aA]',
-          },
-          "Flags: [CWR]",
-          "No results",
-        ],
-        // Restart find (with cleared flags)
-        [
-          " ",
-          "Flags: []",
-          "No results",
-        ],
-        [
-          "[bB]",
-          "Flags: []",
-          "No results",
-        ],
-      ],
+      },
     },
     // Replace tests
     {
@@ -3410,32 +3522,36 @@ function testCases(): TestCase[] {
         type("?a"),
         cmd("groog.find.replaceOne"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // toggle whole word
+          [
+            " ",
+            "Flags: [R]",
+            "No results",
+          ],
+          // type '?a'
+          [
+            {
+              label: "?a",
+              description: "Invalid regular expression: /?a/gim: Nothing to repeat",
+            },
+            "Flags: [R]",
+            "No results",
+          ],
         ],
-        // toggle whole word
-        [
-          " ",
-          "Flags: [R]",
-          "No results",
+      },
+      errorMessage: {
+        expectedMessages: [
+          `Failed to get match info: Invalid regular expression: /?a/gim: Nothing to repeat`,
         ],
-        // type '?a'
-        [
-          {
-            label: "?a",
-            description: "Invalid regular expression: /?a/gim: Nothing to repeat",
-          },
-          "Flags: [R]",
-          "No results",
-        ],
-      ],
-      expectedErrorMessages: [
-        `Failed to get match info: Invalid regular expression: /?a/gim: Nothing to repeat`,
-      ],
+      },
     },
     {
       name: "Replace does nothing if no match",
@@ -3450,20 +3566,22 @@ function testCases(): TestCase[] {
         type("xyz"),
         cmd("groog.find.replaceOne"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'xyz'
+          [
+            "xyz",
+            "Flags: []",
+            "No results",
+          ],
         ],
-        // type 'xyz'
-        [
-          "xyz",
-          "Flags: []",
-          "No results",
-        ],
-      ],
+      },
     },
     {
       name: "Replaces one vanilla text",
@@ -3490,47 +3608,49 @@ function testCases(): TestCase[] {
         type("XYZ"),
         cmd("groog.find.replaceOne"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'bc'
+          [
+            "bc",
+            "Flags: []",
+            "1 of 4",
+          ],
+          // toggle replace mode
+          [
+            {
+              label: "bc",
+              detail: "No replace text set",
+            },
+            "Flags: []",
+            "1 of 4",
+          ],
+          // type 'xyz'
+          [
+            {
+              label: "bc",
+              detail: "XYZ",
+            },
+            "Flags: []",
+            "1 of 4",
+          ],
+          // replace one
+          [
+            {
+              label: "bc",
+              detail: "XYZ",
+            },
+            "Flags: []",
+            "1 of 3",
+          ],
         ],
-        // type 'bc'
-        [
-          "bc",
-          "Flags: []",
-          "1 of 4",
-        ],
-        // toggle replace mode
-        [
-          {
-            label: "bc",
-            detail: "No replace text set",
-          },
-          "Flags: []",
-          "1 of 4",
-        ],
-        // type 'xyz'
-        [
-          {
-            label: "bc",
-            detail: "XYZ",
-          },
-          "Flags: []",
-          "1 of 4",
-        ],
-        // replace one
-        [
-          {
-            label: "bc",
-            detail: "XYZ",
-          },
-          "Flags: []",
-          "1 of 3",
-        ],
-      ],
+      },
     },
     {
       name: "Replaces all vanilla text",
@@ -3553,47 +3673,49 @@ function testCases(): TestCase[] {
         type("XYZ"),
         cmd("groog.find.replaceAll"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'bc'
+          [
+            "bc",
+            "Flags: []",
+            "1 of 4",
+          ],
+          // toggle replace mode
+          [
+            {
+              label: "bc",
+              detail: "No replace text set",
+            },
+            "Flags: []",
+            "1 of 4",
+          ],
+          // type 'xyz'
+          [
+            {
+              label: "bc",
+              detail: "XYZ",
+            },
+            "Flags: []",
+            "1 of 4",
+          ],
+          // replace one
+          [
+            {
+              label: "bc",
+              detail: "XYZ",
+            },
+            "Flags: []",
+            "No results",
+          ],
         ],
-        // type 'bc'
-        [
-          "bc",
-          "Flags: []",
-          "1 of 4",
-        ],
-        // toggle replace mode
-        [
-          {
-            label: "bc",
-            detail: "No replace text set",
-          },
-          "Flags: []",
-          "1 of 4",
-        ],
-        // type 'xyz'
-        [
-          {
-            label: "bc",
-            detail: "XYZ",
-          },
-          "Flags: []",
-          "1 of 4",
-        ],
-        // replace one
-        [
-          {
-            label: "bc",
-            detail: "XYZ",
-          },
-          "Flags: []",
-          "No results",
-        ],
-      ],
+      },
     },
     {
       name: "Replaces one case match",
@@ -3621,56 +3743,58 @@ function testCases(): TestCase[] {
         type("X"),
         cmd("groog.find.replaceOne"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'bc'
+          [
+            "bc",
+            "Flags: []",
+            "1 of 4",
+          ],
+          // toggle replace mode
+          [
+            {
+              label: "bc",
+              detail: "No replace text set",
+            },
+            "Flags: []",
+            "1 of 4",
+          ],
+          // toggle case sensitive
+          [
+            {
+              label: "bc",
+              detail: "No replace text set",
+            },
+            "Flags: [C]",
+            "1 of 2",
+          ],
+          // type 'X'
+          [
+            {
+              label: "bc",
+              detail: "X",
+            },
+            "Flags: [C]",
+            "1 of 2",
+          ],
+          // replace one
+          [
+            {
+              label: "bc",
+              detail: "X",
+            },
+            "Flags: [C]",
+            "1 of 1",
+          ],
         ],
-        // type 'bc'
-        [
-          "bc",
-          "Flags: []",
-          "1 of 4",
-        ],
-        // toggle replace mode
-        [
-          {
-            label: "bc",
-            detail: "No replace text set",
-          },
-          "Flags: []",
-          "1 of 4",
-        ],
-        // toggle case sensitive
-        [
-          {
-            label: "bc",
-            detail: "No replace text set",
-          },
-          "Flags: [C]",
-          "1 of 2",
-        ],
-        // type 'X'
-        [
-          {
-            label: "bc",
-            detail: "X",
-          },
-          "Flags: [C]",
-          "1 of 2",
-        ],
-        // replace one
-        [
-          {
-            label: "bc",
-            detail: "X",
-          },
-          "Flags: [C]",
-          "1 of 1",
-        ],
-      ],
+      },
     },
     {
       name: "Replaces all case match",
@@ -3700,56 +3824,58 @@ function testCases(): TestCase[] {
         type("X"),
         cmd("groog.find.replaceAll"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'bc'
+          [
+            "bc",
+            "Flags: []",
+            "1 of 5",
+          ],
+          // toggle replace mode
+          [
+            {
+              label: "bc",
+              detail: "No replace text set",
+            },
+            "Flags: []",
+            "1 of 5",
+          ],
+          // toggle case sensitive
+          [
+            {
+              label: "bc",
+              detail: "No replace text set",
+            },
+            "Flags: [C]",
+            "1 of 3",
+          ],
+          // type 'X'
+          [
+            {
+              label: "bc",
+              detail: "X",
+            },
+            "Flags: [C]",
+            "1 of 3",
+          ],
+          // replace all
+          [
+            {
+              label: "bc",
+              detail: "X",
+            },
+            "Flags: [C]",
+            "No results",
+          ],
         ],
-        // type 'bc'
-        [
-          "bc",
-          "Flags: []",
-          "1 of 5",
-        ],
-        // toggle replace mode
-        [
-          {
-            label: "bc",
-            detail: "No replace text set",
-          },
-          "Flags: []",
-          "1 of 5",
-        ],
-        // toggle case sensitive
-        [
-          {
-            label: "bc",
-            detail: "No replace text set",
-          },
-          "Flags: [C]",
-          "1 of 3",
-        ],
-        // type 'X'
-        [
-          {
-            label: "bc",
-            detail: "X",
-          },
-          "Flags: [C]",
-          "1 of 3",
-        ],
-        // replace all
-        [
-          {
-            label: "bc",
-            detail: "X",
-          },
-          "Flags: [C]",
-          "No results",
-        ],
-      ],
+      },
     },
     {
       name: "Replaces one whole word match",
@@ -3779,56 +3905,58 @@ function testCases(): TestCase[] {
         type("X"),
         cmd("groog.find.replaceOne"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'bc'
+          [
+            "bc",
+            "Flags: []",
+            "1 of 5",
+          ],
+          // toggle replace mode
+          [
+            {
+              label: "bc",
+              detail: "No replace text set",
+            },
+            "Flags: []",
+            "1 of 5",
+          ],
+          // toggle whole word
+          [
+            {
+              label: "bc",
+              detail: "No replace text set",
+            },
+            "Flags: [W]",
+            "1 of 3",
+          ],
+          // type 'X'
+          [
+            {
+              label: "bc",
+              detail: "X",
+            },
+            "Flags: [W]",
+            "1 of 3",
+          ],
+          // replace all
+          [
+            {
+              label: "bc",
+              detail: "X",
+            },
+            "Flags: [W]",
+            "1 of 2",
+          ],
         ],
-        // type 'bc'
-        [
-          "bc",
-          "Flags: []",
-          "1 of 5",
-        ],
-        // toggle replace mode
-        [
-          {
-            label: "bc",
-            detail: "No replace text set",
-          },
-          "Flags: []",
-          "1 of 5",
-        ],
-        // toggle whole word
-        [
-          {
-            label: "bc",
-            detail: "No replace text set",
-          },
-          "Flags: [W]",
-          "1 of 3",
-        ],
-        // type 'X'
-        [
-          {
-            label: "bc",
-            detail: "X",
-          },
-          "Flags: [W]",
-          "1 of 3",
-        ],
-        // replace all
-        [
-          {
-            label: "bc",
-            detail: "X",
-          },
-          "Flags: [W]",
-          "1 of 2",
-        ],
-      ],
+      },
     },
     {
       name: "Replaces all whole word match",
@@ -3854,61 +3982,63 @@ function testCases(): TestCase[] {
         type("X"),
         cmd("groog.find.replaceAll"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'bc'
+          [
+            "bc",
+            "Flags: []",
+            "1 of 4",
+          ],
+          // toggle replace mode
+          [
+            {
+              label: "bc",
+              detail: "No replace text set",
+            },
+            "Flags: []",
+            "1 of 4",
+          ],
+          // toggle whole word
+          [
+            {
+              label: "bc",
+              detail: "No replace text set",
+            },
+            "Flags: [W]",
+            "1 of 2",
+          ],
+          // type 'X'
+          [
+            {
+              label: "bc",
+              detail: "X",
+            },
+            "Flags: [W]",
+            "1 of 2",
+          ],
+          // replace all
+          [
+            {
+              label: "bc",
+              detail: "X",
+            },
+            "Flags: [W]",
+            "No results",
+            // Whole-word suggestibles
+            findItem({
+              label: "bcd",
+              pickable: true,
+            }),
+          ],
         ],
-        // type 'bc'
-        [
-          "bc",
-          "Flags: []",
-          "1 of 4",
-        ],
-        // toggle replace mode
-        [
-          {
-            label: "bc",
-            detail: "No replace text set",
-          },
-          "Flags: []",
-          "1 of 4",
-        ],
-        // toggle whole word
-        [
-          {
-            label: "bc",
-            detail: "No replace text set",
-          },
-          "Flags: [W]",
-          "1 of 2",
-        ],
-        // type 'X'
-        [
-          {
-            label: "bc",
-            detail: "X",
-          },
-          "Flags: [W]",
-          "1 of 2",
-        ],
-        // replace all
-        [
-          {
-            label: "bc",
-            detail: "X",
-          },
-          "Flags: [W]",
-          "No results",
-          // Whole-word suggestibles
-          findItem({
-            label: "bcd",
-            pickable: true,
-          }),
-        ],
-      ],
+      },
     },
     // Find context tests
     {
@@ -3944,32 +4074,34 @@ function testCases(): TestCase[] {
         cmd("groog.deleteLeft"),
         type("REPLACE"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'bc'
+          [
+            "bc",
+            "Flags: []",
+            "1 of 3",
+          ],
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'bc'
+          [
+            "bc",
+            "Flags: []",
+            "1 of 2",
+          ],
         ],
-        // type 'bc'
-        [
-          "bc",
-          "Flags: []",
-          "1 of 3",
-        ],
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
-        ],
-        // type 'bc'
-        [
-          "bc",
-          "Flags: []",
-          "1 of 2",
-        ],
-      ],
+      },
     },
     {
       name: "reverseFind",
@@ -4003,20 +4135,22 @@ function testCases(): TestCase[] {
         cmd("groog.deleteLeft"),
         type("ZZZ"),
       ],
-      expectedQuickPicks:[
-        // groog.reverseFind
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.reverseFind
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'bc'
+          [
+            "bc",
+            "Flags: []",
+            "5 of 5",
+          ],
         ],
-        // type 'bc'
-        [
-          "bc",
-          "Flags: []",
-          "5 of 5",
-        ],
-      ],
+      },
     },
     {
       name: "Multiple finds and reverseFind",
@@ -4055,50 +4189,52 @@ function testCases(): TestCase[] {
         cmd("groog.deleteLeft"),
         type("ZZZ"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'bc'
+          [
+            "bc",
+            "Flags: []",
+            "1 of 5",
+          ],
+          // groog.find
+          [
+            "bc",
+            "Flags: []",
+            "2 of 5",
+          ],
+          // groog.find
+          [
+            "bc",
+            "Flags: []",
+            "3 of 5",
+          ],
+          // groog.find
+          [
+            "bc",
+            "Flags: []",
+            "4 of 5",
+          ],
+          // groog.reverseFind
+          [
+            "bc",
+            "Flags: []",
+            "3 of 5",
+          ],
+          // groog.reverseFind
+          [
+            "bc",
+            "Flags: []",
+            "2 of 5",
+          ],
         ],
-        // type 'bc'
-        [
-          "bc",
-          "Flags: []",
-          "1 of 5",
-        ],
-        // groog.find
-        [
-          "bc",
-          "Flags: []",
-          "2 of 5",
-        ],
-        // groog.find
-        [
-          "bc",
-          "Flags: []",
-          "3 of 5",
-        ],
-        // groog.find
-        [
-          "bc",
-          "Flags: []",
-          "4 of 5",
-        ],
-        // groog.reverseFind
-        [
-          "bc",
-          "Flags: []",
-          "3 of 5",
-        ],
-        // groog.reverseFind
-        [
-          "bc",
-          "Flags: []",
-          "2 of 5",
-        ],
-      ],
+      },
     },
     {
       name: "Goes to previous context",
@@ -4134,62 +4270,64 @@ function testCases(): TestCase[] {
         cmd("groog.deleteLeft"),
         type("REPLACE"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'bc'
+          [
+            "bc",
+            "Flags: []",
+            "1 of 1",
+          ],
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'de'
+          [
+            "de",
+            "Flags: []",
+            "1 of 1",
+          ],
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'xyz'
+          [
+            "xyz",
+            "Flags: []",
+            "1 of 1",
+          ],
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // groog.find.previous
+          [
+            "xyz",
+            "Flags: []",
+            "1 of 1",
+          ],
+          // groog.find.previous
+          [
+            "de",
+            "Flags: []",
+            "1 of 1",
+          ],
         ],
-        // type 'bc'
-        [
-          "bc",
-          "Flags: []",
-          "1 of 1",
-        ],
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
-        ],
-        // type 'de'
-        [
-          "de",
-          "Flags: []",
-          "1 of 1",
-        ],
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
-        ],
-        // type 'xyz'
-        [
-          "xyz",
-          "Flags: []",
-          "1 of 1",
-        ],
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
-        ],
-        // groog.find.previous
-        [
-          "xyz",
-          "Flags: []",
-          "1 of 1",
-        ],
-        // groog.find.previous
-        [
-          "de",
-          "Flags: []",
-          "1 of 1",
-        ],
-      ],
+      },
     },
     {
       name: "Goes to previous context and continues typing",
@@ -4228,80 +4366,82 @@ function testCases(): TestCase[] {
         cmd("groog.deleteLeft"),
         type("REPLACE"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'bc'
+          [
+            "bc",
+            "Flags: []",
+            "1 of 1",
+          ],
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'de'
+          [
+            "de",
+            "Flags: []",
+            "1 of 1",
+          ],
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'xyz'
+          [
+            "xyz",
+            "Flags: []",
+            "1 of 1",
+          ],
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // groog.find.previous
+          [
+            "xyz",
+            "Flags: []",
+            "1 of 1",
+          ],
+          // groog.find.previous
+          [
+            "de",
+            "Flags: []",
+            "1 of 1",
+          ],
+          // groog.find.next
+          [
+            "xyz",
+            "Flags: []",
+            "1 of 1",
+          ],
+          // groog.find.previous
+          [
+            "de",
+            "Flags: []",
+            "1 of 1",
+          ],
+          // tpye 'f'
+          [
+            "def",
+            "Flags: []",
+            "1 of 1",
+          ],
         ],
-        // type 'bc'
-        [
-          "bc",
-          "Flags: []",
-          "1 of 1",
-        ],
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
-        ],
-        // type 'de'
-        [
-          "de",
-          "Flags: []",
-          "1 of 1",
-        ],
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
-        ],
-        // type 'xyz'
-        [
-          "xyz",
-          "Flags: []",
-          "1 of 1",
-        ],
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
-        ],
-        // groog.find.previous
-        [
-          "xyz",
-          "Flags: []",
-          "1 of 1",
-        ],
-        // groog.find.previous
-        [
-          "de",
-          "Flags: []",
-          "1 of 1",
-        ],
-        // groog.find.next
-        [
-          "xyz",
-          "Flags: []",
-          "1 of 1",
-        ],
-        // groog.find.previous
-        [
-          "de",
-          "Flags: []",
-          "1 of 1",
-        ],
-        // tpye 'f'
-        [
-          "def",
-          "Flags: []",
-          "1 of 1",
-        ],
-      ],
+      },
     },
     // Record tests
     {
@@ -4315,9 +4455,11 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.record.playRecording"),
       ],
-      expectedErrorMessages: [
-        `No recordings exist yet!`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `No recordings exist yet!`,
+        ],
+      },
     },
     {
       name: "Record playback repeatedly fails if no recording set",
@@ -4330,9 +4472,11 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.record.playRecordingRepeatedly"),
       ],
-      expectedErrorMessages: [
-        `No recordings exist yet!`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `No recordings exist yet!`,
+        ],
+      },
     },
     {
       name: "Record playback n times fails if no recording set",
@@ -4345,27 +4489,33 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.record.playRecordingNTimes"),
       ],
-      expectedErrorMessages: [
-        `No recordings exist yet!`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `No recordings exist yet!`,
+        ],
+      },
     },
     {
       name: "Save named recording fails if not recording",
       userInteractions: [
         cmd("groog.record.saveRecordingAs"),
       ],
-      expectedErrorMessages: [
-        `Not recording!`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Not recording!`,
+        ],
+      },
     },
     {
       name: "End recording fails if not recording",
       userInteractions: [
         cmd("groog.record.endRecording"),
       ],
-      expectedErrorMessages: [
-        `Not recording!`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Not recording!`,
+        ],
+      },
     },
     {
       name: "Handles nested startRecording commands",
@@ -4392,9 +4542,11 @@ function testCases(): TestCase[] {
         type("ghi\n"),
         cmd("groog.record.playRecording"),
       ],
-      expectedErrorMessages: [
-        `Already recording!`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Already recording!`,
+        ],
+      },
     },
     {
       name: "groog.deleteRight eats text",
@@ -4423,16 +4575,18 @@ function testCases(): TestCase[] {
         cmd("groog.record.playNamedRecording"),
         new SelectItemQuickPickAction(["Recent recording 0"]),
       ],
-      expectedQuickPicks:[[
-        recordingQuickPick({
-          label: "Recent recording 0",
-          recordBook: recordBook([
-            new CommandRecord("groog.cursorEnd"), // Note only one of these
-            new TypeRecord("X"),
-          ]),
-          savable: true,
-        }),
-      ]],
+      quickPick: {
+        expectedQuickPicks: [[
+          recordingQuickPick({
+            label: "Recent recording 0",
+            recordBook: recordBook([
+              new CommandRecord("groog.cursorEnd"), // Note only one of these
+              new TypeRecord("X"),
+            ]),
+            savable: true,
+          }),
+        ]],
+      },
     },
     {
       name: "Fails to playback if actively recording",
@@ -4455,9 +4609,11 @@ function testCases(): TestCase[] {
         type("\n"),
         cmd("groog.record.playRecording"),
       ],
-      expectedErrorMessages: [
-        `Still recording!`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Still recording!`,
+        ],
+      },
     },
     {
       name: "Fails to playback named recording if actively recording",
@@ -4480,9 +4636,11 @@ function testCases(): TestCase[] {
         type("\n"),
         cmd("groog.record.playRecording"),
       ],
-      expectedErrorMessages: [
-        `Still recording!`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Still recording!`,
+        ],
+      },
     },
     {
       name: "Fails to playback if no named recording selected",
@@ -4496,10 +4654,14 @@ function testCases(): TestCase[] {
         cmd("groog.record.playNamedRecording"),
         new SelectItemQuickPickAction([]),
       ],
-      expectedQuickPicks: [[]],
-      expectedErrorMessages: [
-        `No named recording selection made`,
-      ],
+      quickPick: {
+        expectedQuickPicks: [[]],
+      },
+      errorMessage: {
+        expectedMessages: [
+          `No named recording selection made`,
+        ],
+      },
     },
     {
       name: "Fails to delete recording if actively recording",
@@ -4522,9 +4684,11 @@ function testCases(): TestCase[] {
         type("\n"),
         cmd("groog.record.playRecording"),
       ],
-      expectedErrorMessages: [
-        `Still recording!`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Still recording!`,
+        ],
+      },
     },
     {
       name: "Fails to repeatedly playback if actively recording",
@@ -4547,9 +4711,11 @@ function testCases(): TestCase[] {
         type("\n"),
         cmd("groog.record.playRecording"),
       ],
-      expectedErrorMessages: [
-        `Still recording!`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Still recording!`,
+        ],
+      },
     },
     {
       name: "Fails to n-times playback if actively recording",
@@ -4572,9 +4738,11 @@ function testCases(): TestCase[] {
         type("\n"),
         cmd("groog.record.playRecording"),
       ],
-      expectedErrorMessages: [
-        `Still recording!`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Still recording!`,
+        ],
+      },
     },
     {
       name: "Records and plays back empty recording",
@@ -4691,47 +4859,51 @@ function testCases(): TestCase[] {
         cmd("groog.record.endRecording"),
         cmd("groog.record.playRecording"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'abc'
+          [
+            "abc",
+            "Flags: []",
+            "1 of 2",
+          ],
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'def'
+          [
+            "def",
+            "Flags: []",
+            "1 of 2",
+          ],
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'ghi'
+          [
+            "ghi",
+            "Flags: []",
+            "1 of 1",
+          ],
         ],
-        // type 'abc'
-        [
-          "abc",
-          "Flags: []",
-          "1 of 2",
+      },
+      errorMessage: {
+        expectedMessages: [
+          `No match found during recording playback`,
         ],
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
-        ],
-        // type 'def'
-        [
-          "def",
-          "Flags: []",
-          "1 of 2",
-        ],
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
-        ],
-        // type 'ghi'
-        [
-          "ghi",
-          "Flags: []",
-          "1 of 1",
-        ],
-      ],
-      expectedErrorMessages: [
-        `No match found during recording playback`,
-      ],
+      },
     },
     {
       name: "Records and plays back when recording would be popped",
@@ -4789,19 +4961,23 @@ function testCases(): TestCase[] {
         cmd("groog.record.saveRecordingAs"),
         cmd("groog.record.playRecording"),
       ],
-      inputBoxResponses: ["some-name"],
-      expectedInfoMessages: [
-        `Recording saved as "some-name"!`,
-      ],
-      expectedInputBoxes: [
-        {
-          options: {
-            placeHolder: "Recording name",
-            title: "Save recording as:",
-            validateInputProvided: true,
+      inputBox: {
+        inputBoxResponses: ["some-name"],
+        expectedInputBoxes: [
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
           },
-        },
-      ],
+        ],
+      },
+      informationMessage: {
+        expectedMessages: [
+          `Recording saved as "some-name"!`,
+        ],
+      },
     },
     {
       name: "Fails to name recording if reserved prefix",
@@ -4825,25 +5001,29 @@ function testCases(): TestCase[] {
         cmd("groog.record.saveRecordingAs"),
         cmd("groog.record.playRecording"),
       ],
-      inputBoxResponses: [
-        "Recent recording bleh",
-      ],
-      expectedErrorMessages: [
-        `No recording name provided`,
-      ],
-      expectedInputBoxes: [
-        {
-          options: {
-            placeHolder: "Recording name",
-            title: "Save recording as:",
-            validateInputProvided: true,
+      inputBox: {
+        inputBoxResponses: [
+          "Recent recording bleh",
+        ],
+        expectedInputBoxes: [
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+            validationMessage: {
+              message: "This is a reserved prefix",
+              severity: vscode.InputBoxValidationSeverity.Error,
+            },
           },
-          validationMessage: {
-            message: "This is a reserved prefix",
-            severity: vscode.InputBoxValidationSeverity.Error,
-          },
-        },
-      ],
+        ],
+      },
+      errorMessage: {
+        expectedMessages: [
+          `No recording name provided`,
+        ],
+      },
     },
     {
       name: "Fails to name recording if recording name already exists",
@@ -4871,36 +5051,42 @@ function testCases(): TestCase[] {
         cmd("groog.record.saveRecordingAs"),
         cmd("groog.record.playRecording"),
       ],
-      inputBoxResponses: [
-        "ABC Recording",
-        "ABC Recording",
-      ],
-      expectedInputBoxes: [
-        {
-          options: {
-            placeHolder: "Recording name",
-            title: "Save recording as:",
-            validateInputProvided: true,
+      inputBox: {
+        inputBoxResponses: [
+          "ABC Recording",
+          "ABC Recording",
+        ],
+        expectedInputBoxes: [
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
           },
-        },
-        {
-          options: {
-            placeHolder: "Recording name",
-            title: "Save recording as:",
-            validateInputProvided: true,
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+            validationMessage: {
+              message: "This record name already exists",
+              severity: vscode.InputBoxValidationSeverity.Error,
+            },
           },
-          validationMessage: {
-            message: "This record name already exists",
-            severity: vscode.InputBoxValidationSeverity.Error,
-          },
-        },
-      ],
-      expectedInfoMessages: [
-        `Recording saved as "ABC Recording"!`,
-      ],
-      expectedErrorMessages: [
-        `No recording name provided`,
-      ],
+        ],
+      },
+      informationMessage: {
+        expectedMessages: [
+          `Recording saved as "ABC Recording"!`,
+        ],
+      },
+      errorMessage: {
+        expectedMessages: [
+          `No recording name provided`,
+        ],
+      },
     },
     {
       name: "Plays back named recording specified by name",
@@ -4934,68 +5120,74 @@ function testCases(): TestCase[] {
         cmd("groog.record.playNamedRecording"),
         new SelectItemQuickPickAction(["DEF Recording"]),
       ],
-      inputBoxResponses: [
-        "ABC Recording",
-        "DEF Recording",
-        "GHI Recording",
-      ],
-      expectedQuickPicks:[[
-        recordingQuickPick({
-          label: "Recent recording 0",
-          recordBook: recordBook([new TypeRecord("ghi\n")]),
-          savable: true,
-        }),
-        recordingQuickPick({
-          label: "Recent recording 1",
-          recordBook: recordBook([new TypeRecord("def\n")]),
-          savable: true,
-        }),
-        recordingQuickPick({
-          label: "Recent recording 2",
-          recordBook: recordBook([new TypeRecord("abc\n")]),
-          savable: true,
-        }),
-        recordingQuickPick({
-          label: "ABC Recording",
-          recordBook: recordBook([new TypeRecord("abc\n")]),
-        }),
-        recordingQuickPick({
-          label: "DEF Recording",
-          recordBook: recordBook([new TypeRecord("def\n")]),
-        }),
-        recordingQuickPick({
-          label: "GHI Recording",
-          recordBook: recordBook([new TypeRecord("ghi\n")]),
-        }),
-      ]],
-      expectedInputBoxes: [
-        {
-          options: {
-            placeHolder: "Recording name",
-            title: "Save recording as:",
-            validateInputProvided: true,
+      inputBox: {
+        inputBoxResponses: [
+          "ABC Recording",
+          "DEF Recording",
+          "GHI Recording",
+        ],
+        expectedInputBoxes: [
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
           },
-        },
-        {
-          options: {
-            placeHolder: "Recording name",
-            title: "Save recording as:",
-            validateInputProvided: true,
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
           },
-        },
-        {
-          options: {
-            placeHolder: "Recording name",
-            title: "Save recording as:",
-            validateInputProvided: true,
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
           },
-        },
-      ],
-      expectedInfoMessages: [
-        `Recording saved as "ABC Recording"!`,
-        `Recording saved as "DEF Recording"!`,
-        `Recording saved as "GHI Recording"!`,
-      ],
+        ],
+      },
+      quickPick: {
+        expectedQuickPicks: [[
+          recordingQuickPick({
+            label: "Recent recording 0",
+            recordBook: recordBook([new TypeRecord("ghi\n")]),
+            savable: true,
+          }),
+          recordingQuickPick({
+            label: "Recent recording 1",
+            recordBook: recordBook([new TypeRecord("def\n")]),
+            savable: true,
+          }),
+          recordingQuickPick({
+            label: "Recent recording 2",
+            recordBook: recordBook([new TypeRecord("abc\n")]),
+            savable: true,
+          }),
+          recordingQuickPick({
+            label: "ABC Recording",
+            recordBook: recordBook([new TypeRecord("abc\n")]),
+          }),
+          recordingQuickPick({
+            label: "DEF Recording",
+            recordBook: recordBook([new TypeRecord("def\n")]),
+          }),
+          recordingQuickPick({
+            label: "GHI Recording",
+            recordBook: recordBook([new TypeRecord("ghi\n")]),
+          }),
+        ]],
+      },
+      informationMessage: {
+        expectedMessages: [
+          `Recording saved as "ABC Recording"!`,
+          `Recording saved as "DEF Recording"!`,
+          `Recording saved as "GHI Recording"!`,
+        ],
+      },
     },
     {
       name: "Fails to play back named recording if multiple items are picked",
@@ -5028,82 +5220,38 @@ function testCases(): TestCase[] {
         cmd("groog.record.playNamedRecording"),
         new SelectItemQuickPickAction(["ABC Recording", "DEF Recording"]),
       ],
-      inputBoxResponses: [
-        "ABC Recording",
-        "DEF Recording",
-        "GHI Recording",
-      ],
-      expectedQuickPicks:[[
-        recordingQuickPick({
-          label: "Recent recording 0",
-          recordBook: recordBook([new TypeRecord("ghi\n")]),
-          savable: true,
-        }),
-        recordingQuickPick({
-          label: "Recent recording 1",
-          recordBook: recordBook([new TypeRecord("def\n")]),
-          savable: true,
-        }),
-        recordingQuickPick({
-          label: "Recent recording 2",
-          recordBook: recordBook([new TypeRecord("abc\n")]),
-          savable: true,
-        }),
-        recordingQuickPick({
-          label: "ABC Recording",
-          recordBook: recordBook([new TypeRecord("abc\n")]),
-        }),
-        recordingQuickPick({
-          label: "DEF Recording",
-          recordBook: recordBook([new TypeRecord("def\n")]),
-        }),
-        recordingQuickPick({
-          label: "GHI Recording",
-          recordBook: recordBook([new TypeRecord("ghi\n")]),
-        }),
-      ]],
-      expectedInputBoxes: [
-        {
-          options: {
-            placeHolder: "Recording name",
-            title: "Save recording as:",
-            validateInputProvided: true,
+      inputBox: {
+        inputBoxResponses: [
+          "ABC Recording",
+          "DEF Recording",
+          "GHI Recording",
+        ],
+        expectedInputBoxes: [
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
           },
-        },
-        {
-          options: {
-            placeHolder: "Recording name",
-            title: "Save recording as:",
-            validateInputProvided: true,
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
           },
-        },
-        {
-          options: {
-            placeHolder: "Recording name",
-            title: "Save recording as:",
-            validateInputProvided: true,
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
           },
-        },
-      ],
-      expectedInfoMessages: [
-        `Recording saved as "ABC Recording"!`,
-        `Recording saved as "DEF Recording"!`,
-        `Recording saved as "GHI Recording"!`,
-      ],
-      expectedErrorMessages: [
-        "Multiple selections made somehow?!",
-      ],
-    },
-    {
-      name: "Deletes recording",
-      inputBoxResponses: [
-        "ABC Recording",
-        "DEF Recording",
-        "GHI Recording",
-      ],
-      expectedQuickPicks:[
-        // playNamedRecording
-        [
+        ],
+      },
+      quickPick: {
+        expectedQuickPicks: [[
           recordingQuickPick({
             label: "Recent recording 0",
             recordBook: recordBook([new TypeRecord("ghi\n")]),
@@ -5131,64 +5279,122 @@ function testCases(): TestCase[] {
             label: "GHI Recording",
             recordBook: recordBook([new TypeRecord("ghi\n")]),
           }),
+        ]],
+      },
+      informationMessage: {
+        expectedMessages: [
+          `Recording saved as "ABC Recording"!`,
+          `Recording saved as "DEF Recording"!`,
+          `Recording saved as "GHI Recording"!`,
         ],
-        // deleteRecording
-        ["ABC Recording", "DEF Recording", "GHI Recording"],
-        // playNamedRecording
-        [
-          recordingQuickPick({
-            label: "Recent recording 0",
-            recordBook: recordBook([new TypeRecord("ghi\n")]),
-            savable: true,
-          }),
-          recordingQuickPick({
-            label: "Recent recording 1",
-            recordBook: recordBook([new TypeRecord("def\n")]),
-            savable: true,
-          }),
-          recordingQuickPick({
-            label: "Recent recording 2",
-            recordBook: recordBook([new TypeRecord("abc\n")]),
-            savable: true,
-          }),
-          recordingQuickPick({
-            label: "ABC Recording",
-            recordBook: recordBook([new TypeRecord("abc\n")]),
-          }),
-          recordingQuickPick({
-            label: "GHI Recording",
-            recordBook: recordBook([new TypeRecord("ghi\n")]),
-          }),
+      },
+      errorMessage: {
+        expectedMessages: [
+          "Multiple selections made somehow?!",
         ],
-      ],
-      expectedInfoMessages: [
-        `Recording saved as "ABC Recording"!`,
-        `Recording saved as "DEF Recording"!`,
-        `Recording saved as "GHI Recording"!`,
-      ],
-      expectedInputBoxes: [
-        {
-          options: {
-            placeHolder: "Recording name",
-            title: "Save recording as:",
-            validateInputProvided: true,
+      },
+    },
+    {
+      name: "Deletes recording",
+      inputBox: {
+        inputBoxResponses: [
+          "ABC Recording",
+          "DEF Recording",
+          "GHI Recording",
+        ],
+        expectedInputBoxes: [
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
           },
-        },
-        {
-          options: {
-            placeHolder: "Recording name",
-            title: "Save recording as:",
-            validateInputProvided: true,
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
           },
-        },
-        {
-          options: {
-            placeHolder: "Recording name",
-            title: "Save recording as:",
-            validateInputProvided: true,
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
           },
-        },
-      ],
+        ],
+      },
+      quickPick: {
+        expectedQuickPicks: [
+          // playNamedRecording
+          [
+            recordingQuickPick({
+              label: "Recent recording 0",
+              recordBook: recordBook([new TypeRecord("ghi\n")]),
+              savable: true,
+            }),
+            recordingQuickPick({
+              label: "Recent recording 1",
+              recordBook: recordBook([new TypeRecord("def\n")]),
+              savable: true,
+            }),
+            recordingQuickPick({
+              label: "Recent recording 2",
+              recordBook: recordBook([new TypeRecord("abc\n")]),
+              savable: true,
+            }),
+            recordingQuickPick({
+              label: "ABC Recording",
+              recordBook: recordBook([new TypeRecord("abc\n")]),
+            }),
+            recordingQuickPick({
+              label: "DEF Recording",
+              recordBook: recordBook([new TypeRecord("def\n")]),
+            }),
+            recordingQuickPick({
+              label: "GHI Recording",
+              recordBook: recordBook([new TypeRecord("ghi\n")]),
+            }),
+          ],
+          // deleteRecording
+          ["ABC Recording", "DEF Recording", "GHI Recording"],
+          // playNamedRecording
+          [
+            recordingQuickPick({
+              label: "Recent recording 0",
+              recordBook: recordBook([new TypeRecord("ghi\n")]),
+              savable: true,
+            }),
+            recordingQuickPick({
+              label: "Recent recording 1",
+              recordBook: recordBook([new TypeRecord("def\n")]),
+              savable: true,
+            }),
+            recordingQuickPick({
+              label: "Recent recording 2",
+              recordBook: recordBook([new TypeRecord("abc\n")]),
+              savable: true,
+            }),
+            recordingQuickPick({
+              label: "ABC Recording",
+              recordBook: recordBook([new TypeRecord("abc\n")]),
+            }),
+            recordingQuickPick({
+              label: "GHI Recording",
+              recordBook: recordBook([new TypeRecord("ghi\n")]),
+            }),
+          ],
+        ],
+      },
+      informationMessage: {
+        expectedMessages: [
+          `Recording saved as "ABC Recording"!`,
+          `Recording saved as "DEF Recording"!`,
+          `Recording saved as "GHI Recording"!`,
+        ],
+      },
       text: [
         "start text",
       ],
@@ -5378,20 +5584,22 @@ function testCases(): TestCase[] {
         cmd("groog.record.endRecording"),
         cmd("groog.record.playRecording"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'abc'
+          [
+            "abc",
+            "Flags: []",
+            "1 of 2",
+          ],
         ],
-        // type 'abc'
-        [
-          "abc",
-          "Flags: []",
-          "1 of 2",
-        ],
-      ],
+      },
     },
     // Repeat recording tests
     {
@@ -5412,9 +5620,11 @@ function testCases(): TestCase[] {
         cmd("groog.record.endRecording"),
         cmd("groog.record.playRecordingRepeatedly"),
       ],
-      expectedErrorMessages: [
-        `This recording isn't repeatable`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `This recording isn't repeatable`,
+        ],
+      },
     },
     {
       name: "Repeat record playback with decreasing find matches",
@@ -5445,23 +5655,27 @@ function testCases(): TestCase[] {
         cmd("groog.record.endRecording"),
         cmd("groog.record.playRecordingRepeatedly"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'abc'
+          [
+            "abc",
+            "Flags: []",
+            "1 of 5",
+          ],
         ],
-        // type 'abc'
-        [
-          "abc",
-          "Flags: []",
-          "1 of 5",
+      },
+      errorMessage: {
+        expectedMessages: [
+          "No match found during recording playback",
         ],
-      ],
-      expectedErrorMessages: [
-        "No match found during recording playback",
-      ],
+      },
     },
     {
       name: "Repeat record playback fails if subsequent find fails",
@@ -5500,35 +5714,39 @@ function testCases(): TestCase[] {
 
         cmd("groog.record.playRecordingRepeatedly"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'abc'
+          [
+            "abc",
+            "Flags: []",
+            "1 of 4",
+          ],
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'def'
+          [
+            "def",
+            "Flags: []",
+            "1 of 2",
+          ],
         ],
-        // type 'abc'
-        [
-          "abc",
-          "Flags: []",
-          "1 of 4",
+      },
+      errorMessage: {
+        expectedMessages: [
+          "No match found during recording playback",
         ],
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
-        ],
-        // type 'def'
-        [
-          "def",
-          "Flags: []",
-          "1 of 2",
-        ],
-      ],
-      expectedErrorMessages: [
-        "No match found during recording playback",
-      ],
+      },
     },
     {
       name: "Repeat record playback with non-decreasing find matches",
@@ -5560,23 +5778,27 @@ function testCases(): TestCase[] {
         cmd("groog.record.endRecording"),
         cmd("groog.record.playRecordingRepeatedly"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'abc'
+          [
+            "abc",
+            "Flags: []",
+            "1 of 5",
+          ],
         ],
-        // type 'abc'
-        [
-          "abc",
-          "Flags: []",
-          "1 of 5",
+      },
+      informationMessage: {
+        expectedMessages: [
+          "Successfully ran recording on all matches",
         ],
-      ],
-      expectedInfoMessages: [
-        "Successfully ran recording on all matches",
-      ],
+      },
     },
     {
       name: "Record with skipped find executions",
@@ -5609,29 +5831,33 @@ function testCases(): TestCase[] {
         cmd("groog.record.endRecording"),
         cmd("groog.record.playRecordingRepeatedly"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'abc'
+          [
+            "abc",
+            "Flags: []",
+            "1 of 4",
+          ],
+          // groog.find
+          [
+            "abc",
+            "Flags: []",
+            "2 of 4",
+          ],
         ],
-        // type 'abc'
-        [
-          "abc",
-          "Flags: []",
-          "1 of 4",
+      },
+      errorMessage: {
+        expectedMessages: [
+          "Landed on same match index, ending repeat playback",
         ],
-        // groog.find
-        [
-          "abc",
-          "Flags: []",
-          "2 of 4",
-        ],
-      ],
-      expectedErrorMessages: [
-        "Landed on same match index, ending repeat playback",
-      ],
+      },
     },
     {
       name: "Record repeat playback ends if start in non-decrease mode and count changes",
@@ -5667,23 +5893,27 @@ function testCases(): TestCase[] {
         cmd("groog.record.endRecording"),
         cmd("groog.record.playRecordingRepeatedly"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'abc'
+          [
+            "abc",
+            "Flags: []",
+            "1 of 4",
+          ],
         ],
-        // type 'abc'
-        [
-          "abc",
-          "Flags: []",
-          "1 of 4",
+      },
+      errorMessage: {
+        expectedMessages: [
+          "Number of matches changed (4 -> 3), ending repeat playback",
         ],
-      ],
-      expectedErrorMessages: [
-        "Number of matches changed (4 -> 3), ending repeat playback",
-      ],
+      },
     },
     {
       name: "Record repeat playback ends if start in decrease mode and count does not change",
@@ -5719,23 +5949,27 @@ function testCases(): TestCase[] {
         cmd("groog.record.endRecording"),
         cmd("groog.record.playRecordingRepeatedly"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'abc'
+          [
+            "abc",
+            "Flags: []",
+            "1 of 4",
+          ],
         ],
-        // type 'abc'
-        [
-          "abc",
-          "Flags: []",
-          "1 of 4",
+      },
+      errorMessage: {
+        expectedMessages: [
+          "Number of matches did not decrease, ending repeat playback",
         ],
-      ],
-      expectedErrorMessages: [
-        "Number of matches did not decrease, ending repeat playback",
-      ],
+      },
     },
     // Repeat record playback with buttons
     {
@@ -5768,42 +6002,46 @@ function testCases(): TestCase[] {
         cmd("groog.record.playNamedRecording"),
         new PressItemButtonQuickPickAction("Recent recording 0", 1),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'abc'
+          [
+            "abc",
+            "Flags: []",
+            "1 of 5",
+          ],
+          // playNamedRecording
+          [
+            recordingQuickPick({
+              label: "Recent recording 0",
+              recordBook: recordBook([
+                new FindRecord(0, {
+                  caseInsensitive: true,
+                  prevMatchOnChange: false,
+                  queryText: "abc",
+                  regex: false,
+                  wholeWord: false,
+                }, 1, 0),
+                new CommandRecord("groog.deleteLeft"),
+                new TypeRecord("xyz"),
+              ]),
+              savable: true,
+              repeatable: true,
+            }),
+          ],
         ],
-        // type 'abc'
-        [
-          "abc",
-          "Flags: []",
-          "1 of 5",
+      },
+      errorMessage: {
+        expectedMessages: [
+          `No match found during recording playback`,
         ],
-        // playNamedRecording
-        [
-          recordingQuickPick({
-            label: "Recent recording 0",
-            recordBook: recordBook([
-              new FindRecord(0, {
-                caseInsensitive: true,
-                prevMatchOnChange: false,
-                queryText: "abc",
-                regex: false,
-                wholeWord: false,
-              }, 1, 0),
-              new CommandRecord("groog.deleteLeft"),
-              new TypeRecord("xyz"),
-            ]),
-            savable: true,
-            repeatable: true,
-          }),
-        ],
-      ],
-      expectedErrorMessages: [
-        `No match found during recording playback`,
-      ],
+      },
     },
     // Repeat recording N times
     {
@@ -5825,23 +6063,27 @@ function testCases(): TestCase[] {
         closeAllEditors,
         cmd("groog.record.playRecordingNTimes"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'def'
+          [
+            "def",
+            "Flags: []",
+            "1 of 2",
+          ],
         ],
-        // type 'def'
-        [
-          "def",
-          "Flags: []",
-          "1 of 2",
+      },
+      errorMessage: {
+        expectedMessages: [
+          "No active text editor",
         ],
-      ],
-      expectedErrorMessages: [
-        "No active text editor",
-      ],
+      },
     },
     nTimesRecordValidationTestCase("Repeat n-times recording disallows empty input", ""),
     nTimesRecordValidationTestCase("Repeat n-times recording disallows string input", "x"),
@@ -5865,18 +6107,20 @@ function testCases(): TestCase[] {
         cmd("groog.record.endRecording"),
         cmd("groog.record.playRecordingNTimes"),
       ],
-      inputBoxResponses: [
-        "1",
-      ],
-      expectedInputBoxes: [
-        {
-          options: {
-            prompt: "17",
-            title: "Number of times to playback the recording",
-            validateInputProvided: true,
+      inputBox: {
+        inputBoxResponses: [
+          "1",
+        ],
+        expectedInputBoxes: [
+          {
+            options: {
+              prompt: "17",
+              title: "Number of times to playback the recording",
+              validateInputProvided: true,
+            },
           },
-        },
-      ],
+        ],
+      },
     },
     {
       name: "Repeat n-times recording works with larger value",
@@ -5895,18 +6139,20 @@ function testCases(): TestCase[] {
         cmd("groog.record.endRecording"),
         cmd("groog.record.playRecordingNTimes"),
       ],
-      inputBoxResponses: [
-        "7",
-      ],
-      expectedInputBoxes: [
-        {
-          options: {
-            prompt: "17",
-            title: "Number of times to playback the recording",
-            validateInputProvided: true,
+      inputBox: {
+        inputBoxResponses: [
+          "7",
+        ],
+        expectedInputBoxes: [
+          {
+            options: {
+              prompt: "17",
+              title: "Number of times to playback the recording",
+              validateInputProvided: true,
+            },
           },
-        },
-      ],
+        ],
+      },
     },
     {
       name: "Repeat n-times recording works with button",
@@ -5926,29 +6172,33 @@ function testCases(): TestCase[] {
         cmd("groog.record.playNamedRecording"),
         new PressItemButtonQuickPickAction("Recent recording 0", 1),
       ],
-      inputBoxResponses: [
-        "3",
-      ],
-      expectedInputBoxes: [
-        {
-          options: {
-            prompt: "17",
-            title: "Number of times to playback the recording",
-            validateInputProvided: true,
-          },
-        },
-      ],
-      expectedQuickPicks:[
-        [
-          recordingQuickPick({
-            label: "Recent recording 0",
-            recordBook: recordBook([
-              new TypeRecord("abc"),
-            ]),
-            savable: true,
-          }),
+      inputBox: {
+        inputBoxResponses: [
+          "3",
         ],
-      ],
+        expectedInputBoxes: [
+          {
+            options: {
+              prompt: "17",
+              title: "Number of times to playback the recording",
+              validateInputProvided: true,
+            },
+          },
+        ],
+      },
+      quickPick: {
+        expectedQuickPicks: [
+          [
+            recordingQuickPick({
+              label: "Recent recording 0",
+              recordBook: recordBook([
+                new TypeRecord("abc"),
+              ]),
+              savable: true,
+            }),
+          ],
+        ],
+      },
     },
     {
       name: "Repeat n-times recording works with button for saved recording",
@@ -5968,46 +6218,52 @@ function testCases(): TestCase[] {
         cmd("groog.record.playNamedRecording"),
         new PressItemButtonQuickPickAction("some-recording", 0),
       ],
-      expectedInfoMessages: [
-        `Recording saved as "some-recording"!`,
-      ],
-      inputBoxResponses: [
-        "some-recording",
-        "11",
-      ],
-      expectedInputBoxes: [
-        {
-          options: {
-            placeHolder: "Recording name",
-            title: "Save recording as:",
-            validateInputProvided: true,
-          },
-        },
-        {
-          options: {
-            prompt: "17",
-            title: "Number of times to playback the recording",
-            validateInputProvided: true,
-          },
-        },
-      ],
-      expectedQuickPicks:[
-        [
-          recordingQuickPick({
-            label: "Recent recording 0",
-            recordBook: recordBook([
-              new TypeRecord("abc"),
-            ]),
-            savable: true,
-          }),
-          recordingQuickPick({
-            label: "some-recording",
-            recordBook: recordBook([
-              new TypeRecord("abc"),
-            ]),
-          }),
+      informationMessage: {
+        expectedMessages: [
+          `Recording saved as "some-recording"!`,
         ],
-      ],
+      },
+      inputBox: {
+        inputBoxResponses: [
+          "some-recording",
+          "11",
+        ],
+        expectedInputBoxes: [
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
+          },
+          {
+            options: {
+              prompt: "17",
+              title: "Number of times to playback the recording",
+              validateInputProvided: true,
+            },
+          },
+        ],
+      },
+      quickPick: {
+        expectedQuickPicks: [
+          [
+            recordingQuickPick({
+              label: "Recent recording 0",
+              recordBook: recordBook([
+                new TypeRecord("abc"),
+              ]),
+              savable: true,
+            }),
+            recordingQuickPick({
+              label: "some-recording",
+              recordBook: recordBook([
+                new TypeRecord("abc"),
+              ]),
+            }),
+          ],
+        ],
+      },
     },
     {
       name: "Repeat n-times recording works with button for repeatable recording",
@@ -6053,52 +6309,56 @@ function testCases(): TestCase[] {
         cmd("groog.record.playNamedRecording"),
         new PressItemButtonQuickPickAction("Recent recording 0", 2),
       ],
-      inputBoxResponses: [
-        "5",
-      ],
-      expectedInputBoxes: [
-        {
-          options: {
-            title: "Number of times to playback the recording (4 matches found)",
-            value: "4",
-            prompt: undefined,
-            validateInputProvided: true,
+      inputBox: {
+        inputBoxResponses: [
+          "5",
+        ],
+        expectedInputBoxes: [
+          {
+            options: {
+              title: "Number of times to playback the recording (4 matches found)",
+              value: "4",
+              prompt: undefined,
+              validateInputProvided: true,
+            },
           },
-        },
-      ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
         ],
-        // type 'def'
-        [
-          "def",
-          "Flags: []",
-          "1 of 4",
+      },
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'def'
+          [
+            "def",
+            "Flags: []",
+            "1 of 4",
+          ],
+          // playNamedRecording (to save)
+          [
+            recordingQuickPick({
+              label: "Recent recording 0",
+              recordBook: recordBook([
+                new FindRecord(0, {
+                  caseInsensitive: true,
+                  prevMatchOnChange: false,
+                  queryText: "def",
+                  regex: false,
+                  wholeWord: false,
+                }, 4, 1),
+                new CommandRecord("groog.ctrlG"),
+                new TypeRecord("xyz"),
+              ]),
+              savable: true,
+              repeatable: true,
+            }),
+          ],
         ],
-        // playNamedRecording (to save)
-        [
-          recordingQuickPick({
-            label: "Recent recording 0",
-            recordBook: recordBook([
-              new FindRecord(0, {
-                caseInsensitive: true,
-                prevMatchOnChange: false,
-                queryText: "def",
-                regex: false,
-                wholeWord: false,
-              }, 4, 1),
-              new CommandRecord("groog.ctrlG"),
-              new TypeRecord("xyz"),
-            ]),
-            savable: true,
-            repeatable: true,
-          }),
-        ],
-      ],
+      },
     },
     {
       name: "Repeat findable recording n times when n < numberOfMatches",
@@ -6129,33 +6389,37 @@ function testCases(): TestCase[] {
         cmd("groog.record.endRecording"),
         cmd("groog.record.playRecordingNTimes"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'abc'
+          [
+            "abc",
+            "Flags: []",
+            "1 of 5",
+          ],
         ],
-        // type 'abc'
-        [
-          "abc",
-          "Flags: []",
-          "1 of 5",
+      },
+      inputBox: {
+        inputBoxResponses: [
+          "2",
         ],
-      ],
-      inputBoxResponses: [
-        "2",
-      ],
-      expectedInputBoxes: [
-        {
-          options: {
-            prompt: undefined,
-            title: "Number of times to playback the recording (4 matches found)",
-            value: "4",
-            validateInputProvided: true,
+        expectedInputBoxes: [
+          {
+            options: {
+              prompt: undefined,
+              title: "Number of times to playback the recording (4 matches found)",
+              value: "4",
+              validateInputProvided: true,
+            },
           },
-        },
-      ],
+        ],
+      },
     },
     {
       name: "Repeat findable recording n times when n == numberOfMatches",
@@ -6186,33 +6450,37 @@ function testCases(): TestCase[] {
         cmd("groog.record.endRecording"),
         cmd("groog.record.playRecordingNTimes"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'abc'
+          [
+            "abc",
+            "Flags: []",
+            "1 of 5",
+          ],
         ],
-        // type 'abc'
-        [
-          "abc",
-          "Flags: []",
-          "1 of 5",
+      },
+      inputBox: {
+        inputBoxResponses: [
+          "4",
         ],
-      ],
-      inputBoxResponses: [
-        "4",
-      ],
-      expectedInputBoxes: [
-        {
-          options: {
-            prompt: undefined,
-            title: "Number of times to playback the recording (4 matches found)",
-            value: "4",
-            validateInputProvided: true,
+        expectedInputBoxes: [
+          {
+            options: {
+              prompt: undefined,
+              title: "Number of times to playback the recording (4 matches found)",
+              value: "4",
+              validateInputProvided: true,
+            },
           },
-        },
-      ],
+        ],
+      },
     },
     {
       name: "Repeat findable recording n times when n > numberOfMatches",
@@ -6243,36 +6511,42 @@ function testCases(): TestCase[] {
         cmd("groog.record.endRecording"),
         cmd("groog.record.playRecordingNTimes"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'abc'
+          [
+            "abc",
+            "Flags: []",
+            "1 of 5",
+          ],
         ],
-        // type 'abc'
-        [
-          "abc",
-          "Flags: []",
-          "1 of 5",
+      },
+      inputBox: {
+        inputBoxResponses: [
+          "10",
         ],
-      ],
-      inputBoxResponses: [
-        "10",
-      ],
-      expectedErrorMessages: [
-        "No match found during recording playback",
-      ],
-      expectedInputBoxes: [
-        {
-          options: {
-            prompt: undefined,
-            title: "Number of times to playback the recording (4 matches found)",
-            value: "4",
-            validateInputProvided: true,
+        expectedInputBoxes: [
+          {
+            options: {
+              prompt: undefined,
+              title: "Number of times to playback the recording (4 matches found)",
+              value: "4",
+              validateInputProvided: true,
+            },
           },
-        },
-      ],
+        ],
+      },
+      errorMessage: {
+        expectedMessages: [
+          "No match found during recording playback",
+        ],
+      },
     },
     // SaveRecentRecordingButton
     {
@@ -6302,41 +6576,45 @@ function testCases(): TestCase[] {
         // press unknown button on Recent recording 0
         new PressUnknownButtonQuickPickAction("Recent recording 0"),
       ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'def'
+          [
+            "def",
+            "Flags: []",
+            "1 of 2",
+          ],
+          // playNamedRecording (to save)
+          [
+            recordingQuickPick({
+              label: "Recent recording 0",
+              recordBook: recordBook([
+                new FindRecord(0, {
+                  caseInsensitive: true,
+                  prevMatchOnChange: false,
+                  queryText: "def",
+                  regex: false,
+                  wholeWord: false,
+                }),
+                new TypeRecord("XYZ"),
+              ]),
+              savable: true,
+              repeatable: true,
+            }),
+          ],
         ],
-        // type 'def'
-        [
-          "def",
-          "Flags: []",
-          "1 of 2",
+      },
+      errorMessage: {
+        expectedMessages: [
+          `Unknown item button`,
         ],
-        // playNamedRecording (to save)
-        [
-          recordingQuickPick({
-            label: "Recent recording 0",
-            recordBook: recordBook([
-              new FindRecord(0, {
-                caseInsensitive: true,
-                prevMatchOnChange: false,
-                queryText: "def",
-                regex: false,
-                wholeWord: false,
-              }),
-              new TypeRecord("XYZ"),
-            ]),
-            savable: true,
-            repeatable: true,
-          }),
-        ],
-      ],
-      expectedErrorMessages: [
-        `Unknown item button`,
-      ],
+      },
     },
     {
       name: "Save a recent recording",
@@ -6394,169 +6672,175 @@ function testCases(): TestCase[] {
         new SelectItemQuickPickAction(["My favorite recording"]),
       ],
       expectedSelections: [selection(5, 4)],
-      inputBoxResponses: [
-        "My favorite recording",
-      ],
-      expectedQuickPicks:[
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
+      inputBox: {
+        inputBoxResponses: [
+          "My favorite recording",
         ],
-        // type 'abc'
-        [
-          "abc",
-          "Flags: []",
-          "1 of 2",
-        ],
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
-        ],
-        // type 'def'
-        [
-          "def",
-          "Flags: []",
-          "1 of 2",
-        ],
-        // groog.find
-        [
-          " ",
-          "Flags: []",
-          "No results",
-        ],
-        // type 'ghi'
-        [
-          "ghi",
-          "Flags: []",
-          "1 of 2",
-        ],
-        // playNamedRecording (to save)
-        [
-          recordingQuickPick({
-            label: "Recent recording 0",
-            recordBook: recordBook([
-              new FindRecord(0, {
-                caseInsensitive: true,
-                prevMatchOnChange: false,
-                queryText: "ghi",
-                regex: false,
-                wholeWord: false,
-              }),
-              new TypeRecord("trois"),
-            ]),
-            savable: true,
-            repeatable: true,
-          }),
-          recordingQuickPick({
-            label: "Recent recording 1",
-            recordBook: recordBook([
-              new FindRecord(0, {
-                caseInsensitive: true,
-                prevMatchOnChange: false,
-                queryText: "def",
-                regex: false,
-                wholeWord: false,
-              }, 1, 0),
-              new TypeRecord("deux"),
-            ]),
-            savable: true,
-            repeatable: true,
-          }),
-          recordingQuickPick({
-            label: "Recent recording 2",
-            recordBook: recordBook([
-              new FindRecord(0, {
-                caseInsensitive: true,
-                prevMatchOnChange: false,
-                queryText: "abc",
-                regex: false,
-                wholeWord: false,
-              }, 0, -1),
-              new TypeRecord("un"),
-            ]),
-            savable: true,
-            repeatable: true,
-          }),
-        ],
-        // playNamedRecording (to playback)
-        [
-          recordingQuickPick({
-            label: "Recent recording 0",
-            recordBook: recordBook([
-              new FindRecord(0, {
-                caseInsensitive: true,
-                prevMatchOnChange: false,
-                queryText: "ghi",
-                regex: false,
-                wholeWord: false,
-              }, 0, -1),
-              new TypeRecord("trois"),
-            ]),
-            savable: true,
-            repeatable: true,
-          }),
-          recordingQuickPick({
-            label: "Recent recording 1",
-            recordBook: recordBook([
-              new FindRecord(0, {
-                caseInsensitive: true,
-                prevMatchOnChange: false,
-                queryText: "def",
-                regex: false,
-                wholeWord: false,
-              }, 1, 0),
-              new TypeRecord("deux"),
-            ]),
-            savable: true,
-            repeatable: true,
-          }),
-          recordingQuickPick({
-            label: "Recent recording 2",
-            recordBook: recordBook([
-              new FindRecord(0, {
-                caseInsensitive: true,
-                prevMatchOnChange: false,
-                queryText: "abc",
-                regex: false,
-                wholeWord: false,
-              }, 0, -1),
-              new TypeRecord("un"),
-            ]),
-            savable: true,
-            repeatable: true,
-          }),
-          recordingQuickPick({
-            label: "My favorite recording",
-            recordBook: recordBook([
-              new FindRecord(0, {
-                caseInsensitive: true,
-                prevMatchOnChange: false,
-                queryText: "def",
-                regex: false,
-                wholeWord: false,
-              }, 1, 0),
-              new TypeRecord("deux"),
-            ]),
-            repeatable: true,
-          }),
-        ],
-      ],
-      expectedInputBoxes: [
-        {
-          options: {
-            placeHolder: "Recording name",
-            title: "Save recording as:",
-            validateInputProvided: true,
+        expectedInputBoxes: [
+          {
+            options: {
+              placeHolder: "Recording name",
+              title: "Save recording as:",
+              validateInputProvided: true,
+            },
           },
-        },
-      ],
-      expectedInfoMessages: [
-        `Recording saved as "My favorite recording"!`,
-      ],
+        ],
+      },
+      quickPick: {
+        expectedQuickPicks: [
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'abc'
+          [
+            "abc",
+            "Flags: []",
+            "1 of 2",
+          ],
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'def'
+          [
+            "def",
+            "Flags: []",
+            "1 of 2",
+          ],
+          // groog.find
+          [
+            " ",
+            "Flags: []",
+            "No results",
+          ],
+          // type 'ghi'
+          [
+            "ghi",
+            "Flags: []",
+            "1 of 2",
+          ],
+          // playNamedRecording (to save)
+          [
+            recordingQuickPick({
+              label: "Recent recording 0",
+              recordBook: recordBook([
+                new FindRecord(0, {
+                  caseInsensitive: true,
+                  prevMatchOnChange: false,
+                  queryText: "ghi",
+                  regex: false,
+                  wholeWord: false,
+                }),
+                new TypeRecord("trois"),
+              ]),
+              savable: true,
+              repeatable: true,
+            }),
+            recordingQuickPick({
+              label: "Recent recording 1",
+              recordBook: recordBook([
+                new FindRecord(0, {
+                  caseInsensitive: true,
+                  prevMatchOnChange: false,
+                  queryText: "def",
+                  regex: false,
+                  wholeWord: false,
+                }, 1, 0),
+                new TypeRecord("deux"),
+              ]),
+              savable: true,
+              repeatable: true,
+            }),
+            recordingQuickPick({
+              label: "Recent recording 2",
+              recordBook: recordBook([
+                new FindRecord(0, {
+                  caseInsensitive: true,
+                  prevMatchOnChange: false,
+                  queryText: "abc",
+                  regex: false,
+                  wholeWord: false,
+                }, 0, -1),
+                new TypeRecord("un"),
+              ]),
+              savable: true,
+              repeatable: true,
+            }),
+          ],
+          // playNamedRecording (to playback)
+          [
+            recordingQuickPick({
+              label: "Recent recording 0",
+              recordBook: recordBook([
+                new FindRecord(0, {
+                  caseInsensitive: true,
+                  prevMatchOnChange: false,
+                  queryText: "ghi",
+                  regex: false,
+                  wholeWord: false,
+                }, 0, -1),
+                new TypeRecord("trois"),
+              ]),
+              savable: true,
+              repeatable: true,
+            }),
+            recordingQuickPick({
+              label: "Recent recording 1",
+              recordBook: recordBook([
+                new FindRecord(0, {
+                  caseInsensitive: true,
+                  prevMatchOnChange: false,
+                  queryText: "def",
+                  regex: false,
+                  wholeWord: false,
+                }, 1, 0),
+                new TypeRecord("deux"),
+              ]),
+              savable: true,
+              repeatable: true,
+            }),
+            recordingQuickPick({
+              label: "Recent recording 2",
+              recordBook: recordBook([
+                new FindRecord(0, {
+                  caseInsensitive: true,
+                  prevMatchOnChange: false,
+                  queryText: "abc",
+                  regex: false,
+                  wholeWord: false,
+                }, 0, -1),
+                new TypeRecord("un"),
+              ]),
+              savable: true,
+              repeatable: true,
+            }),
+            recordingQuickPick({
+              label: "My favorite recording",
+              recordBook: recordBook([
+                new FindRecord(0, {
+                  caseInsensitive: true,
+                  prevMatchOnChange: false,
+                  queryText: "def",
+                  regex: false,
+                  wholeWord: false,
+                }, 1, 0),
+                new TypeRecord("deux"),
+              ]),
+              repeatable: true,
+            }),
+          ],
+        ],
+      },
+      informationMessage: {
+        expectedMessages: [
+          `Recording saved as "My favorite recording"!`,
+        ],
+      },
     },
     {
       name: "Playback a recent recording",
@@ -6588,25 +6872,27 @@ function testCases(): TestCase[] {
         new SelectItemQuickPickAction(["Recent recording 1"]),
       ],
       expectedSelections: [selection(0, 15)],
-      expectedQuickPicks:[
-        [
-          recordingQuickPick({
-            label: "Recent recording 0",
-            recordBook: recordBook([new TypeRecord("jkl")]),
-            savable: true,
-          }),
-          recordingQuickPick({
-            label: "Recent recording 1",
-            recordBook: recordBook([new TypeRecord("ghi")]),
-            savable: true,
-          }),
-          recordingQuickPick({
-            label: "Recent recording 2",
-            recordBook: recordBook([new TypeRecord("def")]),
-            savable: true,
-          }),
+      quickPick: {
+        expectedQuickPicks: [
+          [
+            recordingQuickPick({
+              label: "Recent recording 0",
+              recordBook: recordBook([new TypeRecord("jkl")]),
+              savable: true,
+            }),
+            recordingQuickPick({
+              label: "Recent recording 1",
+              recordBook: recordBook([new TypeRecord("ghi")]),
+              savable: true,
+            }),
+            recordingQuickPick({
+              label: "Recent recording 2",
+              recordBook: recordBook([new TypeRecord("def")]),
+              savable: true,
+            }),
+          ],
         ],
-      ],
+      },
     },
     // Record undo tests
     {
@@ -6620,9 +6906,11 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.record.undo"),
       ],
-      expectedErrorMessages: [
-        `No recordings exist yet!`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `No recordings exist yet!`,
+        ],
+      },
     },
     {
       name: "Record undo fails if recording is locked",
@@ -6642,9 +6930,11 @@ function testCases(): TestCase[] {
         cmd("groog.record.endRecording"),
         cmd("groog.record.undo"),
       ],
-      expectedErrorMessages: [
-        `Cannot undo a locked recording`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Cannot undo a locked recording`,
+        ],
+      },
     },
     {
       name: "Record undo does nothing if empty record book",
@@ -6720,9 +7010,11 @@ function testCases(): TestCase[] {
         cmd("groog.record.endRecording"),
         cmd("groog.record.playRecording"),
       ],
-      expectedInfoMessages: [
-        `Undo failed`,
-      ],
+      informationMessage: {
+        expectedMessages: [
+          `Undo failed`,
+        ],
+      },
     },
     // Type-over tests
     {
@@ -7224,18 +7516,22 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.message.info"),
       ],
-      expectedErrorMessages: [
-        "No message set",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "No message set",
+        ],
+      },
     },
     {
       name: "Notification fails if no message",
       userInteractions: [
         cmd("groog.message.info", {}),
       ],
-      expectedErrorMessages: [
-        "No message set",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "No message set",
+        ],
+      },
     },
     {
       name: "Notification fails if wrong args",
@@ -7244,9 +7540,11 @@ function testCases(): TestCase[] {
           badKey: "hello there",
         }),
       ],
-      expectedErrorMessages: [
-        "No message set",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "No message set",
+        ],
+      },
     },
     {
       name: "Notification fails if empty message",
@@ -7255,9 +7553,11 @@ function testCases(): TestCase[] {
           message: "",
         }),
       ],
-      expectedErrorMessages: [
-        "No message set",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "No message set",
+        ],
+      },
     },
     {
       name: "Notification is sent",
@@ -7266,9 +7566,11 @@ function testCases(): TestCase[] {
           message: "Hello there",
         }),
       ],
-      expectedInfoMessages: [
-        "Hello there",
-      ],
+      informationMessage: {
+        expectedMessages: [
+          "Hello there",
+        ],
+      },
     },
     {
       name: "Error notification is sent",
@@ -7278,9 +7580,11 @@ function testCases(): TestCase[] {
           error: true,
         }),
       ],
-      expectedErrorMessages: [
-        "General Kenobi",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "General Kenobi",
+        ],
+      },
     },
     // Copy file name/link tests
     {
@@ -7288,18 +7592,22 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.copyFilePath"),
       ],
-      expectedErrorMessages: [
-        "No active editor",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "No active editor",
+        ],
+      },
     },
     {
       name: "Fails to copy file link if no editor",
       userInteractions: [
         cmd("groog.copyFileLink"),
       ],
-      expectedErrorMessages: [
-        "No active editor",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "No active editor",
+        ],
+      },
     },
     {
       name: "Fails to copy file name if exec error",
@@ -7316,9 +7624,11 @@ function testCases(): TestCase[] {
         wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
         err: "oops",
       }],
-      expectedErrorMessages: [
-        `Failed to get git repository info: oops; stderr:\n`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Failed to get git repository info: oops; stderr:\n`,
+        ],
+      },
       userInteractions: [
         cmd("groog.copyFilePath"),
       ],
@@ -7338,9 +7648,11 @@ function testCases(): TestCase[] {
         wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
         err: "oops",
       }],
-      expectedErrorMessages: [
-        `Failed to get git repository info: oops; stderr:\n`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Failed to get git repository info: oops; stderr:\n`,
+        ],
+      },
       userInteractions: [
         cmd("groog.copyFileLink"),
       ],
@@ -7360,9 +7672,11 @@ function testCases(): TestCase[] {
         wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
         stderr: "whoops",
       }],
-      expectedErrorMessages: [
-        `Failed to get git repository info: undefined; stderr:\nwhoops`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Failed to get git repository info: undefined; stderr:\nwhoops`,
+        ],
+      },
       userInteractions: [
         cmd("groog.copyFilePath"),
       ],
@@ -7382,9 +7696,11 @@ function testCases(): TestCase[] {
         wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
         stderr: "whoops",
       }],
-      expectedErrorMessages: [
-        `Failed to get git repository info: undefined; stderr:\nwhoops`,
-      ],
+      errorMessage: {
+        expectedMessages: [
+          `Failed to get git repository info: undefined; stderr:\nwhoops`,
+        ],
+      },
       userInteractions: [
         cmd("groog.copyFileLink"),
       ],
@@ -7406,9 +7722,11 @@ function testCases(): TestCase[] {
         wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
         stdout: "git@github.com:some-user/arbitrary-repo/path.git",
       }],
-      expectedInfoMessages: [
-        `File path copied!`,
-      ],
+      informationMessage: {
+        expectedMessages: [
+          `File path copied!`,
+        ],
+      },
       userInteractions: [
         cmd("groog.copyFilePath"),
         cmd("groog.paste"),
@@ -7431,9 +7749,11 @@ function testCases(): TestCase[] {
         wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
         stdout: "git@github.com:some-user/arbitrary-repo/path.git",
       }],
-      expectedInfoMessages: [
-        `File link copied!`,
-      ],
+      informationMessage: {
+        expectedMessages: [
+          `File link copied!`,
+        ],
+      },
       userInteractions: [
         cmd("groog.copyFileLink"),
         cmd("groog.paste"),
@@ -7456,9 +7776,11 @@ function testCases(): TestCase[] {
         wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
         stdout: "https://www.github.com/some-user/arbitrary-repo/path.git",
       }],
-      expectedInfoMessages: [
-        `File link copied!`,
-      ],
+      informationMessage: {
+        expectedMessages: [
+          `File link copied!`,
+        ],
+      },
       userInteractions: [
         cmd("groog.copyFileLink"),
         cmd("groog.paste"),
@@ -7481,9 +7803,11 @@ function testCases(): TestCase[] {
         wantArgs: `cd ${startingFile("copy-imports").replace(/^C/, 'c')} && git ls-remote --get-url`,
         stdout: "git@github.com:some-user/arbitrary-repo/path.git",
       }],
-      expectedInfoMessages: [
-        `File link copied!`,
-      ],
+      informationMessage: {
+        expectedMessages: [
+          `File link copied!`,
+        ],
+      },
       userInteractions: [
         cmd("groog.copyFileLink"),
         cmd("groog.cursorBottom"),
@@ -7496,9 +7820,11 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.copyImport"),
       ],
-      expectedErrorMessages: [
-        "No active editor",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "No active editor",
+        ],
+      },
     },
     {
       name: "Fails to copy import if not a supported language",
@@ -7514,9 +7840,11 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.copyImport"),
       ],
-      expectedErrorMessages: [
-        'No import copy support for language (go)',
-      ],
+      errorMessage: {
+        expectedMessages: [
+          'No import copy support for language (go)',
+        ],
+      },
     },
     {
       name: "Successfully copies import",
@@ -7595,9 +7923,11 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.copyImport"),
       ],
-      expectedErrorMessages: [
-        'No import statement found!',
-      ],
+      errorMessage: {
+        expectedMessages: [
+          'No import statement found!',
+        ],
+      },
     },
     // groog.trimClipboard tests
     // Use `editor.action.clipboardPasteAction` instead of `groog.paste` because we're
@@ -7660,9 +7990,11 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.clearRunSolo"),
       ],
-      expectedErrorMessages: [
-        "No active editor",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "No active editor",
+        ],
+      },
     },
     {
       name: "Clears all instancds of 'runSolo: true'",
@@ -7726,9 +8058,11 @@ function testCases(): TestCase[] {
           ],
         }),
       ],
-      expectedInfoMessages: [
-        "hi",
-      ],
+      informationMessage: {
+        expectedMessages: [
+          "hi",
+        ],
+      },
     },
     // Test file tests
     {
@@ -7736,9 +8070,11 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.testFile"),
       ],
-      expectedErrorMessages: [
-        "Previous file not set",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "Previous file not set",
+        ],
+      },
     },
     {
       name: "Fails to run test file if unsupported file suffix",
@@ -7750,29 +8086,33 @@ function testCases(): TestCase[] {
         "Hello there",
         "",
       ],
-      expectedErrorMessages: [
-        "Unknown file suffix: txt",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "Unknown file suffix: txt",
+        ],
+      },
     },
     {
       name: "Fails to run test file if unsupported file suffix (message displayed at part 0)",
       userInteractions: [
         openFile(startingFile("greetings.txt")),
-        cmd("groog.testFile", {part: 0}),
+        cmd("groog.testFile", { part: 0 }),
       ],
       expectedText: [
         "Hello there",
         "",
       ],
-      expectedErrorMessages: [
-        "Unknown file suffix: txt",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "Unknown file suffix: txt",
+        ],
+      },
     },
     {
       name: "Fails to run test file if unsupported file suffix (no message displayed at part 1)",
       userInteractions: [
         openFile(startingFile("greetings.txt")),
-        cmd("groog.testFile", {part: 1}),
+        cmd("groog.testFile", { part: 1 }),
       ],
       expectedText: [
         "Hello there",
@@ -7793,18 +8133,22 @@ function testCases(): TestCase[] {
         "}",
         "",
       ],
-      expectedErrorMessages: [
-        "go testing should be routed to custom command in keybindings.go",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "go testing should be routed to custom command in keybindings.go",
+        ],
+      },
     },
     {
       name: "Doesn't toggle fixed test file if no file visited",
       userInteractions: [
         cmd("groog.toggleFixedTestFile"),
       ],
-      expectedErrorMessages: [
-        "No active file",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "No active file",
+        ],
+      },
     },
     {
       name: "Toggles fixed test file to current active file",
@@ -7813,9 +8157,11 @@ function testCases(): TestCase[] {
         openFile(startingFile("bloop.java")),
         cmd("groog.toggleFixedTestFile"),
       ],
-      expectedInfoMessages: [
-        `Set fixed test file to bloop.java`,
-      ],
+      informationMessage: {
+        expectedMessages: [
+          `Set fixed test file to bloop.java`,
+        ],
+      },
     },
     {
       name: "Toggles ignore test file to false",
@@ -7825,10 +8171,12 @@ function testCases(): TestCase[] {
         cmd("groog.toggleFixedTestFile"),
         cmd("groog.toggleFixedTestFile"),
       ],
-      expectedInfoMessages: [
-        `Set fixed test file to bloop.java`,
-        "Unset fixed test file",
-      ],
+      informationMessage: {
+        expectedMessages: [
+          `Set fixed test file to bloop.java`,
+          "Unset fixed test file",
+        ],
+      },
     },
     // Scripts tests
     {
@@ -7836,9 +8184,11 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.script.replaceNewlineStringsWithQuotes"),
       ],
-      expectedErrorMessages: [
-        "No active text editor.",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "No active text editor.",
+        ],
+      },
     },
     {
       name: "Runs newline replacement with quotes",
@@ -7879,122 +8229,128 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.updateSettings"),
       ],
-      expectedInfoMessages: [
-        `Settings have been updated!`,
-      ],
-      expectedErrorMessages: [
-        `Failed to fetch editor.wordSeparators setting`,
-      ],
-      expectedWorkspaceConfiguration: {
-        configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
-          [vscode.ConfigurationTarget.Global, new Map<string, any>([
-            ["editor", new Map<string, any>([
-              ['autoClosingBrackets', 'never'],
-              ['autoClosingQuotes', 'never'],
-              ['codeActionsOnSave', {
-                'source.fixAll.eslint': true,
-                'source.organizeImports': true,
-              }],
-              ['cursorSurroundingLines', 6],
-              ['detectIndentation', false],
-              ['insertSpaces', true],
-              ['rulers', [
-                80,
-                200,
-              ]],
-              ['tabSize', 2],
-            ])],
-            ["files", new Map<string, any>([
-              ['eol', '\n'],
-              ['insertFinalNewline', true],
-              ['trimFinalNewlines', true],
-              ['trimTrailingWhitespace', true],
-            ])],
-            ["gopls", new Map<string, any>([
-              ['analyses', {
-                composites: false,
-              }],
-            ])],
-            ["powershell", new Map<string, any>([
-              ['startAutomatically', false],
-            ])],
-            ["terminal", new Map<string, any>([
-              ['integrated', new Map<string, any>([
-                ['allowChords', true],
-                ['automationProfile', new Map<string, any>([
-                  ['windows', {
-                    path: 'C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
-                  }],
-                ])],
-                ['scrollback', 10000],
-                ['commandsToSkipShell', [
-                  'workbench.action.terminal.sendSequence',
-                  'groog.message.info',
-                  'workbench.action.closePanel',
-                  'workbench.action.terminal.focusNext',
-                  'workbench.action.terminal.focusPrevious',
-                  'workbench.action.terminal.newWithProfile',
-                  'groog.terminal.find',
-                  'groog.terminal.reverseFind',
-                  'workbench.action.terminal.focusFind',
-                  'workbench.action.terminal.findNext',
-                  'workbench.action.terminal.findPrevious',
-                  'groog.ctrlG',
-                  'groog.multiCommand.execute',
-                  'termin-all-or-nothing.closePanel',
-                ]],
-                ['copyOnSelection', true],
-                ['defaultProfile', new Map<string, any>([
-                  ['windows','PowerShell'],
-                ])],
-                ['profiles', new Map<string, any>([
-                  ['windows' , {
-                    MinGW: {
-                      args: ['--login', '-i'],
-                      color: 'terminal.ansiGreen',
-                      env: {
-                        GROOG_VSCODE: '1',
-                      },
-                      icon: 'hubot',
-                      overrideName: true,
-                      path: 'C:\\msys64\\usr\\bin\\bash.exe',
-                    },
-                  }],
-                ])],
-              ])],
-            ])],
-            ['window', new Map<string, any>([
-              ['newWindowDimensions', 'maximized'],
-            ])],
-            ['workbench', new Map<string, any>([
-              ['colorCustomizations', {
-                'editor.lineHighlightBorder': '#707070',
-                'editorGutter.background': '#000000',
-                'editorLineNumber.activeForeground': '#00ffff',
-                'terminal.findMatchBackground': '#bb00bb',
-                'terminal.findMatchHighlightBackground': '#00bbbb',
-              }],
-              ['editor', new Map<string, any>([
-                ['limit', new Map<string, any>([
-                  ['enabled', true],
-                  ['perEditorGroup', true],
-                  ['value', 1],
-                ])],
-                ['showTabs', false],
-              ])],
-              ['startupEditor', 'none'],
-            ])],
-          ])],
-        ]),
-        languageConfiguration: new Map<string, Map<vscode.ConfigurationTarget, Map<string, any>>>([
-          ['typescript', new Map<vscode.ConfigurationTarget, Map<string, any>>([
+      informationMessage: {
+        expectedMessages: [
+          `Settings have been updated!`,
+        ],
+      },
+      errorMessage: {
+        expectedMessages: [
+          `Failed to fetch editor.wordSeparators setting`,
+        ],
+      },
+      workspaceConfiguration: {
+        expectedWorkspaceConfiguration: {
+          configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
             [vscode.ConfigurationTarget.Global, new Map<string, any>([
-              ['editor', new Map<string, any>([
-                ['formatOnSave', true],
+              ["editor", new Map<string, any>([
+                ['autoClosingBrackets', 'never'],
+                ['autoClosingQuotes', 'never'],
+                ['codeActionsOnSave', {
+                  'source.fixAll.eslint': true,
+                  'source.organizeImports': true,
+                }],
+                ['cursorSurroundingLines', 6],
+                ['detectIndentation', false],
+                ['insertSpaces', true],
+                ['rulers', [
+                  80,
+                  200,
+                ]],
+                ['tabSize', 2],
+              ])],
+              ["files", new Map<string, any>([
+                ['eol', '\n'],
+                ['insertFinalNewline', true],
+                ['trimFinalNewlines', true],
+                ['trimTrailingWhitespace', true],
+              ])],
+              ["gopls", new Map<string, any>([
+                ['analyses', {
+                  composites: false,
+                }],
+              ])],
+              ["powershell", new Map<string, any>([
+                ['startAutomatically', false],
+              ])],
+              ["terminal", new Map<string, any>([
+                ['integrated', new Map<string, any>([
+                  ['allowChords', true],
+                  ['automationProfile', new Map<string, any>([
+                    ['windows', {
+                      path: 'C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+                    }],
+                  ])],
+                  ['scrollback', 10000],
+                  ['commandsToSkipShell', [
+                    'workbench.action.terminal.sendSequence',
+                    'groog.message.info',
+                    'workbench.action.closePanel',
+                    'workbench.action.terminal.focusNext',
+                    'workbench.action.terminal.focusPrevious',
+                    'workbench.action.terminal.newWithProfile',
+                    'groog.terminal.find',
+                    'groog.terminal.reverseFind',
+                    'workbench.action.terminal.focusFind',
+                    'workbench.action.terminal.findNext',
+                    'workbench.action.terminal.findPrevious',
+                    'groog.ctrlG',
+                    'groog.multiCommand.execute',
+                    'termin-all-or-nothing.closePanel',
+                  ]],
+                  ['copyOnSelection', true],
+                  ['defaultProfile', new Map<string, any>([
+                    ['windows', 'PowerShell'],
+                  ])],
+                  ['profiles', new Map<string, any>([
+                    ['windows', {
+                      MinGW: {
+                        args: ['--login', '-i'],
+                        color: 'terminal.ansiGreen',
+                        env: {
+                          GROOG_VSCODE: '1',
+                        },
+                        icon: 'hubot',
+                        overrideName: true,
+                        path: 'C:\\msys64\\usr\\bin\\bash.exe',
+                      },
+                    }],
+                  ])],
+                ])],
+              ])],
+              ['window', new Map<string, any>([
+                ['newWindowDimensions', 'maximized'],
+              ])],
+              ['workbench', new Map<string, any>([
+                ['colorCustomizations', {
+                  'editor.lineHighlightBorder': '#707070',
+                  'editorGutter.background': '#000000',
+                  'editorLineNumber.activeForeground': '#00ffff',
+                  'terminal.findMatchBackground': '#bb00bb',
+                  'terminal.findMatchHighlightBackground': '#00bbbb',
+                }],
+                ['editor', new Map<string, any>([
+                  ['limit', new Map<string, any>([
+                    ['enabled', true],
+                    ['perEditorGroup', true],
+                    ['value', 1],
+                  ])],
+                  ['showTabs', false],
+                ])],
+                ['startupEditor', 'none'],
               ])],
             ])],
-          ])],
-        ]),
+          ]),
+          languageConfiguration: new Map<string, Map<vscode.ConfigurationTarget, Map<string, any>>>([
+            ['typescript', new Map<vscode.ConfigurationTarget, Map<string, any>>([
+              [vscode.ConfigurationTarget.Global, new Map<string, any>([
+                ['editor', new Map<string, any>([
+                  ['formatOnSave', true],
+                ])],
+              ])],
+            ])],
+          ]),
+        },
       },
     },
     {
@@ -8002,129 +8358,133 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.updateSettings"),
       ],
-      expectedInfoMessages: [
-        `Settings have been updated!`,
-      ],
-      workspaceConfiguration: {
-        configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
-          [vscode.ConfigurationTarget.Global, new Map<string, any>([
-            ["editor", new Map<string, any>([
-              ['wordSeparators', ' .?'],
-            ])],
-          ])],
-        ]),
+      informationMessage: {
+        expectedMessages: [
+          `Settings have been updated!`,
+        ],
       },
-      expectedWorkspaceConfiguration: {
-        configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
-          [vscode.ConfigurationTarget.Global, new Map<string, any>([
-            ["editor", new Map<string, any>([
-              ['autoClosingBrackets', 'never'],
-              ['autoClosingQuotes', 'never'],
-              ['codeActionsOnSave', {
-                'source.fixAll.eslint': true,
-                'source.organizeImports': true,
-              }],
-              ['cursorSurroundingLines', 6],
-              ['detectIndentation', false],
-              ['insertSpaces', true],
-              ['rulers', [
-                80,
-                200,
-              ]],
-              ['wordSeparators', ' .?_'],
-              ['tabSize', 2],
-            ])],
-            ["files", new Map<string, any>([
-              ['eol', '\n'],
-              ['insertFinalNewline', true],
-              ['trimFinalNewlines', true],
-              ['trimTrailingWhitespace', true],
-            ])],
-            ["gopls", new Map<string, any>([
-              ['analyses', {
-                composites: false,
-              }],
-            ])],
-            ["powershell", new Map<string, any>([
-              ['startAutomatically', false],
-            ])],
-            ["terminal", new Map<string, any>([
-              ['integrated', new Map<string, any>([
-                ['allowChords', true],
-                ['automationProfile', new Map<string, any>([
-                  ['windows', {
-                    path: 'C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
-                  }],
-                ])],
-                ['scrollback', 10000],
-                ['commandsToSkipShell', [
-                  'workbench.action.terminal.sendSequence',
-                  'groog.message.info',
-                  'workbench.action.closePanel',
-                  'workbench.action.terminal.focusNext',
-                  'workbench.action.terminal.focusPrevious',
-                  'workbench.action.terminal.newWithProfile',
-                  'groog.terminal.find',
-                  'groog.terminal.reverseFind',
-                  'workbench.action.terminal.focusFind',
-                  'workbench.action.terminal.findNext',
-                  'workbench.action.terminal.findPrevious',
-                  'groog.ctrlG',
-                  'groog.multiCommand.execute',
-                  'termin-all-or-nothing.closePanel',
-                ]],
-                ['copyOnSelection', true],
-                ['defaultProfile', new Map<string, any>([
-                  ['windows','PowerShell'],
-                ])],
-                ['profiles', new Map<string, any>([
-                  ['windows' , {
-                    MinGW: {
-                      args: ['--login', '-i'],
-                      color: 'terminal.ansiGreen',
-                      env: {
-                        GROOG_VSCODE: '1',
-                      },
-                      icon: 'hubot',
-                      overrideName: true,
-                      path: 'C:\\msys64\\usr\\bin\\bash.exe',
-                    },
-                  }],
-                ])],
-              ])],
-            ])],
-            ['window', new Map<string, any>([
-              ['newWindowDimensions', 'maximized'],
-            ])],
-            ['workbench', new Map<string, any>([
-              ['colorCustomizations', {
-                'editor.lineHighlightBorder': '#707070',
-                'editorGutter.background': '#000000',
-                'editorLineNumber.activeForeground': '#00ffff',
-                'terminal.findMatchBackground': '#bb00bb',
-                'terminal.findMatchHighlightBackground': '#00bbbb',
-              }],
-              ['editor', new Map<string, any>([
-                ['limit', new Map<string, any>([
-                  ['enabled', true],
-                  ['perEditorGroup', true],
-                  ['value', 1],
-                ])],
-                ['showTabs', false],
-              ])],
-              ['startupEditor', 'none'],
-            ])],
-          ])],
-        ]),
-        languageConfiguration: new Map<string, Map<vscode.ConfigurationTarget, Map<string, any>>>([
-          ['typescript', new Map<vscode.ConfigurationTarget, Map<string, any>>([
+      workspaceConfiguration: {
+        workspaceConfiguration: {
+          configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
             [vscode.ConfigurationTarget.Global, new Map<string, any>([
-              ['editor', new Map<string, any>([
-                ['formatOnSave', true],
+              ["editor", new Map<string, any>([
+                ['wordSeparators', ' .?'],
               ])],
             ])],
-          ])],
-        ]),
+          ]),
+        },
+        expectedWorkspaceConfiguration: {
+          configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
+            [vscode.ConfigurationTarget.Global, new Map<string, any>([
+              ["editor", new Map<string, any>([
+                ['autoClosingBrackets', 'never'],
+                ['autoClosingQuotes', 'never'],
+                ['codeActionsOnSave', {
+                  'source.fixAll.eslint': true,
+                  'source.organizeImports': true,
+                }],
+                ['cursorSurroundingLines', 6],
+                ['detectIndentation', false],
+                ['insertSpaces', true],
+                ['rulers', [
+                  80,
+                  200,
+                ]],
+                ['wordSeparators', ' .?_'],
+                ['tabSize', 2],
+              ])],
+              ["files", new Map<string, any>([
+                ['eol', '\n'],
+                ['insertFinalNewline', true],
+                ['trimFinalNewlines', true],
+                ['trimTrailingWhitespace', true],
+              ])],
+              ["gopls", new Map<string, any>([
+                ['analyses', {
+                  composites: false,
+                }],
+              ])],
+              ["powershell", new Map<string, any>([
+                ['startAutomatically', false],
+              ])],
+              ["terminal", new Map<string, any>([
+                ['integrated', new Map<string, any>([
+                  ['allowChords', true],
+                  ['automationProfile', new Map<string, any>([
+                    ['windows', {
+                      path: 'C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+                    }],
+                  ])],
+                  ['scrollback', 10000],
+                  ['commandsToSkipShell', [
+                    'workbench.action.terminal.sendSequence',
+                    'groog.message.info',
+                    'workbench.action.closePanel',
+                    'workbench.action.terminal.focusNext',
+                    'workbench.action.terminal.focusPrevious',
+                    'workbench.action.terminal.newWithProfile',
+                    'groog.terminal.find',
+                    'groog.terminal.reverseFind',
+                    'workbench.action.terminal.focusFind',
+                    'workbench.action.terminal.findNext',
+                    'workbench.action.terminal.findPrevious',
+                    'groog.ctrlG',
+                    'groog.multiCommand.execute',
+                    'termin-all-or-nothing.closePanel',
+                  ]],
+                  ['copyOnSelection', true],
+                  ['defaultProfile', new Map<string, any>([
+                    ['windows', 'PowerShell'],
+                  ])],
+                  ['profiles', new Map<string, any>([
+                    ['windows', {
+                      MinGW: {
+                        args: ['--login', '-i'],
+                        color: 'terminal.ansiGreen',
+                        env: {
+                          GROOG_VSCODE: '1',
+                        },
+                        icon: 'hubot',
+                        overrideName: true,
+                        path: 'C:\\msys64\\usr\\bin\\bash.exe',
+                      },
+                    }],
+                  ])],
+                ])],
+              ])],
+              ['window', new Map<string, any>([
+                ['newWindowDimensions', 'maximized'],
+              ])],
+              ['workbench', new Map<string, any>([
+                ['colorCustomizations', {
+                  'editor.lineHighlightBorder': '#707070',
+                  'editorGutter.background': '#000000',
+                  'editorLineNumber.activeForeground': '#00ffff',
+                  'terminal.findMatchBackground': '#bb00bb',
+                  'terminal.findMatchHighlightBackground': '#00bbbb',
+                }],
+                ['editor', new Map<string, any>([
+                  ['limit', new Map<string, any>([
+                    ['enabled', true],
+                    ['perEditorGroup', true],
+                    ['value', 1],
+                  ])],
+                  ['showTabs', false],
+                ])],
+                ['startupEditor', 'none'],
+              ])],
+            ])],
+          ]),
+          languageConfiguration: new Map<string, Map<vscode.ConfigurationTarget, Map<string, any>>>([
+            ['typescript', new Map<vscode.ConfigurationTarget, Map<string, any>>([
+              [vscode.ConfigurationTarget.Global, new Map<string, any>([
+                ['editor', new Map<string, any>([
+                  ['formatOnSave', true],
+                ])],
+              ])],
+            ])],
+          ]),
+        },
       },
     },
     {
@@ -8132,129 +8492,133 @@ function testCases(): TestCase[] {
       userInteractions: [
         cmd("groog.updateSettings"),
       ],
-      expectedInfoMessages: [
-        `Settings have been updated!`,
-      ],
-      workspaceConfiguration: {
-        configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
-          [vscode.ConfigurationTarget.Global, new Map<string, any>([
-            ["editor", new Map<string, any>([
-              ['wordSeparators', ' ._?'],
-            ])],
-          ])],
-        ]),
+      informationMessage: {
+        expectedMessages: [
+          `Settings have been updated!`,
+        ],
       },
-      expectedWorkspaceConfiguration: {
-        configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
-          [vscode.ConfigurationTarget.Global, new Map<string, any>([
-            ["editor", new Map<string, any>([
-              ['autoClosingBrackets', 'never'],
-              ['autoClosingQuotes', 'never'],
-              ['codeActionsOnSave', {
-                'source.fixAll.eslint': true,
-                'source.organizeImports': true,
-              }],
-              ['cursorSurroundingLines', 6],
-              ['detectIndentation', false],
-              ['insertSpaces', true],
-              ['rulers', [
-                80,
-                200,
-              ]],
-              ['wordSeparators', ' ._?'],
-              ['tabSize', 2],
-            ])],
-            ["files", new Map<string, any>([
-              ['eol', '\n'],
-              ['insertFinalNewline', true],
-              ['trimFinalNewlines', true],
-              ['trimTrailingWhitespace', true],
-            ])],
-            ["gopls", new Map<string, any>([
-              ['analyses', {
-                composites: false,
-              }],
-            ])],
-            ["powershell", new Map<string, any>([
-              ['startAutomatically', false],
-            ])],
-            ["terminal", new Map<string, any>([
-              ['integrated', new Map<string, any>([
-                ['allowChords', true],
-                ['automationProfile', new Map<string, any>([
-                  ['windows', {
-                    path: 'C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
-                  }],
-                ])],
-                ['scrollback', 10000],
-                ['commandsToSkipShell', [
-                  'workbench.action.terminal.sendSequence',
-                  'groog.message.info',
-                  'workbench.action.closePanel',
-                  'workbench.action.terminal.focusNext',
-                  'workbench.action.terminal.focusPrevious',
-                  'workbench.action.terminal.newWithProfile',
-                  'groog.terminal.find',
-                  'groog.terminal.reverseFind',
-                  'workbench.action.terminal.focusFind',
-                  'workbench.action.terminal.findNext',
-                  'workbench.action.terminal.findPrevious',
-                  'groog.ctrlG',
-                  'groog.multiCommand.execute',
-                  'termin-all-or-nothing.closePanel',
-                ]],
-                ['copyOnSelection', true],
-                ['defaultProfile', new Map<string, any>([
-                  ['windows','PowerShell'],
-                ])],
-                ['profiles', new Map<string, any>([
-                  ['windows' , {
-                    MinGW: {
-                      args: ['--login', '-i'],
-                      color: 'terminal.ansiGreen',
-                      env: {
-                        GROOG_VSCODE: '1',
-                      },
-                      icon: 'hubot',
-                      overrideName: true,
-                      path: 'C:\\msys64\\usr\\bin\\bash.exe',
-                    },
-                  }],
-                ])],
-              ])],
-            ])],
-            ['window', new Map<string, any>([
-              ['newWindowDimensions', 'maximized'],
-            ])],
-            ['workbench', new Map<string, any>([
-              ['colorCustomizations', {
-                'editor.lineHighlightBorder': '#707070',
-                'editorGutter.background': '#000000',
-                'editorLineNumber.activeForeground': '#00ffff',
-                'terminal.findMatchBackground': '#bb00bb',
-                'terminal.findMatchHighlightBackground': '#00bbbb',
-              }],
-              ['editor', new Map<string, any>([
-                ['limit', new Map<string, any>([
-                  ['enabled', true],
-                  ['perEditorGroup', true],
-                  ['value', 1],
-                ])],
-                ['showTabs', false],
-              ])],
-              ['startupEditor', 'none'],
-            ])],
-          ])],
-        ]),
-        languageConfiguration: new Map<string, Map<vscode.ConfigurationTarget, Map<string, any>>>([
-          ['typescript', new Map<vscode.ConfigurationTarget, Map<string, any>>([
+      workspaceConfiguration: {
+        workspaceConfiguration: {
+          configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
             [vscode.ConfigurationTarget.Global, new Map<string, any>([
-              ['editor', new Map<string, any>([
-                ['formatOnSave', true],
+              ["editor", new Map<string, any>([
+                ['wordSeparators', ' ._?'],
               ])],
             ])],
-          ])],
-        ]),
+          ]),
+        },
+        expectedWorkspaceConfiguration: {
+          configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
+            [vscode.ConfigurationTarget.Global, new Map<string, any>([
+              ["editor", new Map<string, any>([
+                ['autoClosingBrackets', 'never'],
+                ['autoClosingQuotes', 'never'],
+                ['codeActionsOnSave', {
+                  'source.fixAll.eslint': true,
+                  'source.organizeImports': true,
+                }],
+                ['cursorSurroundingLines', 6],
+                ['detectIndentation', false],
+                ['insertSpaces', true],
+                ['rulers', [
+                  80,
+                  200,
+                ]],
+                ['wordSeparators', ' ._?'],
+                ['tabSize', 2],
+              ])],
+              ["files", new Map<string, any>([
+                ['eol', '\n'],
+                ['insertFinalNewline', true],
+                ['trimFinalNewlines', true],
+                ['trimTrailingWhitespace', true],
+              ])],
+              ["gopls", new Map<string, any>([
+                ['analyses', {
+                  composites: false,
+                }],
+              ])],
+              ["powershell", new Map<string, any>([
+                ['startAutomatically', false],
+              ])],
+              ["terminal", new Map<string, any>([
+                ['integrated', new Map<string, any>([
+                  ['allowChords', true],
+                  ['automationProfile', new Map<string, any>([
+                    ['windows', {
+                      path: 'C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+                    }],
+                  ])],
+                  ['scrollback', 10000],
+                  ['commandsToSkipShell', [
+                    'workbench.action.terminal.sendSequence',
+                    'groog.message.info',
+                    'workbench.action.closePanel',
+                    'workbench.action.terminal.focusNext',
+                    'workbench.action.terminal.focusPrevious',
+                    'workbench.action.terminal.newWithProfile',
+                    'groog.terminal.find',
+                    'groog.terminal.reverseFind',
+                    'workbench.action.terminal.focusFind',
+                    'workbench.action.terminal.findNext',
+                    'workbench.action.terminal.findPrevious',
+                    'groog.ctrlG',
+                    'groog.multiCommand.execute',
+                    'termin-all-or-nothing.closePanel',
+                  ]],
+                  ['copyOnSelection', true],
+                  ['defaultProfile', new Map<string, any>([
+                    ['windows', 'PowerShell'],
+                  ])],
+                  ['profiles', new Map<string, any>([
+                    ['windows', {
+                      MinGW: {
+                        args: ['--login', '-i'],
+                        color: 'terminal.ansiGreen',
+                        env: {
+                          GROOG_VSCODE: '1',
+                        },
+                        icon: 'hubot',
+                        overrideName: true,
+                        path: 'C:\\msys64\\usr\\bin\\bash.exe',
+                      },
+                    }],
+                  ])],
+                ])],
+              ])],
+              ['window', new Map<string, any>([
+                ['newWindowDimensions', 'maximized'],
+              ])],
+              ['workbench', new Map<string, any>([
+                ['colorCustomizations', {
+                  'editor.lineHighlightBorder': '#707070',
+                  'editorGutter.background': '#000000',
+                  'editorLineNumber.activeForeground': '#00ffff',
+                  'terminal.findMatchBackground': '#bb00bb',
+                  'terminal.findMatchHighlightBackground': '#00bbbb',
+                }],
+                ['editor', new Map<string, any>([
+                  ['limit', new Map<string, any>([
+                    ['enabled', true],
+                    ['perEditorGroup', true],
+                    ['value', 1],
+                  ])],
+                  ['showTabs', false],
+                ])],
+                ['startupEditor', 'none'],
+              ])],
+            ])],
+          ]),
+          languageConfiguration: new Map<string, Map<vscode.ConfigurationTarget, Map<string, any>>>([
+            ['typescript', new Map<vscode.ConfigurationTarget, Map<string, any>>([
+              [vscode.ConfigurationTarget.Global, new Map<string, any>([
+                ['editor', new Map<string, any>([
+                  ['formatOnSave', true],
+                ])],
+              ])],
+            ])],
+          ]),
+        },
       },
     },
     // Jump and fall tests
@@ -8431,9 +8795,11 @@ function testCases(): TestCase[] {
         openFile(startingFile("empty.go")),
         cmd("groog.testFile"),
       ],
-      expectedErrorMessages: [
-        "go testing should be routed to custom command in keybindings.go",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "go testing should be routed to custom command in keybindings.go",
+        ],
+      },
     },
     {
       name: "testFile works for typescript file",
@@ -8486,9 +8852,11 @@ function testCases(): TestCase[] {
         openFile(startingFile("greetings.txt")),
         cmd("groog.testFile"),
       ],
-      expectedErrorMessages: [
-        "Unknown file suffix: txt",
-      ],
+      errorMessage: {
+        expectedMessages: [
+          "Unknown file suffix: txt",
+        ],
+      },
     },
     {
       name: "uses fixed test file",
@@ -8509,10 +8877,12 @@ function testCases(): TestCase[] {
         // python file
         [undefined, `prt ${startingFile("blank.py").replace(/^C/, 'c')}`],
       ],
-      expectedInfoMessages: [
-        "Set fixed test file to twoSpaces.ts",
-        "Unset fixed test file",
-      ],
+      informationMessage: {
+        expectedMessages: [
+          "Set fixed test file to twoSpaces.ts",
+          "Unset fixed test file",
+        ],
+      },
     },
     /* Useful for commenting out tests. */
   ];
@@ -8534,11 +8904,11 @@ suite('Groog commands', () => {
         return;
       }
 
-      const testName = `[${idx+1}/${tcs.length}] ${tc.name}`;
-      test(TEST_ITERATIONS > 1 ? `{${iteration+1}/${TEST_ITERATIONS}} ${testName}` : testName, async () => {
+      const testName = `[${idx + 1}/${tcs.length}] ${tc.name}`;
+      test(TEST_ITERATIONS > 1 ? `{${iteration + 1}/${TEST_ITERATIONS}} ${testName}` : testName, async () => {
 
         if (idx) {
-          const trArgs : TestResetArgs = {
+          const trArgs: TestResetArgs = {
             execStubs: tc.execStubs,
             wantSendTerminalCommandArgs: tc.wantSendTerminalCommands,
           };

@@ -141,26 +141,26 @@ async function testFile(args: TestFileArgs, lastFile?: vscode.Uri) {
 
   const suffix = file.fsPath.split(".").pop();
   switch (suffix) {
-  case "go":
-    vscode.window.showErrorMessage(`go testing should be routed to custom command in keybindings.go`);
-    break;
-  case "ts":
-    // It's possible to run launch.json configurations with `vscode.debug.startDebugging(fs, "Extension Tests");`
-    // But `npm run test` currently does everything we need, but an option to keep in mind if ever needed.
-    stubs.sendTerminalCommandFunc(args, `npm run test`);
-    break;
-  case "java":
-    const javaTestCommand = `zts ${path.parse(file.fsPath).name}`;
-    stubs.sendTerminalCommandFunc(args, javaTestCommand);
-    break;
-  case "py":
-    stubs.sendTerminalCommandFunc(args, `prt ${file.fsPath}`);
-    break;
-  default:
-    if (!args || args.part === 0) {
-      vscode.window.showErrorMessage(`Unknown file suffix: ${suffix}`);
-    }
-    break;
+    case "go":
+      vscode.window.showErrorMessage(`go testing should be routed to custom command in keybindings.go`);
+      break;
+    case "ts":
+      // It's possible to run launch.json configurations with `vscode.debug.startDebugging(fs, "Extension Tests");`
+      // But `npm run test` currently does everything we need, but an option to keep in mind if ever needed.
+      stubs.sendTerminalCommandFunc(args, `npm run test`);
+      break;
+    case "java":
+      const javaTestCommand = `zts ${path.parse(file.fsPath).name}`;
+      stubs.sendTerminalCommandFunc(args, javaTestCommand);
+      break;
+    case "py":
+      stubs.sendTerminalCommandFunc(args, `prt ${file.fsPath}`);
+      break;
+    default:
+      if (!args || args.part === 0) {
+        vscode.window.showErrorMessage(`Unknown file suffix: ${suffix}`);
+      }
+      break;
   }
 }
 
@@ -211,7 +211,7 @@ async function copyFilePath(editor: vscode.TextEditor, link: boolean) {
     const repoInfo = gitRepoInfo(editor.document.uri.fsPath);
     const relativePath = path.relative(repoInfo.root, editor.document.uri.fsPath).replace(/\\/g, '/');
 
-    const copyText = (!link) ? relativePath :`${remoteURL}/blob/${repoInfo.branch}/${relativePath}#${getLineNumbers(editor)}`;
+    const copyText = (!link) ? relativePath : `${remoteURL}/blob/${repoInfo.branch}/${relativePath}#${getLineNumbers(editor)}`;
 
     // Copy link
     vscode.env.clipboard.writeText(copyText);
@@ -250,18 +250,18 @@ const PACKAGE_REGEX = /^package\s+([^\s;]+)\s*;/;
 
 async function copyImport(editor: vscode.TextEditor) {
   switch (editor.document.languageId) {
-  case 'java':
-    const lines = editor.document.getText().split('\n');
-    for (const line of lines) {
-      const match = PACKAGE_REGEX.exec(line);
-      if (match) {
-        const classname = path.parse(editor.document.fileName).name;
-        return vscode.env.clipboard.writeText(`import ${match[1]}.${classname};`);
+    case 'java':
+      const lines = editor.document.getText().split('\n');
+      for (const line of lines) {
+        const match = PACKAGE_REGEX.exec(line);
+        if (match) {
+          const classname = path.parse(editor.document.fileName).name;
+          return vscode.env.clipboard.writeText(`import ${match[1]}.${classname};`);
+        }
       }
-    }
-    vscode.window.showErrorMessage(`No import statement found!`);
-    break;
-  default:
-    vscode.window.showErrorMessage(`No import copy support for language (${editor.document.languageId})`);
+      vscode.window.showErrorMessage(`No import statement found!`);
+      break;
+    default:
+      vscode.window.showErrorMessage(`No import copy support for language (${editor.document.languageId})`);
   }
 }
