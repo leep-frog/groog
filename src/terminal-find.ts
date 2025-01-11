@@ -7,7 +7,7 @@ import { Recorder } from './record';
 export class TerminalFindHandler extends TypeHandler {
   readonly whenContext: string = "terminal.find";
 
-  constructor(cm : ColorMode) {
+  constructor(cm: ColorMode) {
     super(cm);
   }
 
@@ -20,9 +20,12 @@ export class TerminalFindHandler extends TypeHandler {
   }
 
   async handleActivation(): Promise<void> {
+    // We can't start with an input box for initial input value because the below
+    // command doesn't accept args, and that isn't likely to be added either:
+    // https://github.com/microsoft/vscode/issues/211454
     return vscode.commands.executeCommand("workbench.action.terminal.focusFind");
   }
-  onRedundantActivate(): void {}
+  onRedundantActivate(): void { }
 
   async handleDeactivation(): Promise<void> {
     return vscode.commands.executeCommand("workbench.action.terminal.hideFind");
@@ -61,12 +64,12 @@ export class TerminalFindHandler extends TypeHandler {
 
   async moveHandler(cm: CursorMove): Promise<boolean> {
     switch (cm) {
-    case CursorMove.Up:
-      this.nextMatch();
-      break;
-    case CursorMove.Down:
-      this.prevMatch();
-      break;
+      case CursorMove.Up:
+        this.nextMatch();
+        break;
+      case CursorMove.Down:
+        this.prevMatch();
+        break;
     }
     await this.deactivate();
     return true;
@@ -92,5 +95,5 @@ export class TerminalFindHandler extends TypeHandler {
     return true;
   }
 
-  async testReset() {};
+  async testReset() { };
 }

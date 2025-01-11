@@ -34,9 +34,11 @@
     "curly": "warn",
     "eqeqeq": "warn",
     "no-throw-literal": "warn",
-    "indent": [
+    "@typescript-eslint/indent": [
       "error",
-      2
+      {
+        "SwitchCase": 1
+      }
     ],
     "semi": "off"
   },
