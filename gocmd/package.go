@@ -7,7 +7,7 @@ func groogPackage(versionOverride string) *Package {
 		Name:        "groog",
 		DisplayName: "groog",
 		Description: "",
-		Version:     "2.7.35",
+		Version:     "2.7.36",
 		Publisher:   "groogle",
 		Main:        "./bundled-out/extension.js",
 		Engines: map[string]string{
@@ -28,13 +28,12 @@ func groogPackage(versionOverride string) *Package {
 			"esbuild-watch":     "npm run esbuild-base -- --sourcemap --watch",
 			"test-compile":      "tsc -p ./",
 
-			"compile": "tsc -p ./",
-			"watch":   "tsc -watch -p ./",
-			"pretest": "npm run compile && npm run esbuild-base",
-			"lint":    "eslint src --fix --ext ts",
-			// TODO: coverage doesn't work because of bundling. Fix test compiling setup to fix that
-			"test":     "vscode-test --coverage --coverageReporter lcov --coverageReporter html && ts-node ./src/scripts/html-editor.ts ./coverage/index.html",
-			"posttest": "echo 'Open the following file for html coverage report:\nfile:///C:/Users/gleep/Desktop/Coding/vs-code/groog/coverage/index.html'",
+			"compile":  "tsc -p ./",
+			"watch":    "tsc -watch -p ./",
+			"lint":     "eslint src --fix --ext ts",
+			"pretest":  "npm run compile && npm run esbuild",
+			"test":     "vscode-test --coverage --coverageReporter lcov --coverageReporter html && ts-node ./src/scripts/html-editor.ts ./coverage/src/index.html",
+			"posttest": "echo 'Open the following file for html coverage report:\nfile:///C:/Users/gleep/Desktop/Coding/vs-code/groog/coverage/src/index.html'",
 			"coverage": "c8 --reporter lcov --check-coverage npm run test",
 		},
 		Dependencies: map[string]string{
