@@ -109,7 +109,7 @@ export class Settings implements Registerable {
   }
 
   private static async updateSettings(): Promise<void> {
-    const missingConfigs : string[] = [];
+    const missingConfigs: string[] = [];
     for (const setting of this.settings()) {
       const missingConfig = await setting.update();
       if (missingConfig) {

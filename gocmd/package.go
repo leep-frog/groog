@@ -7,7 +7,7 @@ func groogPackage(versionOverride string) *Package {
 		Name:        "groog",
 		DisplayName: "groog",
 		Description: "",
-		Version:     "2.7.36",
+		Version:     "2.7.37",
 		Publisher:   "groogle",
 		Main:        "./bundled-out/extension.js",
 		Engines: map[string]string{
@@ -19,6 +19,13 @@ func groogPackage(versionOverride string) *Package {
 		},
 		Categories: []string{
 			"Other",
+		},
+		ExtensionDependencies: []string{
+			"groogle.faves",
+			"groogle.termin-all-or-nothing",
+			"groogle.very-import-ant",
+			"groogle.what-the-beep",
+			"ryanluker.vscode-coverage-gutters",
 		},
 		Scripts: map[string]string{
 
@@ -93,20 +100,21 @@ func sortFunc[T any](ts []T, f func(a, b T) bool) {
 }
 
 type Package struct {
-	Name             string            `json:"name"`
-	DisplayName      string            `json:"displayName"`
-	Description      string            `json:"description"`
-	Version          string            `json:"version"`
-	Publisher        string            `json:"publisher"`
-	Main             string            `json:"main"`
-	Engines          map[string]string `json:"engines"`
-	Repository       *Repository       `json:"repository"`
-	Categories       []string          `json:"categories"`
-	Scripts          map[string]string `json:"scripts"`
-	Dependencies     map[string]string `json:"dependencies"`
-	DevDependencies  map[string]string `json:"devDependencies"`
-	ActivationEvents []string          `json:"activationEvents"`
-	Contributes      *Contribution     `json:"contributes"`
+	Name                  string            `json:"name"`
+	DisplayName           string            `json:"displayName"`
+	Description           string            `json:"description"`
+	ExtensionDependencies []string          `json:"extensionDependencies"`
+	Version               string            `json:"version"`
+	Publisher             string            `json:"publisher"`
+	Main                  string            `json:"main"`
+	Engines               map[string]string `json:"engines"`
+	Repository            *Repository       `json:"repository"`
+	Categories            []string          `json:"categories"`
+	Scripts               map[string]string `json:"scripts"`
+	Dependencies          map[string]string `json:"dependencies"`
+	DevDependencies       map[string]string `json:"devDependencies"`
+	ActivationEvents      []string          `json:"activationEvents"`
+	Contributes           *Contribution     `json:"contributes"`
 }
 
 func (p *Package) sort() {

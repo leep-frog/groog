@@ -2,7 +2,14 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.36",
+  "extensionDependencies": [
+    "groogle.faves",
+    "groogle.termin-all-or-nothing",
+    "groogle.very-import-ant",
+    "groogle.what-the-beep",
+    "ryanluker.vscode-coverage-gutters"
+  ],
+  "version": "2.7.37",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -727,6 +734,10 @@
         "key": "alt+t",
         "command": "workbench.action.terminal.newInActiveWorkspace",
         "when": "activePanel"
+      },
+      {
+        "key": "alt+v",
+        "command": "coverage-gutters.toggleCoverage"
       },
       {
         "key": "alt+w",

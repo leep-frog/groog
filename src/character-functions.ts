@@ -74,7 +74,7 @@ function openBracketFunction(openClose: string): (editor: vscode.TextEditor, sel
       return [selection, false];
     }
 
-    const middlePos = selection.active.translate({characterDelta: 1});
+    const middlePos = selection.active.translate({ characterDelta: 1 });
     editBuilder.insert(selection.active, openClose);
     return [new vscode.Selection(middlePos, middlePos), true];
   };
@@ -89,7 +89,7 @@ function typeOverFunctions(...characters: string[]): Iterable<[string, TypedChar
 function typeOverFunction(character: string): TypedCharacterHandlerFunction {
   return (editor: vscode.TextEditor, selection: vscode.Selection, editBuilder: vscode.TextEditorEdit): [vscode.Selection, boolean] => {
     const cursor = selection.active;
-    const nextPos = cursor.translate({characterDelta: 1});
+    const nextPos = cursor.translate({ characterDelta: 1 });
     const nextChar = editor.document.getText(new vscode.Range(cursor, nextPos));
     if (nextChar !== character) {
       return [selection, false];
@@ -117,7 +117,7 @@ function deleteSpaceRight(editor: vscode.TextEditor, selection: vscode.Selection
 
   const endPos = lineNumber + 1 === editor.document.lineCount ?
     new vscode.Position(lineNumber, line.text.length) :
-    new vscode.Position(lineNumber+1, editor.document.lineAt(lineNumber+1).firstNonWhitespaceCharacterIndex);
+    new vscode.Position(lineNumber + 1, editor.document.lineAt(lineNumber + 1).firstNonWhitespaceCharacterIndex);
 
   editBuilder.delete(new vscode.Range(
     selection.active,
@@ -128,5 +128,5 @@ function deleteSpaceRight(editor: vscode.TextEditor, selection: vscode.Selection
 
 export function endDocumentPosition(editor: vscode.TextEditor): vscode.Position {
   const doc = editor.document;
-  return doc.lineAt(doc.lineCount-1).range.end;
+  return doc.lineAt(doc.lineCount - 1).range.end;
 }
