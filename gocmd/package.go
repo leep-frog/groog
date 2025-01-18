@@ -21,6 +21,11 @@ func groogPackage(versionOverride string) *Package {
 			"Other",
 		},
 		ExtensionDependencies: []string{
+			// Note: if a new dependency is added to this list, it will need to be
+			// manually installed in the test instance created for tests. Temporarily
+			// add a `delay(60000)` user interaction to the first test, and then
+			// manually install the new extension while that happens and the test
+			// instance is available.
 			"groogle.faves",
 			"groogle.termin-all-or-nothing",
 			"groogle.very-import-ant",
