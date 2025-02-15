@@ -159,7 +159,7 @@ export class Emacs {
 
     [
       ...miscCommands,
-    ].forEach(mc => this.recorder.registerCommand(context, mc.name, (args) => mc.f(this, args), {noLock: mc.noLock}));
+    ].forEach(mc => this.recorder.registerCommand(context, mc.name, (args) => mc.f(this, args), { noLock: mc.noLock }));
 
     this.recorder.registerCommand(context, 'test.reset', async (trArgs: TestResetArgs) => {
       if (process.env.TEST_MODE) {
@@ -230,7 +230,7 @@ export class Emacs {
       }
     }
 
-    return await vscode.commands.executeCommand("default:type", {text: s});
+    return await vscode.commands.executeCommand("default:type", { text: s });
   }
 
 
@@ -247,9 +247,31 @@ export class Emacs {
       return;
     }
 
-    const range = editor.selection;
-    const maybeText = editor.document.getText(range);
-    const prefixText = getPrefixText(editor, range);
+    let range = editor.selection;
+
+    let maybeText: string;
+    let prefixText: string;
+    if (!editor.selection.isEmpty) {
+      maybeText = editor.document.getText(range);
+      prefixText = getPrefixText(editor, range);
+    } else {
+      const lineNumber = range.active.line;
+      const lineRange = editor.document.lineAt(lineNumber).range;
+      const lineText = editor.document.getText(lineRange);
+
+      const [leftText, rightText] = [lineText.slice(0, range.active.character), lineText.slice(range.active.character)];
+
+      const leftMatch = /([a-zA-Z0-9_]*)$/.exec(leftText)![1];
+      const rightMatch = /^([a-zA-Z0-9_]*)/.exec(rightText)![1];
+
+      maybeText = leftMatch + rightMatch;
+      prefixText = "";
+
+      range = new vscode.Selection(
+        new vscode.Position(lineNumber, range.start.character - leftMatch.length),
+        new vscode.Position(lineNumber, range.start.character + rightMatch.length),
+      );
+    }
 
     const indentation = editor.options.insertSpaces ? ' '.repeat(editor.options.indentSize as number) : '\t';
 

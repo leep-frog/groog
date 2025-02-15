@@ -1,5 +1,6 @@
 {
   "extensions.ignoreRecommendations": false,
+  "editor.autoClosingBrackets": "never",
   "files.eol": "\n",
   "[go]": {
     "editor.insertSpaces": false,

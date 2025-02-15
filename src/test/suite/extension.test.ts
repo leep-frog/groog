@@ -8783,6 +8783,223 @@ function testCases(): TestCase[] {
         cmd("groog.tug"),
       ],
     },
+    // Yank/tug word tests
+    {
+      name: "Yanks empty string when not in a word",
+      text: [
+        "123 abc  def_ghi-jkl",
+        "____________________",
+      ],
+      selections: [selection(0, 8)],
+      userInteractions: [
+        cmd("groog.yank"),
+        cmd("groog.cursorDown"),
+        cmd("groog.emacsPaste"),
+      ],
+      expectedText: [
+        "123 abc  def_ghi-jkl",
+        "____________________",
+      ],
+      expectedSelections: [selection(1, 8)],
+    },
+    {
+      name: "Tugs empty string when not in a word",
+      text: [
+        "123 abc  def_ghi-jkl",
+        "____________________",
+      ],
+      selections: [selection(0, 8)],
+      userInteractions: [
+        cmd("groog.tug"),
+        cmd("groog.cursorDown"),
+        cmd("groog.emacsPaste"),
+      ],
+      expectedText: [
+        "123 abc  def_ghi-jkl",
+        "____________________",
+      ],
+      expectedSelections: [selection(1, 8)],
+    },
+    {
+      name: "Yanks word when at beginning of word",
+      text: [
+        "123 abc  def_ghi-jkl",
+        "____________________",
+      ],
+      selections: [selection(0, 9)],
+      userInteractions: [
+        cmd("groog.yank"),
+        cmd("groog.cursorDown"),
+        cmd("groog.emacsPaste"),
+      ],
+      expectedText: [
+        "123 abc  -jkl",
+        "_________def_ghi___________",
+      ],
+      expectedSelections: [selection(1, 16)],
+    },
+    {
+      name: "Tugs word when at beginning of word",
+      text: [
+        "123 abc  def_ghi-jkl",
+        "____________________",
+      ],
+      selections: [selection(0, 9)],
+      userInteractions: [
+        cmd("groog.tug"),
+        cmd("groog.cursorDown"),
+        cmd("groog.emacsPaste"),
+      ],
+      expectedText: [
+        "123 abc  def_ghi-jkl",
+        "_________def_ghi___________",
+      ],
+      expectedSelections: [selection(1, 16)],
+    },
+    {
+      name: "Yanks word when at end of word",
+      text: [
+        "123 abc  def_ghi-jkl",
+        "____________________",
+      ],
+      selections: [selection(0, 7)],
+      userInteractions: [
+        cmd("groog.yank"),
+        cmd("groog.cursorDown"),
+        cmd("groog.emacsPaste"),
+      ],
+      expectedText: [
+        "123   def_ghi-jkl",
+        "____abc________________",
+      ],
+      expectedSelections: [selection(1, 7)],
+    },
+    {
+      name: "Tugs word when at end of word",
+      text: [
+        "123 abc  def_ghi-jkl",
+        "____________________",
+      ],
+      selections: [selection(0, 7)],
+      userInteractions: [
+        cmd("groog.tug"),
+        cmd("groog.cursorDown"),
+        cmd("groog.emacsPaste"),
+      ],
+      expectedText: [
+        "123 abc  def_ghi-jkl",
+        "_______abc_____________",
+      ],
+      expectedSelections: [selection(1, 10)],
+    },
+    {
+      name: "Yanks word when at beginning of word, next to symbol",
+      text: [
+        "123 abc  def_ghi-jkl",
+        "____________________",
+      ],
+      selections: [selection(0, 17)],
+      userInteractions: [
+        cmd("groog.yank"),
+        cmd("groog.cursorDown"),
+        cmd("groog.emacsPaste"),
+      ],
+      expectedText: [
+        "123 abc  def_ghi-",
+        "_________________jkl___",
+      ],
+      expectedSelections: [selection(1, 20)],
+    },
+    {
+      name: "Tugs word when at beginning of word, next to symbol",
+      text: [
+        "123 abc  def_ghi-jkl",
+        "____________________",
+      ],
+      selections: [selection(0, 17)],
+      userInteractions: [
+        cmd("groog.tug"),
+        cmd("groog.cursorDown"),
+        cmd("groog.emacsPaste"),
+      ],
+      expectedText: [
+        "123 abc  def_ghi-jkl",
+        "_________________jkl___",
+      ],
+      expectedSelections: [selection(1, 20)],
+    },
+    {
+      name: "Yanks word when at end of word, next to symbol",
+      text: [
+        "123 abc  def_ghi-jkl",
+        "____________________",
+      ],
+      selections: [selection(0, 16)],
+      userInteractions: [
+        cmd("groog.yank"),
+        cmd("groog.cursorDown"),
+        cmd("groog.emacsPaste"),
+      ],
+      expectedText: [
+        "123 abc  -jkl",
+        "_________def_ghi___________",
+      ],
+      expectedSelections: [selection(1, 16)],
+    },
+    {
+      name: "Tugs word when at end of word, next to symbol",
+      text: [
+        "123 abc  def_ghi-jkl",
+        "____________________",
+      ],
+      selections: [selection(0, 16)],
+      userInteractions: [
+        cmd("groog.tug"),
+        cmd("groog.cursorDown"),
+        cmd("groog.emacsPaste"),
+      ],
+      expectedText: [
+        "123 abc  def_ghi-jkl",
+        "________________def_ghi____",
+      ],
+      expectedSelections: [selection(1, 23)],
+    },
+    {
+      name: "Yanks word when in the middle of a word",
+      text: [
+        "123 abc  def_ghi-jkl",
+        "____________________",
+      ],
+      selections: [selection(0, 18)],
+      userInteractions: [
+        cmd("groog.yank"),
+        cmd("groog.cursorDown"),
+        cmd("groog.emacsPaste"),
+      ],
+      expectedText: [
+        "123 abc  def_ghi-",
+        "_________________jkl___",
+      ],
+      expectedSelections: [selection(1, 20)],
+    },
+    {
+      name: "Tugs word when in the middle of a word",
+      text: [
+        "123 abc  def_ghi-jkl",
+        "____________________",
+      ],
+      selections: [selection(0, 18)],
+      userInteractions: [
+        cmd("groog.tug"),
+        cmd("groog.cursorDown"),
+        cmd("groog.emacsPaste"),
+      ],
+      expectedText: [
+        "123 abc  def_ghi-jkl",
+        "__________________jkl__",
+      ],
+      expectedSelections: [selection(1, 21)],
+    },
     ...getPasteTestCases(),
     // groog.testFile tests
     {
