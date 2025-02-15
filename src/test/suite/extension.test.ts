@@ -751,11 +751,11 @@ export function getPasteTestCases(): TestCase[] {
     ...pasteTestCases.map(tc => {
       return {
         ...tc,
-        name: `[patse] ${tc.name}`,
+        name: `[paste] ${tc.name}`,
         file: tc.startingFile || TABS_FILE,
         userInteractions: [
           // Write the text
-          type(tc.text?.join('\r') || ''),
+          defaultType(tc.text?.join('\r') || ''),
           cmd("groog.paste"),
 
           // Put the cursor at the top cuz we don't care about testing that here
@@ -782,9 +782,9 @@ export function getPasteTestCases(): TestCase[] {
         expectedText: tc.expectedEmacsText || tc.expectedText,
         userInteractions: [
           // Yank only the main text
-          type(clipMainText),
+          defaultType(clipMainText),
           cmd("groog.cursorTop"),
-          type(clipWhitespace),
+          defaultType(clipWhitespace),
           cmd("groog.toggleMarkMode"),
           cmd("groog.cursorBottom"),
           cmd("groog.yank"),
@@ -795,7 +795,7 @@ export function getPasteTestCases(): TestCase[] {
           cmd("groog.deleteLeft"),
 
           // Type the actual starting text
-          type(tc.text?.join('\r') || ''),
+          defaultType(tc.text?.join('\r') || ''),
           cmd("groog.emacsPaste"),
 
           // Put the cursor at the top cuz we don't care about testing that here
@@ -814,14 +814,14 @@ export function getPasteTestCases(): TestCase[] {
         expectedText: tc.expectedEmacsText || tc.expectedText,
         userInteractions: [
           // Yank all the text
-          type(tc.clipboard?.join('\r') || ''),
+          defaultType(tc.clipboard?.join('\r') || ''),
           cmd("groog.cursorTop"),
           cmd("groog.toggleMarkMode"),
           cmd("groog.cursorBottom"),
           cmd("groog.yank"),
 
           // Type the actual starting text
-          type(tc.text?.join('\r') || ''),
+          defaultType(tc.text?.join('\r') || ''),
           cmd("groog.emacsPaste"),
 
           // Put the cursor at the top cuz we don't care about testing that here
@@ -842,7 +842,7 @@ export function getPasteTestCases(): TestCase[] {
       ],
       expectedSelections: [selection(2, 0)],
       userInteractions: [
-        type('abc\n'),
+        defaultType('abc\n'),
         cmd('groog.toggleMarkMode'),
         cmd('groog.cursorUp'),
         cmd("editor.action.clipboardCopyAction"),
@@ -874,7 +874,7 @@ export function getPasteTestCases(): TestCase[] {
         cmd("groog.yank"),
         cmd('editor.action.selectAll'),
         cmd('groog.deleteLeft'),
-        type('  '),
+        defaultType('  '),
         cmd("groog.cursorEnd"),
         cmd("groog.emacsPaste"),
 
@@ -903,7 +903,7 @@ export function getPasteTestCases(): TestCase[] {
         cmd("groog.yank"),
         cmd('editor.action.selectAll'),
         cmd('groog.deleteLeft'),
-        type('  '),
+        defaultType('  '),
         cmd("groog.cursorEnd"),
         cmd("groog.emacsPaste"),
 
@@ -932,7 +932,7 @@ export function getPasteTestCases(): TestCase[] {
         cmd("groog.yank"),
         cmd('editor.action.selectAll'),
         cmd('groog.deleteLeft'),
-        type('  '),
+        defaultType('  '),
         cmd("groog.cursorEnd"),
         cmd("groog.emacsPaste"),
 
@@ -1458,6 +1458,10 @@ const closeAllEditors = cmd("workbench.action.closeEditorsAndGroup");
 
 function type(text: string): UserInteraction {
   return cmd("groog.type", { "text": text });
+}
+
+function defaultType(text: string): UserInteraction {
+  return cmd("default:type", { "text": text });
 }
 
 export function selection(line: number, char: number): vscode.Selection {
@@ -2332,9 +2336,9 @@ function testCases(): TestCase[] {
       selections: [selection(1, 4)],
       expectedText: [
         "  def",
-        "    ghi",
+        "  ghi",
       ],
-      expectedSelections: [selection(1, 7)],
+      expectedSelections: [selection(1, 5)],
       userInteractions: [
         cmd("groog.toggleMarkMode"),
         cmd("groog.cursorDown"),

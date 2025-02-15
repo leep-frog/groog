@@ -118,7 +118,7 @@ export class MarkHandler extends TypeHandler {
 
     // TODO: Can this method just update reference instead of setting?
     // Infer the whitespace prefix of the first line
-    rawLineInfo[0] = firstLinePrefix === undefined ? this.getFirstLine(pasteIndent, rawLineInfo[0], rawLineInfo[1]) : {lineText:rawLineInfo[0].lineText, whitespacePrefix: firstLinePrefix};
+    rawLineInfo[0] = firstLinePrefix === undefined ? this.getFirstLine(pasteIndent, rawLineInfo[0], rawLineInfo[1]) : { lineText: rawLineInfo[0].lineText, whitespacePrefix: firstLinePrefix };
     const pasteBaseIndents = whitespaceSubstringCount(rawLineInfo[0].whitespacePrefix, pasteIndent);
 
     // Make the document edits
@@ -144,7 +144,7 @@ export class MarkHandler extends TypeHandler {
               endIndex--;
             } else {
               // Otherwise, remove up to the number of spaces
-              for (let j = 0; j < fileNumSpaces && curPrefix.at(endIndex-1) === ' '; j++) {
+              for (let j = 0; j < fileNumSpaces && curPrefix.at(endIndex - 1) === ' '; j++) {
                 endIndex--;
               }
             }
@@ -179,7 +179,7 @@ export class MarkHandler extends TypeHandler {
     return secondLine.trim().startsWith(".");
   }
 
-  private getFirstLine(indent: string, firstLineInfo: {lineText: string, whitespacePrefix: string}, secondLineInfo?: {lineText: string, whitespacePrefix: string}) {
+  private getFirstLine(indent: string, firstLineInfo: { lineText: string, whitespacePrefix: string }, secondLineInfo?: { lineText: string, whitespacePrefix: string }) {
     // If first line already has whitespace prefix, then no inferrence needed
     if (firstLineInfo.whitespacePrefix) {
       return firstLineInfo;
@@ -218,7 +218,7 @@ export class MarkHandler extends TypeHandler {
     // Rather than only fix there, be sure to always clear this when activating
     this.keepSelectionOnDeactivation = false;
   }
-  onRedundantActivate(): void {}
+  onRedundantActivate(): void { }
 
   async handleDeactivation() {
     // Don't cancel the selection on delete command
@@ -281,7 +281,7 @@ export class MarkHandler extends TypeHandler {
     return true;
   }
 
-  async testReset() {}
+  async testReset() { }
 }
 
 function whitespaceSubstringCount(str: string, ws: string): number {
