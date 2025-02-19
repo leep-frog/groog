@@ -124,7 +124,7 @@ export class Emacs {
   private checkDependencies() {
     const allDependencies = [
       "groogle.faves",
-      "groogle.termin-all-or-nothingo",
+      "groogle.termin-all-or-nothing",
       "groogle.very-import-ant",
       "groogle.what-the-beep",
       "ryanluker.vscode-coverage-gutters"
