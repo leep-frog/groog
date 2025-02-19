@@ -1280,6 +1280,10 @@
         "when": "activePanel"
       },
       {
+        "key": "ctrl+shift+r",
+        "command": "workbench.action.restartExtensionHost"
+      },
+      {
         "key": "ctrl+shift+s",
         "command": "workbench.action.findInFiles",
         "when": "!groog.context.qmkMode"

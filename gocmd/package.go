@@ -7,7 +7,7 @@ func groogPackage(versionOverride string) *Package {
 		Name:        "groog",
 		DisplayName: "groog",
 		Description: "",
-		Version:     "2.7.38",
+		Version:     "2.7.39",
 		Publisher:   "groogle",
 		Main:        "./bundled-out/extension.js",
 		Engines: map[string]string{
@@ -19,18 +19,6 @@ func groogPackage(versionOverride string) *Package {
 		},
 		Categories: []string{
 			"Other",
-		},
-		ExtensionDependencies: []string{
-			// Note: if a new dependency is added to this list, it will need to be
-			// manually installed in the test instance created for tests. Temporarily
-			// add a `delay(60000)` user interaction to the first test, and then
-			// manually install the new extension while that happens and the test
-			// instance is available.
-			"groogle.faves",
-			"groogle.termin-all-or-nothing",
-			"groogle.very-import-ant",
-			"groogle.what-the-beep",
-			"ryanluker.vscode-coverage-gutters",
 		},
 		Scripts: map[string]string{
 
@@ -105,21 +93,22 @@ func sortFunc[T any](ts []T, f func(a, b T) bool) {
 }
 
 type Package struct {
-	Name                  string            `json:"name"`
-	DisplayName           string            `json:"displayName"`
-	Description           string            `json:"description"`
-	ExtensionDependencies []string          `json:"extensionDependencies"`
-	Version               string            `json:"version"`
-	Publisher             string            `json:"publisher"`
-	Main                  string            `json:"main"`
-	Engines               map[string]string `json:"engines"`
-	Repository            *Repository       `json:"repository"`
-	Categories            []string          `json:"categories"`
-	Scripts               map[string]string `json:"scripts"`
-	Dependencies          map[string]string `json:"dependencies"`
-	DevDependencies       map[string]string `json:"devDependencies"`
-	ActivationEvents      []string          `json:"activationEvents"`
-	Contributes           *Contribution     `json:"contributes"`
+	Name        string `json:"name"`
+	DisplayName string `json:"displayName"`
+	Description string `json:"description"`
+	// ExtensionDependencies: If set, this requires all deps to be installed.
+	// Instead, we add logic that optionally checks for them in the typescript code.
+	Version          string            `json:"version"`
+	Publisher        string            `json:"publisher"`
+	Main             string            `json:"main"`
+	Engines          map[string]string `json:"engines"`
+	Repository       *Repository       `json:"repository"`
+	Categories       []string          `json:"categories"`
+	Scripts          map[string]string `json:"scripts"`
+	Dependencies     map[string]string `json:"dependencies"`
+	DevDependencies  map[string]string `json:"devDependencies"`
+	ActivationEvents []string          `json:"activationEvents"`
+	Contributes      *Contribution     `json:"contributes"`
 }
 
 func (p *Package) sort() {

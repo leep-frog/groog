@@ -629,8 +629,9 @@ var (
 		},
 
 		// Miscellaneous
-		alt("v"):   only("coverage-gutters.toggleCoverage"),
-		ctrlX("r"): only("workbench.action.reloadWindow"),
+		alt("v"):         only("coverage-gutters.toggleCoverage"),
+		ctrlX("r"):       only("workbench.action.reloadWindow"),
+		ctrl(shift("r")): only("workbench.action.restartExtensionHost"),
 		// Sometimes hit alt+g on qmk keyboard. This binding
 		// ensures we don't change focus to the menu bar (File, Edit, ...).
 		alt("g"):   only("noop"),
