@@ -101,7 +101,44 @@ export class Emacs {
     ];
   }
 
+  private checkExtensionDependency(extensionId: string) {
+    if (!!vscode.extensions.getExtension(extensionId)) {
+      return;
+    }
+
+    // Otherwise, suggest installing to the user
+    vscode.window.showWarningMessage(
+      `The extension ${extensionId} is not installed`,
+      'Install',
+      'Dismiss',
+    ).then(selection => {
+      if (selection === 'Install') {
+        return vscode.commands.executeCommand('workbench.extensions.installExtension', extensionId).then(
+          () => vscode.window.showInformationMessage(`Extension ${extensionId} was successfully installed!`),
+          (err) => vscode.window.showErrorMessage(`Extension ${extensionId} failed to install: ${err}`),
+        );
+      }
+    });
+  }
+
+  private checkDependencies() {
+    const allDependencies = [
+      "groogle.faves",
+      "groogle.termin-all-or-nothingo",
+      "groogle.very-import-ant",
+      "groogle.what-the-beep",
+      "ryanluker.vscode-coverage-gutters"
+    ];
+
+    for (const extensionId of allDependencies) {
+      this.checkExtensionDependency(extensionId);
+    }
+  }
+
   register(context: vscode.ExtensionContext) {
+
+    this.checkDependencies();
+
     for (var move of Object.values(CursorMove)) {
       const m = move;
       this.recorder.registerCommand(context, move, (...args: any[]) => this.move(m, ...args));

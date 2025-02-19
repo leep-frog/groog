@@ -2,14 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "extensionDependencies": [
-    "groogle.faves",
-    "groogle.termin-all-or-nothing",
-    "groogle.very-import-ant",
-    "groogle.what-the-beep",
-    "ryanluker.vscode-coverage-gutters"
-  ],
-  "version": "2.7.38",
+  "version": "2.7.39",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
