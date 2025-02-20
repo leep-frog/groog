@@ -8250,7 +8250,7 @@ function testCases(): TestCase[] {
               ['coverage-gutters', new Map<string, any>([
                 ['showLineCoverage', true],
                 ['showGutterCoverage', false],
-                ['showRullerCoverage', true],
+                ['showRulerCoverage', true],
               ])],
               ["editor", new Map<string, any>([
                 ['autoClosingBrackets', 'never'],
@@ -8388,7 +8388,7 @@ function testCases(): TestCase[] {
               ['coverage-gutters', new Map<string, any>([
                 ['showLineCoverage', true],
                 ['showGutterCoverage', false],
-                ['showRullerCoverage', true],
+                ['showRulerCoverage', true],
               ])],
               ["editor", new Map<string, any>([
                 ['autoClosingBrackets', 'never'],
@@ -8527,7 +8527,7 @@ function testCases(): TestCase[] {
               ['coverage-gutters', new Map<string, any>([
                 ['showLineCoverage', true],
                 ['showGutterCoverage', false],
-                ['showRullerCoverage', true],
+                ['showRulerCoverage', true],
               ])],
               ["editor", new Map<string, any>([
                 ['autoClosingBrackets', 'never'],
