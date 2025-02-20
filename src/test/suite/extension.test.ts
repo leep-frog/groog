@@ -8247,6 +8247,11 @@ function testCases(): TestCase[] {
         expectedWorkspaceConfiguration: {
           configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
             [vscode.ConfigurationTarget.Global, new Map<string, any>([
+              ['coverage-gutters', new Map<string, any>([
+                ['showLineCoverage', true],
+                ['showGutterCoverage', false],
+                ['showRullerCoverage', true],
+              ])],
               ["editor", new Map<string, any>([
                 ['autoClosingBrackets', 'never'],
                 ['autoClosingQuotes', 'never'],
@@ -8342,11 +8347,6 @@ function testCases(): TestCase[] {
                   ['showTabs', false],
                 ])],
                 ['startupEditor', 'none'],
-                ['coverage-gutters', new Map<string, any>([
-                  ['showLineCoverage', true],
-                  ['showGutterCoverage', false],
-                  ['showRullerCoverage', true],
-                ])],
               ])],
             ])],
           ]),
@@ -8385,6 +8385,11 @@ function testCases(): TestCase[] {
         expectedWorkspaceConfiguration: {
           configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
             [vscode.ConfigurationTarget.Global, new Map<string, any>([
+              ['coverage-gutters', new Map<string, any>([
+                ['showLineCoverage', true],
+                ['showGutterCoverage', false],
+                ['showRullerCoverage', true],
+              ])],
               ["editor", new Map<string, any>([
                 ['autoClosingBrackets', 'never'],
                 ['autoClosingQuotes', 'never'],
@@ -8481,11 +8486,6 @@ function testCases(): TestCase[] {
                   ['showTabs', false],
                 ])],
                 ['startupEditor', 'none'],
-                ['coverage-gutters', new Map<string, any>([
-                  ['showLineCoverage', true],
-                  ['showGutterCoverage', false],
-                  ['showRullerCoverage', true],
-                ])],
               ])],
             ])],
           ]),
@@ -8524,6 +8524,11 @@ function testCases(): TestCase[] {
         expectedWorkspaceConfiguration: {
           configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
             [vscode.ConfigurationTarget.Global, new Map<string, any>([
+              ['coverage-gutters', new Map<string, any>([
+                ['showLineCoverage', true],
+                ['showGutterCoverage', false],
+                ['showRullerCoverage', true],
+              ])],
               ["editor", new Map<string, any>([
                 ['autoClosingBrackets', 'never'],
                 ['autoClosingQuotes', 'never'],
@@ -8620,11 +8625,6 @@ function testCases(): TestCase[] {
                   ['showTabs', false],
                 ])],
                 ['startupEditor', 'none'],
-                ['coverage-gutters', new Map<string, any>([
-                  ['showLineCoverage', true],
-                  ['showGutterCoverage', false],
-                  ['showRullerCoverage', true],
-                ])],
               ])],
             ])],
           ]),
