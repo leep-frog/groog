@@ -105,6 +105,11 @@ export class Settings implements Registerable {
           },
         },
       }),
+
+      // Coverage Gutters settings
+      new GroogSetting("coverage-gutters", "showLineCoverage", true),
+      new GroogSetting("coverage-gutters", "showGutterCoverage", false),
+      new GroogSetting("coverage-gutters", "showRulerCoverage", true),
     ];
   }
 
