@@ -124,10 +124,12 @@ export class Emacs {
   private checkDependencies() {
     const allDependencies = [
       "groogle.faves",
-      "groogle.termin-all-or-nothing",
       "groogle.very-import-ant",
-      "groogle.what-the-beep",
       "ryanluker.vscode-coverage-gutters"
+
+      // These are ui extensions, so can't really check for them on the remote host
+      // "groogle.what-the-beep",
+      // "groogle.termin-all-or-nothing",
     ];
 
     for (const extensionId of allDependencies) {
