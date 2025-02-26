@@ -110,7 +110,7 @@ export async function multiCommand(mc: MultiCommand) {
 const HOME_UNICODE_CHAR = "\u0001";
 const TERMINAL_KILL_CHAR = "\u000B";
 
-export function sendTerminalCommand(args: TestFileArgs, command: string) {
+export async function sendTerminalCommand(args: TestFileArgs, command: string) {
   const terminal = vscode.window.activeTerminal ?? vscode.window.createTerminal();
 
   const text = args.part === 0 ? [
@@ -124,7 +124,7 @@ export function sendTerminalCommand(args: TestFileArgs, command: string) {
   terminal.sendText(text.join(""), args.part !== 0);
 
   if (args.part === 1) {
-    terminal.show();
+    await vscode.commands.executeCommand("termin-all-or-nothing.openPanel");
   }
 }
 
@@ -147,14 +147,14 @@ async function testFile(args: TestFileArgs, lastFile?: vscode.Uri) {
     case "ts":
       // It's possible to run launch.json configurations with `vscode.debug.startDebugging(fs, "Extension Tests");`
       // But `npm run test` currently does everything we need, but an option to keep in mind if ever needed.
-      stubs.sendTerminalCommandFunc(args, `npm run test`);
+      await stubs.sendTerminalCommandFunc(args, `npm run test`);
       break;
     case "java":
       const javaTestCommand = `zts ${path.parse(file.fsPath).name}`;
-      stubs.sendTerminalCommandFunc(args, javaTestCommand);
+      await stubs.sendTerminalCommandFunc(args, javaTestCommand);
       break;
     case "py":
-      stubs.sendTerminalCommandFunc(args, `prt ${file.fsPath}`);
+      await stubs.sendTerminalCommandFunc(args, `prt ${file.fsPath}`);
       break;
     default:
       if (!args || args.part === 0) {
