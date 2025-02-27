@@ -92,6 +92,9 @@ var (
 	findWidgetVisible       = wc("findWidgetVisible")
 	findInputFocussed       = wc("findInputFocussed")
 	inputFocus              = wc("inputFocus")
+	notebookEditorFocused   = wc("notebookEditorFocused")
+	notebookMarkdownCell    = wc("notebookCellType == 'markup'")
+	notebookCodeCell        = wc("notebookCellType == 'code'")
 	groogFindMode           = wc(groogContext("find"))
 	groogSimpleFindMode     = wc(groogContext("find.simple"))
 	groogQMK                = wc(groogContext("qmk"))
@@ -301,7 +304,10 @@ var (
 				"text": " ",
 			}),
 		},
-		alt("r"):        findToggler("Regex", nil, nil),
+		alt("r"): findToggler("Regex", nil, map[string]*KB{
+			notebookEditorFocused.and(notebookCodeCell).value:     kb("notebook.cell.execute"),
+			notebookEditorFocused.and(notebookMarkdownCell).value: kb("notebook.cell.quitEdit"),
+		}),
 		alt("c"):        findToggler("CaseSensitive", nil, nil),
 		alt("w"):        findToggler("WholeWord", nil, nil),
 		alt(shift("c")): only("togglePreserveCase"),
@@ -475,8 +481,24 @@ var (
 			kb("groog.record.saveRecordingAs"),
 			kb("groog.record.playNamedRecording"),
 		),
-		alt(shift("r")):  only("groog.record.playRecordingRepeatedly"),
-		alt(shift("d")):  only("groog.record.deleteRecording"),
+		alt(shift("r")): {
+			always.value:                kb("groog.record.playRecordingRepeatedly"),
+			notebookEditorFocused.value: kb("jupyter.restartkernelandrunuptoselectedcell"),
+		},
+		ctrl(shift("r")): {
+			// Needed the delay temporarily, but no more?
+			// notebookEditorFocused.value: mcWithArgs(kb("jupyter.restartkernel"), &KB{Command: "notebook.cell.execute", Delay: delay(0)}),
+			notebookEditorFocused.value: mc("jupyter.restartkernel", "notebook.cell.execute"),
+			// always.value:                kb("workbench.action.restartExtensionHost"),
+		},
+		alt(shift("d")): {
+			always.value:                kb("groog.record.deleteRecording"),
+			notebookEditorFocused.value: kb("notebook.cell.delete"),
+		},
+		alt(shift(delete)): {
+			always.value:                kb("groog.record.deleteRecording"),
+			notebookEditorFocused.value: kb("notebook.cell.delete"),
+		},
 		ctrl(shift("s")): onlyWhen("workbench.action.findInFiles", groogQMK.not()),
 		ctrl(shift("f")): onlyWhen("workbench.action.findInFiles", groogQMK),
 		shift(backspace): { // This is basically ctrl+shift+h
@@ -584,12 +606,22 @@ var (
 
 		// Git
 		alt("z"): only("git.revertSelectedRanges"),
-		alt("p"): only("workbench.action.editor.previousChange"),
-		alt("n"): only("workbench.action.editor.nextChange"),
+		alt("p"): {
+			always.value:                kb("workbench.action.editor.previousChange"),
+			notebookEditorFocused.value: kb("notebook.focusPreviousEditor"),
+		},
+		alt("n"): {
+			always.value:                kb("workbench.action.editor.nextChange"),
+			notebookEditorFocused.value: kb("notebook.focusNextEditor"),
+		},
 
 		// Errors (like git ones with addition of shift modifier).
 		alt(shift("p")): onlyMC("editor.action.marker.prevInFiles", "closeMarkersNavigation"),
-		alt(shift("n")): onlyMC("editor.action.marker.nextInFiles", "closeMarkersNavigation"),
+		alt(shift("n")): {
+			notebookEditorFocused.value: kb("notebook.cell.insertCodeCellBelow"),
+			always.value:                mc("editor.action.marker.nextInFiles", "closeMarkersNavigation"),
+		},
+		alt(shift("m")): onlyKBWhen(kb("notebook.cell.insertMarkdownCellBelow"), notebookEditorFocused),
 
 		ctrlZ("t"): only("groog.toggleFixedTestFile"),
 		ctrlX("t"): {
@@ -629,9 +661,8 @@ var (
 		},
 
 		// Miscellaneous
-		alt("v"):         only("coverage-gutters.toggleCoverage"),
-		ctrlX("r"):       only("workbench.action.reloadWindow"),
-		ctrl(shift("r")): only("workbench.action.restartExtensionHost"),
+		alt("v"):   only("coverage-gutters.toggleCoverage"),
+		ctrlX("r"): only("workbench.action.reloadWindow"),
 		// Sometimes hit alt+g on qmk keyboard. This binding
 		// ensures we don't change focus to the menu bar (File, Edit, ...).
 		alt("g"):   only("noop"),

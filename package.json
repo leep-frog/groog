@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.43",
+  "version": "2.7.44",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -603,8 +603,18 @@
         "command": "workbench.action.editor.nextChange"
       },
       {
+        "key": "alt+n",
+        "command": "notebook.focusNextEditor",
+        "when": "notebookEditorFocused"
+      },
+      {
         "key": "alt+p",
         "command": "workbench.action.editor.previousChange"
+      },
+      {
+        "key": "alt+p",
+        "command": "notebook.focusPreviousEditor",
+        "when": "notebookEditorFocused"
       },
       {
         "key": "alt+r",
@@ -623,6 +633,16 @@
       },
       {
         "key": "alt+r",
+        "command": "notebook.cell.execute",
+        "when": "notebookEditorFocused && notebookCellType == 'code'"
+      },
+      {
+        "key": "alt+r",
+        "command": "notebook.cell.quitEdit",
+        "when": "notebookEditorFocused && notebookCellType == 'markup'"
+      },
+      {
+        "key": "alt+r",
         "command": "toggleSearchRegex",
         "when": "searchViewletFocus"
       },
@@ -637,6 +657,20 @@
       {
         "key": "alt+shift+d",
         "command": "groog.record.deleteRecording"
+      },
+      {
+        "key": "alt+shift+d",
+        "command": "notebook.cell.delete",
+        "when": "notebookEditorFocused"
+      },
+      {
+        "key": "alt+shift+delete",
+        "command": "groog.record.deleteRecording"
+      },
+      {
+        "key": "alt+shift+delete",
+        "command": "notebook.cell.delete",
+        "when": "notebookEditorFocused"
       },
       {
         "key": "alt+shift+e",
@@ -662,6 +696,11 @@
         "when": "editorTextFocus"
       },
       {
+        "key": "alt+shift+m",
+        "command": "notebook.cell.insertMarkdownCellBelow",
+        "when": "notebookEditorFocused"
+      },
+      {
         "key": "alt+shift+n",
         "command": "groog.multiCommand.execute",
         "args": {
@@ -674,6 +713,11 @@
             }
           ]
         }
+      },
+      {
+        "key": "alt+shift+n",
+        "command": "notebook.cell.insertCodeCellBelow",
+        "when": "notebookEditorFocused"
       },
       {
         "key": "alt+shift+p",
@@ -692,6 +736,11 @@
       {
         "key": "alt+shift+r",
         "command": "groog.record.playRecordingRepeatedly"
+      },
+      {
+        "key": "alt+shift+r",
+        "command": "jupyter.restartkernelandrunuptoselectedcell",
+        "when": "notebookEditorFocused"
       },
       {
         "key": "alt+shift+r",
@@ -1281,7 +1330,18 @@
       },
       {
         "key": "ctrl+shift+r",
-        "command": "workbench.action.restartExtensionHost"
+        "command": "groog.multiCommand.execute",
+        "when": "notebookEditorFocused",
+        "args": {
+          "sequence": [
+            {
+              "command": "jupyter.restartkernel"
+            },
+            {
+              "command": "notebook.cell.execute"
+            }
+          ]
+        }
       },
       {
         "key": "ctrl+shift+s",

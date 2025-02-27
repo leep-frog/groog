@@ -96,12 +96,18 @@ interface MultiCommand {
 
 export async function multiCommand(mc: MultiCommand) {
   for (const sc of mc.sequence) {
+
+    // Some commands (notably "notebook.cell.execute") fail if passed an undefined
+    // arguments object. In order to avoid this issue, we simply don't pass
+    // sc.args if it's undefined.
+    const func = sc.args === undefined ? () => vscode.commands.executeCommand(sc.command) : () => vscode.commands.executeCommand(sc.command, sc.args);
+
     if (sc.delay) {
-      setTimeout(() => vscode.commands.executeCommand(sc.command, sc.args), sc.delay);
+      setTimeout(func, sc.delay);
     } else if (sc.async) {
-      vscode.commands.executeCommand(sc.command, sc.args);
+      func()
     } else {
-      await vscode.commands.executeCommand(sc.command, sc.args);
+      await func();
     }
   }
 }
