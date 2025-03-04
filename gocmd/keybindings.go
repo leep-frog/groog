@@ -520,8 +520,20 @@ var (
 			kb("groog.cursorBottom"),
 		),
 		ctrl("t"): panelSplit(
-			mc("groog.ctrlG", "termin-all-or-nothing.closePanel"),
-			mc("groog.ctrlG", "termin-all-or-nothing.openPanel"),
+			mcWithArgs(
+				&KB{
+					Command: "groog.ctrlG",
+					Async:   async(true),
+				},
+				kb("termin-all-or-nothing.closePanel"),
+			),
+			mcWithArgs(
+				&KB{
+					Command: "groog.ctrlG",
+					Async:   async(true),
+				},
+				kb("termin-all-or-nothing.openPanel"),
+			),
 		),
 		// alt-t on QMK keyboard is actually ctrl+shift+t (for new tab)
 		ctrl(shift("t")): altT(),

@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.44",
+  "version": "2.7.45",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -1400,7 +1400,8 @@
         "args": {
           "sequence": [
             {
-              "command": "groog.ctrlG"
+              "command": "groog.ctrlG",
+              "async": true
             },
             {
               "command": "termin-all-or-nothing.openPanel"
@@ -1415,7 +1416,8 @@
         "args": {
           "sequence": [
             {
-              "command": "groog.ctrlG"
+              "command": "groog.ctrlG",
+              "async": true
             },
             {
               "command": "termin-all-or-nothing.closePanel"
