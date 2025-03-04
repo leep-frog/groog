@@ -582,28 +582,28 @@ var (
 		alt("y"):               paste(),
 
 		// Settings
-		ctrl("."): panelSplit(
+		ctrl(","): panelSplit(
 			mc(
 				"workbench.action.closePanel",
 				"workbench.action.openGlobalKeybindings",
 			),
 			kb("workbench.action.openGlobalKeybindings"),
 		),
-		ctrlX("."): panelSplit(
+		ctrlX(","): panelSplit(
 			mc(
 				"workbench.action.closePanel",
 				"workbench.action.openGlobalKeybindingsFile",
 			),
 			kb("workbench.action.openGlobalKeybindingsFile"),
 		),
-		ctrl(","): panelSplit(
+		ctrl("."): panelSplit(
 			mc(
 				"workbench.action.closePanel",
 				"workbench.action.openSettings",
 			),
 			kb("workbench.action.openSettings"),
 		),
-		ctrlX(","): panelSplit(
+		ctrlX("."): panelSplit(
 			mc(
 				"workbench.action.closePanel",
 				"workbench.action.openSettingsJson",

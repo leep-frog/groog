@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.45",
+  "version": "2.7.46",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -847,7 +847,7 @@
       },
       {
         "key": "ctrl+,",
-        "command": "workbench.action.openSettings",
+        "command": "workbench.action.openGlobalKeybindings",
         "when": "!activePanel"
       },
       {
@@ -860,14 +860,14 @@
               "command": "workbench.action.closePanel"
             },
             {
-              "command": "workbench.action.openSettings"
+              "command": "workbench.action.openGlobalKeybindings"
             }
           ]
         }
       },
       {
         "key": "ctrl+.",
-        "command": "workbench.action.openGlobalKeybindings",
+        "command": "workbench.action.openSettings",
         "when": "!activePanel"
       },
       {
@@ -880,7 +880,7 @@
               "command": "workbench.action.closePanel"
             },
             {
-              "command": "workbench.action.openGlobalKeybindings"
+              "command": "workbench.action.openSettings"
             }
           ]
         }
@@ -1498,12 +1498,12 @@
       },
       {
         "key": "ctrl+x ,",
-        "command": "workbench.action.openSettingsJson",
+        "command": "workbench.action.openGlobalKeybindingsFile",
         "when": "!activePanel"
       },
       {
         "key": "ctrl+x ctrl+,",
-        "command": "workbench.action.openSettingsJson",
+        "command": "workbench.action.openGlobalKeybindingsFile",
         "when": "!activePanel"
       },
       {
@@ -1516,7 +1516,7 @@
               "command": "workbench.action.closePanel"
             },
             {
-              "command": "workbench.action.openSettingsJson"
+              "command": "workbench.action.openGlobalKeybindingsFile"
             }
           ]
         }
@@ -1531,37 +1531,37 @@
               "command": "workbench.action.closePanel"
             },
             {
+              "command": "workbench.action.openGlobalKeybindingsFile"
+            }
+          ]
+        }
+      },
+      {
+        "key": "ctrl+x .",
+        "command": "workbench.action.openSettingsJson",
+        "when": "!activePanel"
+      },
+      {
+        "key": "ctrl+x ctrl+.",
+        "command": "workbench.action.openSettingsJson",
+        "when": "!activePanel"
+      },
+      {
+        "key": "ctrl+x .",
+        "command": "groog.multiCommand.execute",
+        "when": "activePanel",
+        "args": {
+          "sequence": [
+            {
+              "command": "workbench.action.closePanel"
+            },
+            {
               "command": "workbench.action.openSettingsJson"
             }
           ]
         }
       },
       {
-        "key": "ctrl+x .",
-        "command": "workbench.action.openGlobalKeybindingsFile",
-        "when": "!activePanel"
-      },
-      {
-        "key": "ctrl+x ctrl+.",
-        "command": "workbench.action.openGlobalKeybindingsFile",
-        "when": "!activePanel"
-      },
-      {
-        "key": "ctrl+x .",
-        "command": "groog.multiCommand.execute",
-        "when": "activePanel",
-        "args": {
-          "sequence": [
-            {
-              "command": "workbench.action.closePanel"
-            },
-            {
-              "command": "workbench.action.openGlobalKeybindingsFile"
-            }
-          ]
-        }
-      },
-      {
         "key": "ctrl+x ctrl+.",
         "command": "groog.multiCommand.execute",
         "when": "activePanel",
@@ -1571,7 +1571,7 @@
               "command": "workbench.action.closePanel"
             },
             {
-              "command": "workbench.action.openGlobalKeybindingsFile"
+              "command": "workbench.action.openSettingsJson"
             }
           ]
         }
