@@ -5638,7 +5638,6 @@ function testCases(): TestCase[] {
       },
     },
     {
-      skipBecauseOfPaste: true,
       name: "Repeat record playback with decreasing find matches",
       text: [
         "abc",
