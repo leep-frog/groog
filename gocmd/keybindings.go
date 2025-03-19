@@ -460,6 +460,7 @@ var (
 		ctrlX("d"):       only("editor.action.revealDefinition"),
 		ctrlZ("d"):       only("cSpell.addWordToUserDictionary"),
 		ctrlZ("delete"):  only("cSpell.addWordToUserDictionary"),
+		ctrlZ("n"):       only("cSpell.goToNextSpellingIssue"),
 		ctrl(shift("d")): revealInNewEditor,
 		shift(delete):    revealInNewEditor,
 		ctrl(pageup):     prevTab(),

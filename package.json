@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.48",
+  "version": "2.7.49",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -2073,6 +2073,14 @@
       {
         "key": "ctrl+z ctrl+k",
         "command": "groog.toggleQMK"
+      },
+      {
+        "key": "ctrl+z n",
+        "command": "cSpell.goToNextSpellingIssue"
+      },
+      {
+        "key": "ctrl+z ctrl+n",
+        "command": "cSpell.goToNextSpellingIssue"
       },
       {
         "key": "ctrl+z pagedown",
