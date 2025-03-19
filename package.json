@@ -6,7 +6,7 @@
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
-    "vscode": "^1.81.0"
+    "vscode": "^1.96.0"
   },
   "repository": {
     "type": "git",
