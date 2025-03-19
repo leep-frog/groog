@@ -458,6 +458,8 @@ var (
 			groogQMK.and(groogFindMode.not()).value: kb("workbench.action.files.newUntitledFile"),
 		},
 		ctrlX("d"):       only("editor.action.revealDefinition"),
+		ctrlZ("d"):       only("cSpell.addWordToUserDictionary"),
+		ctrlZ("delete"):  only("cSpell.addWordToUserDictionary"),
 		ctrl(shift("d")): revealInNewEditor,
 		shift(delete):    revealInNewEditor,
 		ctrl(pageup):     prevTab(),
