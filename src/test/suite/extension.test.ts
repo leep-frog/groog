@@ -9145,7 +9145,7 @@ suite('Groog commands', () => {
 
     tcs.forEach((tc, idx) => {
       // Don't check for opening info message more than once
-      if (idx === 0 && iteration !== 0) {
+      if ((idx === 0 && iteration !== 0) || tc.skipBecauseOfPaste) {
         return;
       }
 
