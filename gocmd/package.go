@@ -7,7 +7,7 @@ func groogPackage(versionOverride string) *Package {
 		Name:        "groog",
 		DisplayName: "groog",
 		Description: "",
-		Version:     "2.7.47",
+		Version:     "2.7.48",
 		Publisher:   "groogle",
 		Main:        "./bundled-out/extension.js",
 		Engines: map[string]string{
@@ -37,7 +37,7 @@ func groogPackage(versionOverride string) *Package {
 			"coverage": "c8 --reporter lcov --check-coverage npm run test",
 		},
 		Dependencies: map[string]string{
-			"@leep-frog/vscode-test-stubber": "^2.0.2",
+			"@leep-frog/vscode-test-stubber": "^2.0.5",
 			"await-lock":                     "^2.2.2",
 			"dayjs":                          "^1.11.11",
 			"escape-string-regexp":           "^5.0.0",
@@ -46,7 +46,7 @@ func groogPackage(versionOverride string) *Package {
 			"sorted-array-functions":         "^1.3.0",
 		},
 		DevDependencies: map[string]string{
-			"@types/vscode":                    "^1.81.0",
+			"@types/vscode":                    "^1.96.0",
 			"@types/mocha":                     "^10.0.1",
 			"@types/node":                      "16.x",
 			"@typescript-eslint/eslint-plugin": "^6.4.1",
@@ -58,7 +58,7 @@ func groogPackage(versionOverride string) *Package {
 			"mocha":                            "^10.2.0",
 			"typescript":                       "^5.1.6",
 			"@vscode/test-electron":            "^2.3.9",
-			"@vscode/test-cli":                 "^0.0.8",
+			"@vscode/test-cli":                 "^0.0.10",
 			"ts-node":                          "^10.9.2",
 			"tslib":                            "^2.6.2",
 		},

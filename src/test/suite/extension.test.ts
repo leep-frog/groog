@@ -834,6 +834,7 @@ export function getPasteTestCases(): TestCase[] {
     // One-off test cases
     {
       name: 'wtf',
+      skipBecauseOfPaste: true,
       text: [''],
       expectedText: [
         'abc',
@@ -1510,6 +1511,10 @@ export interface TestCase extends SimpleTestCaseProps {
   clipboard?: string[];
   execStubs?: ExecStub[];
   wantSendTerminalCommands?: [TestFileArgs | undefined, string][];
+
+  // TODO: Remove after this issue is fixed
+  // https://github.com/microsoft/vscode-test-cli/issues/69
+  skipBecauseOfPaste?: boolean;
 }
 
 const TEST_ITERATIONS = 1;
@@ -2613,6 +2618,7 @@ function testCases(): TestCase[] {
       },
     },
     {
+      skipBecauseOfPaste: true,
       name: "Works with regular pasting",
       text: [
         "bc",
@@ -5529,6 +5535,7 @@ function testCases(): TestCase[] {
       ],
     },
     {
+      skipBecauseOfPaste: true,
       name: "Records vanilla copy and paste",
       text: [
         "abc",
@@ -5631,6 +5638,7 @@ function testCases(): TestCase[] {
       },
     },
     {
+      skipBecauseOfPaste: true,
       name: "Repeat record playback with decreasing find matches",
       text: [
         "abc",
@@ -7937,6 +7945,7 @@ function testCases(): TestCase[] {
     // Use `editor.action.clipboardPasteAction` instead of `groog.paste` because we're
     // testing the raw clipboard value (not groog.paste logic, e.g. whitespace indenting/custom trimming)
     {
+      skipBecauseOfPaste: true,
       name: "Trims the clipboard of whitespace",
       text: [
         ' \t abc\t def\t \t',
@@ -7959,6 +7968,7 @@ function testCases(): TestCase[] {
       ],
     },
     {
+      skipBecauseOfPaste: true,
       name: "Trims the clipboard of whitespace and newlines",
       text: [
         'abc def\t \t',

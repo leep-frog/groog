@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.47",
+  "version": "2.7.48",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -30,7 +30,7 @@
     "watch": "tsc -watch -p ./"
   },
   "dependencies": {
-    "@leep-frog/vscode-test-stubber": "^2.0.2",
+    "@leep-frog/vscode-test-stubber": "^2.0.5",
     "await-lock": "^2.2.2",
     "dayjs": "^1.11.11",
     "escape-string-regexp": "^5.0.0",
@@ -41,10 +41,10 @@
   "devDependencies": {
     "@types/mocha": "^10.0.1",
     "@types/node": "16.x",
-    "@types/vscode": "^1.81.0",
+    "@types/vscode": "^1.96.0",
     "@typescript-eslint/eslint-plugin": "^6.4.1",
     "@typescript-eslint/parser": "^6.4.1",
-    "@vscode/test-cli": "^0.0.8",
+    "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.3.9",
     "c8": "^9.1.0",
     "esbuild": "^0.20.1",
