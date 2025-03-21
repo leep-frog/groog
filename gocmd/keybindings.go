@@ -459,8 +459,9 @@ var (
 		},
 		ctrlX("d"):       only("editor.action.revealDefinition"),
 		ctrlZ("d"):       only("cSpell.addWordToUserDictionary"),
-		ctrlZ("delete"):  only("cSpell.addWordToUserDictionary"),
+		ctrlZ(delete):    only("cSpell.addWordToUserDictionary"),
 		ctrlZ("n"):       only("cSpell.goToNextSpellingIssue"),
+		ctrlZ(down):      only("cSpell.goToNextSpellingIssue"), // ~= qmk ctrl+z ctrl+n (since ctrl+n is down arrow)
 		ctrl(shift("d")): revealInNewEditor,
 		shift(delete):    revealInNewEditor,
 		ctrl(pageup):     prevTab(),

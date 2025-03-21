@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.49",
+  "version": "2.7.50",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -2037,6 +2037,14 @@
       {
         "key": "ctrl+z ctrl+delete",
         "command": "cSpell.addWordToUserDictionary"
+      },
+      {
+        "key": "ctrl+z down",
+        "command": "cSpell.goToNextSpellingIssue"
+      },
+      {
+        "key": "ctrl+z ctrl+down",
+        "command": "cSpell.goToNextSpellingIssue"
       },
       {
         "key": "ctrl+z f",
