@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.50",
+  "version": "2.7.51",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -1887,19 +1887,10 @@
         "args": {
           "sequence": [
             {
-              "command": "go.test.package",
+              "command": "termin-all-or-nothing.execute",
               "args": {
-                "background": true
-              },
-              "async": true
-            },
-            {
-              "command": "termin-all-or-nothing.openPanel",
-              "delay": 50
-            },
-            {
-              "command": "workbench.action.output.show.extension-output-golang.go-#2-Go Tests",
-              "delay": 50
+                "command": "go.test.package"
+              }
             }
           ]
         }
@@ -1911,19 +1902,10 @@
         "args": {
           "sequence": [
             {
-              "command": "go.test.package",
+              "command": "termin-all-or-nothing.execute",
               "args": {
-                "background": true
-              },
-              "async": true
-            },
-            {
-              "command": "termin-all-or-nothing.openPanel",
-              "delay": 50
-            },
-            {
-              "command": "workbench.action.output.show.extension-output-golang.go-#2-Go Tests",
-              "delay": 50
+                "command": "go.test.package"
+              }
             }
           ]
         }

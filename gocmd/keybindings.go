@@ -643,19 +643,10 @@ var (
 		ctrlX("t"): {
 			goFile.value: mcWithArgs(
 				&KB{
-					Command: "go.test.package",
-					Async:   async(true),
+					Command: "termin-all-or-nothing.execute",
 					Args: map[string]interface{}{
-						"background": true,
+						"command": "go.test.package",
 					},
-				},
-				&KB{
-					Command: "termin-all-or-nothing.openPanel",
-					Delay:   delay(50),
-				},
-				&KB{
-					Command: "workbench.action.output.show.extension-output-golang.go-#2-Go Tests",
-					Delay:   delay(50),
 				},
 			),
 			// For all other file types, use the custom function
