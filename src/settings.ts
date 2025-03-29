@@ -183,7 +183,7 @@ async function updateSetting(section: string, subsection: string, value: any, op
   const vsConfig = options?.languageId ? vscode.workspace.getConfiguration(section, { languageId: options.languageId }) : vscode.workspace.getConfiguration(section);
   const configurationTarget = options?.workspaceTarget ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global;
   try {
-    await vsConfig.update(subsection, value, configurationTarget);
+    await vsConfig.update(subsection, value, configurationTarget, !!(options?.languageId));
   } catch (e) {
     return `${e}`;
   }
