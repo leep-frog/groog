@@ -78,7 +78,9 @@ export class Settings implements Registerable {
       // https://github.com/golang/vscode-go/issues/217
       new GroogSetting("gopls", "analyses", { "composites": false }),
       new WordSeparatorSetting("_"),
-      new LanguageSetting("typescript", "editor", "formatOnSave", true),
+      new GroogSetting("editor", "formatOnSave", true, {
+        languageId: "typescript",
+      }),
       // MinGW terminal
       // https://dev.to/yumetodo/make-the-integrated-shell-of-visual-studio-code-to-bash-of-msys2-5eao
       // https://code.visualstudio.com/docs/terminal/basics#_terminal-profiles
@@ -119,9 +121,15 @@ export class Settings implements Registerable {
       new GroogSetting("very-import-ant", "organizeImports", true),
       new GroogSetting("very-import-ant", "removeUnusedImports", true),
       new GroogSetting("very-import-ant", "output.enable", false),
-      new LanguageSetting("python", "editor", "formatOnSave", true),
-      new LanguageSetting("python", "editor", "formatOnType", true),
-      new LanguageSetting("python", "editor", "defaultFormatter", "groogle.very-import-ant"),
+      new GroogSetting("editor", "formatOnSave", true, {
+        languageId: "python",
+      }),
+      new GroogSetting("editor", "formatOnType", true, {
+        languageId: "python",
+      }),
+      new GroogSetting("editor", "defaultFormatter", "groogle.very-import-ant", {
+        languageId: "python",
+      }),
       new GroogSetting("python", "analysis.autoIndent", false),
       new GroogSetting("python", "analysis.autoFormatStrings", false),
       new GroogSetting("notebook", "formatOnSave.enabled", true),
@@ -166,8 +174,19 @@ interface Setting {
 }
 
 interface GroogSettingOptions {
+  languageId?: string;
   workspaceTarget?: boolean;
   forceOverride?: boolean;
+}
+
+async function updateSetting(section: string, subsection: string, value: any, options?: GroogSettingOptions): Promise<string | undefined> {
+  const vsConfig = options?.languageId ? vscode.workspace.getConfiguration(section, { languageId: options.languageId }) : vscode.workspace.getConfiguration(section);
+  const configurationTarget = options?.workspaceTarget ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global;
+  try {
+    await vsConfig.update(subsection, value, configurationTarget);
+  } catch (e) {
+    return `${e}`;
+  }
 }
 
 export class GroogSetting implements Setting {
@@ -175,22 +194,17 @@ export class GroogSetting implements Setting {
   private configSection: string;
   private subsection: string;
   private value: string;
-  private configurationTarget: vscode.ConfigurationTarget;
+  private options?: GroogSettingOptions;
 
   constructor(configSection: string, subsection: string, value: any, options?: GroogSettingOptions) {
     this.configSection = configSection;
     this.subsection = subsection;
     this.value = value;
-    this.configurationTarget = options?.workspaceTarget ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global;
+    this.options = options;
   }
 
   async update(): Promise<string | undefined> {
-    const vsConfig = vscode.workspace.getConfiguration(this.configSection);
-    try {
-      await vsConfig.update(this.subsection, this.value, this.configurationTarget);
-    } catch (e) {
-      return `${e}`;
-    }
+    return updateSetting(this.configSection, this.subsection, this.value, this.options);
   }
 }
 
@@ -217,32 +231,15 @@ export class WordSeparatorSetting implements Setting {
         existing += char;
       }
     }
-    await configuration.update(WordSeparatorSetting.configSubsection, existing, vscode.ConfigurationTarget.Global);
-    return;
+
+    const options: GroogSettingOptions = {
+      forceOverride: true,
+    };
+    return updateSetting(WordSeparatorSetting.configSection, WordSeparatorSetting.configSubsection, existing, options);
   }
 
   public static getWordSeparators(): [vscode.WorkspaceConfiguration, string | undefined] {
     const configuration = vscode.workspace.getConfiguration(this.configSection);
     return [configuration, configuration.get(this.configSubsection)];
-  }
-}
-
-class LanguageSetting implements Setting {
-
-  private languageId: string;
-  private configSection: string;
-  private subsection: string;
-  private value: string;
-
-  constructor(languageId: string, configSection: string, subsection: string, value: any) {
-    this.languageId = languageId;
-    this.configSection = configSection;
-    this.subsection = subsection;
-    this.value = value;
-  }
-
-  async update(): Promise<string | undefined> {
-    await vscode.workspace.getConfiguration(this.configSection, { languageId: this.languageId }).update(this.subsection, this.value, vscode.ConfigurationTarget.Global, true);
-    return;
   }
 }
