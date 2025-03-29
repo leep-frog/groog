@@ -3,7 +3,7 @@ import { Registerable } from './handler';
 import { Recorder } from './record';
 import path = require('path');
 
-export function colorCustomizationSetting(color?: string, workspaceTarget?: boolean): GroogSetting {
+export function colorCustomizationSetting(color?: string): GroogSetting {
   const value = color === undefined ? undefined : {
     "editorGutter.background": "#000000",
     "editorLineNumber.activeForeground": "#00ffff",
@@ -11,7 +11,7 @@ export function colorCustomizationSetting(color?: string, workspaceTarget?: bool
     "terminal.findMatchHighlightBackground": "#00bbbb",
     "terminal.findMatchBackground": "#bb00bb",
   };
-  return new GroogSetting("workbench", "colorCustomizations", value, workspaceTarget);
+  return new GroogSetting("workbench", "colorCustomizations", value);
 }
 
 export class Settings implements Registerable {
@@ -133,7 +133,9 @@ export class Settings implements Registerable {
       settings.push(new GroogSetting("coverage-gutters", "manualCoverageFilePaths", [
         path.join(workspacePath, "coverage.lcov"),
         path.join(workspacePath, "coverage", "lcov.info"),
-      ], true))
+      ], {
+        workspaceTarget: true,
+      }))
     }
     return settings;
   }
@@ -163,6 +165,11 @@ interface Setting {
   update(): Promise<string | undefined>;
 }
 
+interface GroogSettingOptions {
+  workspaceTarget?: boolean;
+  forceOverride?: boolean;
+}
+
 export class GroogSetting implements Setting {
 
   private configSection: string;
@@ -170,11 +177,11 @@ export class GroogSetting implements Setting {
   private value: string;
   private configurationTarget: vscode.ConfigurationTarget;
 
-  constructor(configSection: string, subsection: string, value: any, workspaceTarget?: boolean) {
+  constructor(configSection: string, subsection: string, value: any, options?: GroogSettingOptions) {
     this.configSection = configSection;
     this.subsection = subsection;
     this.value = value;
-    this.configurationTarget = workspaceTarget ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global;
+    this.configurationTarget = options?.workspaceTarget ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global;
   }
 
   async update(): Promise<string | undefined> {
