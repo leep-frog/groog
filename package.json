@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.51",
+  "version": "2.7.52",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -15,6 +15,7 @@
   "categories": [
     "Other"
   ],
+  "icon": "logo.png",
   "scripts": {
     "compile": "tsc -p ./",
     "coverage": "c8 --reporter lcov --check-coverage npm run test",
