@@ -8358,6 +8358,11 @@ function testCases(): TestCase[] {
                 ['startupEditor', 'none'],
               ])],
             ])],
+            [vscode.ConfigurationTarget.Workspace, new Map<string, any>([
+              ['coverage-gutters', new Map<string, any>([
+                ['manualCoverageFilePaths', [startingFile("coverage.lcov")]],
+              ])],
+            ])],
           ]),
           languageConfiguration: new Map<string, Map<vscode.ConfigurationTarget, Map<string, any>>>([
             ['typescript', new Map<vscode.ConfigurationTarget, Map<string, any>>([
@@ -8393,6 +8398,11 @@ function testCases(): TestCase[] {
         },
         expectedWorkspaceConfiguration: {
           configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
+            [vscode.ConfigurationTarget.Workspace, new Map<string, any>([
+              ['coverage-gutters', new Map<string, any>([
+                ['manualCoverageFilePaths', [startingFile("coverage.lcov")]],
+              ])],
+            ])],
             [vscode.ConfigurationTarget.Global, new Map<string, any>([
               ['coverage-gutters', new Map<string, any>([
                 ['showLineCoverage', true],
@@ -8532,6 +8542,11 @@ function testCases(): TestCase[] {
         },
         expectedWorkspaceConfiguration: {
           configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
+            [vscode.ConfigurationTarget.Workspace, new Map<string, any>([
+              ['coverage-gutters', new Map<string, any>([
+                ['manualCoverageFilePaths', [startingFile("coverage.lcov")]],
+              ])],
+            ])],
             [vscode.ConfigurationTarget.Global, new Map<string, any>([
               ['coverage-gutters', new Map<string, any>([
                 ['showLineCoverage', true],

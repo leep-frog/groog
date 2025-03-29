@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { Registerable } from './handler';
 import { Recorder } from './record';
+import path = require('path');
 
 export function colorCustomizationSetting(color?: string, workspaceTarget?: boolean): GroogSetting {
   const value = color === undefined ? undefined : {
@@ -37,7 +38,7 @@ export class Settings implements Registerable {
       "groog.multiCommand.execute",
       "termin-all-or-nothing.closePanel",
     ];
-    return [
+    const settings = [
       new GroogSetting("editor", "autoClosingQuotes", "never"),
       // My preference is to only auto-close curly brackets, but this auto-closes (), [], and {}.
       // So, we disable this, and manually implement auto-close for curly brackets ourselves.
@@ -111,6 +112,13 @@ export class Settings implements Registerable {
       new GroogSetting("coverage-gutters", "showGutterCoverage", false),
       new GroogSetting("coverage-gutters", "showRulerCoverage", true),
     ];
+
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (workspaceFolders && workspaceFolders.length === 1) {
+      const coverageFile = path.join(workspaceFolders[0].uri.fsPath, "coverage.lcov");
+      settings.push(new GroogSetting("coverage-gutters", "manualCoverageFilePaths", [coverageFile], true))
+    }
+    return settings;
   }
 
   private static async updateSettings(): Promise<void> {
