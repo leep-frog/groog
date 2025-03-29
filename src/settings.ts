@@ -119,6 +119,12 @@ export class Settings implements Registerable {
       new GroogSetting("very-import-ant", "organizeImports", true),
       new GroogSetting("very-import-ant", "removeUnusedImports", true),
       new GroogSetting("very-import-ant", "output.enable", false),
+      new LanguageSetting("python", "editor", "formatOnSave", true),
+      new LanguageSetting("python", "editor", "formatOnType", true),
+      new LanguageSetting("python", "editor", "defaultFormatter", "groogle.very-import-ant"),
+      new GroogSetting("python", "analysis.autoIndent", false),
+      new GroogSetting("python", "analysis.autoFormatStrings", false),
+      new GroogSetting("notebook", "formatOnSave.enabled", true),
     ];
 
     const workspaceFolders = vscode.workspace.workspaceFolders;

@@ -8277,6 +8277,17 @@ function testCases(): TestCase[] {
                   ['enable', false],
                 ])],
               ])],
+              ['python', new Map<string, any>([
+                ["analysis", new Map<string, any>([
+                  ['autoIndent', false],
+                  ['autoFormatStrings', false],
+                ])],
+              ])],
+              ['notebook', new Map<string, any>([
+                ["formatOnSave", new Map<string, any>([
+                  ['enabled', true],
+                ])],
+              ])],
               ["editor", new Map<string, any>([
                 ['autoClosingBrackets', 'never'],
                 ['autoClosingQuotes', 'never'],
@@ -8383,6 +8394,15 @@ function testCases(): TestCase[] {
                 ])],
               ])],
             ])],
+            ['python', new Map<vscode.ConfigurationTarget, Map<string, any>>([
+              [vscode.ConfigurationTarget.Global, new Map<string, any>([
+                ['editor', new Map<string, any>([
+                  ['formatOnSave', true],
+                  ['formatOnType', true],
+                  ['defaultFormatter', "groogle.very-import-ant"],
+                ])],
+              ])],
+            ])],
           ]),
         },
       },
@@ -8429,6 +8449,17 @@ function testCases(): TestCase[] {
                 ["removeUnusedImports", true],
                 ["output", new Map<string, any>([
                   ['enable', false],
+                ])],
+              ])],
+              ['python', new Map<string, any>([
+                ["analysis", new Map<string, any>([
+                  ['autoIndent', false],
+                  ['autoFormatStrings', false],
+                ])],
+              ])],
+              ['notebook', new Map<string, any>([
+                ["formatOnSave", new Map<string, any>([
+                  ['enabled', true],
                 ])],
               ])],
               ["editor", new Map<string, any>([
@@ -8538,6 +8569,15 @@ function testCases(): TestCase[] {
                 ])],
               ])],
             ])],
+            ['python', new Map<vscode.ConfigurationTarget, Map<string, any>>([
+              [vscode.ConfigurationTarget.Global, new Map<string, any>([
+                ['editor', new Map<string, any>([
+                  ['formatOnSave', true],
+                  ['formatOnType', true],
+                  ['defaultFormatter', "groogle.very-import-ant"],
+                ])],
+              ])],
+            ])],
           ]),
         },
       },
@@ -8584,6 +8624,17 @@ function testCases(): TestCase[] {
                 ["removeUnusedImports", true],
                 ["output", new Map<string, any>([
                   ['enable', false],
+                ])],
+              ])],
+              ['python', new Map<string, any>([
+                ["analysis", new Map<string, any>([
+                  ['autoIndent', false],
+                  ['autoFormatStrings', false],
+                ])],
+              ])],
+              ['notebook', new Map<string, any>([
+                ["formatOnSave", new Map<string, any>([
+                  ['enabled', true],
                 ])],
               ])],
               ["editor", new Map<string, any>([
@@ -8690,6 +8741,15 @@ function testCases(): TestCase[] {
               [vscode.ConfigurationTarget.Global, new Map<string, any>([
                 ['editor', new Map<string, any>([
                   ['formatOnSave', true],
+                ])],
+              ])],
+            ])],
+            ['python', new Map<vscode.ConfigurationTarget, Map<string, any>>([
+              [vscode.ConfigurationTarget.Global, new Map<string, any>([
+                ['editor', new Map<string, any>([
+                  ['formatOnSave', true],
+                  ['formatOnType', true],
+                  ['defaultFormatter', "groogle.very-import-ant"],
                 ])],
               ])],
             ])],
