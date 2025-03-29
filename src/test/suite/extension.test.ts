@@ -8255,11 +8255,27 @@ function testCases(): TestCase[] {
       workspaceConfiguration: {
         expectedWorkspaceConfiguration: {
           configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
+            [vscode.ConfigurationTarget.Workspace, new Map<string, any>([
+              ['coverage-gutters', new Map<string, any>([
+                ['manualCoverageFilePaths', [startingFile("coverage.lcov")]],
+              ])],
+            ])],
             [vscode.ConfigurationTarget.Global, new Map<string, any>([
               ['coverage-gutters', new Map<string, any>([
                 ['showLineCoverage', true],
                 ['showGutterCoverage', false],
                 ['showRulerCoverage', true],
+              ])],
+              ['very-import-ant', new Map<string, any>([
+                ["format", new Map<string, any>([
+                  ['enable', true],
+                ])],
+                ["onTypeTriggerCharacters", "\n,.\t []{}"],
+                ["organizeImports", true],
+                ["removeUnusedImports", true],
+                ["output", new Map<string, any>([
+                  ['enable', false],
+                ])],
               ])],
               ["editor", new Map<string, any>([
                 ['autoClosingBrackets', 'never'],
@@ -8358,11 +8374,6 @@ function testCases(): TestCase[] {
                 ['startupEditor', 'none'],
               ])],
             ])],
-            [vscode.ConfigurationTarget.Workspace, new Map<string, any>([
-              ['coverage-gutters', new Map<string, any>([
-                ['manualCoverageFilePaths', [startingFile("coverage.lcov")]],
-              ])],
-            ])],
           ]),
           languageConfiguration: new Map<string, Map<vscode.ConfigurationTarget, Map<string, any>>>([
             ['typescript', new Map<vscode.ConfigurationTarget, Map<string, any>>([
@@ -8408,6 +8419,17 @@ function testCases(): TestCase[] {
                 ['showLineCoverage', true],
                 ['showGutterCoverage', false],
                 ['showRulerCoverage', true],
+              ])],
+              ['very-import-ant', new Map<string, any>([
+                ["format", new Map<string, any>([
+                  ['enable', true],
+                ])],
+                ["onTypeTriggerCharacters", "\n,.\t []{}"],
+                ["organizeImports", true],
+                ["removeUnusedImports", true],
+                ["output", new Map<string, any>([
+                  ['enable', false],
+                ])],
               ])],
               ["editor", new Map<string, any>([
                 ['autoClosingBrackets', 'never'],
@@ -8552,6 +8574,17 @@ function testCases(): TestCase[] {
                 ['showLineCoverage', true],
                 ['showGutterCoverage', false],
                 ['showRulerCoverage', true],
+              ])],
+              ['very-import-ant', new Map<string, any>([
+                ["format", new Map<string, any>([
+                  ['enable', true],
+                ])],
+                ["onTypeTriggerCharacters", "\n,.\t []{}"],
+                ["organizeImports", true],
+                ["removeUnusedImports", true],
+                ["output", new Map<string, any>([
+                  ['enable', false],
+                ])],
               ])],
               ["editor", new Map<string, any>([
                 ['autoClosingBrackets', 'never'],

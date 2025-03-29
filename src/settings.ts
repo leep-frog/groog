@@ -111,6 +111,14 @@ export class Settings implements Registerable {
       new GroogSetting("coverage-gutters", "showLineCoverage", true),
       new GroogSetting("coverage-gutters", "showGutterCoverage", false),
       new GroogSetting("coverage-gutters", "showRulerCoverage", true),
+
+      // Very Import-Ant settings
+      new GroogSetting("very-import-ant", "format.enable", true),
+      new GroogSetting("very-import-ant", "organizeImports", true),
+      new GroogSetting("very-import-ant", "onTypeTriggerCharacters", "\n,.\t []{}"),
+      new GroogSetting("very-import-ant", "organizeImports", true),
+      new GroogSetting("very-import-ant", "removeUnusedImports", true),
+      new GroogSetting("very-import-ant", "output.enable", false),
     ];
 
     const workspaceFolders = vscode.workspace.workspaceFolders;
