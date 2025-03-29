@@ -8257,7 +8257,10 @@ function testCases(): TestCase[] {
           configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
             [vscode.ConfigurationTarget.Workspace, new Map<string, any>([
               ['coverage-gutters', new Map<string, any>([
-                ['manualCoverageFilePaths', [startingFile("coverage.lcov")]],
+                ['manualCoverageFilePaths', [
+                  startingFile("coverage.lcov"),
+                  startingFile("coverage", "lcov.info"),
+                ]],
               ])],
             ])],
             [vscode.ConfigurationTarget.Global, new Map<string, any>([
@@ -8431,7 +8434,10 @@ function testCases(): TestCase[] {
           configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
             [vscode.ConfigurationTarget.Workspace, new Map<string, any>([
               ['coverage-gutters', new Map<string, any>([
-                ['manualCoverageFilePaths', [startingFile("coverage.lcov")]],
+                ['manualCoverageFilePaths', [
+                  startingFile("coverage.lcov"),
+                  startingFile("coverage", "lcov.info"),
+                ]],
               ])],
             ])],
             [vscode.ConfigurationTarget.Global, new Map<string, any>([
@@ -8606,7 +8612,10 @@ function testCases(): TestCase[] {
           configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
             [vscode.ConfigurationTarget.Workspace, new Map<string, any>([
               ['coverage-gutters', new Map<string, any>([
-                ['manualCoverageFilePaths', [startingFile("coverage.lcov")]],
+                ['manualCoverageFilePaths', [
+                  startingFile("coverage.lcov"),
+                  startingFile("coverage", "lcov.info"),
+                ]],
               ])],
             ])],
             [vscode.ConfigurationTarget.Global, new Map<string, any>([

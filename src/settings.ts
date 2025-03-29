@@ -129,8 +129,11 @@ export class Settings implements Registerable {
 
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (workspaceFolders && workspaceFolders.length === 1) {
-      const coverageFile = path.join(workspaceFolders[0].uri.fsPath, "coverage.lcov");
-      settings.push(new GroogSetting("coverage-gutters", "manualCoverageFilePaths", [coverageFile], true))
+      const workspacePath = workspaceFolders[0].uri.fsPath
+      settings.push(new GroogSetting("coverage-gutters", "manualCoverageFilePaths", [
+        path.join(workspacePath, "coverage.lcov"),
+        path.join(workspacePath, "coverage", "lcov.info"),
+      ], true))
     }
     return settings;
   }
