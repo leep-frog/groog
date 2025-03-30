@@ -8299,7 +8299,7 @@ function testCases(): TestCase[] {
                   'source.organizeImports': true,
                 }],
                 ['cursorSurroundingLines', 6],
-                ['detectIndentation', false],
+                ['detectIndentation', true],
                 ['insertSpaces', true],
                 ['rulers', [
                   80,
@@ -8476,7 +8476,7 @@ function testCases(): TestCase[] {
                   'source.organizeImports': true,
                 }],
                 ['cursorSurroundingLines', 6],
-                ['detectIndentation', false],
+                ['detectIndentation', true],
                 ['insertSpaces', true],
                 ['rulers', [
                   80,
@@ -8654,7 +8654,7 @@ function testCases(): TestCase[] {
                   'source.organizeImports': true,
                 }],
                 ['cursorSurroundingLines', 6],
-                ['detectIndentation', false],
+                ['detectIndentation', true],
                 ['insertSpaces', true],
                 ['rulers', [
                   80,
@@ -8838,7 +8838,7 @@ function testCases(): TestCase[] {
                   'source.organizeImports': true,
                 }],
                 ['cursorSurroundingLines', 6],
-                ['detectIndentation', false],
+                ['detectIndentation', true],
                 ['insertSpaces', true],
                 ['rulers', [
                   80,
