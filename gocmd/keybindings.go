@@ -280,10 +280,9 @@ var (
 			groogTerminalFindMode.value: kb("groog.terminal.reverseFind"),
 		},
 		enter: {
-			suggestWidgetVisible.value:                          kb("acceptSelectedSuggestion"),
-			suggestWidgetVisible.not().and(inSnippetMode).value: kb("jumpToNextSnippetPlaceholder"),
-			groogTerminalFindMode.value:                         kb("groog.terminal.find"),
-			groogFindMode.value:                                 kb("editor.action.nextMatchFindAction"),
+			suggestWidgetVisible.value:  kb("acceptSelectedSuggestion"),
+			groogTerminalFindMode.value: kb("groog.terminal.find"),
+			groogFindMode.value:         kb("editor.action.nextMatchFindAction"),
 			// This is needed so enter hits are recorded
 			// Don't do for tab since that can add a variable
 			// number of spaces. If seems necessary, we can add
@@ -445,7 +444,13 @@ var (
 		ctrl(pagedown): only("groog.focusNextEditor"),
 		ctrl(pageup):   only("groog.focusPreviousEditor"),
 		// When there is a suggestible item highlighted, then accept it.
-		tab: onlyKBWhen(kb("workbench.action.acceptSelectedQuickOpenItem"), groogFindMode),
+		tab: {
+			groogFindMode.value: kb("workbench.action.acceptSelectedQuickOpenItem"),
+			// Have this be tab (not enter) because sometimes we want to press the actual
+			// enter key in the middle of a snippet (and this will jump to the end of the
+			// snippet input if at the last snippet input section).
+			suggestWidgetVisible.not().and(inSnippetMode).value: kb("jumpToNextSnippetPlaceholder"),
+		},
 		ctrl(shift("n")): {
 			groogFindMode.value:       kb("groog.find.next"),
 			groogFindMode.not().value: kb("workbench.action.files.newUntitledFile"),
