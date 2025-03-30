@@ -50,7 +50,7 @@ export class Settings implements Registerable {
       }),
       new GroogSetting("window", "newWindowDimensions", "maximized"),
       new GroogSetting("editor", "cursorSurroundingLines", 6),
-      new GroogSetting("editor", "detectIndentation", false),
+      new GroogSetting("editor", "detectIndentation", true),
       new GroogSetting("editor", "insertSpaces", true),
       new GroogSetting("editor", "rulers", [80, 200]),
       new GroogSetting("editor", "tabSize", 2),
