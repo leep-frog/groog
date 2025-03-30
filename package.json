@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.59",
+  "version": "2.7.60",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -2184,11 +2184,6 @@
       },
       {
         "key": "enter",
-        "command": "jumpToNextSnippetPlaceholder",
-        "when": "!suggestWidgetVisible && inSnippetMode"
-      },
-      {
-        "key": "enter",
         "command": "editor.action.nextMatchFindAction",
         "when": "groog.context.findMode"
       },
@@ -2877,6 +2872,11 @@
         "args": {
           "text": "t"
         }
+      },
+      {
+        "key": "tab",
+        "command": "jumpToNextSnippetPlaceholder",
+        "when": "!suggestWidgetVisible && inSnippetMode"
       },
       {
         "key": "tab",
