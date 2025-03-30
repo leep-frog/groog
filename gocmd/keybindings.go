@@ -279,6 +279,7 @@ var (
 			groogFindMode.value:         kb("editor.action.previousMatchFindAction"),
 			groogTerminalFindMode.value: kb("groog.terminal.reverseFind"),
 		},
+		ctrl(enter): only("-github.copilot.generate"),
 		enter: {
 			suggestWidgetVisible.value:  kb("acceptSelectedSuggestion"),
 			groogTerminalFindMode.value: kb("groog.terminal.find"),

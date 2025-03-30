@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.60",
+  "version": "2.7.61",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -952,6 +952,10 @@
       {
         "key": "ctrl+e",
         "command": "groog.cursorEnd"
+      },
+      {
+        "key": "ctrl+enter",
+        "command": "-github.copilot.generate"
       },
       {
         "key": "ctrl+f",
