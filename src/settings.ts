@@ -58,7 +58,7 @@ export class Settings implements Registerable {
       new GroogSetting("files", "insertFinalNewline", true),
       new GroogSetting("files", "trimFinalNewlines", true),
       new GroogSetting("files", "trimTrailingWhitespace", true),
-      // true is the default, but explicilty set it here to avoid potential issues.
+      // true is the default, but explicitly set it here to avoid potential issues.
       new GroogSetting("terminal", "integrated.allowChords", true),
       new GroogSetting("terminal", "integrated.commandsToSkipShell", ics),
       new GroogSetting("terminal", "integrated.copyOnSelection", true),
@@ -143,6 +143,9 @@ export class Settings implements Registerable {
         path.join(workspacePath, "coverage", "lcov.info"),
       ], {
         workspaceTarget: true,
+        skipIf: (value: string[] | undefined): boolean => {
+          return !!value && value.length > 0;
+        },
       }))
     }
     return settings;
@@ -173,15 +176,19 @@ interface Setting {
   update(): Promise<string | undefined>;
 }
 
-interface GroogSettingOptions {
+interface GroogSettingOptions<T> {
   languageId?: string;
   workspaceTarget?: boolean;
-  forceOverride?: boolean;
+  skipIf?: (value: T | undefined) => boolean;
 }
 
-async function updateSetting(section: string, subsection: string, value: any, options?: GroogSettingOptions): Promise<string | undefined> {
+async function updateSetting(section: string, subsection: string, value: any, options?: GroogSettingOptions<any>): Promise<string | undefined> {
   const vsConfig = options?.languageId ? vscode.workspace.getConfiguration(section, { languageId: options.languageId }) : vscode.workspace.getConfiguration(section);
   const configurationTarget = options?.workspaceTarget ? vscode.ConfigurationTarget.Workspace : vscode.ConfigurationTarget.Global;
+
+  if (options?.skipIf && options.skipIf(vsConfig.get(subsection))) {
+    return;
+  }
   try {
     await vsConfig.update(subsection, value, configurationTarget, !!(options?.languageId));
   } catch (e) {
@@ -194,9 +201,9 @@ export class GroogSetting implements Setting {
   private configSection: string;
   private subsection: string;
   private value: string;
-  private options?: GroogSettingOptions;
+  private options?: GroogSettingOptions<any>;
 
-  constructor(configSection: string, subsection: string, value: any, options?: GroogSettingOptions) {
+  constructor(configSection: string, subsection: string, value: any, options?: GroogSettingOptions<any>) {
     this.configSection = configSection;
     this.subsection = subsection;
     this.value = value;
@@ -232,10 +239,7 @@ export class WordSeparatorSetting implements Setting {
       }
     }
 
-    const options: GroogSettingOptions = {
-      forceOverride: true,
-    };
-    return updateSetting(WordSeparatorSetting.configSection, WordSeparatorSetting.configSubsection, existing, options);
+    return updateSetting(WordSeparatorSetting.configSection, WordSeparatorSetting.configSubsection, existing);
   }
 
   public static getWordSeparators(): [vscode.WorkspaceConfiguration, string | undefined] {

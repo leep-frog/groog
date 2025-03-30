@@ -8766,6 +8766,190 @@ function testCases(): TestCase[] {
         },
       },
     },
+    {
+      name: "Updates settings skipIfs",
+      userInteractions: [
+        cmd("groog.updateSettings"),
+      ],
+      informationMessage: {
+        expectedMessages: [
+          `Settings have been updated!`,
+        ],
+      },
+      workspaceConfiguration: {
+        workspaceConfiguration: {
+          configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
+            [vscode.ConfigurationTarget.Global, new Map<string, any>([
+              ["editor", new Map<string, any>([
+                ['wordSeparators', ' .?'],
+              ])],
+            ])],
+            [vscode.ConfigurationTarget.Workspace, new Map<string, any>([
+              ['coverage-gutters', new Map<string, any>([
+                ['manualCoverageFilePaths', [
+                  "some-file.lcov",
+                ]],
+              ])],
+            ])],
+          ]),
+        },
+        expectedWorkspaceConfiguration: {
+          configuration: new Map<vscode.ConfigurationTarget, Map<string, any>>([
+            [vscode.ConfigurationTarget.Workspace, new Map<string, any>([
+              ['coverage-gutters', new Map<string, any>([
+                ['manualCoverageFilePaths', [
+                  "some-file.lcov",
+                ]],
+              ])],
+            ])],
+            [vscode.ConfigurationTarget.Global, new Map<string, any>([
+              ['coverage-gutters', new Map<string, any>([
+                ['showLineCoverage', true],
+                ['showGutterCoverage', false],
+                ['showRulerCoverage', true],
+              ])],
+              ['very-import-ant', new Map<string, any>([
+                ["format", new Map<string, any>([
+                  ['enable', true],
+                ])],
+                ["onTypeTriggerCharacters", "\n,.\t []{}"],
+                ["organizeImports", true],
+                ["removeUnusedImports", true],
+                ["output", new Map<string, any>([
+                  ['enable', false],
+                ])],
+              ])],
+              ['python', new Map<string, any>([
+                ["analysis", new Map<string, any>([
+                  ['autoIndent', false],
+                  ['autoFormatStrings', false],
+                ])],
+              ])],
+              ['notebook', new Map<string, any>([
+                ["formatOnSave", new Map<string, any>([
+                  ['enabled', true],
+                ])],
+              ])],
+              ["editor", new Map<string, any>([
+                ['autoClosingBrackets', 'never'],
+                ['autoClosingQuotes', 'never'],
+                ['codeActionsOnSave', {
+                  'source.fixAll.eslint': true,
+                  'source.organizeImports': true,
+                }],
+                ['cursorSurroundingLines', 6],
+                ['detectIndentation', false],
+                ['insertSpaces', true],
+                ['rulers', [
+                  80,
+                  200,
+                ]],
+                ['wordSeparators', ' .?_'],
+                ['tabSize', 2],
+              ])],
+              ["files", new Map<string, any>([
+                ['eol', '\n'],
+                ['insertFinalNewline', true],
+                ['trimFinalNewlines', true],
+                ['trimTrailingWhitespace', true],
+              ])],
+              ["gopls", new Map<string, any>([
+                ['analyses', {
+                  composites: false,
+                }],
+              ])],
+              ["powershell", new Map<string, any>([
+                ['startAutomatically', false],
+              ])],
+              ["terminal", new Map<string, any>([
+                ['integrated', new Map<string, any>([
+                  ['allowChords', true],
+                  ['automationProfile', new Map<string, any>([
+                    ['windows', {
+                      path: 'C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+                    }],
+                  ])],
+                  ['scrollback', 10000],
+                  ['commandsToSkipShell', [
+                    'workbench.action.terminal.sendSequence',
+                    'groog.message.info',
+                    'workbench.action.closePanel',
+                    'workbench.action.terminal.focusNext',
+                    'workbench.action.terminal.focusPrevious',
+                    'workbench.action.terminal.newWithProfile',
+                    'groog.terminal.find',
+                    'groog.terminal.reverseFind',
+                    'workbench.action.terminal.focusFind',
+                    'workbench.action.terminal.findNext',
+                    'workbench.action.terminal.findPrevious',
+                    'groog.ctrlG',
+                    'groog.multiCommand.execute',
+                    'termin-all-or-nothing.closePanel',
+                  ]],
+                  ['copyOnSelection', true],
+                  ['defaultProfile', new Map<string, any>([
+                    ['windows', 'PowerShell'],
+                  ])],
+                  ['profiles', new Map<string, any>([
+                    ['windows', {
+                      MinGW: {
+                        args: ['--login', '-i'],
+                        color: 'terminal.ansiGreen',
+                        env: {
+                          GROOG_VSCODE: '1',
+                        },
+                        icon: 'hubot',
+                        overrideName: true,
+                        path: 'C:\\msys64\\usr\\bin\\bash.exe',
+                      },
+                    }],
+                  ])],
+                ])],
+              ])],
+              ['window', new Map<string, any>([
+                ['newWindowDimensions', 'maximized'],
+              ])],
+              ['workbench', new Map<string, any>([
+                ['colorCustomizations', {
+                  'editor.lineHighlightBorder': '#707070',
+                  'editorGutter.background': '#000000',
+                  'editorLineNumber.activeForeground': '#00ffff',
+                  'terminal.findMatchBackground': '#bb00bb',
+                  'terminal.findMatchHighlightBackground': '#00bbbb',
+                }],
+                ['editor', new Map<string, any>([
+                  ['limit', new Map<string, any>([
+                    ['enabled', true],
+                    ['perEditorGroup', true],
+                    ['value', 1],
+                  ])],
+                  ['showTabs', false],
+                ])],
+                ['startupEditor', 'none'],
+              ])],
+            ])],
+          ]),
+          languageConfiguration: new Map<string, Map<vscode.ConfigurationTarget, Map<string, any>>>([
+            ['typescript', new Map<vscode.ConfigurationTarget, Map<string, any>>([
+              [vscode.ConfigurationTarget.Global, new Map<string, any>([
+                ['editor', new Map<string, any>([
+                  ['formatOnSave', true],
+                ])],
+              ])],
+            ])],
+            ['python', new Map<vscode.ConfigurationTarget, Map<string, any>>([
+              [vscode.ConfigurationTarget.Global, new Map<string, any>([
+                ['editor', new Map<string, any>([
+                  ['formatOnSave', true],
+                  ['formatOnType', true],
+                  ['defaultFormatter', "groogle.very-import-ant"],
+                ])],
+              ])],
+            ])],
+          ]),
+        },
+      },
+    },
     // Jump and fall tests
     {
       name: "Jump jumps ten lines by default",

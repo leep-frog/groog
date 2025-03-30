@@ -76,7 +76,7 @@ func groogPackage(versionOverride string) *Package {
 		Commands:      CustomCommands,
 		Keybindings:   kbDefsToBindings(),
 		Configuration: groogConfiguration(),
-		Snipppets:     Snippets,
+		Snippets:      Snippets,
 	}
 	sortFunc(p.Contributes.Commands, func(a, b *Command) bool {
 		return a.Command < b.Command
@@ -141,7 +141,7 @@ type Contribution struct {
 	Commands      []*Command     `json:"commands"`
 	Keybindings   []*Keybinding  `json:"keybindings"`
 	Configuration *Configuration `json:"configuration"`
-	Snipppets     []*Snippet     `json:"snippets"`
+	Snippets      []*Snippet     `json:"snippets"`
 }
 
 type Keybinding struct {
