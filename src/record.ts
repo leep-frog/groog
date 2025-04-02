@@ -133,7 +133,7 @@ export class RecordBook {
 
   async nPlaybacks(emacs: Emacs) {
 
-    const opts : vscode.InputBoxOptions = {
+    const opts: vscode.InputBoxOptions = {
       title: "Number of times to playback the recording",
       // Need the wrapping, otherwise hangs for some reason.
       validateInput: (input => {
@@ -250,10 +250,14 @@ export class Recorder extends TypeHandler {
   // The initialization of command executions, however, are well ordered, so requiring a lock
   // immediately has proven to be a great solution to this problem.
   public lockWrap(name: string, f: (...t: any) => Thenable<void>, noTimeout?: boolean): (...t: any) => Thenable<void> {
+    this.emacs.outputChannel.log(`Starting command ${name}`)
     return async (...t: any) => await this.typeLock.acquireAsync()
       .then(() => noTimeout ? undefined : setTimeout(() => vscode.window.showErrorMessage(`LockWrap "${name}" is taking too long`), 5_000))
       .then((timeoutRef) => f(...t).then(() => noTimeout ? undefined : clearTimeout(timeoutRef)))
-      .finally(() => this.typeLock.release());
+      .finally(() => {
+        this.emacs.outputChannel.log(`Releasing command ${name}`)
+        this.typeLock.release()
+      });
   }
 
   registerHandler(context: vscode.ExtensionContext, recorder: Recorder) {
@@ -264,10 +268,10 @@ export class Recorder extends TypeHandler {
     recorder.registerCommand(context, "record.undo", () => recorder.undo());
 
     // We don't lock on playbacks because they are nested commands.
-    recorder.registerCommand(context, "record.playRecording", () => recorder.playback(), {noLock: true});
-    recorder.registerCommand(context, "record.playRecordingRepeatedly", () => recorder.repeatPlayback(), {noLock: true});
-    recorder.registerCommand(context, "record.playRecordingNTimes", () => recorder.nPlayback(), {noLock: true});
-    recorder.registerCommand(context, "record.playNamedRecording", () => recorder.playbackNamedRecording(), {noLock: true});
+    recorder.registerCommand(context, "record.playRecording", () => recorder.playback(), { noLock: true });
+    recorder.registerCommand(context, "record.playRecordingRepeatedly", () => recorder.repeatPlayback(), { noLock: true });
+    recorder.registerCommand(context, "record.playRecordingNTimes", () => recorder.nPlayback(), { noLock: true });
+    recorder.registerCommand(context, "record.playNamedRecording", () => recorder.playbackNamedRecording(), { noLock: true });
   }
 
   registerCommand(context: vscode.ExtensionContext, commandName: string, callback: (...args: any[]) => Thenable<any>, optionalProps?: RegisterCommandOptionalProps) {
@@ -295,7 +299,7 @@ export class Recorder extends TypeHandler {
   forceGetRecordBook(): RecordBook { return this.getRecordBook()!; }
   getOptionalRecordBook(): RecordBook | undefined { return this.recordBooks.at(-1); }
 
-  setRecordBook(newBook: RecordBook) { this.recordBooks[this.recordBooks.length-1] = newBook; }
+  setRecordBook(newBook: RecordBook) { this.recordBooks[this.recordBooks.length - 1] = newBook; }
 
   async undo() {
     const recordBook = this.getRecordBook();
@@ -397,26 +401,29 @@ export class Recorder extends TypeHandler {
     }
 
     // Create items
-    const recentItems: RecordBookQuickPickItem[] = this.recordBooks.map((recordBook, idx) => { return {
-      recordBook: recordBook,
-      buttons: [
-        new SaveRecentRecordingButton(),
-        recordBook.repeatable() ? new RepeatRecordingButton() : undefined,
-        new NTimesRecordingButton(),
-      ].filter(btn => btn) as vscode.QuickInputButton[],
-      label: `${RECENT_RECORDING_PREFIX} ${this.recordBooks.length - 1 - idx}`,
-    };
+    const recentItems: RecordBookQuickPickItem[] = this.recordBooks.map((recordBook, idx) => {
+      return {
+        recordBook: recordBook,
+        buttons: [
+          new SaveRecentRecordingButton(),
+          recordBook.repeatable() ? new RepeatRecordingButton() : undefined,
+          new NTimesRecordingButton(),
+        ].filter(btn => btn) as vscode.QuickInputButton[],
+        label: `${RECENT_RECORDING_PREFIX} ${this.recordBooks.length - 1 - idx}`,
+      };
     }).reverse();
 
     const items: RecordBookQuickPickItem[] = [...this.namedRecordings.entries()]
-      .map((a: [string, RecordBook]): RecordBookQuickPickItem => { return {
-        recordBook: a[1],
-        label: a[0],
-        buttons: [
-          a[1].repeatable() ? new RepeatRecordingButton() : undefined,
-          new NTimesRecordingButton(),
-        ].filter(btn => btn) as vscode.QuickInputButton[],
-      };})
+      .map((a: [string, RecordBook]): RecordBookQuickPickItem => {
+        return {
+          recordBook: a[1],
+          label: a[0],
+          buttons: [
+            a[1].repeatable() ? new RepeatRecordingButton() : undefined,
+            new NTimesRecordingButton(),
+          ].filter(btn => btn) as vscode.QuickInputButton[],
+        };
+      })
       .sort((a, b) => a.label.localeCompare(b.label));
 
     // Create quick pick
@@ -437,20 +444,20 @@ export class Recorder extends TypeHandler {
       // When pressing a button
       input.onDidTriggerItemButton(async (event: vscode.QuickPickItemButtonEvent<RecordBookQuickPickItem>): Promise<any> => {
         switch (event.button.constructor) {
-        case SaveRecentRecordingButton:
-          input.dispose();
-          this.saveNewRec(event.item.recordBook);
-          break;
-        case RepeatRecordingButton:
-          input.dispose();
-          await event.item.recordBook.repeatedPlayback(this.emacs);
-          break;
-        case NTimesRecordingButton:
-          input.dispose();
-          await event.item.recordBook.nPlaybacks(this.emacs);
-          break;
-        default:
-          vscode.window.showErrorMessage(`Unknown item button`);
+          case SaveRecentRecordingButton:
+            input.dispose();
+            this.saveNewRec(event.item.recordBook);
+            break;
+          case RepeatRecordingButton:
+            input.dispose();
+            await event.item.recordBook.repeatedPlayback(this.emacs);
+            break;
+          case NTimesRecordingButton:
+            input.dispose();
+            await event.item.recordBook.nPlaybacks(this.emacs);
+            break;
+          default:
+            vscode.window.showErrorMessage(`Unknown item button`);
         }
       }),
       // When accepting an event, run the record book!
@@ -459,15 +466,15 @@ export class Recorder extends TypeHandler {
         // No clue why exactly, but if it's done at the end, then test execution doesn't await promises properly.
         input.dispose();
         switch (input.selectedItems.length) {
-        case 0:
-          vscode.window.showErrorMessage("No named recording selection made");
-          break;
-        case 1:
-          await input.selectedItems[0].recordBook.playback(this.emacs);
-          break;
-        default:
-          vscode.window.showErrorMessage(`Multiple selections made somehow?!`);
-          break;
+          case 0:
+            vscode.window.showErrorMessage("No named recording selection made");
+            break;
+          case 1:
+            await input.selectedItems[0].recordBook.playback(this.emacs);
+            break;
+          default:
+            vscode.window.showErrorMessage(`Multiple selections made somehow?!`);
+            break;
         };
       }),
     );
@@ -580,20 +587,20 @@ export class TypeRecord implements Record {
 
   eat(next: Record): boolean {
     switch (next.constructor) {
-    case TypeRecord:
-      const tr = <TypeRecord>next;
-      this.text += tr.text;
-      return true;
-
-    case CommandRecord:
-      const cr = <CommandRecord>next;
-      // TODO "groog." prefix to helper method
-      if (cr.command === `groog.${DeleteCommand.Left}`) {
-        // Length will not be zero because it will be popped by the noop check.
-        this.text = this.text.slice(0, this.text.length-1);
+      case TypeRecord:
+        const tr = <TypeRecord>next;
+        this.text += tr.text;
         return true;
-      }
-      return false;
+
+      case CommandRecord:
+        const cr = <CommandRecord>next;
+        // TODO "groog." prefix to helper method
+        if (cr.command === `groog.${DeleteCommand.Left}`) {
+          // Length will not be zero because it will be popped by the noop check.
+          this.text = this.text.slice(0, this.text.length - 1);
+          return true;
+        }
+        return false;
     }
 
     return false;
@@ -624,9 +631,9 @@ export class CommandRecord implements Record {
 
   eat(next: Record): boolean {
     switch (next.constructor) {
-    case CommandRecord:
-      const cr = <CommandRecord>next;
-      return (this.command === `groog.cursorEnd`) && (cr.command === `groog.cursorEnd`);
+      case CommandRecord:
+        const cr = <CommandRecord>next;
+        return (this.command === `groog.cursorEnd`) && (cr.command === `groog.cursorEnd`);
     }
 
     return false;

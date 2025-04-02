@@ -13,6 +13,39 @@ import { Settings } from './settings';
 import { stubs, TestResetArgs } from './stubs';
 import { TerminalFindHandler } from './terminal-find';
 
+
+export class TruncatedOutputChannel {
+
+  private outputChannel: vscode.OutputChannel;
+  private logs: string[];
+  enabled: boolean;
+
+  constructor(outputChannel: vscode.OutputChannel) {
+    this.outputChannel = outputChannel;
+    this.logs = [];
+    this.enabled = true;
+  }
+
+  log(message: string, reset?: boolean, force?: boolean) {
+    if (!this.enabled && !force) {
+      return;
+    }
+
+    if (reset) {
+      this.outputChannel.clear();
+      this.logs = [];
+    }
+
+    this.logs.push(message);
+    if (this.logs.length > 1000) {
+      this.logs = this.logs.slice(900);
+      this.outputChannel.replace(this.logs.join("\n"));
+    } else {
+      this.outputChannel.appendLine(message);
+    }
+  }
+}
+
 export class GlobalBoolTracker {
   private stateTracker: GlobalStateTracker<boolean>;
   private value: boolean;
@@ -66,9 +99,11 @@ export class Emacs {
   typoFixer: TypoFixer;
   scripts: Scripts;
   lastVisitedFile?: vscode.Uri;
+  outputChannel: TruncatedOutputChannel;
 
   constructor() {
     this.cm = new ColorMode();
+    this.outputChannel = new TruncatedOutputChannel(vscode.window.createOutputChannel("groogle"));
     this.qmkTracker = new GlobalBoolTracker("qmkState", async () => {
       return setGroogContext('qmk', true).then(() => {
         // We don't want to wait on the message, otherwise, we are locked until the message is cleared
