@@ -31,6 +31,8 @@ export class TruncatedOutputChannel {
       return;
     }
 
+    message = `[${new Date()}]: ${message}`;
+
     if (reset) {
       this.outputChannel.clear();
       this.logs = [];

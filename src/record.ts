@@ -250,12 +250,13 @@ export class Recorder extends TypeHandler {
   // The initialization of command executions, however, are well ordered, so requiring a lock
   // immediately has proven to be a great solution to this problem.
   public lockWrap(name: string, f: (...t: any) => Thenable<void>, noTimeout?: boolean): (...t: any) => Thenable<void> {
-    this.emacs.outputChannel.log(`Starting command ${name}`)
-    return async (...t: any) => await this.typeLock.acquireAsync()
+    return async (...t: any) => await Promise.resolve()
+      .then(() => this.emacs.outputChannel.log(`Starting command ${name} with args ${JSON.stringify(t)}`))
+      .then(() => this.typeLock.acquireAsync())
       .then(() => noTimeout ? undefined : setTimeout(() => vscode.window.showErrorMessage(`LockWrap "${name}" is taking too long`), 5_000))
       .then((timeoutRef) => f(...t).then(() => noTimeout ? undefined : clearTimeout(timeoutRef)))
       .finally(() => {
-        this.emacs.outputChannel.log(`Releasing command ${name}`)
+        this.emacs.outputChannel.log(`Releasing command ${name} with args ${JSON.stringify(t)}`)
         this.typeLock.release()
       });
   }
