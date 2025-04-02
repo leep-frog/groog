@@ -505,7 +505,8 @@ var (
 			always.value:                kb("groog.record.deleteRecording"),
 			notebookEditorFocused.value: kb("notebook.cell.delete"),
 		},
-		alt(shift(delete)): {
+		// (This is [alt layer]+shift+del on QMK)
+		ctrl(shift(delete)): {
 			always.value:                kb("groog.record.deleteRecording"),
 			notebookEditorFocused.value: kb("notebook.cell.delete"),
 		},

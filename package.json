@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.61",
+  "version": "2.7.62",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -665,15 +665,6 @@
         "when": "notebookEditorFocused"
       },
       {
-        "key": "alt+shift+delete",
-        "command": "groog.record.deleteRecording"
-      },
-      {
-        "key": "alt+shift+delete",
-        "command": "notebook.cell.delete",
-        "when": "notebookEditorFocused"
-      },
-      {
         "key": "alt+shift+e",
         "command": "groog.record.playNamedRecording",
         "when": "!groog.context.recordMode"
@@ -1288,6 +1279,15 @@
             }
           ]
         }
+      },
+      {
+        "key": "ctrl+shift+delete",
+        "command": "groog.record.deleteRecording"
+      },
+      {
+        "key": "ctrl+shift+delete",
+        "command": "notebook.cell.delete",
+        "when": "notebookEditorFocused"
       },
       {
         "key": "ctrl+shift+f",
