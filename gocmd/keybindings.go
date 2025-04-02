@@ -650,7 +650,7 @@ var (
 
 		// Errors (like git ones with addition of shift modifier).
 		alt(shift("p")): {
-			notebookEditorFocused.value: kb("notebook.cell.insertCodeCellBelow"),
+			notebookEditorFocused.value: kb("notebook.cell.insertCodeCellAbove"),
 			always.value:                mc("editor.action.marker.prevInFiles", "closeMarkersNavigation"),
 		},
 		alt(shift("n")): {

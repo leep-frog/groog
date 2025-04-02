@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.63",
+  "version": "2.7.64",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -742,7 +742,7 @@
       },
       {
         "key": "alt+shift+p",
-        "command": "notebook.cell.insertCodeCellBelow",
+        "command": "notebook.cell.insertCodeCellAbove",
         "when": "notebookEditorFocused"
       },
       {
