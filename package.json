@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.62",
+  "version": "2.7.63",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -618,6 +618,10 @@
         "when": "notebookEditorFocused"
       },
       {
+        "key": "alt+q",
+        "command": "editor.action.inlineSuggest.trigger"
+      },
+      {
         "key": "alt+r",
         "command": "toggleSearchRegex",
         "when": "!groog.context.findMode && !inSearchEditor && !searchViewletFocus"
@@ -649,7 +653,18 @@
       },
       {
         "key": "alt+s",
-        "command": "groog.find.toggleSimpleMode"
+        "command": "workbench.panel.chat.view.copilot.focus",
+        "when": "!auxiliaryBarVisible"
+      },
+      {
+        "key": "alt+s",
+        "command": "-gitlens.showQuickRepoStatus",
+        "when": "!gitlens:disabled && config.gitlens.keymap == 'alternate'"
+      },
+      {
+        "key": "alt+s",
+        "command": "workbench.action.toggleAuxiliaryBar",
+        "when": "auxiliaryBarVisible"
       },
       {
         "key": "alt+shift+c",
@@ -724,6 +739,11 @@
             }
           ]
         }
+      },
+      {
+        "key": "alt+shift+p",
+        "command": "notebook.cell.insertCodeCellBelow",
+        "when": "notebookEditorFocused"
       },
       {
         "key": "alt+shift+r",
@@ -1397,6 +1417,10 @@
         "args": {
           "lines": 50
         }
+      },
+      {
+        "key": "ctrl+t",
+        "command": "-workbench.action.showAllSymbols"
       },
       {
         "key": "ctrl+t",
@@ -2133,6 +2157,11 @@
         "key": "delete",
         "command": "groog.deleteRight",
         "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode"
+      },
+      {
+        "key": "delete",
+        "command": "-notebook.cell.delete",
+        "when": "notebookEditorFocused"
       },
       {
         "key": "delete",

@@ -92,6 +92,7 @@ var (
 	findWidgetVisible       = wc("findWidgetVisible")
 	findInputFocussed       = wc("findInputFocussed")
 	inputFocus              = wc("inputFocus")
+	auxiliaryBarVisible     = wc("auxiliaryBarVisible")
 	notebookEditorFocused   = wc("notebookEditorFocused")
 	notebookMarkdownCell    = wc("notebookCellType == 'markup'")
 	notebookCodeCell        = wc("notebookCellType == 'code'")
@@ -345,7 +346,12 @@ var (
 		pagedown:         ctrlVBindings(),
 		shift(pagedown):  ctrlShiftVBindings(),
 		ctrl(shift("p")): only("groog.find.previous"),
-		alt("s"):         only("groog.find.toggleSimpleMode"),
+		alt("s"): {
+			auxiliaryBarVisible.value:                                   kb("workbench.action.toggleAuxiliaryBar"),
+			auxiliaryBarVisible.not().value:                             kb("workbench.panel.chat.view.copilot.focus"),
+			"!gitlens:disabled && config.gitlens.keymap == 'alternate'": kb("-gitlens.showQuickRepoStatus"),
+		},
+		alt("q"): only("editor.action.inlineSuggest.trigger"),
 		shift(up): {
 			groogQMK.and(groogFindMode).value: kb("groog.find.previous"),
 		},
@@ -403,6 +409,7 @@ var (
 		delete: {
 			groogBehaviorContext.value:              kb("groog.deleteRight"),
 			searchViewletFocus.and(listFocus).value: kb("search.action.remove"),
+			notebookEditorFocused.value:             kb("-notebook.cell.delete"),
 		},
 		alt("h"):       only("groog.deleteWordLeft"),
 		alt(backspace): textOnly("groog.deleteWordLeft"),
@@ -530,20 +537,23 @@ var (
 			kb("workbench.action.terminal.rename"),
 			kb("groog.cursorBottom"),
 		),
-		ctrl("t"): panelSplit(
-			mcWithArgs(
-				&KB{
-					Command: "groog.ctrlG",
-					Async:   async(true),
-				},
-				kb("termin-all-or-nothing.closePanel"),
-			),
-			mcWithArgs(
-				&KB{
-					Command: "groog.ctrlG",
-					Async:   async(true),
-				},
-				kb("termin-all-or-nothing.openPanel"),
+		ctrl("t"): merge(
+			only("-workbench.action.showAllSymbols"),
+			panelSplit(
+				mcWithArgs(
+					&KB{
+						Command: "groog.ctrlG",
+						Async:   async(true),
+					},
+					kb("termin-all-or-nothing.closePanel"),
+				),
+				mcWithArgs(
+					&KB{
+						Command: "groog.ctrlG",
+						Async:   async(true),
+					},
+					kb("termin-all-or-nothing.openPanel"),
+				),
 			),
 		),
 		// alt-t on QMK keyboard is actually ctrl+shift+t (for new tab)
@@ -639,7 +649,10 @@ var (
 		},
 
 		// Errors (like git ones with addition of shift modifier).
-		alt(shift("p")): onlyMC("editor.action.marker.prevInFiles", "closeMarkersNavigation"),
+		alt(shift("p")): {
+			notebookEditorFocused.value: kb("notebook.cell.insertCodeCellBelow"),
+			always.value:                mc("editor.action.marker.prevInFiles", "closeMarkersNavigation"),
+		},
 		alt(shift("n")): {
 			notebookEditorFocused.value: kb("notebook.cell.insertCodeCellBelow"),
 			always.value:                mc("editor.action.marker.nextInFiles", "closeMarkersNavigation"),
@@ -1045,4 +1058,14 @@ func altT() map[string]*KB {
 			kb("terminal.focus"),
 		),
 	)
+}
+
+func merge(ms ...map[string]*KB) map[string]*KB {
+	final := map[string]*KB{}
+	for _, m := range ms {
+		for k, v := range m {
+			final[k] = v
+		}
+	}
+	return final
 }
