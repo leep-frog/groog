@@ -200,7 +200,19 @@ export function getLineNumbers(editor: vscode.TextEditor) {
   }).join(",");
 }
 
+function getRelativeGitPath(editor: vscode.TextEditor): [gitRepoInfo.GitRepoInfo, string] {
+  const repoInfo = gitRepoInfo(editor.document.uri.fsPath);
+  const relativePath = path.relative(repoInfo.root, editor.document.uri.fsPath).replace(/\\/g, '/');
+  return [repoInfo, relativePath];
+}
 
+function getRelativeWorkspacePath(fileUri: vscode.Uri): string | undefined {
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(fileUri);
+  if (!workspaceFolder) {
+    return undefined; // Not inside a workspace
+  }
+  return path.relative(workspaceFolder.uri.fsPath, fileUri.fsPath).replace(/\\/g, '/');
+}
 
 async function copyFilePath(editor: vscode.TextEditor, link: boolean) {
   stubs.execFunc(`cd ${path.dirname(editor.document.uri.fsPath)} && git ls-remote --get-url`, (err: any, stdout: string, stderr: string) => {
@@ -214,8 +226,7 @@ async function copyFilePath(editor: vscode.TextEditor, link: boolean) {
     }
 
     // Get the relative path
-    const repoInfo = gitRepoInfo(editor.document.uri.fsPath);
-    const relativePath = path.relative(repoInfo.root, editor.document.uri.fsPath).replace(/\\/g, '/');
+    const [repoInfo, relativePath] = getRelativeGitPath(editor);
 
     const copyText = (!link) ? relativePath : `${remoteURL}/blob/${repoInfo.branch}/${relativePath}#${getLineNumbers(editor)}`;
 
@@ -267,6 +278,18 @@ async function copyImport(editor: vscode.TextEditor) {
       }
       vscode.window.showErrorMessage(`No import statement found!`);
       break;
+    case 'python':
+      const relativePath = getRelativeWorkspacePath(editor.document.uri);
+      if (!relativePath) {
+        vscode.window.showErrorMessage(`File is not in a VS Code workspace`);
+        // (if ever needed) use git relative path instead
+        return;
+      }
+
+      const importParts = relativePath.split("/");
+      const from = importParts.length > 1 ? `from ${importParts.slice(undefined, -1).join(".")} ` : ``;
+      const importStatement = `${from}import ${path.parse(importParts.at(-1)!).name}`;
+      return vscode.env.clipboard.writeText(importStatement);
     default:
       vscode.window.showErrorMessage(`No import copy support for language (${editor.document.languageId})`);
   }

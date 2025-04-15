@@ -7857,6 +7857,57 @@ function testCases(): TestCase[] {
         ],
       },
     },
+    // copyImport - python
+    {
+      name: "Successfully copies python import",
+      file: startingFile("blank.py"),
+      expectedText: [
+        "import blank",
+      ],
+      userInteractions: [
+        cmd("groog.copyImport"),
+        cmd("groog.paste"),
+      ],
+      expectedSelections: [selection(0, 12)],
+    },
+    {
+      name: "Successfully copies singly nested python import",
+      file: startingFile("nested", "single.py"),
+      expectedText: [
+        "from nested import single",
+      ],
+      userInteractions: [
+        cmd("groog.copyImport"),
+        cmd("groog.paste"),
+      ],
+      expectedSelections: [selection(0, 25)],
+    },
+    {
+      name: "Successfully copies doubly nested python import",
+      file: startingFile("nested", "more", "double.py"),
+      expectedText: [
+        "from nested.more import double",
+      ],
+      userInteractions: [
+        cmd("groog.copyImport"),
+        cmd("groog.paste"),
+      ],
+      expectedSelections: [selection(0, 30)],
+    },
+    {
+      name: "copyImport fails on python file outside workspace",
+      file: startingFile("..", "outside-workspace", "other.py"),
+      expectedText: [],
+      userInteractions: [
+        cmd("groog.copyImport"),
+      ],
+      errorMessage: {
+        expectedMessages: [
+          "File is not in a VS Code workspace",
+        ],
+      }
+    },
+    // copyImport - java
     {
       name: "Successfully copies import",
       file: startingFile("copy-imports", "SimplePackage.java"),
