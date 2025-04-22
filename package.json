@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.68",
+  "version": "2.7.69",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -2026,6 +2026,14 @@
         }
       },
       {
+        "key": "ctrl+z b",
+        "command": "git.blame.toggleEditorDecoration"
+      },
+      {
+        "key": "ctrl+z ctrl+b",
+        "command": "git.blame.toggleEditorDecoration"
+      },
+      {
         "key": "ctrl+z c",
         "command": "groog.copyFileLink"
       },
@@ -2092,6 +2100,14 @@
       {
         "key": "ctrl+z ctrl+k",
         "command": "groog.toggleQMK"
+      },
+      {
+        "key": "ctrl+z left",
+        "command": "git.blame.toggleEditorDecoration"
+      },
+      {
+        "key": "ctrl+z ctrl+left",
+        "command": "git.blame.toggleEditorDecoration"
       },
       {
         "key": "ctrl+z n",
