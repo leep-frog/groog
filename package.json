@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.69",
+  "version": "2.7.70",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -2027,11 +2027,11 @@
       },
       {
         "key": "ctrl+z b",
-        "command": "git.blame.toggleEditorDecoration"
+        "command": "gitlens.toggleLineBlame"
       },
       {
         "key": "ctrl+z ctrl+b",
-        "command": "git.blame.toggleEditorDecoration"
+        "command": "gitlens.toggleLineBlame"
       },
       {
         "key": "ctrl+z c",
@@ -2103,11 +2103,11 @@
       },
       {
         "key": "ctrl+z left",
-        "command": "git.blame.toggleEditorDecoration"
+        "command": "gitlens.toggleLineBlame"
       },
       {
         "key": "ctrl+z ctrl+left",
-        "command": "git.blame.toggleEditorDecoration"
+        "command": "gitlens.toggleLineBlame"
       },
       {
         "key": "ctrl+z n",

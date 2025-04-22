@@ -639,8 +639,8 @@ var (
 
 		// Git
 		alt("z"):    only("git.revertSelectedRanges"),
-		ctrlZ("b"):  only("git.blame.toggleEditorDecoration"),
-		ctrlZ(left): only("git.blame.toggleEditorDecoration"),
+		ctrlZ("b"):  only("gitlens.toggleLineBlame"),
+		ctrlZ(left): only("gitlens.toggleLineBlame"),
 		alt("p"): {
 			always.value:                kb("workbench.action.editor.previousChange"),
 			notebookEditorFocused.value: kb("notebook.focusPreviousEditor"),
