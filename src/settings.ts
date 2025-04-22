@@ -121,6 +121,7 @@ export class Settings implements Registerable {
       new GroogSetting("very-import-ant", "organizeImports", true),
       new GroogSetting("very-import-ant", "removeUnusedImports", true),
       new GroogSetting("very-import-ant", "output.enable", false),
+      new GroogSetting("ruff", "organizeImports", false),
       new GroogSetting("editor", "formatOnSave", true, {
         languageId: "python",
       }),

@@ -8331,6 +8331,9 @@ function testCases(): TestCase[] {
                   ['enable', false],
                 ])],
               ])],
+              ['ruff', new Map<string, any>([
+                ["organizeImports", false],
+              ])],
               ['python', new Map<string, any>([
                 ["analysis", new Map<string, any>([
                   ['autoIndent', false],
@@ -8507,6 +8510,9 @@ function testCases(): TestCase[] {
                 ["output", new Map<string, any>([
                   ['enable', false],
                 ])],
+              ])],
+              ['ruff', new Map<string, any>([
+                ["organizeImports", false],
               ])],
               ['python', new Map<string, any>([
                 ["analysis", new Map<string, any>([
@@ -8685,6 +8691,9 @@ function testCases(): TestCase[] {
                 ["output", new Map<string, any>([
                   ['enable', false],
                 ])],
+              ])],
+              ['ruff', new Map<string, any>([
+                ["organizeImports", false],
               ])],
               ['python', new Map<string, any>([
                 ["analysis", new Map<string, any>([
@@ -8869,6 +8878,9 @@ function testCases(): TestCase[] {
                 ["output", new Map<string, any>([
                   ['enable', false],
                 ])],
+              ])],
+              ['ruff', new Map<string, any>([
+                ["organizeImports", false],
               ])],
               ['python', new Map<string, any>([
                 ["analysis", new Map<string, any>([
