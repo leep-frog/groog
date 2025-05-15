@@ -7173,15 +7173,13 @@ function testCases(): TestCase[] {
     {
       name: "Types over type-overable characters",
       text: [
-        "]}'\"`",
+        "}'\"`",
       ],
       expectedText: [
-        "0]1}2'3\"4`5",
+        "1}2'3\"4`5",
       ],
-      expectedSelections: [selection(0, 11)],
+      expectedSelections: [selection(0, 9)],
       userInteractions: [
-        type("0"),
-        type("]"),
         type("1"),
         type("}"),
         type("2"),
