@@ -17,7 +17,6 @@ const characterFnMap: Map<string, TypedCharacterHandlerFunction> = new Map<strin
   ["{", openBracketFunction("{}")],
   ["[", openBracketFunction("[]")],
   ...typeOverFunctions(
-    "]",
     "}",
     "'",
     "\"",
