@@ -39,12 +39,14 @@ export class MarkHandler extends TypeHandler {
         return this.emacs.runHandlers(
           async (th: TypeHandler) => th.onEmacsPaste(this.yanked),
           async () => {
+            // Get whitespace prefix
             const extraWhitespace = /^\s*/.exec(this.yanked)?.at(0)!;
+
+            // Get text without leading whitespace
             const slicedText = this.yanked.slice(extraWhitespace.length);
 
+            // If only whitespace before copied text, then we want to make guesses about indentation
             const nonWhitespacePrefix = /[^\s]/.test(this.yankedPrefix);
-
-            // If only whitespace before copied text, then we want to make guesses about
             if (!nonWhitespacePrefix) {
               return this.paste(slicedText, this.yankedPrefix + extraWhitespace, this.yankedIndentation);
             }
@@ -91,7 +93,7 @@ export class MarkHandler extends TypeHandler {
       return false;
     }
 
-    // Calculate the current editor's whitespacing configuration
+    // Calculate the current editor's whitespace configuration
     const fileIndent = editor.options.insertSpaces ? ' '.repeat(editor.options.indentSize as number) : '\t';
     const fileNumSpaces = (editor.options.insertSpaces ? editor.options.indentSize : editor.options.tabSize) as number;
 
@@ -175,12 +177,17 @@ export class MarkHandler extends TypeHandler {
       return true;
     }
 
+    // For python files
+    if (firstLine.trim().endsWith(":")) {
+      return true;
+    }
+
     // If second line is a nested function, then assume an indent
     return secondLine.trim().startsWith(".");
   }
 
   private getFirstLine(indent: string, firstLineInfo: { lineText: string, whitespacePrefix: string }, secondLineInfo?: { lineText: string, whitespacePrefix: string }) {
-    // If first line already has whitespace prefix, then no inferrence needed
+    // If first line already has whitespace prefix, then no inference needed
     if (firstLineInfo.whitespacePrefix) {
       return firstLineInfo;
     }

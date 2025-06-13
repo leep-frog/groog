@@ -151,6 +151,9 @@ async function testFile(args: TestFileArgs, lastFile?: vscode.Uri) {
       vscode.window.showErrorMessage(`go testing should be routed to custom command in keybindings.go`);
       break;
     case "ts":
+    case "mjs":
+    case "js":
+    case "json": // TODO: Have methodology to track last relevant file suffix?!
       // It's possible to run launch.json configurations with `vscode.debug.startDebugging(fs, "Extension Tests");`
       // But `npm run test` currently does everything we need, but an option to keep in mind if ever needed.
       await stubs.sendTerminalCommandFunc(args, `npm run test`);

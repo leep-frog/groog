@@ -428,6 +428,38 @@ const pasteTestCases: PasteTestCase[] = [
     ],
   },
   {
+    name: "Pastes text with indent and inferred first line indent (because of ending colon with no parens)",
+    startingFile: TWO_SPACES_FILE,
+    text: ['    '],
+    selections: [selection(0, 4)],
+    clipboard: [
+      'class Thing:',
+      '  def func():',
+      '    pass',
+    ],
+    expectedText: [
+      '    class Thing:',
+      '      def func():',
+      '        pass',
+    ],
+  },
+  {
+    name: "Pastes text with indent and inferred first line indent (because of ending colon with parens)",
+    startingFile: TWO_SPACES_FILE,
+    text: ['    '],
+    selections: [selection(0, 4)],
+    clipboard: [
+      'class Thing():',
+      '  def func():',
+      '    pass',
+    ],
+    expectedText: [
+      '    class Thing():',
+      '      def func():',
+      '        pass',
+    ],
+  },
+  {
     name: "Pasted text removes existing indents regardless if spaces or tabs",
     startingFile: TWO_SPACES_FILE,
     text: ['   \t  \t '],
@@ -2341,9 +2373,9 @@ function testCases(): TestCase[] {
       selections: [selection(1, 4)],
       expectedText: [
         "  def",
-        "  ghi",
+        "    ghi",
       ],
-      expectedSelections: [selection(1, 5)],
+      expectedSelections: [selection(1, 7)],
       userInteractions: [
         cmd("groog.toggleMarkMode"),
         cmd("groog.cursorDown"),
@@ -9413,6 +9445,39 @@ function testCases(): TestCase[] {
       expectedText: [``],
       userInteractions: [
         openFile(startingFile('whitespace', 'twoSpaces.ts')),
+        cmd("groog.testFile"),
+      ],
+      wantSendTerminalCommands: [
+        [undefined, "npm run test"],
+      ],
+    },
+    {
+      name: "testFile works for javascript file",
+      expectedText: [``],
+      userInteractions: [
+        openFile(startingFile('jsfile.js')),
+        cmd("groog.testFile"),
+      ],
+      wantSendTerminalCommands: [
+        [undefined, "npm run test"],
+      ],
+    },
+    {
+      name: "testFile works for mocha file",
+      expectedText: [``],
+      userInteractions: [
+        openFile(startingFile('fakemocha.mjs')),
+        cmd("groog.testFile"),
+      ],
+      wantSendTerminalCommands: [
+        [undefined, "npm run test"],
+      ],
+    },
+    {
+      name: "testFile works for son file",
+      expectedText: [``],
+      userInteractions: [
+        openFile(startingFile('fakejson.json')),
         cmd("groog.testFile"),
       ],
       wantSendTerminalCommands: [
