@@ -52,9 +52,9 @@ class PythonSpec implements LanguageSpec {
   }
 }
 
-class JavaSpec implements LanguageSpec {
+const PACKAGE_REGEX = /^package\s+([^\s;]+)\s*;/;
 
-  PACKAGE_REGEX = /^package\s+([^\s;]+)\s*;/;
+class JavaSpec implements LanguageSpec {
 
   suffix: string = "java";
   languageId: string = "java";
@@ -67,7 +67,7 @@ class JavaSpec implements LanguageSpec {
   async copyImport(document: vscode.TextDocument): Promise<any> {
     const lines = document.getText().split('\n');
     for (const line of lines) {
-      const match = this.PACKAGE_REGEX.exec(line);
+      const match = PACKAGE_REGEX.exec(line);
       if (match) {
         const classname = path.parse(document.fileName).name;
         return vscode.env.clipboard.writeText(`import ${match[1]}.${classname};`);
