@@ -2,6 +2,7 @@ import { basename } from 'path';
 import * as vscode from 'vscode';
 import { endDocumentPosition } from './character-functions';
 import { Emacs } from './emacs';
+import { getLanguageSpec } from './language-behavior';
 import { stubs } from './stubs';
 import path = require('path');
 import gitRepoInfo = require('git-repo-info');
@@ -145,32 +146,7 @@ async function testFile(args: TestFileArgs, lastFile?: vscode.Uri) {
     return;
   }
 
-  const suffix = file.fsPath.split(".").pop();
-  switch (suffix) {
-    case "go":
-      vscode.window.showErrorMessage(`go testing should be routed to custom command in keybindings.go`);
-      break;
-    case "ts":
-    case "mjs":
-    case "js":
-    case "json": // TODO: Have methodology to track last relevant file suffix?!
-      // It's possible to run launch.json configurations with `vscode.debug.startDebugging(fs, "Extension Tests");`
-      // But `npm run test` currently does everything we need, but an option to keep in mind if ever needed.
-      await stubs.sendTerminalCommandFunc(args, `npm run test`);
-      break;
-    case "java":
-      const javaTestCommand = `zts ${path.parse(file.fsPath).name}`;
-      await stubs.sendTerminalCommandFunc(args, javaTestCommand);
-      break;
-    case "py":
-      await stubs.sendTerminalCommandFunc(args, `prt ${file.fsPath}`);
-      break;
-    default:
-      if (!args || args.part === 0) {
-        vscode.window.showErrorMessage(`Unknown file suffix: ${suffix}`);
-      }
-      break;
-  }
+  await getLanguageSpec(file).testingBehavior(args, file);
 }
 
 interface Message {
