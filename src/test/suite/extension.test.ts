@@ -429,7 +429,7 @@ const pasteTestCases: PasteTestCase[] = [
   },
   {
     name: "Pastes text with indent and inferred first line indent (because of ending colon with no parens)",
-    startingFile: TWO_SPACES_FILE,
+    startingFile: startingFile('whitespace', 'two_spaces.py'),
     text: ['    '],
     selections: [selection(0, 4)],
     clipboard: [
@@ -445,7 +445,7 @@ const pasteTestCases: PasteTestCase[] = [
   },
   {
     name: "Pastes text with indent and inferred first line indent (because of ending colon with parens)",
-    startingFile: TWO_SPACES_FILE,
+    startingFile: startingFile('whitespace', 'two_spaces.py'),
     text: ['    '],
     selections: [selection(0, 4)],
     clipboard: [
@@ -455,6 +455,27 @@ const pasteTestCases: PasteTestCase[] = [
     ],
     expectedText: [
       '    class Thing():',
+      '      def func():',
+      '        pass',
+    ],
+  },
+  {
+    name: "Doesn't infer indent if non-python file with ending colon",
+    startingFile: TWO_SPACES_FILE, // not python file
+    text: ['    '],
+    selections: [selection(0, 4)],
+    clipboard: [
+      'class Thing:',
+      '  def func():',
+      '    pass',
+    ],
+    expectedText: [
+      '    class Thing:',
+      '    def func():',
+      '      pass',
+    ],
+    expectedEmacsText: [
+      '    class Thing:',
       '      def func():',
       '        pass',
     ],
@@ -533,7 +554,7 @@ const pasteTestCases: PasteTestCase[] = [
       '  good',
       'bye',
     ],
-    // Only existing text whiespace is included (not clipboard whitespace)
+    // Only existing text whitespace is included (not clipboard whitespace)
     expectedText: [
       '\t\thello',
       '\t\t  there',
@@ -553,7 +574,7 @@ const pasteTestCases: PasteTestCase[] = [
       '  bye',
       'then',
     ],
-    // Only existing text whiespace is included (not clipboard whitespace)
+    // Only existing text whitespace is included (not clipboard whitespace)
     expectedText: [
       '\t\thello',
       '\t\tthere',
@@ -581,7 +602,7 @@ const pasteTestCases: PasteTestCase[] = [
       '  bye',
       'then',
     ],
-    // Only existing text whiespace is included (not clipboard whitespace)
+    // Only existing text whitespace is included (not clipboard whitespace)
     expectedText: [
       '\t\thello',
       '\t\tabc  there',
@@ -603,7 +624,7 @@ const pasteTestCases: PasteTestCase[] = [
       'then',
       '  fin',
     ],
-    // Only existing text whiespace is included (not clipboard whitespace)
+    // Only existing text whitespace is included (not clipboard whitespace)
     expectedText: [
       '\t\thello {',
       '\t\t  there',
@@ -634,7 +655,7 @@ const pasteTestCases: PasteTestCase[] = [
       'then',
       '\tfin',
     ],
-    // Only existing text whiespace is included (not clipboard whitespace)
+    // Only existing text whitespace is included (not clipboard whitespace)
     expectedText: [
       '\t\thello {',
       '\t\t\tthere',
@@ -665,7 +686,7 @@ const pasteTestCases: PasteTestCase[] = [
       'then',
       '  fin',
     ],
-    // Only existing text whiespace is included (not clipboard whitespace)
+    // Only existing text whitespace is included (not clipboard whitespace)
     expectedText: [
       '\t\thello (',
       '\t\t  there',
@@ -695,7 +716,7 @@ const pasteTestCases: PasteTestCase[] = [
       'then',
       '\tfin',
     ],
-    // Only existing text whiespace is included (not clipboard whitespace)
+    // Only existing text whitespace is included (not clipboard whitespace)
     expectedText: [
       '\t\thello [',
       '\t\t\tthere',
@@ -726,7 +747,7 @@ const pasteTestCases: PasteTestCase[] = [
       'then',
       '  fin',
     ],
-    // Only existing text whiespace is included (not clipboard whitespace)
+    // Only existing text whitespace is included (not clipboard whitespace)
     expectedText: [
       '\t\thello',
       '\t\t  .there()',
@@ -745,33 +766,34 @@ const pasteTestCases: PasteTestCase[] = [
     ],
   },
   {
-    name: "Pastes text, inferring tabbing prefix from second line with extra indent (due to dot)",
+    name: "Pastes text, not inferring spacing prefix with dot if not java-ish file",
+    startingFile: startingFile('whitespace', 'two_spaces.py'),
     text: ['\t\t'],
     selections: [selection(0, 2)],
     clipboard: [
       'hello',
+      '    .there()',
+      '    good',
+      '      bye',
+      'then',
+      '  fin',
+    ],
+    // Only existing text whitespace is included (not clipboard whitespace)
+    expectedText: [
+      '\t\thello',
       '\t\t.there()',
       '\t\tgood',
-      '\t\t\t\tbye',
+      '\t\t  bye',
       'then',
       '\tfin',
     ],
-    // Only existing text whiespace is included (not clipboard whitespace)
-    expectedText: [
-      '\t\thello',
-      '\t\t\t.there()',
-      '\t\t\tgood',
-      '\t\t\t\t\tbye',
-      '\tthen',
-      '\t\tfin',
-    ],
     expectedEmacsText: [
       '\t\thello',
-      '\t\t\t\t.there()',
-      '\t\t\t\tgood',
-      '\t\t\t\t\t\tbye',
+      '\t\t    .there()',
+      '\t\t    good',
+      '\t\t      bye',
       '\t\tthen',
-      '\t\t\tfin',
+      '\t\t  fin',
     ],
   },
   /* Useful for commenting out tests. */

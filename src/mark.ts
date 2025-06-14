@@ -3,6 +3,7 @@ import { ColorMode, HandlerColoring, gutterHandlerColoring } from './color_mode'
 import { Emacs } from './emacs';
 import { TypeHandler, getPrefixText } from './handler';
 import { CtrlGCommand, CursorMove, DeleteCommand } from './interfaces';
+import { guessLanguageSpec } from './language-behavior';
 import { Recorder } from './record';
 
 export class MarkHandler extends TypeHandler {
@@ -166,7 +167,7 @@ export class MarkHandler extends TypeHandler {
     }).then(() => true);
   }
 
-  private indentInferred(firstLine: string, secondLine: string) {
+  private indentInferred(firstLine: string, secondLine: string): boolean {
     // If opening more things than closing, then assume an indent
     const charMap = new Map<string, number>();
     for (const char of firstLine) {
@@ -177,13 +178,12 @@ export class MarkHandler extends TypeHandler {
       return true;
     }
 
-    // For python files
-    if (firstLine.trim().endsWith(":")) {
-      return true;
+    // Run language specific indent inference
+    const languageSpec = guessLanguageSpec();
+    if (languageSpec && languageSpec.indentInferred) {
+      return languageSpec.indentInferred(firstLine, secondLine);
     }
-
-    // If second line is a nested function, then assume an indent
-    return secondLine.trim().startsWith(".");
+    return false;
   }
 
   private getFirstLine(indent: string, firstLineInfo: { lineText: string, whitespacePrefix: string }, secondLineInfo?: { lineText: string, whitespacePrefix: string }) {

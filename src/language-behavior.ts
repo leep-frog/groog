@@ -9,7 +9,7 @@ export interface LanguageSpec {
   languageId: string;
   testingBehavior(args: TestFileArgs, file: vscode.Uri): Promise<any>;
   copyImport?: (document: vscode.TextDocument) => Promise<any>;
-  // TODO: inferred indent
+  indentInferred?: (firstLine: string, secondLine: string) => boolean;
 }
 
 class GoSpec implements LanguageSpec {
@@ -50,14 +50,25 @@ class PythonSpec implements LanguageSpec {
     const importStatement = `${from}import ${path.parse(importParts.at(-1)!).name}`;
     return vscode.env.clipboard.writeText(importStatement);
   }
+
+  indentInferred(firstLine: string, secondLine: string): boolean {
+    return firstLine.trim().endsWith(":");
+  }
 }
 
 const PACKAGE_REGEX = /^package\s+([^\s;]+)\s*;/;
+
+function javaIndentInferred(firstLine: string, secondLine: string): boolean {
+  // If second line is a nested function, then assume an indent
+  return secondLine.trim().startsWith(".");
+}
 
 class JavaSpec implements LanguageSpec {
 
   suffix: string = "java";
   languageId: string = "java";
+
+  indentInferred = javaIndentInferred;
 
   async testingBehavior(args: TestFileArgs, file: vscode.Uri): Promise<void> {
     const javaTestCommand = `zts ${path.parse(file.fsPath).name}`;
@@ -75,11 +86,15 @@ class JavaSpec implements LanguageSpec {
     }
     vscode.window.showErrorMessage(`No import statement found!`);
   }
+
+
 }
 
 class TypescriptSpec implements LanguageSpec {
   suffix: string = "ts";
   languageId: string = "typescript";
+
+  indentInferred = javaIndentInferred;
 
   async testingBehavior(args: TestFileArgs, file: vscode.Uri): Promise<void> {
     // It's possible to run launch.json configurations with `vscode.debug.startDebugging(fs, "Extension Tests");`
@@ -91,9 +106,11 @@ class TypescriptSpec implements LanguageSpec {
 class JavascriptSpec extends TypescriptSpec {
   suffix: string = "js";
   languageId: string = "javascript";
+
+  indentInferred = javaIndentInferred;
 }
 
-class MochaSpec extends TypescriptSpec {
+class MochaSpec extends JavascriptSpec {
   suffix: string = "mjs";
   languageId: string = "mocha-javascript?";
 }
@@ -148,4 +165,11 @@ export function getLanguageSpec(input: vscode.TextDocument | vscode.Uri): Langua
 
   // Otherwise, is a TextDocument
   return LANGUAGE_ID_TO_SPEC.get(input.languageId) || new UnknownSpec(input.languageId);
+}
+
+export function guessLanguageSpec(): LanguageSpec | undefined {
+  const document = vscode.window.activeTextEditor?.document;
+  if (document) {
+    return getLanguageSpec(document);
+  }
 }
