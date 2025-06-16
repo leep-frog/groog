@@ -50,6 +50,7 @@ interface PasteTestCase {
   text?: string[];
   expectedText?: string[];
   expectedEmacsText?: string[];
+  expectedEmacsNoWhitespaceText?: string[];
 }
 
 const TABS_FILE = startingFile('whitespace', 'tabs.go');
@@ -65,11 +66,13 @@ const pasteTestCases: PasteTestCase[] = [
     expectedText: ['hello there'],
   },
   {
-    name: "Pastes text and trims prefix",
+    name: "Pastes text and does not trim prefix",
     text: [],
     clipboard: [' \t hello there  '],
-    expectedText: ['hello there  '],
+    expectedText: [' \t hello there  '],
+    expectedEmacsNoWhitespaceText: ['hello there  '],
   },
+  // TODO: tests that copy and paste whitespace only
   {
     name: "Pastes indented blob of text",
     text: ['\t\t'],
@@ -135,22 +138,30 @@ const pasteTestCases: PasteTestCase[] = [
       '  fin',
     ],
     expectedText: [
-      '\t\thello',
-      '\t\tthere',
-      '\t\t\tgeneral',
-      '\t\t\t\tken',
-      '\tobi',
-      '\t\tfin',
+      '\t\t\thello',
+      '\t\t\tthere',
+      '\t\t\t\tgeneral',
+      '\t\t\t\t\tken',
+      '\t\tobi',
+      '\t\t\tfin',
     ],
     // This isn't indented because the yanking logic is looking for tab prefixes,
     // but the clipboard pastes space indents.
     expectedEmacsText: [
-      '\t\thello',
-      '\t\tthere',
-      '\t\tgeneral',
-      '\t\tken',
+      '\t\t  hello',
+      '\t\t  there',
+      '\t\t    general',
+      '\t\t      ken',
       '\t\tobi',
-      '\t\tfin',
+      '\t\t  fin',
+    ],
+    expectedEmacsNoWhitespaceText: [
+      '\t\thello',
+      '\t\t  there',
+      '\t\t    general',
+      '\t\t      ken',
+      '\t\tobi',
+      '\t\t  fin',
     ],
   },
   {
@@ -167,6 +178,14 @@ const pasteTestCases: PasteTestCase[] = [
       '\tfin',
     ],
     expectedText: [
+      '\t\t\thello',
+      '\t\t\tthere',
+      '\t\t\t\tgeneral',
+      '\t\t\t\t\tken',
+      '\t\tobi',
+      '\t\t\tfin',
+    ],
+    expectedEmacsNoWhitespaceText: [
       '\t\thello',
       '\t\tthere',
       '\t\t\tgeneral',
@@ -189,6 +208,14 @@ const pasteTestCases: PasteTestCase[] = [
       '  fin',
     ],
     expectedText: [
+      '\t\t  hello',
+      '\t\t  there',
+      '\t\t    general',
+      '\t\t      ken',
+      '\t\tobi',
+      '\t\t  fin',
+    ],
+    expectedEmacsNoWhitespaceText: [
       '\t\thello',
       '\t\tthere',
       '\t\t  general',
@@ -211,22 +238,30 @@ const pasteTestCases: PasteTestCase[] = [
       '  fin',
     ],
     expectedText: [
-      '\t\thello',
-      '\t\tthere',
-      '\t\t    general',
-      '\t\t        ken',
-      '\tobi',
-      '\t\tfin',
+      '\t\t    hello',
+      '\t\t    there',
+      '\t\t        general',
+      '\t\t            ken',
+      '\t\tobi',
+      '\t\t    fin',
     ],
     // This isn't indented because the yanking logic is looking for tab prefixes,
     // but the clipboard pastes space indents.
     expectedEmacsText: [
-      '\t\thello',
-      '\t\tthere',
+      '\t\t  hello',
+      '\t\t  there',
       '\t\t    general',
-      '\t\t    ken',
+      '\t\t      ken',
       '\t\tobi',
-      '\t\tfin',
+      '\t\t  fin',
+    ],
+    expectedEmacsNoWhitespaceText: [
+      '\t\thello',
+      '\t\t  there',
+      '\t\t    general',
+      '\t\t      ken',
+      '\t\tobi',
+      '\t\t  fin',
     ],
   },
   {
@@ -243,6 +278,14 @@ const pasteTestCases: PasteTestCase[] = [
       '    fin',
     ],
     expectedText: [
+      '\t\t    hello',
+      '\t\t    there',
+      '\t\t        general',
+      '\t\t            ken',
+      '\t\tobi',
+      '\t\t    fin',
+    ],
+    expectedEmacsNoWhitespaceText: [
       '\t\thello',
       '\t\tthere',
       '\t\t    general',
@@ -265,22 +308,30 @@ const pasteTestCases: PasteTestCase[] = [
       '    fin',
     ],
     expectedText: [
-      '\t\thello',
-      '\t\tthere',
-      '\t\t\tgeneral',
-      '\t\t\t\tken',
-      '\tobi',
-      '\t\tfin',
+      '\t\t\thello',
+      '\t\t\tthere',
+      '\t\t\t\tgeneral',
+      '\t\t\t\t\tken',
+      '\t\tobi',
+      '\t\t\tfin',
     ],
     // This isn't indented because the yanking logic is looking for tab prefixes,
     // but the clipboard pastes space indents.
     expectedEmacsText: [
-      '\t\thello',
-      '\t\tthere',
-      '\t\tgeneral',
-      '\t\tken',
+      '\t\t    hello',
+      '\t\t    there',
+      '\t\t        general',
+      '\t\t            ken',
       '\t\tobi',
-      '\t\tfin',
+      '\t\t    fin',
+    ],
+    expectedEmacsNoWhitespaceText: [
+      '\t\thello',
+      '\t\t    there',
+      '\t\t        general',
+      '\t\t            ken',
+      '\t\tobi',
+      '\t\t    fin',
     ],
   },
   {
@@ -297,6 +348,14 @@ const pasteTestCases: PasteTestCase[] = [
       '    fin',
     ],
     expectedText: [
+      '\t\t    hello',
+      '\t\t    there',
+      '\t\t        general',
+      '\t\t            ken',
+      '\t\tobi',
+      '\t\t    fin',
+    ],
+    expectedEmacsNoWhitespaceText: [
       '\t\thello',
       '\t\tthere',
       '\t\t    general',
@@ -317,12 +376,62 @@ const pasteTestCases: PasteTestCase[] = [
       'kenobi',
       '  fin',
     ],
+    // For vanilla copy, assumes that whitespace prefix wasn't copied
     expectedText: [
       '    hello {',
       '      there',
       '        general',
       '    kenobi',
       '      fin',
+    ],
+  },
+  {
+    name: "Pastes text with indent and inferred first line indent when preceding text",
+    startingFile: TWO_SPACES_FILE,
+    text: ['    X'],
+    selections: [selection(0, 4)],
+    clipboard: [
+      'hello {',
+      '  there',
+      '    general',
+      'kenobi',
+      '  fin',
+    ],
+    // For vanilla copy, assumes that whitespace prefix wasn't copied
+    expectedText: [
+      '    Xhello {',
+      '      there',
+      '        general',
+      '    kenobi',
+      '      fin',
+    ],
+  },
+  {
+    name: "Pastes text with indent and inferred first line indent when preceding text and whitespace prefix in first line",
+    startingFile: TWO_SPACES_FILE,
+    text: ['    X'],
+    selections: [selection(0, 4)],
+    clipboard: [
+      '  hello',
+      '  there',
+      '    general',
+      'kenobi',
+      '  fin',
+    ],
+    // For vanilla copy, assumes that whitespace prefix wasn't copied
+    expectedText: [
+      '    X  hello',
+      '      there',
+      '        general',
+      '    kenobi',
+      '      fin',
+    ],
+    expectedEmacsNoWhitespaceText: [
+      '    Xhello',
+      '    there',
+      '      general',
+      '  kenobi',
+      '    fin',
     ],
   },
   {
@@ -372,6 +481,7 @@ const pasteTestCases: PasteTestCase[] = [
       '    fin',
     ],
     expectedText: [
+      // Converted to four-space indents for file
       '        hello',
       '            .there',
       '                general',
@@ -383,10 +493,10 @@ const pasteTestCases: PasteTestCase[] = [
     // yank knows the actual prefix, so no inference is done (and just use floor(spaces/4))
     expectedEmacsText: [
       '        hello',
-      '            .there',
+      '              .there',
       '                general',
       '            ken',
-      '        o',
+      '          o',
       '        bi',
       '            fin',
     ],
@@ -483,7 +593,7 @@ const pasteTestCases: PasteTestCase[] = [
   {
     name: "Pasted text removes existing indents regardless if spaces or tabs",
     startingFile: TWO_SPACES_FILE,
-    text: ['   \t  \t '],
+    text: ['   \t  \t  '],
     selections: [selection(0, 8)],
     clipboard: [
       'hello',
@@ -498,50 +608,71 @@ const pasteTestCases: PasteTestCase[] = [
       'c',
     ],
     expectedText: [
-      '   \t  \t hello',
-      '   \t  \t there',
-      '   \t  \t   general',
+      '   \t  \t  hello',
+      '   \t  \t  there',
+      '   \t  \t    general',
       '   \t  \tken',
       '   \t  o',
       '   \tb',
       '   i',
       ' a',
-      'b',
-      'c',
+      ' b',
+      ' c',
     ],
     expectedEmacsText: [
-      '   \t  \t hello',
-      '   \t  \t               there',
-      '   \t  \t                 general',
-      '   \t  \t             ken',
-      '   \t  \t           o',
-      '   \t  \t         b',
-      '   \t  \t       i',
-      '   \t  \t     a',
-      '   \t  \t b',
-      '   \t  \t c',
+      '   \t  \t  hello',
+      '   \t  \t                there',
+      '   \t  \t                  general',
+      '   \t  \t              ken',
+      '   \t  \t            o',
+      '   \t  \t          b',
+      '   \t  \t        i',
+      '   \t  \t      a',
+      '   \t  \t  b',
+      '   \t  \t  c',
     ],
   },
   {
-    name: "Pastes text and uses existing whitespace prefix",
+    name: "Pastes text and converts existing whitespace prefix to tabulated if prefix is indent-ish",
     text: ['\t\t'],
     selections: [selection(0, 2)],
     clipboard: ['  hello there  '],
-    expectedText: ['\t\thello there  '],
+    expectedText: ['\t\t\thello there  '],
+    expectedEmacsText: ['\t\t  hello there  '],
+    expectedEmacsNoWhitespaceText: ['\t\thello there  '],
+  },
+  {
+    name: "Pastes text and does not convert existing whitespace prefix to tabulated if prefix is not indent-ish",
+    text: ['\t\t'],
+    selections: [selection(0, 2)],
+    clipboard: [' hello there  '],
+    expectedText: ['\t\t hello there  '],
+    expectedEmacsText: ['\t\t hello there  '],
+    expectedEmacsNoWhitespaceText: ['\t\thello there  '],
+  },
+  {
+    name: "Does not convert whitespace prefix for first line if text is between",
+    text: ['\t\tX'],
+    selections: [selection(0, 2)], // TODO: WAIT WHAT?! Seems like this isn't doing what it's supposed to; otherwise, X would be after pasted text
+    clipboard: ['  hello there  '],
+    expectedText: ['\t\tX  hello there  '],
+    expectedEmacsNoWhitespaceText: ['\t\tXhello there  '],
   },
   {
     name: "Pastes trimmed text if existing prefix doesn't have whitespace at beginning",
     text: ['Z\t\t'],
     selections: [selection(0, 3)],
     clipboard: ['  hello there  '],
-    expectedText: ['Z\t\thello there  '],
+    expectedText: ['Z\t\t  hello there  '],
+    expectedEmacsNoWhitespaceText: ['Z\t\thello there  '],
   },
   {
     name: "Pastes trimmed text if existing prefix doesn't have whitespace at end",
     text: ['\t\tZ'],
     selections: [selection(0, 3)],
     clipboard: ['  hello there  '],
-    expectedText: ['\t\tZhello there  '],
+    expectedText: ['\t\tZ  hello there  '],
+    expectedEmacsNoWhitespaceText: ['\t\tZhello there  '],
   },
   {
     name: "Pastes text with indented lines replaced",
@@ -556,6 +687,18 @@ const pasteTestCases: PasteTestCase[] = [
     ],
     // Only existing text whitespace is included (not clipboard whitespace)
     expectedText: [
+      '\t\thello',
+      '\t\t  there',
+      '\t\tgood',
+      '\tbye',
+    ],
+    expectedEmacsText: [
+      '\t\t  hello',
+      '\t\t    there',
+      '\t\t  good',
+      '\t\tbye',
+    ],
+    expectedEmacsNoWhitespaceText: [
       '\t\thello',
       '\t\t  there',
       '\t\tgood',
@@ -819,46 +962,6 @@ export function getPasteTestCases(): TestCase[] {
       };
     }),
 
-    // Test cases where entire text with no whitespace prefix is yanked and groog.emacsPaste
-    ...pasteTestCases.map(tc => {
-
-      // If we use \n, then vs code does clever indentation for us which we don't want.
-      // Using \r does the trick (and actually just inserts a newline character.
-      const clipText = tc.clipboard?.join('\r') || '';
-
-      const clipWhitespace = /^\s*/.exec(clipText)?.at(0)!;
-      const clipMainText = clipText.slice(clipWhitespace.length);
-
-      return {
-        ...tc,
-        name: `[emacs paste no whitespace] ${tc.name}`,
-        file: tc.startingFile || TABS_FILE,
-        expectedText: tc.expectedEmacsText || tc.expectedText,
-        userInteractions: [
-          // Yank only the main text
-          defaultType(clipMainText),
-          cmd("groog.cursorTop"),
-          defaultType(clipWhitespace),
-          cmd("groog.toggleMarkMode"),
-          cmd("groog.cursorBottom"),
-          cmd("groog.yank"),
-
-          // Clear all text
-          cmd("groog.toggleMarkMode"),
-          cmd("groog.cursorTop"),
-          cmd("groog.deleteLeft"),
-
-          // Type the actual starting text
-          defaultType(tc.text?.join('\r') || ''),
-          cmd("groog.emacsPaste"),
-
-          // Put the cursor at the top cuz we don't care about testing that here
-          cmd("groog.cursorTop"),
-        ],
-        expectedSelections: [selection(0, 0)],
-      };
-    }),
-
     // Test cases where entire text with whitespace prefix is yanked and groog.emacsPaste
     ...pasteTestCases.map(tc => {
       return {
@@ -873,6 +976,46 @@ export function getPasteTestCases(): TestCase[] {
           cmd("groog.toggleMarkMode"),
           cmd("groog.cursorBottom"),
           cmd("groog.yank"),
+
+          // Type the actual starting text
+          defaultType(tc.text?.join('\r') || ''),
+          cmd("groog.emacsPaste"),
+
+          // Put the cursor at the top cuz we don't care about testing that here
+          cmd("groog.cursorTop"),
+        ],
+        expectedSelections: [selection(0, 0)],
+      };
+    }),
+
+    // Test cases where entire text with no whitespace prefix is yanked and groog.emacsPaste
+    ...pasteTestCases.map(tc => {
+
+      // If we use \n, then vs code does clever indentation for us which we don't want.
+      // Using \r does the trick (and actually just inserts a newline character.
+      const clipText = tc.clipboard?.join('\r') || '';
+
+      const clipWhitespace = /^\s*/.exec(clipText)?.at(0)!;
+      const clipMainText = clipText.slice(clipWhitespace.length);
+
+      return {
+        ...tc,
+        name: `[emacs paste no whitespace] ${tc.name}`,
+        file: tc.startingFile || TABS_FILE,
+        expectedText: tc.expectedEmacsNoWhitespaceText || tc.expectedEmacsText || tc.expectedText,
+        userInteractions: [
+          // Yank only the main text
+          defaultType(clipMainText),
+          cmd("groog.cursorTop"),
+          defaultType(clipWhitespace),
+          cmd("groog.toggleMarkMode"),
+          cmd("groog.cursorBottom"),
+          cmd("groog.yank"),
+
+          // Clear all text
+          cmd("groog.toggleMarkMode"),
+          cmd("groog.cursorTop"),
+          cmd("groog.deleteLeft"),
 
           // Type the actual starting text
           defaultType(tc.text?.join('\r') || ''),
@@ -995,6 +1138,37 @@ export function getPasteTestCases(): TestCase[] {
         cmd("groog.cursorTop"),
       ],
     },
+    {
+      name: "Emacs paste uses preceding whitespace on line (when two indents)",
+      file: TWO_SPACES_FILE,
+      expectedText: [
+        '    def',
+        'ghi',
+      ],
+      userInteractions: [
+        type([
+          '    abc  def',
+          '  ghi',
+        ].join('\r')),
+        cmd("groog.toggleMarkMode"),
+        cmd("groog.cursorUp"),
+        cmd("groog.cursorEnd"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.yank"),
+        cmd('editor.action.selectAll'),
+        cmd('groog.deleteLeft'),
+        defaultType('  '),
+        cmd("groog.cursorEnd"),
+        cmd("groog.emacsPaste"),
+
+        // Put the cursor at the top cuz we don't care about testing that here
+        cmd("groog.cursorTop"),
+      ],
+    },
   ];
 }
 
@@ -1041,7 +1215,7 @@ function convertTestMatches(pattern: RegExp | undefined, testMatches: TestMatch[
   });
 }
 
-// Need to use this due to pickable being in FindQuickPickItem, but not vscode.QuickPickItem.
+// Need to use this due to pick-able being in FindQuickPickItem, but not vscode.QuickPickItem.
 function findItem(f: FindQuickPickItem): FindQuickPickItem {
   return f;
 }

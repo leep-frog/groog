@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import { ColorMode, HandlerColoring, gutterHandlerColoring } from './color_mode';
+import { Copier } from './copier';
 import { Emacs } from './emacs';
-import { TypeHandler, getPrefixText } from './handler';
+import { TypeHandler } from './handler';
 import { CtrlGCommand, CursorMove, DeleteCommand } from './interfaces';
-import { guessLanguageSpec } from './language-behavior';
 import { Recorder } from './record';
 
 export class MarkHandler extends TypeHandler {
@@ -40,21 +40,8 @@ export class MarkHandler extends TypeHandler {
         return this.emacs.runHandlers(
           async (th: TypeHandler) => th.onEmacsPaste(this.yanked),
           async () => {
-            // Get whitespace prefix
-            const extraWhitespace = /^\s*/.exec(this.yanked)?.at(0)!;
-
-            // Get text without leading whitespace
-            const slicedText = this.yanked.slice(extraWhitespace.length);
-
-            // If only whitespace before copied text, then we want to make guesses about indentation
-            const nonWhitespacePrefix = /[^\s]/.test(this.yankedPrefix);
-            if (!nonWhitespacePrefix) {
-              return this.paste(slicedText, this.yankedPrefix + extraWhitespace, this.yankedIndentation);
-            }
-
-            // Otherwise, we want to use all of the copied text, and the prefix
-            // is just the leading whitespace
-            return this.paste(this.yanked, /^\s*/.exec(this.yankedPrefix)?.at(0)!, this.yankedIndentation);
+            const prefixHasNonWhitespace = /[^\s]/.test(this.yankedPrefix);
+            return this.applyPaste(this.yanked, this.yankedIndentation, /^\s*/.exec(this.yankedPrefix)?.at(0)!, prefixHasNonWhitespace);
           },
         );
       });
@@ -66,158 +53,20 @@ export class MarkHandler extends TypeHandler {
         // Use runHandlers to check if other handlers should handle the pasting isntead.
         return this.emacs.runHandlers(
           async (th: TypeHandler) => th.onPaste(text),
-          async () => this.paste(text).then(pasted => pasted ? false : vscode.commands.executeCommand("editor.action.clipboardPasteAction")),
+          async () => this.applyPaste(text).then(pasted => pasted ? false : vscode.commands.executeCommand("editor.action.clipboardPasteAction")),
         );
       });
     });
   }
 
-  private lineParts(line: string) {
-    const partsRegex = /^(\s*)(.*)$/;
-
-    // For some reason copying sometimes adds an \r character and pasting that
-    // causes an issue in the above regex (removing the '$' works for some
-    // reason, but so does removing \r characters and would rather this solution
-    // so we don't paste \r in windows copying contexts).
-    const match = partsRegex.exec(line.replace(/\r/g, ''))!;
-    const whitespacePrefix = match.at(1)!;
-    const lineText = match.at(2)!;
-    return {
-      whitespacePrefix,
-      lineText,
-    };
-  }
-
-  async paste(text: string, firstLinePrefix?: string, pasteIndent?: string): Promise<boolean> {
+  async applyPaste(text: string, fromIndentation?: string, fixedFirstLineIndentation?: string, firstLinePrefixHasText?: boolean) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       return false;
     }
 
-    // Calculate the current editor's whitespace configuration
-    const fileIndent = editor.options.insertSpaces ? ' '.repeat(editor.options.indentSize as number) : '\t';
-    const fileNumSpaces = (editor.options.insertSpaces ? editor.options.indentSize : editor.options.tabSize) as number;
-
-    // Convert the paste lines into lineParts objects
-    const rawLineInfo = text.split('\n').map(this.lineParts);
-
-    // Infer what the indentation used by the paste is.
-    const lineInfosWithWhitespace = rawLineInfo.filter(a => a.whitespacePrefix);
-
-    if (pasteIndent !== undefined) {
-      // Use provided value if given
-    } else if (lineInfosWithWhitespace.length === 0) {
-      // Doesn't matter if none of the lines are indented
-      pasteIndent = '';
-    } else if (lineInfosWithWhitespace.some(a => a.whitespacePrefix.includes('\t'))) {
-      // If any tabs, then assume tabs
-      pasteIndent = '\t';
-    } else if (lineInfosWithWhitespace.map(a => whitespaceSubstringCount(a.whitespacePrefix, ' ')).some(spaceCount => spaceCount % 4 === 2)) {
-      // Otherwise, determine if two spaces or four
-      pasteIndent = '  ';
-    } else {
-      pasteIndent = '    ';
-    }
-
-    // TODO: Can this method just update reference instead of setting?
-    // Infer the whitespace prefix of the first line
-    rawLineInfo[0] = firstLinePrefix === undefined ? this.getFirstLine(pasteIndent, rawLineInfo[0], rawLineInfo[1]) : { lineText: rawLineInfo[0].lineText, whitespacePrefix: firstLinePrefix };
-    const pasteBaseIndents = whitespaceSubstringCount(rawLineInfo[0].whitespacePrefix, pasteIndent);
-
-    // Make the document edits
-    return editor.edit(editBuilder => {
-
-      // Iterate over all selections
-      for (const sel of editor.selections) {
-
-        // Get all text in the line behind start of current selection cursor
-        const linePrefix = getPrefixText(editor, new vscode.Range(sel.start, sel.end));
-
-        const curPrefix = /^\s*/.exec(linePrefix)?.at(0)!;
-
-        // Generate the single replacement string from the list of paste line infos.
-        const replacement = rawLineInfo.map((lineInfo, idx) => {
-          const lineIndentCount = whitespaceSubstringCount(lineInfo.whitespacePrefix, pasteIndent!);
-          let newIndentCount = lineIndentCount - pasteBaseIndents;
-
-          // If relevant (newIndentCount is negative), then remove
-          let endIndex = curPrefix.length;
-          for (; newIndentCount < 0; newIndentCount++) {
-            if (curPrefix.at(endIndex - 1) === '\t') {
-              endIndex--;
-            } else {
-              // Otherwise, remove up to the number of spaces
-              for (let j = 0; j < fileNumSpaces && curPrefix.at(endIndex - 1) === ' '; j++) {
-                endIndex--;
-              }
-            }
-          }
-
-          // Construct the final replacement string
-          //     (removed indents if negative indentation detected)     + (   additional indents to add   ) + (remaining text)
-          //     (  This is not needed for first, since curPrefix is
-          //     (  always on first line and will never be negative)
-          return (idx ? curPrefix.slice(0, Math.max(0, endIndex)) : '') + fileIndent.repeat(newIndentCount) + lineInfo.lineText;
-        }).join('\n');
-
-        // Update the document
-        editBuilder.delete(sel);
-        editBuilder.insert(sel.start, replacement);
-      }
-    }).then(() => true);
-  }
-
-  private indentInferred(firstLine: string, secondLine: string): boolean {
-    // If opening more things than closing, then assume an indent
-    const charMap = new Map<string, number>();
-    for (const char of firstLine) {
-      charMap.set(char, (charMap.get(char) || 0) + 1);
-    }
-
-    if (((charMap.get("(") || 0) > (charMap.get(")") || 0)) || ((charMap.get("{") || 0) > (charMap.get("}") || 0)) || ((charMap.get("[") || 0) > (charMap.get("]") || 0))) {
-      return true;
-    }
-
-    // Run language specific indent inference
-    const languageSpec = guessLanguageSpec();
-    if (languageSpec && languageSpec.indentInferred) {
-      return languageSpec.indentInferred(firstLine, secondLine);
-    }
-    return false;
-  }
-
-  private getFirstLine(indent: string, firstLineInfo: { lineText: string, whitespacePrefix: string }, secondLineInfo?: { lineText: string, whitespacePrefix: string }) {
-    // If first line already has whitespace prefix, then no inference needed
-    if (firstLineInfo.whitespacePrefix) {
-      return firstLineInfo;
-    }
-
-    // Otherwise, try to infer from the second line
-    if (!secondLineInfo) {
-      return firstLineInfo;
-    }
-
-    // If the second line has no whitespace prefix, then indented the same as the first line
-    if (!secondLineInfo.whitespacePrefix) {
-      return firstLineInfo;
-    }
-
-    // If not, then try to infer the indentation of the first line from the indentation of the second line
-
-    // If we expect the second line to be extra indented, however, we need to adjust
-    if (this.indentInferred(firstLineInfo.lineText, secondLineInfo.lineText)) {
-      // Assume the first line is indented one less than the second line, in which case we should remove an indent (i.e. tab or set of spaces)
-      return {
-        lineText: firstLineInfo.lineText,
-        whitespacePrefix: secondLineInfo.whitespacePrefix.replace(indent, ''),
-      };
-    }
-
-    // Otherwise, second line is indented the same as the first line, so just use that
-    return {
-      lineText: firstLineInfo.lineText,
-      whitespacePrefix: secondLineInfo.whitespacePrefix,
-    };
+    const copier = new Copier(text, fromIndentation, fixedFirstLineIndentation, firstLinePrefixHasText);
+    return copier.apply(editor);
   }
 
   async handleActivation() {
@@ -289,15 +138,4 @@ export class MarkHandler extends TypeHandler {
   }
 
   async testReset() { }
-}
-
-function whitespaceSubstringCount(str: string, ws: string): number {
-  if (!str || !ws) {
-    return 0;
-  }
-
-  // This is sometimes zero if we ultimately run ` ''.split('') `
-  // hence why we use regex instead
-  const r = new RegExp(ws, 'g');
-  return str.match(r)?.length || 0;
 }
