@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.72",
+  "version": "2.7.73",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -328,7 +328,7 @@
       {
         "key": "'",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "'"
         }
@@ -336,7 +336,7 @@
       {
         "key": ",",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": ","
         }
@@ -344,7 +344,7 @@
       {
         "key": "-",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "-"
         }
@@ -352,7 +352,7 @@
       {
         "key": ".",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "."
         }
@@ -360,7 +360,7 @@
       {
         "key": "/",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "/"
         }
@@ -368,7 +368,7 @@
       {
         "key": "0",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "0"
         }
@@ -376,7 +376,7 @@
       {
         "key": "1",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "1"
         }
@@ -384,7 +384,7 @@
       {
         "key": "2",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "2"
         }
@@ -392,7 +392,7 @@
       {
         "key": "3",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "3"
         }
@@ -400,7 +400,7 @@
       {
         "key": "4",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "4"
         }
@@ -408,7 +408,7 @@
       {
         "key": "5",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "5"
         }
@@ -416,7 +416,7 @@
       {
         "key": "6",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "6"
         }
@@ -424,7 +424,7 @@
       {
         "key": "7",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "7"
         }
@@ -432,7 +432,7 @@
       {
         "key": "8",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "8"
         }
@@ -440,7 +440,7 @@
       {
         "key": "9",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "9"
         }
@@ -448,7 +448,7 @@
       {
         "key": ";",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": ";"
         }
@@ -456,7 +456,7 @@
       {
         "key": "=",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "="
         }
@@ -464,7 +464,7 @@
       {
         "key": "[",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "["
         }
@@ -472,7 +472,7 @@
       {
         "key": "\\",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "\\"
         }
@@ -480,7 +480,7 @@
       {
         "key": "]",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "]"
         }
@@ -488,7 +488,7 @@
       {
         "key": "`",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "`"
         }
@@ -496,7 +496,7 @@
       {
         "key": "a",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "a"
         }
@@ -508,7 +508,7 @@
       {
         "key": "alt+backspace",
         "command": "groog.deleteWordLeft",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode"
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode"
       },
       {
         "key": "alt+c",
@@ -537,7 +537,7 @@
       {
         "key": "alt+delete",
         "command": "groog.deleteWordRight",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode"
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode"
       },
       {
         "key": "alt+e",
@@ -834,7 +834,7 @@
       {
         "key": "b",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "b"
         }
@@ -842,7 +842,7 @@
       {
         "key": "backspace",
         "command": "groog.deleteLeft",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode"
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode"
       },
       {
         "key": "backspace",
@@ -852,7 +852,7 @@
       {
         "key": "c",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "c"
         }
@@ -935,12 +935,12 @@
       {
         "key": "ctrl+backspace",
         "command": "groog.deleteWordLeft",
-        "when": "editorTextFocus"
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode"
       },
       {
         "key": "ctrl+backspace",
         "command": "workbench.action.terminal.sendSequence",
-        "when": "groog.context.qmkMode && panelFocus",
+        "when": "groog.context.qmkMode && terminalFocus",
         "args": {
           "text": "\u0018\b"
         }
@@ -958,7 +958,7 @@
       {
         "key": "ctrl+delete",
         "command": "groog.deleteWordRight",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode"
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode"
       },
       {
         "key": "ctrl+e",
@@ -1114,7 +1114,7 @@
       {
         "key": "ctrl+left",
         "command": "groog.cursorWordLeft",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode"
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode"
       },
       {
         "key": "ctrl+m",
@@ -1255,7 +1255,7 @@
       {
         "key": "ctrl+right",
         "command": "groog.cursorWordRight",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode"
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode"
       },
       {
         "key": "ctrl+s",
@@ -2164,7 +2164,7 @@
       {
         "key": "d",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "d"
         }
@@ -2172,7 +2172,7 @@
       {
         "key": "delete",
         "command": "groog.deleteRight",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode"
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode"
       },
       {
         "key": "delete",
@@ -2221,7 +2221,7 @@
       {
         "key": "e",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "e"
         }
@@ -2229,7 +2229,7 @@
       {
         "key": "end",
         "command": "groog.cursorEnd",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode"
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode"
       },
       {
         "key": "enter",
@@ -2262,7 +2262,7 @@
       {
         "key": "f",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "f"
         }
@@ -2270,7 +2270,7 @@
       {
         "key": "g",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "g"
         }
@@ -2278,7 +2278,7 @@
       {
         "key": "h",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "h"
         }
@@ -2286,12 +2286,12 @@
       {
         "key": "home",
         "command": "groog.cursorHome",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode"
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode"
       },
       {
         "key": "i",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "i"
         }
@@ -2299,7 +2299,7 @@
       {
         "key": "j",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "j"
         }
@@ -2307,7 +2307,7 @@
       {
         "key": "k",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "k"
         }
@@ -2315,7 +2315,7 @@
       {
         "key": "l",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "l"
         }
@@ -2328,7 +2328,7 @@
       {
         "key": "m",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "m"
         }
@@ -2336,7 +2336,7 @@
       {
         "key": "n",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "n"
         }
@@ -2344,7 +2344,7 @@
       {
         "key": "o",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "o"
         }
@@ -2352,7 +2352,7 @@
       {
         "key": "p",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "p"
         }
@@ -2434,7 +2434,7 @@
       {
         "key": "q",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "q"
         }
@@ -2442,7 +2442,7 @@
       {
         "key": "r",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "r"
         }
@@ -2455,7 +2455,7 @@
       {
         "key": "s",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "s"
         }
@@ -2463,7 +2463,7 @@
       {
         "key": "shift+'",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "\""
         }
@@ -2471,7 +2471,7 @@
       {
         "key": "shift+,",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "<"
         }
@@ -2479,7 +2479,7 @@
       {
         "key": "shift+-",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "_"
         }
@@ -2487,7 +2487,7 @@
       {
         "key": "shift+.",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": ">"
         }
@@ -2495,7 +2495,7 @@
       {
         "key": "shift+/",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "?"
         }
@@ -2503,7 +2503,7 @@
       {
         "key": "shift+0",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": ")"
         }
@@ -2511,7 +2511,7 @@
       {
         "key": "shift+1",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "!"
         }
@@ -2519,7 +2519,7 @@
       {
         "key": "shift+2",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "@"
         }
@@ -2527,7 +2527,7 @@
       {
         "key": "shift+3",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "#"
         }
@@ -2535,7 +2535,7 @@
       {
         "key": "shift+4",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "$"
         }
@@ -2543,7 +2543,7 @@
       {
         "key": "shift+5",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "%"
         }
@@ -2551,7 +2551,7 @@
       {
         "key": "shift+6",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "^"
         }
@@ -2559,7 +2559,7 @@
       {
         "key": "shift+7",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "&"
         }
@@ -2567,7 +2567,7 @@
       {
         "key": "shift+8",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "*"
         }
@@ -2575,7 +2575,7 @@
       {
         "key": "shift+9",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "("
         }
@@ -2583,7 +2583,7 @@
       {
         "key": "shift+;",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": ":"
         }
@@ -2591,7 +2591,7 @@
       {
         "key": "shift+=",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "+"
         }
@@ -2599,7 +2599,7 @@
       {
         "key": "shift+[",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "{"
         }
@@ -2607,7 +2607,7 @@
       {
         "key": "shift+\\",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "|"
         }
@@ -2615,7 +2615,7 @@
       {
         "key": "shift+]",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "}"
         }
@@ -2623,7 +2623,7 @@
       {
         "key": "shift+`",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "~"
         }
@@ -2631,7 +2631,7 @@
       {
         "key": "shift+a",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "A"
         }
@@ -2639,7 +2639,7 @@
       {
         "key": "shift+b",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "B"
         }
@@ -2652,7 +2652,7 @@
       {
         "key": "shift+c",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "C"
         }
@@ -2660,7 +2660,7 @@
       {
         "key": "shift+d",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "D"
         }
@@ -2692,7 +2692,7 @@
       {
         "key": "shift+e",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "E"
         }
@@ -2710,7 +2710,7 @@
       {
         "key": "shift+f",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "F"
         }
@@ -2718,7 +2718,7 @@
       {
         "key": "shift+g",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "G"
         }
@@ -2726,7 +2726,7 @@
       {
         "key": "shift+h",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "H"
         }
@@ -2738,7 +2738,7 @@
       {
         "key": "shift+i",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "I"
         }
@@ -2746,7 +2746,7 @@
       {
         "key": "shift+j",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "J"
         }
@@ -2754,7 +2754,7 @@
       {
         "key": "shift+k",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "K"
         }
@@ -2762,7 +2762,7 @@
       {
         "key": "shift+l",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "L"
         }
@@ -2770,7 +2770,7 @@
       {
         "key": "shift+m",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "M"
         }
@@ -2778,7 +2778,7 @@
       {
         "key": "shift+n",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "N"
         }
@@ -2786,7 +2786,7 @@
       {
         "key": "shift+o",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "O"
         }
@@ -2794,7 +2794,7 @@
       {
         "key": "shift+p",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "P"
         }
@@ -2816,7 +2816,7 @@
       {
         "key": "shift+q",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "Q"
         }
@@ -2824,7 +2824,7 @@
       {
         "key": "shift+r",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "R"
         }
@@ -2832,7 +2832,7 @@
       {
         "key": "shift+s",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "S"
         }
@@ -2840,7 +2840,7 @@
       {
         "key": "shift+space",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": " "
         }
@@ -2848,7 +2848,7 @@
       {
         "key": "shift+t",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "T"
         }
@@ -2856,7 +2856,7 @@
       {
         "key": "shift+u",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "U"
         }
@@ -2869,7 +2869,7 @@
       {
         "key": "shift+v",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "V"
         }
@@ -2877,7 +2877,7 @@
       {
         "key": "shift+w",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "W"
         }
@@ -2885,7 +2885,7 @@
       {
         "key": "shift+x",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "X"
         }
@@ -2893,7 +2893,7 @@
       {
         "key": "shift+y",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "Y"
         }
@@ -2901,7 +2901,7 @@
       {
         "key": "shift+z",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "Z"
         }
@@ -2909,7 +2909,7 @@
       {
         "key": "space",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": " "
         }
@@ -2917,7 +2917,7 @@
       {
         "key": "t",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "t"
         }
@@ -2935,7 +2935,7 @@
       {
         "key": "u",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "u"
         }
@@ -2972,7 +2972,7 @@
       {
         "key": "v",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "v"
         }
@@ -2980,7 +2980,7 @@
       {
         "key": "w",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "w"
         }
@@ -2988,7 +2988,7 @@
       {
         "key": "x",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "x"
         }
@@ -2996,7 +2996,7 @@
       {
         "key": "y",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "y"
         }
@@ -3004,7 +3004,7 @@
       {
         "key": "z",
         "command": "groog.type",
-        "when": "editorTextFocus || findInputFocussed || inQuickOpen && groog.context.findMode",
+        "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
         "args": {
           "text": "z"
         }

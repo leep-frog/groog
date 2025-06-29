@@ -85,10 +85,14 @@ func delay(n int) *int {
 
 var (
 	// When contexts
-	activePanel             = wc("activePanel")
-	always                  = wc("")
-	editorFocus             = wc("editorFocus")
-	editorTextFocus         = wc("editorTextFocus")
+	activePanel     = wc("activePanel")
+	always          = wc("")
+	editorFocus     = wc("editorFocus")
+	editorTextFocus = wc("editorTextFocus")
+	// TODO: Change WhenContext for better not usage
+	debugConsoleFocus    = wcCmp("focusedView", "'workbench.panel.repl.view'", true)
+	notDebugConsoleFocus = wcCmp("focusedView", "'workbench.panel.repl.view'", false)
+
 	findWidgetVisible       = wc("findWidgetVisible")
 	findInputFocussed       = wc("findInputFocussed")
 	inputFocus              = wc("inputFocus")
@@ -140,7 +144,7 @@ var (
 
 	// The context to use for keys that should have no binding in global find or
 	// input boxes, etc.
-	groogBehaviorContext = editorTextFocus.or(findInputFocussed).or(inQuickOpen.and(groogFindMode))
+	groogBehaviorContext = editorTextFocus.or(debugConsoleFocus).or(findInputFocussed).or(inQuickOpen.and(groogFindMode))
 
 	// The execute wrap for terminAllOrNothing
 	terminAllOrNothingExecute = "termin-all-or-nothing.execute"
@@ -422,8 +426,8 @@ var (
 			// Set-PSReadLineKeyHandler -Chord Ctrl+x,Ctrl+h -ScriptBlock {
 			// 	[Microsoft.PowerShell.PSConsoleReadLine]::BackwardDeleteWord()
 			// }
-			groogQMK.and(panelFocus).value: sendSequence("\u0018\u0008"),
-			editorTextFocus.value:          kb("groog.deleteWordLeft"),
+			groogQMK.and(terminalFocus).value: sendSequence("\u0018\u0008"),
+			groogBehaviorContext.value:        kb("groog.deleteWordLeft"),
 			// groogQMK.not().or(panelFocus.not()).value: kb("groog.deleteWordLeft"),
 		},
 		alt("d"):     only("groog.deleteWordRight"),
