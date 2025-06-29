@@ -9,65 +9,92 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-type WhenContext struct {
-	value           string
-	singleValue     bool
-	comparisonValue bool
+type WhenContext interface {
+	value() string
 }
 
-func (wc *WhenContext) and(that *WhenContext) *WhenContext {
-	return &WhenContext{
-		fmt.Sprintf("%s && %s", wc.value, that.value),
-		false,
-		false,
-	}
+type SimpleContext struct {
+	context  string
+	negative bool
 }
 
-func (wc *WhenContext) or(that *WhenContext) *WhenContext {
-	return &WhenContext{
-		fmt.Sprintf("%s || %s", wc.value, that.value),
-		false,
-		false,
+func (sc *SimpleContext) value() string {
+	if sc.negative {
+		return fmt.Sprintf("!%s", sc.context)
 	}
+	return sc.context
 }
 
-func (wc *WhenContext) not() *WhenContext {
-	if !wc.singleValue {
-		panic("Can only negate a single when context")
-	}
-	if wc.comparisonValue {
-		panic("Can't negate a comparison context")
-	}
-	return &WhenContext{
-		fmt.Sprintf("!%s", wc.value),
-		false,
-		false,
+func simpleContext(context string) *SimpleContext {
+	return &SimpleContext{
+		context: context,
 	}
 }
 
-func wc(s string) *WhenContext {
-	return &WhenContext{s, true, false}
+func wc(context string) *SimpleContext {
+	return simpleContext(context)
+}
+
+func (sc *SimpleContext) not() *SimpleContext {
+	return &SimpleContext{
+		context:  sc.context,
+		negative: !sc.negative,
+	}
+}
+
+type ComparisonContext struct {
+	left  string
+	right string
+	equal bool
+}
+
+func (cc *ComparisonContext) value() string {
+	if cc.equal {
+		return fmt.Sprintf("%s == %s", cc.left, cc.right)
+	}
+	return fmt.Sprintf("%s != %s", cc.left, cc.right)
+}
+
+func (cc *ComparisonContext) not() *ComparisonContext {
+	return &ComparisonContext{
+		left:  cc.left,
+		right: cc.right,
+		equal: !cc.equal,
+	}
+}
+
+type OperationContext struct {
+	parts     []WhenContext
+	operation string
+}
+
+func (oc *OperationContext) value() string {
+	var values []string
+	for _, part := range oc.parts {
+		values = append(values, part.value())
+	}
+	return fmt.Sprintf("%s", strings.Join(values, fmt.Sprintf(" %s ", oc.operation)))
+}
+
+func and(contexts ...WhenContext) WhenContext {
+	return &OperationContext{contexts, "&&"}
+}
+
+func or(contexts ...WhenContext) WhenContext {
+	return &OperationContext{contexts, "||"}
 }
 
 // See the following link for language codes: https://code.visualstudio.com/docs/languages/identifiers
-func whenFileType(languageId string) *WhenContext {
+func whenFileType(languageId string) WhenContext {
 	return wcCmp("resourceLangId", languageId, true)
 }
 
-func whenNotFileType(languageId string) *WhenContext {
+func whenNotFileType(languageId string) WhenContext {
 	return wcCmp("resourceLangId", languageId, false)
 }
 
-func wcCmp(key, value string, eql bool) *WhenContext {
-	op := "!="
-	if eql {
-		op = "=="
-	}
-	return &WhenContext{
-		fmt.Sprintf("%s %s %v", key, op, value),
-		false,
-		true,
-	}
+func wcCmp(key, value string, eql bool) WhenContext {
+	return &ComparisonContext{key, value, eql}
 }
 
 func groogContext(mode string) string {
@@ -144,7 +171,7 @@ var (
 
 	// The context to use for keys that should have no binding in global find or
 	// input boxes, etc.
-	groogBehaviorContext = editorTextFocus.or(debugConsoleFocus).or(findInputFocussed).or(inQuickOpen.and(groogFindMode))
+	groogBehaviorContext = and(or(editorTextFocus, debugConsoleFocus, findInputFocussed, inQuickOpen), groogFindMode)
 
 	// The execute wrap for terminAllOrNothing
 	terminAllOrNothingExecute = "termin-all-or-nothing.execute"
@@ -183,7 +210,7 @@ func kbDefsToBindings() []*Keybinding {
 			}
 
 			kbDefinitions[s] = map[string]*KB{
-				groogBehaviorContext.value: kbArgs("groog.type", map[string]interface{}{
+				groogBehaviorContext.value(): kbArgs("groog.type", map[string]interface{}{
 					"text": text,
 				}),
 			}
@@ -262,62 +289,62 @@ var (
 	kbDefinitions = map[Key]map[string]*KB{
 		// Find bindings
 		ctrl("f"): {
-			groogQMK.and(terminalVisible).value: kb("groog.terminal.find"),
+			and(groogQMK, terminalVisible).value(): kb("groog.terminal.find"),
 			// This is mostly relevant for Find Simple Mode (so `ctrl+s; ctrl+s` results in redoing previous find)
-			groogQMK.and(terminalVisible.not()).and(inQuickOpen).and(groogSimpleFindMode).value: kb("workbench.action.acceptSelectedQuickOpenItem"),
-			groogQMK.and(terminalVisible.not()).value:                                           kb("groog.find"),
-			groogQMK.not().and(editorTextFocus.and(inQuickOpen.not())).value:                    kb("groog.cursorRight"),
-			always.value: kb("-workbench.action.terminal.focusFind"),
+			and(groogQMK, terminalVisible.not(), inQuickOpen, groogSimpleFindMode).value(): kb("workbench.action.acceptSelectedQuickOpenItem"),
+			and(groogQMK, terminalVisible.not()).value():                                   kb("groog.find"),
+			and(groogQMK.not(), editorTextFocus, inQuickOpen.not()).value():                kb("groog.cursorRight"),
+			always.value(): kb("-workbench.action.terminal.focusFind"),
 		},
 		ctrl("s"): {
 			// "workbench.action.acceptSelectedQuickOpenItem",
-			groogQMK.value: kb("groog.cursorRight"),
-			groogQMK.not().and(terminalVisible).value: kb("groog.terminal.find"),
+			groogQMK.value(): kb("groog.cursorRight"),
+			and(groogQMK.not(), terminalVisible).value(): kb("groog.terminal.find"),
 			// This is mostly relevant for Find Simple Mode (so `ctrl+s; ctrl+s` results in redoing previous find)
-			groogQMK.not().and(terminalVisible.not()).and(inQuickOpen).and(groogSimpleFindMode).value: kb("workbench.action.acceptSelectedQuickOpenItem"),
-			groogQMK.not().and(terminalVisible.not()).value:                                           kb("groog.find"),
+			and(groogQMK.not(), terminalVisible.not(), inQuickOpen, groogSimpleFindMode).value(): kb("workbench.action.acceptSelectedQuickOpenItem"),
+			and(groogQMK.not(), terminalVisible.not()).value():                                   kb("groog.find"),
 		},
 		// Don't use 'terminalVisible' here because we don't want ctrl+r to activate terminal find mode.
 		// Instead, we want ctrl+r in non-find mode to search for matching bash commands (as it normally would)
 		ctrl("r"): contextualKB(groogTerminalFindMode, kb("groog.terminal.reverseFind"), kb("groog.reverseFind")),
 		shift(enter): {
-			groogFindMode.value:         kb("editor.action.previousMatchFindAction"),
-			groogTerminalFindMode.value: kb("groog.terminal.reverseFind"),
+			groogFindMode.value():         kb("editor.action.previousMatchFindAction"),
+			groogTerminalFindMode.value(): kb("groog.terminal.reverseFind"),
 		},
 		ctrl(enter): only("-github.copilot.generate"),
 		enter: {
-			suggestWidgetVisible.value:  kb("acceptSelectedSuggestion"),
-			groogTerminalFindMode.value: kb("groog.terminal.find"),
-			groogFindMode.value:         kb("editor.action.nextMatchFindAction"),
+			suggestWidgetVisible.value():  kb("acceptSelectedSuggestion"),
+			groogTerminalFindMode.value(): kb("groog.terminal.find"),
+			groogFindMode.value():         kb("editor.action.nextMatchFindAction"),
 			// This is needed so enter hits are recorded
 			// Don't do for tab since that can add a variable
 			// number of spaces. If seems necessary, we can add
 			// groog.tab later on, but given tab's dynamic nature
 			// depending on file type and context, that may become
 			// tricky rather quickly.
-			groogRecording.value: kbArgs("groog.type", map[string]interface{}{
+			groogRecording.value(): kbArgs("groog.type", map[string]interface{}{
 				"text": "\n",
 			}),
 		},
 		space: {
-			groogBehaviorContext.value: kbArgs("groog.type", map[string]interface{}{
+			groogBehaviorContext.value(): kbArgs("groog.type", map[string]interface{}{
 				"text": " ",
 			}),
 		},
 		shift(space): {
-			groogBehaviorContext.value: kbArgs("groog.type", map[string]interface{}{
+			groogBehaviorContext.value(): kbArgs("groog.type", map[string]interface{}{
 				"text": " ",
 			}),
 		},
 		alt("r"): findToggler("Regex", nil, map[string]*KB{
-			notebookEditorFocused.and(notebookCodeCell).value:     kb("notebook.cell.execute"),
-			notebookEditorFocused.and(notebookMarkdownCell).value: kb("notebook.cell.quitEdit"),
+			and(notebookEditorFocused, notebookCodeCell).value():     kb("notebook.cell.execute"),
+			and(notebookEditorFocused, notebookMarkdownCell).value(): kb("notebook.cell.quitEdit"),
 		}),
 		alt("c"):        findToggler("CaseSensitive", nil, nil),
 		alt("w"):        findToggler("WholeWord", nil, nil),
 		alt(shift("c")): only("togglePreserveCase"),
 		alt("f4"): findToggler("WholeWord", groogQMK, map[string]*KB{
-			groogQMK.not().value: errorNotification("Run alt+shift+f4 to close the window"),
+			groogQMK.not().value(): errorNotification("Run alt+shift+f4 to close the window"),
 		}),
 		alt(shift("f4")): only("workbench.action.closeWindow"),
 
@@ -326,20 +353,20 @@ var (
 		ctrlX("w"): only("groog.tug"),
 		ctrl("j"): {
 			// Jumps to other input box in find mode
-			groogFindMode.value: kb("groog.find.toggleReplaceMode"),
+			groogFindMode.value(): kb("groog.find.toggleReplaceMode"),
 			// Change panel in terminal
-			groogFindMode.not().and(activePanel).value: kb("workbench.action.previousPanelView"),
+			and(groogFindMode.not(), activePanel).value(): kb("workbench.action.previousPanelView"),
 			// Start mark mode in regular editor
-			groogFindMode.not().and(activePanel.not()).value: kb("groog.toggleMarkMode"),
+			and(groogFindMode.not(), activePanel.not()).value(): kb("groog.toggleMarkMode"),
 		},
 		ctrl("y"):        only("groog.emacsPaste"),
 		ctrl(shift("k")): onlyWhen("groog.find.replaceAll", groogFindMode),
 		ctrlX("k"):       only("groog.maim"),
 		ctrl("k"): {
 			// Replace in find mode
-			groogFindMode.value: kb("groog.find.replaceOne"),
+			groogFindMode.value(): kb("groog.find.replaceOne"),
 			// Kill in editor
-			groogFindMode.not().value: kb("groog.kill"),
+			groogFindMode.not().value(): kb("groog.kill"),
 		},
 		ctrl("l"):        ctrlLBindings(),
 		ctrl(shift("l")): ctrlShiftLBindings(),
@@ -351,13 +378,13 @@ var (
 		shift(pagedown):  ctrlShiftVBindings(),
 		ctrl(shift("p")): only("groog.find.previous"),
 		alt("s"): {
-			auxiliaryBarVisible.value:                                   kb("workbench.action.toggleAuxiliaryBar"),
-			auxiliaryBarVisible.not().value:                             kb("workbench.panel.chat.view.copilot.focus"),
+			auxiliaryBarVisible.value():                                 kb("workbench.action.toggleAuxiliaryBar"),
+			auxiliaryBarVisible.not().value():                           kb("workbench.panel.chat.view.copilot.focus"),
 			"!gitlens:disabled && config.gitlens.keymap == 'alternate'": kb("-gitlens.showQuickRepoStatus"),
 		},
 		alt("q"): only("editor.action.inlineSuggest.trigger"),
 		shift(up): {
-			groogQMK.and(groogFindMode).value: kb("groog.find.previous"),
+			and(groogQMK, groogFindMode).value(): kb("groog.find.previous"),
 		},
 		ctrl("p"): upBindings(),
 		up:        upBindings(),
@@ -365,9 +392,9 @@ var (
 		down:      downBindings(),
 		left:      leftBindings(),
 		ctrl("b"): leftBindings(),
-		ctrl("m"): onlyWhen("workbench.action.quickPickManyToggle", inQuickOpen.and(listSupportsMultiselect)),
+		ctrl("m"): onlyWhen("workbench.action.quickPickManyToggle", and(inQuickOpen, listSupportsMultiselect)),
 		right: {
-			editorTextFocus.and(inQuickOpen.not()).value: kb("groog.cursorRight"),
+			and(editorTextFocus, inQuickOpen.not()).value(): kb("groog.cursorRight"),
 		},
 		home:              textOnly("groog.cursorHome"),
 		ctrl("a"):         keyboardSplit(kb("groog.cursorHome"), kb("editor.action.selectAll")),
@@ -378,20 +405,20 @@ var (
 		ctrl("e"):         only("groog.cursorEnd"),
 		alt("f"):          only("groog.cursorWordRight"),
 		ctrl("g"): {
-			sideBarFocus.and(inQuickOpen.not().and(suggestWidgetVisible.not())).value:  kb("workbench.action.focusActiveEditorGroup"),
-			inQuickOpen.and(suggestWidgetVisible.not()).and(groogFindMode.not()).value: kb("workbench.action.closeQuickOpen"),
-			suggestWidgetVisible.value: kb("hideSuggestWidget"),
-			always.value:               kb("groog.ctrlG"),
+			and(sideBarFocus, inQuickOpen.not(), suggestWidgetVisible.not()).value():  kb("workbench.action.focusActiveEditorGroup"),
+			and(inQuickOpen, suggestWidgetVisible.not(), groogFindMode.not()).value(): kb("workbench.action.closeQuickOpen"),
+			suggestWidgetVisible.value(): kb("hideSuggestWidget"),
+			always.value():               kb("groog.ctrlG"),
 		},
 		ctrl("/"): {
-			activePanel.value: nil,
-			activePanel.not().and(groogRecording).value:       kb("groog.record.undo"),
-			activePanel.not().and(groogRecording.not()).value: kb("groog.undo"),
+			activePanel.value():                                  nil,
+			and(activePanel.not(), groogRecording).value():       kb("groog.record.undo"),
+			and(activePanel.not(), groogRecording.not()).value(): kb("groog.undo"),
 		},
 		ctrl(shift("/")): {
-			activePanel.value: nil,
-			activePanel.not().and(groogRecording).value:       nil,
-			activePanel.not().and(groogRecording.not()).value: kb("groog.redo"),
+			activePanel.value():                                  nil,
+			and(activePanel.not(), groogRecording).value():       nil,
+			and(activePanel.not(), groogRecording.not()).value(): kb("groog.redo"),
 		},
 		ctrl(right): textOnly("groog.cursorWordRight"),
 		alt("b"):    only("groog.cursorWordLeft"),
@@ -399,21 +426,21 @@ var (
 		ctrlX("p"):  only("groog.cursorTop"),
 		ctrlX("s"):  only("workbench.action.files.save"),
 		ctrl("h"): {
-			searchViewletFocus.not().value: kb("groog.deleteLeft"),
-			searchViewletFocus.value:       kb("search.action.remove"),
+			searchViewletFocus.not().value(): kb("groog.deleteLeft"),
+			searchViewletFocus.value():       kb("search.action.remove"),
 		},
 		backspace: {
-			groogBehaviorContext.value:              kb("groog.deleteLeft"),
-			searchViewletFocus.and(listFocus).value: kb("search.action.remove"),
+			groogBehaviorContext.value():               kb("groog.deleteLeft"),
+			and(searchViewletFocus, listFocus).value(): kb("search.action.remove"),
 		},
 		ctrl("d"): {
-			searchViewletFocus.not().value: kb("groog.deleteRight"),
-			searchViewletFocus.value:       kb("search.action.remove"),
+			searchViewletFocus.not().value(): kb("groog.deleteRight"),
+			searchViewletFocus.value():       kb("search.action.remove"),
 		},
 		delete: {
-			groogBehaviorContext.value:              kb("groog.deleteRight"),
-			searchViewletFocus.and(listFocus).value: kb("search.action.remove"),
-			notebookEditorFocused.value:             kb("-notebook.cell.delete"),
+			groogBehaviorContext.value():               kb("groog.deleteRight"),
+			and(searchViewletFocus, listFocus).value(): kb("search.action.remove"),
+			notebookEditorFocused.value():              kb("-notebook.cell.delete"),
 		},
 		alt("h"):       only("groog.deleteWordLeft"),
 		alt(backspace): textOnly("groog.deleteWordLeft"),
@@ -426,9 +453,9 @@ var (
 			// Set-PSReadLineKeyHandler -Chord Ctrl+x,Ctrl+h -ScriptBlock {
 			// 	[Microsoft.PowerShell.PSConsoleReadLine]::BackwardDeleteWord()
 			// }
-			groogQMK.and(terminalFocus).value: sendSequence("\u0018\u0008"),
-			groogBehaviorContext.value:        kb("groog.deleteWordLeft"),
-			// groogQMK.not().or(panelFocus.not()).value: kb("groog.deleteWordLeft"),
+			and(groogQMK, terminalFocus).value(): sendSequence("\u0018\u0008"),
+			groogBehaviorContext.value():         kb("groog.deleteWordLeft"),
+			// groogQMK.not().or(panelFocus.not()).value(): kb("groog.deleteWordLeft"),
 		},
 		alt("d"):     only("groog.deleteWordRight"),
 		alt(delete):  textOnly("groog.deleteWordRight"),
@@ -457,22 +484,22 @@ var (
 		ctrl(pageup):   only("groog.focusPreviousEditor"),
 		// When there is a suggestible item highlighted, then accept it.
 		tab: {
-			groogFindMode.value: kb("workbench.action.acceptSelectedQuickOpenItem"),
+			groogFindMode.value(): kb("workbench.action.acceptSelectedQuickOpenItem"),
 			// Have this be tab (not enter) because sometimes we want to press the actual
 			// enter key in the middle of a snippet (and this will jump to the end of the
 			// snippet input if at the last snippet input section).
-			suggestWidgetVisible.not().and(inSnippetMode).value: kb("jumpToNextSnippetPlaceholder"),
+			and(suggestWidgetVisible.not(), inSnippetMode).value(): kb("jumpToNextSnippetPlaceholder"),
 		},
 		ctrl(shift("n")): {
-			groogFindMode.value:       kb("groog.find.next"),
-			groogFindMode.not().value: kb("workbench.action.files.newUntitledFile"),
+			groogFindMode.value():       kb("groog.find.next"),
+			groogFindMode.not().value(): kb("workbench.action.files.newUntitledFile"),
 		},
 		// In our QMK keyboard, pressing "shift+n" in the LR_CTRL layer
 		// actually sends "shift+down" (no ctrl modifier).
 		// So when trying to press "ctrl+shift+n", do the same thing (new file).
 		shift(down): {
-			groogQMK.and(groogFindMode).value:       kb("groog.find.next"),
-			groogQMK.and(groogFindMode.not()).value: kb("workbench.action.files.newUntitledFile"),
+			and(groogQMK, groogFindMode).value():       kb("groog.find.next"),
+			and(groogQMK, groogFindMode.not()).value(): kb("workbench.action.files.newUntitledFile"),
 		},
 		ctrlX("d"):       only("editor.action.revealDefinition"),
 		ctrlZ("d"):       only("cSpell.addWordToUserDictionary"),
@@ -503,28 +530,28 @@ var (
 			kb("groog.record.playNamedRecording"),
 		),
 		alt(shift("r")): {
-			always.value:                kb("groog.record.playRecordingRepeatedly"),
-			notebookEditorFocused.value: kb("jupyter.restartkernelandrunuptoselectedcell"),
+			always.value():                kb("groog.record.playRecordingRepeatedly"),
+			notebookEditorFocused.value(): kb("jupyter.restartkernelandrunuptoselectedcell"),
 		},
 		ctrl(shift("r")): {
 			// Needed the delay temporarily, but no more?
-			// notebookEditorFocused.value: mcWithArgs(kb("jupyter.restartkernel"), &KB{Command: "notebook.cell.execute", Delay: delay(0)}),
-			notebookEditorFocused.value: mc("jupyter.restartkernel", "notebook.cell.execute"),
-			// always.value:                kb("workbench.action.restartExtensionHost"),
+			// notebookEditorFocused.value(): mcWithArgs(kb("jupyter.restartkernel"), &KB{Command: "notebook.cell.execute", Delay: delay(0)}),
+			notebookEditorFocused.value(): mc("jupyter.restartkernel", "notebook.cell.execute"),
+			// always.value():                kb("workbench.action.restartExtensionHost"),
 		},
 		alt(shift("d")): {
-			always.value:                kb("groog.record.deleteRecording"),
-			notebookEditorFocused.value: kb("notebook.cell.delete"),
+			always.value():                kb("groog.record.deleteRecording"),
+			notebookEditorFocused.value(): kb("notebook.cell.delete"),
 		},
 		// (This is [alt layer]+shift+del on QMK)
 		ctrl(shift(delete)): {
-			always.value:                kb("groog.record.deleteRecording"),
-			notebookEditorFocused.value: kb("notebook.cell.delete"),
+			always.value():                kb("groog.record.deleteRecording"),
+			notebookEditorFocused.value(): kb("notebook.cell.delete"),
 		},
 		ctrl(shift("s")): onlyWhen("workbench.action.findInFiles", groogQMK.not()),
 		ctrl(shift("f")): onlyWhen("workbench.action.findInFiles", groogQMK),
 		shift(backspace): { // This is basically ctrl+shift+h
-			groogQMK.value: kb("workbench.action.replaceInFiles"),
+			groogQMK.value(): kb("workbench.action.replaceInFiles"),
 		},
 
 		// Terminal and panel related bindings
@@ -596,8 +623,8 @@ var (
 		ctrlZ("i"):       only("editor.action.organizeImports"),
 		alt("i"):         only("groog.indentToPreviousLine"),
 		alt(shift("i")): {
-			always.value:          kb("groog.indentToNextLine"),
-			editorTextFocus.value: kb("-editor.action.insertCursorAtEndOfEachLineSelected"),
+			always.value():          kb("groog.indentToNextLine"),
+			editorTextFocus.value(): kb("-editor.action.insertCursorAtEndOfEachLineSelected"),
 		},
 
 		// Pasting
@@ -646,28 +673,28 @@ var (
 		ctrlZ("b"):  only("gitlens.toggleLineBlame"),
 		ctrlZ(left): only("gitlens.toggleLineBlame"),
 		alt("p"): {
-			always.value:                kb("workbench.action.editor.previousChange"),
-			notebookEditorFocused.value: kb("notebook.focusPreviousEditor"),
+			always.value():                kb("workbench.action.editor.previousChange"),
+			notebookEditorFocused.value(): kb("notebook.focusPreviousEditor"),
 		},
 		alt("n"): {
-			always.value:                kb("workbench.action.editor.nextChange"),
-			notebookEditorFocused.value: kb("notebook.focusNextEditor"),
+			always.value():                kb("workbench.action.editor.nextChange"),
+			notebookEditorFocused.value(): kb("notebook.focusNextEditor"),
 		},
 
 		// Errors (like git ones with addition of shift modifier).
 		alt(shift("p")): {
-			notebookEditorFocused.value: kb("notebook.cell.insertCodeCellAbove"),
-			always.value:                mc("editor.action.marker.prevInFiles", "closeMarkersNavigation"),
+			notebookEditorFocused.value(): kb("notebook.cell.insertCodeCellAbove"),
+			always.value():                mc("editor.action.marker.prevInFiles", "closeMarkersNavigation"),
 		},
 		alt(shift("n")): {
-			notebookEditorFocused.value: kb("notebook.cell.insertCodeCellBelow"),
-			always.value:                mc("editor.action.marker.nextInFiles", "closeMarkersNavigation"),
+			notebookEditorFocused.value(): kb("notebook.cell.insertCodeCellBelow"),
+			always.value():                mc("editor.action.marker.nextInFiles", "closeMarkersNavigation"),
 		},
 		alt(shift("m")): onlyKBWhen(kb("notebook.cell.insertMarkdownCellBelow"), notebookEditorFocused),
 
 		ctrlZ("t"): only("groog.toggleFixedTestFile"),
 		ctrlX("t"): {
-			goFile.value: mcWithArgs(
+			goFile.value(): mcWithArgs(
 				&KB{
 					Command: "termin-all-or-nothing.execute",
 					Args: map[string]interface{}{
@@ -676,7 +703,7 @@ var (
 				},
 			),
 			// For all other file types, use the custom function
-			notGoFile.value: mcWithArgs(
+			notGoFile.value(): mcWithArgs(
 				&KB{
 					Command: "groog.testFile",
 					Args: map[string]interface{}{
@@ -702,7 +729,7 @@ var (
 		ctrlX("o"): only("workbench.action.openRecent"),
 
 		alt("l"): {
-			editorFocus.value: kb("editor.action.selectHighlights"),
+			editorFocus.value(): kb("editor.action.selectHighlights"),
 		},
 
 		ctrlZ("k"): only("groog.toggleQMK"),
@@ -746,11 +773,11 @@ func textOnly(command string) map[string]*KB {
 	return onlyWhen(command, groogBehaviorContext)
 }
 
-func onlyWhen(command string, context *WhenContext) map[string]*KB {
+func onlyWhen(command string, context WhenContext) map[string]*KB {
 	return onlyWhenArgs(command, context, nil)
 }
 
-func onlyWhenArgs(command string, context *WhenContext, args map[string]interface{}) map[string]*KB {
+func onlyWhenArgs(command string, context WhenContext, args map[string]interface{}) map[string]*KB {
 	return onlyKBWhen(kbArgs(command, args), context)
 }
 
@@ -758,9 +785,9 @@ func onlyKB(kb *KB) map[string]*KB {
 	return onlyKBWhen(kb, always)
 }
 
-func onlyKBWhen(kb *KB, context *WhenContext) map[string]*KB {
+func onlyKBWhen(kb *KB, context WhenContext) map[string]*KB {
 	return map[string]*KB{
-		context.value: kb,
+		context.value(): kb,
 	}
 }
 
@@ -836,23 +863,23 @@ func (k Key) keyAliases() []string {
 	return kas
 }
 
-func findToggler(suffix string, context *WhenContext, m map[string]*KB) map[string]*KB {
+func findToggler(suffix string, context WhenContext, m map[string]*KB) map[string]*KB {
 	groogCmd := fmt.Sprintf("groog.find.toggle%s", suffix)
-	gc := inQuickOpen.and(groogFindMode)
-	se := inSearchEditor
-	sv := searchViewletFocus
-	neg := groogFindMode.not().and(inSearchEditor.not()).and(searchViewletFocus.not())
+	gc := and(inQuickOpen, groogFindMode)
+	var se WhenContext = inSearchEditor
+	var sv WhenContext = searchViewletFocus
+	neg := and(groogFindMode.not(), inSearchEditor.not(), searchViewletFocus.not())
 	if context != nil {
-		gc = context.and(gc)
-		se = context.and(se)
-		sv = context.and(sv)
-		neg = context.and(neg)
+		gc = and(context, gc)
+		se = and(context, se)
+		sv = and(context, sv)
+		neg = and(context, neg)
 	}
 	r := map[string]*KB{
-		gc.value:  kb(groogCmd),
-		se.value:  kb(fmt.Sprintf("toggleSearchEditor%s", suffix)),
-		sv.value:  kb(fmt.Sprintf("toggleSearch%s", suffix)),
-		neg.value: kb(fmt.Sprintf("toggleSearch%s", suffix)),
+		gc.value():  kb(groogCmd),
+		se.value():  kb(fmt.Sprintf("toggleSearchEditor%s", suffix)),
+		sv.value():  kb(fmt.Sprintf("toggleSearch%s", suffix)),
+		neg.value(): kb(fmt.Sprintf("toggleSearch%s", suffix)),
 	}
 	for k, v := range m {
 		r[k] = v
@@ -879,8 +906,8 @@ var (
 // contextualKB will run the trueKB if contextKey is set
 // and falseKB otherwise. An error is returned if `contextKey` is not
 // a single variable.
-func contextualKB(context *WhenContext, trueKB, falseKB *KB) map[string]*KB {
-	contextKey := context.value
+func contextualKB(context WhenContext, trueKB, falseKB *KB) map[string]*KB {
+	contextKey := context.value()
 	if !simpleContextRegex.MatchString(contextKey) {
 		panic(fmt.Sprintf("context key (%q) does not match required regexp (%s)", contextKey, simpleContextRegex))
 	}
@@ -902,9 +929,9 @@ func panelSplit(panelKB, otherKB *KB) map[string]*KB {
 
 func terminalPanelSplit(terminalKB, panelKB, otherKB *KB) map[string]*KB {
 	return map[string]*KB{
-		terminalFocus.value:                       terminalKB,
-		panelFocus.and(terminalFocus.not()).value: panelKB,
-		panelFocus.not().value:                    otherKB,
+		terminalFocus.value():                        terminalKB,
+		and(panelFocus, terminalFocus.not()).value(): panelKB,
+		panelFocus.not().value():                     otherKB,
 	}
 }
 
@@ -957,21 +984,21 @@ func repeat(c string, times int) []string {
 
 func ctrlLBindings() map[string]*KB {
 	return map[string]*KB{
-		inQuickOpen.value: mc(repeat("workbench.action.quickOpenNavigatePreviousInFilePicker", 5)...),
-		inQuickOpen.not().and(terminalFocus.not()).value: kb("groog.jump"),
+		inQuickOpen.value(): mc(repeat("workbench.action.quickOpenNavigatePreviousInFilePicker", 5)...),
+		and(inQuickOpen.not(), terminalFocus.not()).value(): kb("groog.jump"),
 		// Sending this sequence sends the equivalent of pressing the page-up key while in the terminal.
 		// See this stack overflow post: https://stackoverflow.com/questions/61742559/need-vscode-sendsequence-keybindings-for-previous-command-next-command-move-to
 		// and this page that it links to (ctrl+f for "pageup"): https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
-		inQuickOpen.not().and(terminalFocus).value: sendSequence("\u001b[5~"),
+		and(inQuickOpen.not(), terminalFocus).value(): sendSequence("\u001b[5~"),
 	}
 }
 
 func ctrlVBindings() map[string]*KB {
 	return map[string]*KB{
-		inQuickOpen.value: mc(repeat("workbench.action.quickOpenNavigateNextInFilePicker", 5)...),
-		inQuickOpen.not().and(terminalFocus.not()).value: kb("groog.fall"),
+		inQuickOpen.value(): mc(repeat("workbench.action.quickOpenNavigateNextInFilePicker", 5)...),
+		and(inQuickOpen.not(), terminalFocus.not()).value(): kb("groog.fall"),
 		// See ctrlLBindings function for description of what this means
-		inQuickOpen.not().and(terminalFocus).value: sendSequence("\u001b[6~"),
+		and(inQuickOpen.not(), terminalFocus).value(): sendSequence("\u001b[6~"),
 	}
 }
 
@@ -981,7 +1008,7 @@ const (
 
 func ctrlShiftLBindings() map[string]*KB {
 	return map[string]*KB{
-		always.value: kbArgs("groog.jump", map[string]interface{}{
+		always.value(): kbArgs("groog.jump", map[string]interface{}{
 			"lines": superJump,
 		}),
 	}
@@ -989,7 +1016,7 @@ func ctrlShiftLBindings() map[string]*KB {
 
 func ctrlShiftVBindings() map[string]*KB {
 	return map[string]*KB{
-		always.value: kbArgs("groog.fall", map[string]interface{}{
+		always.value(): kbArgs("groog.fall", map[string]interface{}{
 			"lines": superJump,
 		}),
 	}
@@ -997,24 +1024,24 @@ func ctrlShiftVBindings() map[string]*KB {
 
 func upBindings() map[string]*KB {
 	return map[string]*KB{
-		groogTerminalFindMode.value: kb("groog.terminal.reverseFind"),
-		always.value:                kb("-workbench.action.quickOpen"),
-		editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorUp"),
-		editorTextFocus.and(suggestWidgetVisible).value:       kb("selectPrevSuggestion"),
-		inQuickOpen.value:        kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
-		searchViewletFocus.value: kb("list.focusUp"),
+		groogTerminalFindMode.value(): kb("groog.terminal.reverseFind"),
+		always.value():                kb("-workbench.action.quickOpen"),
+		and(editorTextFocus, suggestWidgetVisible.not()).value(): kb("groog.cursorUp"),
+		and(editorTextFocus, suggestWidgetVisible).value():       kb("selectPrevSuggestion"),
+		inQuickOpen.value():        kb("workbench.action.quickOpenNavigatePreviousInFilePicker"),
+		searchViewletFocus.value(): kb("list.focusUp"),
 	}
 }
 
 func downBindings() map[string]*KB {
 	return map[string]*KB{
-		groogTerminalFindMode.value: kb("groog.terminal.find"),
-		always.value:                kb("-workbench.action.files.newUntitledFile"),
-		editorTextFocus.and(suggestWidgetVisible.not()).value: kb("groog.cursorDown"),
-		editorTextFocus.and(suggestWidgetVisible).value:       kb("selectNextSuggestion"),
-		inQuickOpen.value:         kb("workbench.action.quickOpenNavigateNextInFilePicker"),
-		searchInputBoxFocus.value: kb("search.action.focusSearchList"),
-		searchInputBoxFocus.not().and(searchViewletFocus).value: kb("list.focusDown"),
+		groogTerminalFindMode.value(): kb("groog.terminal.find"),
+		always.value():                kb("-workbench.action.files.newUntitledFile"),
+		and(editorTextFocus, suggestWidgetVisible.not()).value(): kb("groog.cursorDown"),
+		and(editorTextFocus, suggestWidgetVisible).value():       kb("selectNextSuggestion"),
+		inQuickOpen.value():         kb("workbench.action.quickOpenNavigateNextInFilePicker"),
+		searchInputBoxFocus.value(): kb("search.action.focusSearchList"),
+		and(searchInputBoxFocus.not(), searchViewletFocus).value(): kb("list.focusDown"),
 	}
 }
 
@@ -1022,14 +1049,14 @@ func leftBindings() map[string]*KB {
 	return map[string]*KB{
 		// "workbench.action.quickPickManyToggle" was removed because we want
 		// left to just move the cursor in the quick open text to the left.
-		editorTextFocus.and(inQuickOpen.not()).value: kb("groog.cursorLeft"),
+		and(editorTextFocus, inQuickOpen.not()).value(): kb("groog.cursorLeft"),
 	}
 }
 
 func paste() map[string]*KB {
 	return map[string]*KB{
-		editorTextFocus.or(groogFindMode).value: kb("groog.paste"),
-		editorTextFocus.not().value:             kb("editor.action.clipboardPasteAction"),
+		or(editorTextFocus, groogFindMode).value(): kb("groog.paste"),
+		editorTextFocus.not().value():              kb("editor.action.clipboardPasteAction"),
 	}
 }
 
