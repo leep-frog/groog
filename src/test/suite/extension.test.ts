@@ -8103,6 +8103,9 @@ function testCases(): TestCase[] {
         "from nested import single",
       ],
       userInteractions: [
+        // TODO: remove this delay and fix reason issues happens
+        // Need to allow some time for file to load up (otherwise get copyImpot took too long error)
+        delay(3000),
         cmd("groog.copyImport"),
         cmd("groog.paste"),
       ],
