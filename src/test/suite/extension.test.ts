@@ -4,6 +4,7 @@ import * as assert from 'assert';
 // as well as import your extension to test it
 import { CloseQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectActiveItems, SelectItemQuickPickAction, SimpleTestCase, SimpleTestCaseProps, UserInteraction, Waiter, WorkspaceConfiguration, cmd, delay, openFile } from '@leep-frog/vscode-test-stubber';
 import * as vscode from 'vscode';
+import { AUTO_CLOSE_WINDOW_MS } from '../../character-functions';
 import { tabbify } from '../../emacs';
 import { Document, FIND_MEMORY_MS, FindQuickPickItem, FindRecord, Match } from '../../find';
 import { TestFileArgs } from '../../misc-command';
@@ -1687,6 +1688,10 @@ const closeAllEditors = cmd("workbench.action.closeEditorsAndGroup");
 
 function type(text: string): UserInteraction {
   return cmd("groog.type", { "text": text });
+}
+
+function typeDistinct(text: string): UserInteraction[] {
+  return text.split("").map(char => cmd("groog.type", { "text": char }));
 }
 
 function defaultType(text: string): UserInteraction {
@@ -9754,6 +9759,229 @@ function testCases(): TestCase[] {
           "Unset fixed test file",
         ],
       },
+    },
+    // autoClose type over tests
+    {
+      name: "Doesn't auto-close bracket if no previous event",
+      text: [
+        `]`,
+      ],
+      expectedText: [
+        `]]`,
+      ],
+      expectedSelections: [selection(0, 1)],
+      userInteractions: [
+        type("]"),
+      ],
+    },
+    {
+      name: "Auto closes nested brackets",
+      text: [],
+      expectedText: [
+        `[[[]]]`,
+      ],
+      expectedSelections: [selection(0, 3)],
+      userInteractions: [
+        type("["),
+        type("["),
+        type("["),
+      ],
+    },
+    {
+      name: "Doesn't auto-close bracket if different line number",
+      text: [
+        ``,
+        `[]`,
+        ``,
+      ],
+      expectedText: [
+        `[]`,
+        `[]]`,
+        ``,
+      ],
+      expectedSelections: [selection(1, 2)],
+      userInteractions: [
+        type("["),
+        cmd("groog.cursorDown"),
+        type("]"),
+      ],
+    },
+    {
+      name: "Doesn't auto-close bracket if different file",
+      text: [],
+      expectedText: [
+        `bracket example start`,
+        `[]]`,
+        `bracket example end`,
+        ``,
+      ],
+      expectedSelections: [selection(1, 2)],
+      userInteractions: [
+        type("\n"),
+        type("["),
+        openFile(startingFile("bracketExample.txt")),
+        cmd("groog.cursorRight"),
+        cmd("groog.cursorDown"),
+        type("]"),
+      ],
+    },
+    {
+      name: "Doesn't auto-close bracket if too much time has elapsed",
+      text: [],
+      expectedText: [
+        `[]]`,
+      ],
+      expectedSelections: [selection(0, 2)],
+      userInteractions: [
+        type("["),
+        delay(AUTO_CLOSE_WINDOW_MS),
+        type("]"),
+      ],
+    },
+    {
+      name: "Restarts auto-close timer with each new character",
+      text: [],
+      expectedText: [
+        `[[[xyz]]]]`,
+      ],
+      expectedSelections: [selection(0, 10)],
+      userInteractions: [
+        type("["),
+        delay(AUTO_CLOSE_WINDOW_MS / 2),
+        type("["),
+        delay(AUTO_CLOSE_WINDOW_MS / 2),
+        type("["),
+        delay(AUTO_CLOSE_WINDOW_MS / 2),
+        ...typeDistinct("xyz"),
+        ...typeDistinct("]]]]"),
+      ],
+    },
+    {
+      name: "Adds auto-close bracket",
+      text: [
+        ``,
+        `  abc = `,
+        ``,
+      ],
+      expectedText: [
+        ``,
+        `  abc = ['def']`,
+        ``,
+      ],
+      selections: [selection(1, 8)],
+      expectedSelections: [selection(1, 14)],
+      userInteractions: [
+        ...typeDistinct("['def'"), // Note no closing bracket here
+      ],
+    },
+    {
+      name: "Types over when same line",
+      text: [
+        ``,
+        `  abc = `,
+        ``,
+      ],
+      expectedText: [
+        ``,
+        `  abc = ['def'] # extra`,
+        ``,
+      ],
+      selections: [selection(1, 8)],
+      expectedSelections: [selection(1, 23)],
+      userInteractions: [
+        ...typeDistinct("['def'] # extra"),
+      ],
+    },
+    {
+      name: "Types over when same line even when some characters have been deleted",
+      // runSolo: true,
+      text: [
+        ``,
+        `  abc = `,
+        ``,
+      ],
+      expectedText: [
+        ``,
+        `  abc = ['dont worry about it']`,
+        ``,
+      ],
+      selections: [selection(1, 8)],
+      expectedSelections: [selection(1, 31)],
+      userInteractions: [
+        ...typeDistinct("['dont worry xyz"),
+        cmd("groog.deleteLeft"),
+        cmd("groog.deleteWordLeft"),
+        ...typeDistinct("about it']"),
+      ],
+    },
+    {
+      name: "Types over when same line even when some characters have been deleted",
+      text: [
+        ``,
+        `  abc = `,
+        ``,
+      ],
+      expectedText: [
+        ``,
+        `  abc = ['dont worry about it']`,
+        ``,
+      ],
+      selections: [selection(1, 8)],
+      expectedSelections: [selection(1, 31)],
+      userInteractions: [
+        ...typeDistinct("['dont worry xyz"),
+        cmd("groog.deleteLeft"),
+        cmd("groog.deleteWordLeft"),
+        ...typeDistinct("about it']"),
+      ],
+    },
+    {
+      name: "Only types over same number of brackets",
+      text: [
+        ``,
+        `  abc = `,
+        ``,
+      ],
+      expectedText: [
+        ``,
+        `  abc = [[['def']]]]`,
+        ``,
+      ],
+      selections: [selection(1, 8)],
+      // Note this is after first closing bracket: ]]_]]
+      expectedSelections: [selection(1, 18)],
+      userInteractions: [
+        ...typeDistinct("[[['def']]]"),
+        cmd("groog.cursorLeft"),
+        cmd("groog.cursorLeft"),
+        type("]"),
+      ],
+    },
+    {
+      name: "Only types over same number of brackets one at a time",
+      text: [
+        ``,
+        `  abc = `,
+        ``,
+      ],
+      expectedText: [
+        ``,
+        `  abc = [[['def']]]]`,
+        ``,
+      ],
+      selections: [selection(1, 8)],
+      // Note this is after first closing bracket: ]_]]
+      expectedSelections: [selection(1, 17)],
+      userInteractions: [
+        ...typeDistinct("[[['def']"),
+        // Types over the first two brackets, but not the third
+        cmd("groog.cursorLeft"),
+        type("]"),
+        cmd("groog.cursorLeft"),
+        type("]"),
+        cmd("groog.cursorLeft"),
+        type("]"),
+      ],
     },
     /* Useful for commenting out tests. */
   ];

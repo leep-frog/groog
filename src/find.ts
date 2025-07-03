@@ -8,7 +8,7 @@ import { positiveMod } from './misc-command';
 import { Record, Recorder } from './record';
 import dayjs = require('dayjs');
 
-function findColor(opacity?: number): string{
+function findColor(opacity?: number): string {
   return `rgba(200, 120, 0, ${opacity ?? 1})`;
 }
 
@@ -35,17 +35,17 @@ function escapeStringRegexp(s: string) {
 // _sorted because the type-wrapped functions below should be used
 const _sorted = require('sorted-array-functions');
 // This just type wraps sorted.gte (since sorted.gte is in javascript)
-function sortedGTE<T>(list: T[], value: T, cmp?: (a: T, b: T) => number) : number {
+function sortedGTE<T>(list: T[], value: T, cmp?: (a: T, b: T) => number): number {
   return _sorted.gte(list, value, cmp);
 }
 
 
-const maxFindCacheSize : number = 100;
+const maxFindCacheSize: number = 100;
 
 interface FindContext {
-  modified : boolean;
-  findText : string;
-  replaceText : string;
+  modified: boolean;
+  findText: string;
+  replaceText: string;
 }
 
 interface DocumentMatchProps {
@@ -129,10 +129,10 @@ export class Document {
         }
 
         // If the last character is a word character than the next one must not be.
-        if (WORD_PARTS.test(this.documentText[m.endIndex-1])) {
+        if (WORD_PARTS.test(this.documentText[m.endIndex - 1])) {
           if (m.endIndex < this.documentText.length && WORD_PARTS.test(this.documentText[m.endIndex])) {
             let lastIndex = m.endIndex;
-            for (; lastIndex < this.documentText.length && WORD_PARTS.test(this.documentText[lastIndex]); lastIndex++) {}
+            for (; lastIndex < this.documentText.length && WORD_PARTS.test(this.documentText[lastIndex]); lastIndex++) { }
             suggestibleMatches.add(this.documentText.substring(m.startIndex, lastIndex));
             return false;
           }
@@ -155,7 +155,7 @@ export class Document {
 
   private posFromIndex(index: number): vscode.Position {
     const line = sortedGTE(this.newlineIndices, index);
-    const lineStartIndex = line === 0 ? 0 : this.newlineIndices[line-1] + 1;
+    const lineStartIndex = line === 0 ? 0 : this.newlineIndices[line - 1] + 1;
     const char = index - lineStartIndex;
     return new vscode.Position(line, char);
   }
@@ -380,7 +380,7 @@ class FindContextCache {
     });
   }
 
-  public async startNew(findPrevOnType: boolean, initText?: string) : Promise<boolean> {
+  public async startNew(findPrevOnType: boolean, initText?: string): Promise<boolean> {
     const editor = vscode.window.activeTextEditor;
     this.nexts = 0;
     this.lastRefreshProps = {
@@ -405,7 +405,7 @@ class FindContextCache {
     if (this.cache.length > maxFindCacheSize) {
       this.cache = this.cache.slice(1);
     }
-    this.cacheIdx = this.cache.length-1;
+    this.cacheIdx = this.cache.length - 1;
     this.findPrevOnType = findPrevOnType;
     this.refreshMatches();
     return this.focusMatch().then(() => true);
@@ -444,12 +444,12 @@ class FindContextCache {
     this.replaceMode = false;
   }
 
-  private currentContext() : FindContext {
-    return this.cache[this.cacheIdx ?? this.cache.length-1];
+  private currentContext(): FindContext {
+    return this.cache[this.cacheIdx ?? this.cache.length - 1];
   }
 
   public async nextContext(): Promise<void> {
-    if (this.cacheIdx >= this.cache.length-1) {
+    if (this.cacheIdx >= this.cache.length - 1) {
       vscode.window.showInformationMessage("End of find cache");
       return;
     }
@@ -576,7 +576,7 @@ class FindContextCache {
     const matchText = !matchInfo ? `No results` : `${matchInfo.match.index + 1} of ${matches.length}`;
     const ctx = this.currentContext();
     const detail = this.replaceMode ? (ctx.replaceText.length === 0 ? "No replace text set" : this.appendVerticalLine(ctx.replaceText)) : undefined;
-    const suggestibleItems = suggestibleMatches.map((sm: string) : FindQuickPickItem => {
+    const suggestibleItems = suggestibleMatches.map((sm: string): FindQuickPickItem => {
       return {
         label: sm,
         pickable: true,
@@ -675,14 +675,14 @@ export const FIND_MEMORY_MS = process.env.TEST_MODE ? 400 : 2 * 60 * 1000;
 
 export class FindHandler extends TypeHandler {
   readonly whenContext: string = "find";
-  cache : FindContextCache;
+  cache: FindContextCache;
   // If true, go to the previous match when typing
-  findPrevOnType : boolean;
+  findPrevOnType: boolean;
   // If true, we have a simpler find interaction (specifically, don't
   // refreshMatches on every type).
-  simpleModeTracker : GlobalBoolTracker;
+  simpleModeTracker: GlobalBoolTracker;
   recorder: Recorder;
-  lastDeactivation : Dayjs;
+  lastDeactivation: Dayjs;
 
   constructor(cm: ColorMode, recorder: Recorder) {
     super(cm);
@@ -805,7 +805,7 @@ export class FindHandler extends TypeHandler {
       return this.deactivate();
     }
   }
-  onRedundantActivate(): void {}
+  onRedundantActivate(): void { }
 
   async deactivateCommands() {
     this.lastDeactivation = dayjs();
@@ -909,7 +909,7 @@ export class FindRecord implements Record {
 
     if (Math.abs(this.nexts) >= matchInfo.matches.length) {
       if (!repeatMode) {
-        vscode.window.showErrorMessage(`There are ${matchInfo.matches.length} matches, but the FindRecord requires at least ${Math.abs(this.nexts)+1}`);
+        vscode.window.showErrorMessage(`There are ${matchInfo.matches.length} matches, but the FindRecord requires at least ${Math.abs(this.nexts) + 1}`);
       }
       return false;
     }

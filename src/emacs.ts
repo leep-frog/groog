@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { handleDeleteCharacter, handleTypedCharacter } from './character-functions';
+import { characterFunctionTestReset, handleDeleteCharacter, handleTypedCharacter } from './character-functions';
 import { ColorMode } from './color_mode';
 import { FindHandler } from './find';
 import { getPrefixText, Registerable, TypeHandler } from './handler';
@@ -244,6 +244,7 @@ export class Emacs {
           await h.testReset();
         }
         miscTestReset();
+        characterFunctionTestReset();
         this.typoFixer.reload(true);
         stubs.configureForTest(trArgs.execStubs || [], trArgs.wantSendTerminalCommandArgs || []);
       } else {
