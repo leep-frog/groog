@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.74",
+  "version": "2.7.75",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -220,6 +220,10 @@
         "title": "Groog MultiCommand"
       },
       {
+        "command": "groog.noTest",
+        "title": "Groog No Test"
+      },
+      {
         "command": "groog.paste",
         "title": "Groog Paste"
       },
@@ -322,6 +326,10 @@
       {
         "command": "groog.yank",
         "title": "Emacs Yank"
+      },
+      {
+        "command": "groog.yesTest",
+        "title": "Groog Yes Test"
       }
     ],
     "keybindings": [

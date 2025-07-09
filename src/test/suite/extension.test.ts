@@ -9983,6 +9983,139 @@ function testCases(): TestCase[] {
         type("]"),
       ],
     },
+    // Tests for noTest and yesTest
+    {
+      name: "noTest does nothing if no matches",
+      text: [
+        ``,
+        `  def do_thing():`,
+        `    pass`,
+        ``,
+      ],
+      expectedText: [
+        ``,
+        `  def do_thing():`,
+        `    pass`,
+        ``,
+      ],
+      userInteractions: [
+        cmd("groog.noTest"),
+      ],
+    },
+    {
+      name: "noTest replaces single match",
+      text: [
+        ``,
+        `  def test_thing():`,
+        `    pass`,
+        ``,
+      ],
+      expectedText: [
+        ``,
+        `  def no_test_thing():`,
+        `    pass`,
+        ``,
+      ],
+      userInteractions: [
+        cmd("groog.noTest"),
+      ],
+    },
+    {
+      name: "noTest replaces multiple matches",
+      text: [
+        ``,
+        `  def test_thing():`,
+        `    pass`,
+        ``,
+        `  def no_test_already():`,
+        `    pass`,
+        ``,
+        `  def test_other_thing():`,
+        `    pass`,
+        ``,
+      ],
+      expectedText: [
+        ``,
+        `  def no_test_thing():`,
+        `    pass`,
+        ``,
+        `  def no_test_already():`,
+        `    pass`,
+        ``,
+        `  def no_test_other_thing():`,
+        `    pass`,
+        ``,
+      ],
+      userInteractions: [
+        cmd("groog.noTest"),
+      ],
+    },
+    {
+      name: "yesTest does nothing if no matches",
+      text: [
+        ``,
+        `  def do_thing():`,
+        `    pass`,
+        ``,
+      ],
+      expectedText: [
+        ``,
+        `  def do_thing():`,
+        `    pass`,
+        ``,
+      ],
+      userInteractions: [
+        cmd("groog.yesTest"),
+      ],
+    },
+    {
+      name: "yesTest replaces single match",
+      text: [
+        ``,
+        `  def no_test_thing():`,
+        `    pass`,
+        ``,
+      ],
+      expectedText: [
+        ``,
+        `  def test_thing():`,
+        `    pass`,
+        ``,
+      ],
+      userInteractions: [
+        cmd("groog.yesTest"),
+      ],
+    },
+    {
+      name: "yesTest replaces multiple matches",
+      text: [
+        ``,
+        `  def no_test_thing():`,
+        `    pass`,
+        ``,
+        `  def test_already():`,
+        `    pass`,
+        ``,
+        `  def no_test_other_thing():`,
+        `    pass`,
+        ``,
+      ],
+      expectedText: [
+        ``,
+        `  def test_thing():`,
+        `    pass`,
+        ``,
+        `  def test_already():`,
+        `    pass`,
+        ``,
+        `  def test_other_thing():`,
+        `    pass`,
+        ``,
+      ],
+      userInteractions: [
+        cmd("groog.yesTest"),
+      ],
+    },
     /* Useful for commenting out tests. */
   ];
 }

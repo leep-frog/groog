@@ -51,6 +51,14 @@ export const miscCommands: MiscCommand[] = [
     f: miscEditorFunc((e: vscode.TextEditor) => copyFilePath(e, true)),
   },
   {
+    name: "noTest",
+    f: miscEditorFunc((e: vscode.TextEditor) => replaceInEditor(e, "def test", "def no_test")),
+  },
+  {
+    name: "yesTest",
+    f: miscEditorFunc((e: vscode.TextEditor) => replaceInEditor(e, "def no_test", "def test")),
+  },
+  {
     name: "testFile",
     f: (e: Emacs, mc: TestFileArgs) => testFile(mc, e.lastVisitedFile),
   },
@@ -205,6 +213,26 @@ async function copyFilePath(editor: vscode.TextEditor, link: boolean) {
     // Copy link
     vscode.env.clipboard.writeText(copyText);
     vscode.window.showInformationMessage(link ? `File link copied!` : `File path copied!`);
+  });
+
+}
+
+async function replaceInEditor(editor: vscode.TextEditor, from: string, to: string): Promise<any> {
+  return editor.edit(eb => {
+    // Replace all occurrences of 'from' with 'to'
+    const lines = editor.document.getText().split("\n");
+
+    lines.forEach((line, idx) => {
+      const matchAt = line.indexOf(from);
+      if (matchAt < 0) {
+        return;
+      }
+
+      eb.replace(new vscode.Range(
+        new vscode.Position(idx, matchAt),
+        new vscode.Position(idx, matchAt + from.length)
+      ), to);
+    });
   });
 
 }
