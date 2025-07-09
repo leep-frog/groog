@@ -83,6 +83,7 @@ var (
 		cc("groog.copyFilePath", "Groog Copy File Path"),
 		cc("groog.noTest", "Groog No Test"),
 		cc("groog.yesTest", "Groog Yes Test"),
+		cc("groog.toggleYesNoTest", "Groog Toggle Yes/No Test"),
 		cc("groog.reverseFind", "Groog reverse find"),
 		cc("groog.terminal.find", "Groog find in terminal"),
 		cc("groog.terminal.reverseFind", "Groog find in terminal"),

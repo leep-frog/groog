@@ -52,11 +52,15 @@ export const miscCommands: MiscCommand[] = [
   },
   {
     name: "noTest",
-    f: miscEditorFunc((e: vscode.TextEditor) => replaceInEditor(e, "def test", "def no_test")),
+    f: miscEditorFunc((e: vscode.TextEditor) => noTest(e)),
   },
   {
     name: "yesTest",
-    f: miscEditorFunc((e: vscode.TextEditor) => replaceInEditor(e, "def no_test", "def test")),
+    f: miscEditorFunc((e: vscode.TextEditor) => yesTest(e)),
+  },
+  {
+    name: "toggleYesNoTest",
+    f: miscEditorFunc((e: vscode.TextEditor) => toggleYesNoTest(e)),
   },
   {
     name: "testFile",
@@ -215,6 +219,21 @@ async function copyFilePath(editor: vscode.TextEditor, link: boolean) {
     vscode.window.showInformationMessage(link ? `File link copied!` : `File path copied!`);
   });
 
+}
+
+async function toggleYesNoTest(editor: vscode.TextEditor): Promise<any> {
+  if (editor.document.getText().includes("def no_test")) {
+    return yesTest(editor);
+  }
+  return noTest(editor);
+}
+
+async function yesTest(editor: vscode.TextEditor): Promise<any> {
+  return replaceInEditor(editor, "def no_test", "def test");
+}
+
+async function noTest(editor: vscode.TextEditor): Promise<any> {
+  return replaceInEditor(editor, "def test", "def no_test");
 }
 
 async function replaceInEditor(editor: vscode.TextEditor, from: string, to: string): Promise<any> {

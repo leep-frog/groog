@@ -304,6 +304,10 @@
         "title": "Emacs Toggle QMK"
       },
       {
+        "command": "groog.toggleYesNoTest",
+        "title": "Groog Toggle Yes/No Test"
+      },
+      {
         "command": "groog.trimClipboard",
         "title": "Groog Trim Clipboard"
       },
