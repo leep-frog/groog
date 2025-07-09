@@ -692,6 +692,7 @@ var (
 		},
 		alt(shift("m")): onlyKBWhen(kb("notebook.cell.insertMarkdownCellBelow"), notebookEditorFocused),
 
+		ctrlZ("y"): only("groog.toggleYesNoTest"),
 		ctrlZ("t"): only("groog.toggleFixedTestFile"),
 		ctrlX("t"): {
 			goFile.value(): mcWithArgs(

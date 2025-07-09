@@ -2174,6 +2174,14 @@
         "command": "faves.toggle"
       },
       {
+        "key": "ctrl+z y",
+        "command": "groog.toggleYesNoTest"
+      },
+      {
+        "key": "ctrl+z ctrl+y",
+        "command": "groog.toggleYesNoTest"
+      },
+      {
         "key": "d",
         "command": "groog.type",
         "when": "editorTextFocus || focusedView == 'workbench.panel.repl.view' || findInputFocussed || inQuickOpen && groog.context.findMode",
