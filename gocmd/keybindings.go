@@ -502,7 +502,7 @@ var (
 			and(groogQMK, groogFindMode.not()).value(): kb("workbench.action.files.newUntitledFile"),
 		},
 		ctrlX("d"):       only("editor.action.revealDefinition"),
-		ctrlZ("d"):       only("cSpell.addWordToUserDictionary"),
+		ctrlZ("d"):       revealInNewEditor,
 		ctrlZ(delete):    only("cSpell.addWordToUserDictionary"),
 		ctrlZ("n"):       only("cSpell.goToNextSpellingIssue"),
 		ctrlZ(down):      only("cSpell.goToNextSpellingIssue"), // ~= qmk ctrl+z ctrl+n (since ctrl+n is down arrow)

@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.75",
+  "version": "2.7.76",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -2055,11 +2055,31 @@
       },
       {
         "key": "ctrl+z d",
-        "command": "cSpell.addWordToUserDictionary"
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            {
+              "command": "workbench.action.splitEditorRight"
+            },
+            {
+              "command": "editor.action.revealDefinition"
+            }
+          ]
+        }
       },
       {
         "key": "ctrl+z ctrl+d",
-        "command": "cSpell.addWordToUserDictionary"
+        "command": "groog.multiCommand.execute",
+        "args": {
+          "sequence": [
+            {
+              "command": "workbench.action.splitEditorRight"
+            },
+            {
+              "command": "editor.action.revealDefinition"
+            }
+          ]
+        }
       },
       {
         "key": "ctrl+z delete",
