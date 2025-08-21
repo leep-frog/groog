@@ -7,11 +7,14 @@ func groogPackage(versionOverride string) *Package {
 		Name:        "groog",
 		DisplayName: "groog",
 		Description: "",
-		Version:     "2.7.76",
+		Version:     "2.7.78",
 		Publisher:   "groogle",
 		Main:        "./bundled-out/extension.js",
 		Engines: map[string]string{
 			"vscode": "^1.96.0",
+		},
+		ExtensionKind: []string{
+			"ui",
 		},
 		Repository: &Repository{
 			Type: "git",
@@ -111,6 +114,7 @@ type Package struct {
 	DevDependencies  map[string]string `json:"devDependencies"`
 	ActivationEvents []string          `json:"activationEvents"`
 	Contributes      *Contribution     `json:"contributes"`
+	ExtensionKind    []string          `json:"extensionKind"`
 }
 
 func (p *Package) sort() {

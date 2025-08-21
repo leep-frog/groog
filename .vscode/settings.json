@@ -15,6 +15,11 @@
     {
       "path": "c:\\Users\\gleep\\Desktop\\Coding\\vs-code\\groog\\gocmd\\keybindings.go",
       "alias": "kb"
+    },
+    {
+      "path": "c:\\Users\\gleep\\Desktop\\Coding\\vs-code\\groog\\src\\test\\suite\\extension.test.ts",
+      "scheme": "file",
+      "alias": "t"
     }
   ],
 }
