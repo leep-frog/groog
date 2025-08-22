@@ -5,8 +5,8 @@ import path = require('path');
 
 
 export interface LanguageSpec {
-  suffix: string;
-  languageId: string;
+  suffix: string | string[];
+  languageId: string | string[];
   testingBehavior(args: TestFileArgs, file: vscode.Uri): Promise<any>;
   copyImport?: (document: vscode.TextDocument) => Promise<any>;
   indentInferred?: (firstLine: string, secondLine: string) => boolean;
@@ -29,6 +29,17 @@ function getRelativeWorkspacePath(fileUri: vscode.Uri): string | undefined {
   return path.relative(workspaceFolder.uri.fsPath, fileUri.fsPath).replace(/\\/g, '/');
 }
 
+function importFromRelativePath(document: vscode.TextDocument, pathToImport: (p: string) => string) {
+  const relativePath = getRelativeWorkspacePath(document.uri);
+  if (!relativePath) {
+    vscode.window.showErrorMessage(`File is not in a VS Code workspace`);
+    // (if ever needed) use git relative path instead
+    return;
+  }
+
+  return vscode.env.clipboard.writeText(pathToImport(relativePath));
+}
+
 class PythonSpec implements LanguageSpec {
   suffix: string = "py";
   languageId: string = "python";
@@ -38,17 +49,11 @@ class PythonSpec implements LanguageSpec {
   }
 
   async copyImport(document: vscode.TextDocument): Promise<any> {
-    const relativePath = getRelativeWorkspacePath(document.uri);
-    if (!relativePath) {
-      vscode.window.showErrorMessage(`File is not in a VS Code workspace`);
-      // (if ever needed) use git relative path instead
-      return;
-    }
-
-    const importParts = relativePath.split("/");
-    const from = importParts.length > 1 ? `from ${importParts.slice(undefined, -1).join(".")} ` : ``;
-    const importStatement = `${from}import ${path.parse(importParts.at(-1)!).name}`;
-    return vscode.env.clipboard.writeText(importStatement);
+    return importFromRelativePath(document, (relativePath: string) => {
+      const importParts = relativePath.split("/");
+      const from = importParts.length > 1 ? `from ${importParts.slice(undefined, -1).join(".")} ` : ``;
+      return `${from}import ${path.parse(importParts.at(-1)!).name}`;
+    });
   }
 
   indentInferred(firstLine: string, secondLine: string): boolean {
@@ -86,8 +91,26 @@ class JavaSpec implements LanguageSpec {
     }
     vscode.window.showErrorMessage(`No import statement found!`);
   }
+}
 
+class CSpec implements LanguageSpec {
 
+  suffix: string[] = ["c", "h"];
+  languageId: string[] = ["c", "cpp"];
+
+  async testingBehavior(args: TestFileArgs, file: vscode.Uri): Promise<void> {
+    return stubs.sendTerminalCommandFunc(args, `qt`);
+  }
+
+  async copyImport(document: vscode.TextDocument): Promise<any> {
+    return importFromRelativePath(document, (relativePath: string) => {
+      return `#include "${relativePath}"`;
+    });
+  }
+
+  indentInferred(firstLine: string, secondLine: string): boolean {
+    return firstLine.trim().endsWith(":");
+  }
 }
 
 class TypescriptSpec implements LanguageSpec {
@@ -145,14 +168,27 @@ const LANGUAGE_SPECS: LanguageSpec[] = [
   new JavascriptSpec(),
   new MochaSpec(),
   new JsonSpec(),
+  new CSpec(),
 ];
 
 const SUFFIX_TO_SPEC: Map<string, LanguageSpec> = new Map<string, LanguageSpec>(
-  LANGUAGE_SPECS.map(languageSpec => [languageSpec.suffix, languageSpec])
+  LANGUAGE_SPECS.flatMap(languageSpec => {
+
+    if (typeof languageSpec.suffix === "string") {
+      return [[languageSpec.suffix, languageSpec]];
+    }
+    return languageSpec.suffix.map(suffix => [suffix, languageSpec]);
+  })
 );
 
 const LANGUAGE_ID_TO_SPEC: Map<string, LanguageSpec> = new Map<string, LanguageSpec>(
-  LANGUAGE_SPECS.map(languageSpec => [languageSpec.languageId, languageSpec])
+  LANGUAGE_SPECS.flatMap(languageSpec => {
+
+    if (typeof languageSpec.languageId === "string") {
+      return [[languageSpec.languageId, languageSpec]];
+    }
+    return languageSpec.languageId.map(languageId => [languageId, languageSpec]);
+  })
 );
 
 export function getLanguageSpec(document: vscode.TextDocument): LanguageSpec

@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.78",
+  "version": "2.7.79",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -12,9 +12,6 @@
     "type": "git",
     "url": "https://github.com/leep-frog/vs-extension"
   },
-  "extensionKind": [
-    "ui"
-  ],
   "categories": [
     "Other"
   ],
@@ -3140,5 +3137,8 @@
         "language": "java"
       }
     ]
-  }
+  },
+  "extensionKind": [
+    "ui"
+  ]
 }

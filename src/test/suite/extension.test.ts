@@ -8141,6 +8141,44 @@ function testCases(): TestCase[] {
         ],
       }
     },
+    // copyImport - c
+    {
+      name: "Successfully copies c import",
+      file: startingFile("nothing.c"),
+      expectedText: [
+        `#include "nothing.c"`,
+      ],
+      userInteractions: [
+        cmd("groog.copyImport"),
+        cmd("groog.paste"),
+      ],
+      expectedSelections: [selection(0, 20)],
+    },
+    {
+      name: "Successfully copies c.h import",
+      file: startingFile("nested", "nothing.h"),
+      expectedText: [
+        `#include "nested/nothing.h"`,
+      ],
+      userInteractions: [
+        cmd("groog.copyImport"),
+        cmd("groog.paste"),
+      ],
+      expectedSelections: [selection(0, 27)],
+    },
+    {
+      name: "copyImport fails on c file outside workspace",
+      file: startingFile("..", "outside-workspace", "outside.c"),
+      expectedText: [],
+      userInteractions: [
+        cmd("groog.copyImport"),
+      ],
+      errorMessage: {
+        expectedMessages: [
+          "File is not in a VS Code workspace",
+        ],
+      }
+    },
     // copyImport - java
     {
       name: "Successfully copies import",
