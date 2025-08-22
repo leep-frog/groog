@@ -704,7 +704,16 @@ var (
 				},
 			),
 			// For all other file types, use the custom function
-			notGoFile.value(): mcWithArgs(
+			and(notGoFile, activePanel).value(): mcWithArgs(
+				&KB{
+					Command: "groog.testFile",
+					Args: map[string]interface{}{
+						"part": 2,
+					},
+				},
+				// If active panel, don't toggle the panel
+			),
+			and(notGoFile, activePanel.not()).value(): mcWithArgs(
 				&KB{
 					Command: "groog.testFile",
 					Args: map[string]interface{}{
@@ -922,7 +931,7 @@ func keyboardSplit(basicKB, qmkKB *KB) map[string]*KB {
 	return contextualKB(groogQMK, qmkKB, basicKB)
 }
 
-// panelSplit runs panelKB if the panel is avtice (i.e. visible) (so it may or
+// panelSplit runs panelKB if the panel is active (i.e. visible) (so it may or
 // may not be focused), and otherKB otherwise.
 func panelSplit(panelKB, otherKB *KB) map[string]*KB {
 	return contextualKB(activePanel, panelKB, otherKB)

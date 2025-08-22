@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.79",
+  "version": "2.7.80",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -1880,7 +1880,7 @@
       {
         "key": "ctrl+x t",
         "command": "groog.multiCommand.execute",
-        "when": "resourceLangId != go",
+        "when": "resourceLangId != go && !activePanel",
         "args": {
           "sequence": [
             {
@@ -1902,7 +1902,7 @@
       {
         "key": "ctrl+x ctrl+t",
         "command": "groog.multiCommand.execute",
-        "when": "resourceLangId != go",
+        "when": "resourceLangId != go && !activePanel",
         "args": {
           "sequence": [
             {
@@ -1917,6 +1917,36 @@
                 "part": 1
               },
               "delay": 25
+            }
+          ]
+        }
+      },
+      {
+        "key": "ctrl+x t",
+        "command": "groog.multiCommand.execute",
+        "when": "resourceLangId != go && activePanel",
+        "args": {
+          "sequence": [
+            {
+              "command": "groog.testFile",
+              "args": {
+                "part": 2
+              }
+            }
+          ]
+        }
+      },
+      {
+        "key": "ctrl+x ctrl+t",
+        "command": "groog.multiCommand.execute",
+        "when": "resourceLangId != go && activePanel",
+        "args": {
+          "sequence": [
+            {
+              "command": "groog.testFile",
+              "args": {
+                "part": 2
+              }
             }
           ]
         }

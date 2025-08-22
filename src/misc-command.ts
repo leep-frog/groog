@@ -133,14 +133,30 @@ const TERMINAL_KILL_CHAR = "\u000B";
 export async function sendTerminalCommand(args: TestFileArgs, command: string) {
   const terminal = vscode.window.activeTerminal ?? vscode.window.createTerminal();
 
-  const text = args.part === 0 ? [
+  const textSetup = [
     // Exit git diff view (or any file terminal view)
     "q",
     // Move cursor to the beginning
     HOME_UNICODE_CHAR,
     // Remove any characters after the command we just added
     TERMINAL_KILL_CHAR,
-  ] : [command];
+  ];
+
+  const text = [];
+  switch (args.part) {
+    case 0:
+      text.push(...textSetup);
+      break;
+    case 1:
+      text.push(command);
+    case 2:
+      text.push(...textSetup, command);
+      break;
+    default:
+      vscode.window.showErrorMessage(`Must provide part`);
+      return;
+  }
+
   terminal.sendText(text.join(""), args.part !== 0);
 
   if (args.part === 1) {
