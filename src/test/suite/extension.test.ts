@@ -9734,7 +9734,7 @@ function testCases(): TestCase[] {
         cmd("groog.testFile"),
       ],
       wantSendTerminalCommands: [
-        [undefined, `prt ${startingFile("blank.py").replace(/^C/, 'c')}`],
+        [undefined, `prt ${startingFile("blank.py").replace(/^C/, 'c')}`.replace(/\\/g, '/')],
       ],
     },
     {
@@ -9789,7 +9789,7 @@ function testCases(): TestCase[] {
         // typescript file
         [undefined, "npm run test"],
         // python file
-        [undefined, `prt ${startingFile("blank.py").replace(/^C/, 'c')}`],
+        [undefined, `prt ${startingFile("blank.py").replace(/^C/, 'c')}`.replace(/\\/g, '/')],
       ],
       informationMessage: {
         expectedMessages: [
