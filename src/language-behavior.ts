@@ -45,12 +45,12 @@ class PythonSpec implements LanguageSpec {
   languageId: string = "python";
 
   async testingBehavior(args: TestFileArgs, file: vscode.Uri): Promise<void> {
-    return stubs.sendTerminalCommandFunc(args, `prt ${file.fsPath}`);
+    return stubs.sendTerminalCommandFunc(args, `prt ${file.fsPath}`.replace(/\\/g, '/'));
   }
 
   async copyImport(document: vscode.TextDocument): Promise<any> {
     return importFromRelativePath(document, (relativePath: string) => {
-      const importParts = relativePath.split("/");
+      const importParts = relativePath.split(/[\/\\]/);
       const from = importParts.length > 1 ? `from ${importParts.slice(undefined, -1).join(".")} ` : ``;
       return `${from}import ${path.parse(importParts.at(-1)!).name}`;
     });
