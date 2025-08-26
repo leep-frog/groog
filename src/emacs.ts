@@ -246,7 +246,7 @@ export class Emacs {
         miscTestReset();
         characterFunctionTestReset();
         this.typoFixer.reload(true);
-        stubs.configureForTest(trArgs.execStubs || [], trArgs.wantSendTerminalCommandArgs || []);
+        stubs.configureForTest(trArgs.execStubs || [], trArgs.wantSendTerminalCommandArgs || [], trArgs.gitStub);
       } else {
         vscode.window.showErrorMessage(`Cannot run test.reset outside of test mode!`);
       }

@@ -142,6 +142,7 @@ var (
 	sideBarFocus            = wc("sideBarFocus")
 	suggestWidgetVisible    = wc("suggestWidgetVisible")
 	terminalFocus           = wc("terminalFocus")
+	inlineChatVisible       = wc("inlineChatVisible")
 	// terminal.visible is true even when the terminal is in the back,
 	// hence why we need to use view.terminal.visible here.
 	terminalVisible     = wc("view.terminal.visible")
@@ -377,10 +378,17 @@ var (
 		pagedown:         ctrlVBindings(),
 		shift(pagedown):  ctrlShiftVBindings(),
 		ctrl(shift("p")): only("groog.find.previous"),
-		alt("s"): {
-			auxiliaryBarVisible.value():                                 kb("workbench.action.toggleAuxiliaryBar"),
-			auxiliaryBarVisible.not().value():                           kb("workbench.panel.chat.view.copilot.focus"),
-			"!gitlens:disabled && config.gitlens.keymap == 'alternate'": kb("-gitlens.showQuickRepoStatus"),
+		ctrlZ("l"): {
+			inlineChatVisible.value():       kb("inlineChat.close"),
+			inlineChatVisible.not().value(): kb("inlineChat.start"),
+		},
+		ctrlZ("pageup"): {
+			inlineChatVisible.value():       kb("inlineChat.close"),
+			inlineChatVisible.not().value(): kb("inlineChat.start"),
+		},
+		ctrlZ(";"): {
+			auxiliaryBarVisible.value():       kb("workbench.action.toggleAuxiliaryBar"),
+			auxiliaryBarVisible.not().value(): kb("workbench.panel.chat.view.copilot.focus"),
 		},
 		alt("q"): only("editor.action.inlineSuggest.trigger"),
 		shift(up): {
@@ -461,6 +469,7 @@ var (
 		alt(delete):  textOnly("groog.deleteWordRight"),
 		ctrl(delete): textOnly("groog.deleteWordRight"),
 		alt("x"):     only("workbench.action.showCommands"),
+		ctrlZ("x"):   only("workbench.action.showCommands"),
 		ctrlX("l"):   only("workbench.action.gotoLine"),
 		// nextPanelView was removed from ctrl+l because we want that
 		// to work as regular jump behavior in terminal editors (e.g. `git diff` interactions)

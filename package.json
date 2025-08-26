@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.81",
+  "version": "2.7.82",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -662,21 +662,6 @@
         "key": "alt+r",
         "command": "toggleSearchRegex",
         "when": "searchViewletFocus"
-      },
-      {
-        "key": "alt+s",
-        "command": "workbench.panel.chat.view.copilot.focus",
-        "when": "!auxiliaryBarVisible"
-      },
-      {
-        "key": "alt+s",
-        "command": "-gitlens.showQuickRepoStatus",
-        "when": "!gitlens:disabled && config.gitlens.keymap == 'alternate'"
-      },
-      {
-        "key": "alt+s",
-        "command": "workbench.action.toggleAuxiliaryBar",
-        "when": "auxiliaryBarVisible"
       },
       {
         "key": "alt+shift+c",
@@ -2068,6 +2053,26 @@
         }
       },
       {
+        "key": "ctrl+z ;",
+        "command": "workbench.panel.chat.view.copilot.focus",
+        "when": "!auxiliaryBarVisible"
+      },
+      {
+        "key": "ctrl+z ctrl+;",
+        "command": "workbench.panel.chat.view.copilot.focus",
+        "when": "!auxiliaryBarVisible"
+      },
+      {
+        "key": "ctrl+z ;",
+        "command": "workbench.action.toggleAuxiliaryBar",
+        "when": "auxiliaryBarVisible"
+      },
+      {
+        "key": "ctrl+z ctrl+;",
+        "command": "workbench.action.toggleAuxiliaryBar",
+        "when": "auxiliaryBarVisible"
+      },
+      {
         "key": "ctrl+z b",
         "command": "gitlens.toggleLineBlame"
       },
@@ -2184,6 +2189,26 @@
         "command": "groog.toggleQMK"
       },
       {
+        "key": "ctrl+z l",
+        "command": "inlineChat.start",
+        "when": "!inlineChatVisible"
+      },
+      {
+        "key": "ctrl+z ctrl+l",
+        "command": "inlineChat.start",
+        "when": "!inlineChatVisible"
+      },
+      {
+        "key": "ctrl+z l",
+        "command": "inlineChat.close",
+        "when": "inlineChatVisible"
+      },
+      {
+        "key": "ctrl+z ctrl+l",
+        "command": "inlineChat.close",
+        "when": "inlineChatVisible"
+      },
+      {
         "key": "ctrl+z left",
         "command": "gitlens.toggleLineBlame"
       },
@@ -2208,6 +2233,26 @@
         "key": "ctrl+z ctrl+pagedown",
         "command": "faves.toggle",
         "when": "groog.context.qmkMode"
+      },
+      {
+        "key": "ctrl+z pageup",
+        "command": "inlineChat.start",
+        "when": "!inlineChatVisible"
+      },
+      {
+        "key": "ctrl+z ctrl+pageup",
+        "command": "inlineChat.start",
+        "when": "!inlineChatVisible"
+      },
+      {
+        "key": "ctrl+z pageup",
+        "command": "inlineChat.close",
+        "when": "inlineChatVisible"
+      },
+      {
+        "key": "ctrl+z ctrl+pageup",
+        "command": "inlineChat.close",
+        "when": "inlineChatVisible"
       },
       {
         "key": "ctrl+z right",
@@ -2242,6 +2287,14 @@
       {
         "key": "ctrl+z ctrl+v",
         "command": "faves.toggle"
+      },
+      {
+        "key": "ctrl+z x",
+        "command": "workbench.action.showCommands"
+      },
+      {
+        "key": "ctrl+z ctrl+x",
+        "command": "workbench.action.showCommands"
       },
       {
         "key": "ctrl+z y",

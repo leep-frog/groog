@@ -7,6 +7,7 @@ import { sendTerminalCommand, TestFileArgs } from './misc-command';
 export interface TestResetArgs {
   execStubs?: ExecStub[];
   wantSendTerminalCommandArgs?: [TestFileArgs | undefined, string][];
+  gitStub?: ScopedGitAPI;
 }
 
 export interface ExecStub {
@@ -35,7 +36,7 @@ export class Stubbers {
   gotTerminalArgs: [TestFileArgs | undefined, string][];
   wantTerminalArgs: [TestFileArgs | undefined, string][];
 
-  gitApi: () => GitAPI | undefined;
+  gitApi: () => ScopedGitAPI | undefined;
 
   constructor(execFunc: (cmd: string, f: (err: any, stdout: string, stderr: string) => any) => any, sendTerminalCommandFunc: (args: TestFileArgs, command: string) => any, gitAPI: () => GitAPI | undefined) {
     this.execFunc = execFunc;
@@ -49,7 +50,7 @@ export class Stubbers {
     this.gitApi = gitAPI;
   };
 
-  configureForTest(stubs: ExecStub[], wantSendTerminalCommandArgs: [TestFileArgs | undefined, string][]) {
+  configureForTest(stubs: ExecStub[], wantSendTerminalCommandArgs: [TestFileArgs | undefined, string][], gitStub?: ScopedGitAPI) {
     this.gotExecArgs = [];
     this.wantExecArgs = stubs.map(es => es.wantArgs);
     this.execFunc = (cmd: string, f: (err: any, stdout: string, stderr: string) => any): any => {
@@ -69,6 +70,9 @@ export class Stubbers {
     this.sendTerminalCommandFunc = (args: TestFileArgs, command: string) => {
       this.gotTerminalArgs.push([args, command]);
     };
+    this.gitApi = () => {
+      return gitStub;
+    }
   }
 
   verify() {

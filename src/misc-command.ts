@@ -223,7 +223,7 @@ async function copyFilePath(editor: vscode.TextEditor, link: boolean) {
     return;
   }
 
-  const repo = git.repositories.at(0);
+  const repo = git?.repositories?.at(0);
   if (!repo) {
     vscode.window.showErrorMessage(`No git repository found`);
     return;

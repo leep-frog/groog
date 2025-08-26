@@ -23,6 +23,7 @@ export enum CtrlGCommand {
   WorkbenchActionTerminalHideFind = "workbench.action.terminal.hideFind",
   CloseReferenceSearch = "closeReferenceSearch",
   CloseMarkersNavigation = "closeMarkersNavigation",
+  InlineChatClose = "inlineChat.close",
 }
 
 export enum DeleteCommand {
@@ -32,6 +33,6 @@ export enum DeleteCommand {
   WordRight = "deleteWordRight",
 }
 
-export async function setGroogContext(context : string, value : boolean) {
+export async function setGroogContext(context: string, value: boolean) {
   await vscode.commands.executeCommand('setContext', `groog.context.${context}Mode`, value);
 }

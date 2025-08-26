@@ -4,12 +4,13 @@ import * as assert from 'assert';
 // as well as import your extension to test it
 import { CloseQuickPickAction, PressItemButtonQuickPickAction, PressUnknownButtonQuickPickAction, SelectActiveItems, SelectItemQuickPickAction, SimpleTestCase, SimpleTestCaseProps, UserInteraction, Waiter, WorkspaceConfiguration, cmd, delay, openFile } from '@leep-frog/vscode-test-stubber';
 import * as vscode from 'vscode';
+import { Remote, Repository, RepositoryState } from '../../../typings/git';
 import { AUTO_CLOSE_WINDOW_MS } from '../../character-functions';
 import { tabbify } from '../../emacs';
 import { Document, FIND_MEMORY_MS, FindQuickPickItem, FindRecord, Match } from '../../find';
 import { TestFileArgs } from '../../misc-command';
 import { CommandRecord, Record, RecordBook, TypeRecord } from '../../record';
-import { ExecStub, TestResetArgs } from '../../stubs';
+import { ExecStub, ScopedGitAPI, TestResetArgs } from '../../stubs';
 import { Correction } from '../../typos';
 import path = require('path');
 
@@ -25,6 +26,19 @@ const tabbifyTestCases = [
 ];
 
 const endCommentString = "*" + "/";
+
+interface FakeRemote {
+  name: string;
+  fetchUrl: string;
+}
+
+function fakeRepoState(remotes: FakeRemote[]): Repository {
+  return {
+    state: ({
+      remotes: remotes.map(r => (r as Remote)),
+    } as RepositoryState),
+  } as Repository;
+}
 
 suite('tabbify tests', () => {
   tabbifyTestCases.forEach(tc => {
@@ -1743,6 +1757,7 @@ export interface TestCase extends SimpleTestCaseProps {
   runSolo?: boolean;
   clipboard?: string[];
   execStubs?: ExecStub[];
+  gitStub?: ScopedGitAPI;
   wantSendTerminalCommands?: [TestFileArgs | undefined, string][];
 
   // TODO: Remove after this issue is fixed
@@ -7852,7 +7867,7 @@ function testCases(): TestCase[] {
       },
     },
     {
-      name: "Fails to copy file name if exec error",
+      name: "Fails to copy file name if no git info",
       file: startingFile("empty.go"),
       expectedText: [
         "package main",
@@ -7862,13 +7877,10 @@ function testCases(): TestCase[] {
         "}",
         "",
       ],
-      execStubs: [{
-        wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
-        err: "oops",
-      }],
+      gitStub: undefined,
       errorMessage: {
         expectedMessages: [
-          `Failed to get git repository info: oops; stderr:\n`,
+          `Could not access git API`,
         ],
       },
       userInteractions: [
@@ -7876,7 +7888,7 @@ function testCases(): TestCase[] {
       ],
     },
     {
-      name: "Fails to copy file link if exec error",
+      name: "Fails to copy file link if undefined git repos",
       file: startingFile("empty.go"),
       expectedText: [
         "package main",
@@ -7886,13 +7898,10 @@ function testCases(): TestCase[] {
         "}",
         "",
       ],
-      execStubs: [{
-        wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
-        err: "oops",
-      }],
+      gitStub: {},
       errorMessage: {
         expectedMessages: [
-          `Failed to get git repository info: oops; stderr:\n`,
+          `No git repository found`,
         ],
       },
       userInteractions: [
@@ -7900,7 +7909,7 @@ function testCases(): TestCase[] {
       ],
     },
     {
-      name: "Fails to copy file name if exec stderr",
+      name: "Fails to copy file link if empty git repos",
       file: startingFile("empty.go"),
       expectedText: [
         "package main",
@@ -7910,21 +7919,20 @@ function testCases(): TestCase[] {
         "}",
         "",
       ],
-      execStubs: [{
-        wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
-        stderr: "whoops",
-      }],
+      gitStub: {
+        repositories: [],
+      },
       errorMessage: {
         expectedMessages: [
-          `Failed to get git repository info: undefined; stderr:\nwhoops`,
+          `No git repository found`,
         ],
       },
       userInteractions: [
-        cmd("groog.copyFilePath"),
+        cmd("groog.copyFileLink"),
       ],
     },
     {
-      name: "Fails to copy file link if exec stderr",
+      name: "Fails to copy file link if no git remote",
       file: startingFile("empty.go"),
       expectedText: [
         "package main",
@@ -7934,13 +7942,42 @@ function testCases(): TestCase[] {
         "}",
         "",
       ],
-      execStubs: [{
-        wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
-        stderr: "whoops",
-      }],
+      gitStub: {
+        repositories: [
+          fakeRepoState([]),
+        ],
+      },
       errorMessage: {
         expectedMessages: [
-          `Failed to get git repository info: undefined; stderr:\nwhoops`,
+          `No remote repository found`,
+        ],
+      },
+      userInteractions: [
+        cmd("groog.copyFileLink"),
+      ],
+    },
+    {
+      name: "Fails to copy file link if no git remotes with name origin",
+      file: startingFile("empty.go"),
+      expectedText: [
+        "package main",
+        "",
+        "func main() {",
+        "",
+        "}",
+        "",
+      ],
+      gitStub: {
+        repositories: [
+          fakeRepoState([
+            { name: "not-origin", fetchUrl: "some-url" },
+            { name: "other", fetchUrl: "some-other-url" },
+          ]),
+        ],
+      },
+      errorMessage: {
+        expectedMessages: [
+          `No remote repository found`,
         ],
       },
       userInteractions: [
@@ -7960,10 +7997,14 @@ function testCases(): TestCase[] {
       ],
       selections: [selection(1, 0)],
       expectedSelections: [selection(1, 32)],
-      execStubs: [{
-        wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
-        stdout: "git@github.com:some-user/arbitrary-repo/path.git",
-      }],
+      gitStub: {
+        repositories: [
+          fakeRepoState([
+            { name: "origin", fetchUrl: "git@github.com:some-user/arbitrary-repo/path.git" },
+            { name: "other", fetchUrl: "some-other-url" },
+          ]),
+        ],
+      },
       informationMessage: {
         expectedMessages: [
           `File path copied!`,
@@ -7987,10 +8028,14 @@ function testCases(): TestCase[] {
       ],
       selections: [selection(1, 0)],
       expectedSelections: [selection(1, 98)],
-      execStubs: [{
-        wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
-        stdout: "git@github.com:some-user/arbitrary-repo/path.git",
-      }],
+      gitStub: {
+        repositories: [
+          fakeRepoState([
+            { name: "origin", fetchUrl: "git@github.com:some-user/arbitrary-repo/path.git" },
+            { name: "other", fetchUrl: "some-other-url" },
+          ]),
+        ],
+      },
       informationMessage: {
         expectedMessages: [
           `File link copied!`,
@@ -8014,10 +8059,14 @@ function testCases(): TestCase[] {
       ],
       selections: [selection(1, 0)],
       expectedSelections: [selection(1, 98)],
-      execStubs: [{
-        wantArgs: `cd ${startingFile().replace(/^C/, 'c')} && git ls-remote --get-url`,
-        stdout: "https://www.github.com/some-user/arbitrary-repo/path.git",
-      }],
+      gitStub: {
+        repositories: [
+          fakeRepoState([
+            { name: "origin", fetchUrl: "https://www.github.com/some-user/arbitrary-repo/path.git" },
+            { name: "other", fetchUrl: "some-other-url" },
+          ]),
+        ],
+      },
       informationMessage: {
         expectedMessages: [
           `File link copied!`,
@@ -8041,10 +8090,14 @@ function testCases(): TestCase[] {
       ],
       selections: [new vscode.Selection(2, 2, 4, 1)],
       expectedSelections: [selection(5, 123)],
-      execStubs: [{
-        wantArgs: `cd ${startingFile("copy-imports").replace(/^C/, 'c')} && git ls-remote --get-url`,
-        stdout: "git@github.com:some-user/arbitrary-repo/path.git",
-      }],
+      gitStub: {
+        repositories: [
+          fakeRepoState([
+            { name: "origin", fetchUrl: "git@github.com:some-user/arbitrary-repo/path.git" },
+            { name: "other", fetchUrl: "some-other-url" },
+          ]),
+        ],
+      },
       informationMessage: {
         expectedMessages: [
           `File link copied!`,
@@ -8671,6 +8724,8 @@ function testCases(): TestCase[] {
                     'groog.ctrlG',
                     'groog.multiCommand.execute',
                     'termin-all-or-nothing.closePanel',
+                    'workbench.action.toggleAuxiliaryBar',
+                    'workbench.panel.chat.view.copilot.focus',
                   ]],
                   ['copyOnSelection', true],
                   ['defaultProfile', new Map<string, any>([
@@ -8852,6 +8907,8 @@ function testCases(): TestCase[] {
                     'groog.ctrlG',
                     'groog.multiCommand.execute',
                     'termin-all-or-nothing.closePanel',
+                    'workbench.action.toggleAuxiliaryBar',
+                    'workbench.panel.chat.view.copilot.focus',
                   ]],
                   ['copyOnSelection', true],
                   ['defaultProfile', new Map<string, any>([
@@ -9033,6 +9090,8 @@ function testCases(): TestCase[] {
                     'groog.ctrlG',
                     'groog.multiCommand.execute',
                     'termin-all-or-nothing.closePanel',
+                    'workbench.action.toggleAuxiliaryBar',
+                    'workbench.panel.chat.view.copilot.focus',
                   ]],
                   ['copyOnSelection', true],
                   ['defaultProfile', new Map<string, any>([
@@ -9220,6 +9279,8 @@ function testCases(): TestCase[] {
                     'groog.ctrlG',
                     'groog.multiCommand.execute',
                     'termin-all-or-nothing.closePanel',
+                    'workbench.action.toggleAuxiliaryBar',
+                    'workbench.panel.chat.view.copilot.focus',
                   ]],
                   ['copyOnSelection', true],
                   ['defaultProfile', new Map<string, any>([
@@ -10259,6 +10320,7 @@ suite('Groog commands', () => {
           const trArgs: TestResetArgs = {
             execStubs: tc.execStubs,
             wantSendTerminalCommandArgs: tc.wantSendTerminalCommands,
+            gitStub: tc.gitStub,
           };
           tc.userInteractions = [
             cmd("groog.test.reset", trArgs),

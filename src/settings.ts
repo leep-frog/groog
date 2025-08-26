@@ -37,6 +37,8 @@ export class Settings implements Registerable {
       "groog.ctrlG",
       "groog.multiCommand.execute",
       "termin-all-or-nothing.closePanel",
+      "workbench.action.toggleAuxiliaryBar",
+      "workbench.panel.chat.view.copilot.focus",
     ];
     const settings = [
       new GroogSetting("editor", "autoClosingQuotes", "never"),
