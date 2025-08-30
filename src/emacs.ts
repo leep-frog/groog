@@ -6,7 +6,7 @@ import { getPrefixText, Registerable, TypeHandler } from './handler';
 import { CtrlGCommand, CursorMove, DeleteCommand, setGroogContext } from './interfaces';
 import { TypoFixer } from './internal-typos';
 import { MarkHandler } from './mark';
-import { miscCommands, miscTestReset, multiCommand } from './misc-command';
+import { FILE_ISH_SCHEMES, miscCommands, miscTestReset, multiCommand } from './misc-command';
 import { Recorder } from './record';
 import { Scripts } from './scripts';
 import { Settings } from './settings';
@@ -491,7 +491,7 @@ const defaultJumpDist: JumpDist = {
 };
 
 function isFileUri(uri: vscode.Uri): boolean {
-  return uri.scheme === "file";
+  return FILE_ISH_SCHEMES.includes(uri.scheme);
 }
 
 export function tabbify(s: string): string {

@@ -9,6 +9,8 @@ import path = require('path');
 import gitRepoInfo = require('git-repo-info');
 const { exec } = require('child_process');
 
+export const FILE_ISH_SCHEMES = ["file", "vscode-remote", "vscode-local"];
+
 
 export interface MiscCommand {
   name: string;
@@ -84,7 +86,7 @@ export const miscCommands: MiscCommand[] = [
     f: async () => {
       if (!fixedTestFile) {
         const currentFile = vscode.window.activeTextEditor?.document.uri;
-        if (!currentFile || !(["file", "vscode-remote"].includes(currentFile.scheme))) {
+        if (!currentFile || !(FILE_ISH_SCHEMES.includes(currentFile.scheme))) {
           vscode.window.showErrorMessage(`No active file`);
         } else {
           fixedTestFile = currentFile;
