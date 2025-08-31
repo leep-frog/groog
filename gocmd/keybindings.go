@@ -611,9 +611,9 @@ var (
 				kb("groog.trimClipboard"),
 				notification("Terminal output copied!"),
 			),
-			kb("groog.copyFilePath"),
+			kb("groog-remote.copyFilePath"),
 		),
-		ctrlZ("c"): only("groog.copyFileLink"),
+		ctrlZ("c"): only("groog-remote.copyFileLink"),
 
 		// To determine this, I did the following
 		// - ran `sed -n l` (as recommended in (1))

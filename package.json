@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.83",
+  "version": "2.7.84",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -62,14 +62,6 @@
       {
         "command": "groog.clearRunSolo",
         "title": "Clear runSolo tests"
-      },
-      {
-        "command": "groog.copyFileLink",
-        "title": "Groog Copy File Link"
-      },
-      {
-        "command": "groog.copyFilePath",
-        "title": "Groog Copy File Path"
       },
       {
         "command": "groog.copyImport",
@@ -1632,12 +1624,12 @@
       },
       {
         "key": "ctrl+x c",
-        "command": "groog.copyFilePath",
+        "command": "groog-remote.copyFilePath",
         "when": "!activePanel"
       },
       {
         "key": "ctrl+x ctrl+c",
-        "command": "groog.copyFilePath",
+        "command": "groog-remote.copyFilePath",
         "when": "!activePanel"
       },
       {
@@ -2082,11 +2074,11 @@
       },
       {
         "key": "ctrl+z c",
-        "command": "groog.copyFileLink"
+        "command": "groog-remote.copyFileLink"
       },
       {
         "key": "ctrl+z ctrl+c",
-        "command": "groog.copyFileLink"
+        "command": "groog-remote.copyFileLink"
       },
       {
         "key": "ctrl+z d",

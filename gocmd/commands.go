@@ -79,8 +79,6 @@ var (
 		cc("groog.record.saveRecordingAs", "Groog Save Recording As..."),
 		cc("groog.record.startRecording", "Groog Start Recording"),
 		cc("groog.renameFile", "Groog Rename File"),
-		cc("groog.copyFileLink", "Groog Copy File Link"),
-		cc("groog.copyFilePath", "Groog Copy File Path"),
 		cc("groog.noTest", "Groog No Test"),
 		cc("groog.yesTest", "Groog Yes Test"),
 		cc("groog.toggleYesNoTest", "Groog Toggle Yes/No Test"),

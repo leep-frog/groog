@@ -4,10 +4,6 @@ import * as vscode from 'vscode';
 import { endDocumentPosition } from './character-functions';
 import { Emacs } from './emacs';
 import { getLanguageSpec } from './language-behavior';
-import { stubs } from './stubs';
-import path = require('path');
-import gitRepoInfo = require('git-repo-info');
-const { exec } = require('child_process');
 
 export const FILE_ISH_SCHEMES = ["file", "vscode-remote", "vscode-local"];
 
@@ -44,14 +40,6 @@ export const miscCommands: MiscCommand[] = [
   {
     name: "message.info",
     f: (e: Emacs, msg: Message | undefined) => infoMessage(msg),
-  },
-  {
-    name: "copyFilePath",
-    f: miscEditorFunc((e: vscode.TextEditor) => copyFilePath(e, false)),
-  },
-  {
-    name: "copyFileLink",
-    f: miscEditorFunc((e: vscode.TextEditor) => copyFilePath(e, true)),
   },
   {
     name: "noTest",
@@ -199,64 +187,7 @@ async function infoMessage(msg: Message | undefined) {
   }
 }
 
-export function getLineNumbers(editor: vscode.TextEditor) {
-  return editor.selections.map((sel: vscode.Selection) => {
-    const startLine = sel.start.line + 1;
-    const endLine = sel.end.line + 1;
 
-    if (startLine === endLine) {
-      return `L${startLine}`;
-    }
-    return `L${startLine}-L${endLine}`;
-  }).join(",");
-}
-
-function getRelativeGitPath(editor: vscode.TextEditor): [gitRepoInfo.GitRepoInfo, string] {
-  const repoInfo = gitRepoInfo(editor.document.uri.fsPath);
-  const relativePath = path.relative(repoInfo.root, editor.document.uri.fsPath).replace(/\\/g, '/');
-  return [repoInfo, relativePath];
-}
-
-async function copyFilePath(editor: vscode.TextEditor, link: boolean) {
-  const git = stubs.gitApi();
-
-  if (!git) {
-    vscode.window.showErrorMessage(`Could not access git API`);
-    return;
-  }
-
-  const repo = git?.repositories?.at(0);
-  if (!repo) {
-    vscode.window.showErrorMessage(`No git repository found`);
-    return;
-  }
-
-  const remote = repo.state.remotes.filter(r => r.name === "origin").at(0);
-  if (!remote) {
-    vscode.window.showErrorMessage(`No remote repository found`);
-    return;
-  }
-
-  const fetchUrl = remote.fetchUrl;
-  if (!fetchUrl) {
-    vscode.window.showErrorMessage(`No remote fetch URL found`);
-    return;
-  }
-
-  let remoteURL = fetchUrl.trim().replace(/\.git$/, "");
-  if (!remoteURL.startsWith("http")) {
-    remoteURL = `https://www.${remoteURL.replace(/^git@/, "").replace(":", "/")}`;
-  }
-
-  // Get the relative path
-  const [repoInfo, relativePath] = getRelativeGitPath(editor);
-
-  const copyText = (!link) ? relativePath : `${remoteURL}/blob/${repoInfo.branch}/${relativePath}#${getLineNumbers(editor)}`;
-
-  // Copy link
-  vscode.env.clipboard.writeText(copyText);
-  vscode.window.showInformationMessage(link ? `File link copied!` : `File path copied!`);
-}
 
 async function toggleYesNoTest(editor: vscode.TextEditor): Promise<any> {
   if (editor.document.getText().includes("def no_test")) {
