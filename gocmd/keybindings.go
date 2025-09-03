@@ -172,7 +172,7 @@ var (
 
 	// The context to use for keys that should have no binding in global find or
 	// input boxes, etc.
-	groogBehaviorContext = and(or(editorTextFocus, debugConsoleFocus, findInputFocussed, inQuickOpen), groogFindMode)
+	groogBehaviorContext = and(or(editorTextFocus, notDebugConsoleFocus, findInputFocussed, inQuickOpen), groogFindMode)
 
 	// The execute wrap for terminAllOrNothing
 	terminAllOrNothingExecute = "termin-all-or-nothing.execute"
