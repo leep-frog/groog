@@ -498,6 +498,12 @@ var (
 			// enter key in the middle of a snippet (and this will jump to the end of the
 			// snippet input if at the last snippet input section).
 			and(suggestWidgetVisible.not(), inSnippetMode).value(): kb("jumpToNextSnippetPlaceholder"),
+			// This just removes default keybinding. See keybinding below for replacement
+			always.value(): kb("-editor.action.inlineSuggest.jump"),
+		},
+		ctrl(tab): {
+			// This context was just copied from built-in keybinding definition
+			"inlineEditIsVisible && tabShouldJumpToInlineEdit && !editorHoverFocused && !editorTabMovesFocus && !suggestWidgetVisible": kb("editor.action.inlineSuggest.jump"),
 		},
 		ctrl(shift("n")): {
 			groogFindMode.value():       kb("groog.find.next"),
@@ -521,8 +527,6 @@ var (
 		ctrl(pagedown):   nextTab(),
 		ctrl("u"):        prevTab(),
 		ctrl("o"):        nextTab(),
-		ctrl(shift(tab)): prevTab(),
-		ctrl(tab):        nextTab(),
 		ctrlX("b"): onlyMC(
 			// This re-opens the previously opened file
 			"workbench.action.openPreviousEditorFromHistory",

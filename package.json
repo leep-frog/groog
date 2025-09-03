@@ -1386,21 +1386,6 @@
         "when": "activePanel"
       },
       {
-        "key": "ctrl+shift+tab",
-        "command": "groog.focusPreviousEditor",
-        "when": "!panelFocus"
-      },
-      {
-        "key": "ctrl+shift+tab",
-        "command": "workbench.action.terminal.focus",
-        "when": "panelFocus && !terminalFocus"
-      },
-      {
-        "key": "ctrl+shift+tab",
-        "command": "workbench.action.terminal.focusPrevious",
-        "when": "terminalFocus"
-      },
-      {
         "key": "ctrl+shift+v",
         "command": "groog.fall",
         "args": {
@@ -1445,18 +1430,8 @@
       },
       {
         "key": "ctrl+tab",
-        "command": "groog.focusNextEditor",
-        "when": "!panelFocus"
-      },
-      {
-        "key": "ctrl+tab",
-        "command": "workbench.action.terminal.focus",
-        "when": "panelFocus && !terminalFocus"
-      },
-      {
-        "key": "ctrl+tab",
-        "command": "workbench.action.terminal.focusNext",
-        "when": "terminalFocus"
+        "command": "editor.action.inlineSuggest.jump",
+        "when": "inlineEditIsVisible && tabShouldJumpToInlineEdit && !editorHoverFocused && !editorTabMovesFocus && !suggestWidgetVisible"
       },
       {
         "key": "ctrl+u",
@@ -3056,6 +3031,10 @@
         "args": {
           "text": "t"
         }
+      },
+      {
+        "key": "tab",
+        "command": "-editor.action.inlineSuggest.jump"
       },
       {
         "key": "tab",
