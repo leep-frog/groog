@@ -618,7 +618,7 @@ var (
 			notebookEditorFocused.value(): mcWithArgs(
 				kb("notebook.cellOutput.copy"),
 				kb("groog.trimClipboard"),
-				notification("Terminal output copied!"),
+				notification("Cell output copied!"),
 			),
 		},
 		ctrlZ("c"): only("groog-remote.copyFileLink"),

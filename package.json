@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.86",
+  "version": "2.7.87",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -1664,7 +1664,7 @@
             {
               "command": "groog.message.info",
               "args": {
-                "message": "Terminal output copied!"
+                "message": "Cell output copied!"
               }
             }
           ]
@@ -1685,7 +1685,7 @@
             {
               "command": "groog.message.info",
               "args": {
-                "message": "Terminal output copied!"
+                "message": "Cell output copied!"
               }
             }
           ]
