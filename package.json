@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.87",
+  "version": "2.7.89",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -3087,6 +3087,11 @@
         "key": "tab",
         "command": "workbench.action.acceptSelectedQuickOpenItem",
         "when": "groog.context.findMode"
+      },
+      {
+        "key": "tab",
+        "command": "editor.action.inlineSuggest.commit",
+        "when": "inlineEditIsVisible || inlineSuggestionVisible"
       },
       {
         "key": "u",

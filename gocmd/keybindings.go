@@ -142,6 +142,8 @@ var (
 	suggestWidgetVisible    = wc("suggestWidgetVisible")
 	terminalFocus           = wc("terminalFocus")
 	inlineChatVisible       = wc("inlineChatVisible")
+	inlineEditIsVisible     = wc("inlineEditIsVisible")
+	inlineSuggestionVisible = wc("inlineSuggestionVisible")
 	// terminal.visible is true even when the terminal is in the back,
 	// hence why we need to use view.terminal.visible here.
 	terminalVisible     = wc("view.terminal.visible")
@@ -492,6 +494,8 @@ var (
 		ctrl(pageup):   only("groog.focusPreviousEditor"),
 		// When there is a suggestible item highlighted, then accept it.
 		tab: {
+			// This way, tab accepts ai suggestion, enter accepts drop down
+			or(inlineEditIsVisible, inlineSuggestionVisible).value(): kb("editor.action.inlineSuggest.commit"),
 			groogFindMode.value(): kb("workbench.action.acceptSelectedQuickOpenItem"),
 			// Have this be tab (not enter) because sometimes we want to press the actual
 			// enter key in the middle of a snippet (and this will jump to the end of the
