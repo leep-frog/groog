@@ -117,8 +117,7 @@ var (
 	editorFocus     = wc("editorFocus")
 	editorTextFocus = wc("editorTextFocus")
 	// TODO: Change WhenContext for better not usage
-	debugConsoleFocus    = wcCmp("focusedView", "'workbench.panel.repl.view'", true)
-	notDebugConsoleFocus = wcCmp("focusedView", "'workbench.panel.repl.view'", false)
+	debugConsoleFocus = wc("inDebugRepl")
 
 	findWidgetVisible       = wc("findWidgetVisible")
 	findInputFocussed       = wc("findInputFocussed")
@@ -172,7 +171,7 @@ var (
 
 	// The context to use for keys that should have no binding in global find or
 	// input boxes, etc.
-	groogBehaviorContext = and(or(editorTextFocus, notDebugConsoleFocus, findInputFocussed, inQuickOpen), groogFindMode)
+	groogBehaviorContext = and(or(editorTextFocus, findInputFocussed, inQuickOpen), groogFindMode, debugConsoleFocus.not())
 
 	// The execute wrap for terminAllOrNothing
 	terminAllOrNothingExecute = "termin-all-or-nothing.execute"
@@ -609,14 +608,19 @@ var (
 		// See below link for unicode characters:
 		// https://en.wikipedia.org/wiki/List_of_Unicode_characters
 		// ctrlX("c"): panelSplit(sendSequence("\u0018\u0003"), nil),
-		ctrlX("c"): panelSplit(
-			mcWithArgs(
+		ctrlX("c"): {
+			and(notebookEditorFocused.not(), activePanel).value(): mcWithArgs(
 				kb("workbench.action.terminal.copyLastCommandOutput"),
 				kb("groog.trimClipboard"),
 				notification("Terminal output copied!"),
 			),
-			kb("groog-remote.copyFilePath"),
-		),
+			and(notebookEditorFocused.not(), activePanel.not()).value(): kb("groog-remote.copyFilePath"),
+			notebookEditorFocused.value(): mcWithArgs(
+				kb("notebook.cell.copyCellOutput"),
+				kb("groog.trimClipboard"),
+				notification("Terminal output copied!"),
+			),
+		},
 		ctrlZ("c"): only("groog-remote.copyFileLink"),
 
 		// To determine this, I did the following
