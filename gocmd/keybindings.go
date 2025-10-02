@@ -616,7 +616,7 @@ var (
 			),
 			and(notebookEditorFocused.not(), activePanel.not()).value(): kb("groog-remote.copyFilePath"),
 			notebookEditorFocused.value(): mcWithArgs(
-				kb("notebook.cell.copyCellOutput"),
+				kb("notebook.cellOutput.copy"),
 				kb("groog.trimClipboard"),
 				notification("Terminal output copied!"),
 			),

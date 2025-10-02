@@ -1656,7 +1656,7 @@
         "args": {
           "sequence": [
             {
-              "command": "notebook.cell.copyCellOutput"
+              "command": "notebook.cellOutput.copy"
             },
             {
               "command": "groog.trimClipboard"
@@ -1677,7 +1677,7 @@
         "args": {
           "sequence": [
             {
-              "command": "notebook.cell.copyCellOutput"
+              "command": "notebook.cellOutput.copy"
             },
             {
               "command": "groog.trimClipboard"
