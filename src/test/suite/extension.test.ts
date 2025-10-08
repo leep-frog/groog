@@ -7866,19 +7866,19 @@ function testCases(): TestCase[] {
       name: "Successfully copies python import",
       file: startingFile("blank.py"),
       expectedText: [
-        "import blank",
+        "from blank import ",
       ],
       userInteractions: [
         cmd("groog.copyImport"),
         cmd("groog.paste"),
       ],
-      expectedSelections: [selection(0, 12)],
+      expectedSelections: [selection(0, 13)],
     },
     {
       name: "Successfully copies singly nested python import",
       file: startingFile("nested", "single.py"),
       expectedText: [
-        "from nested import single",
+        "from nested.single import ",
       ],
       userInteractions: [
         // TODO: remove this delay and fix reason issues happens
@@ -7887,19 +7887,19 @@ function testCases(): TestCase[] {
         cmd("groog.copyImport"),
         cmd("groog.paste"),
       ],
-      expectedSelections: [selection(0, 25)],
+      expectedSelections: [selection(0, 26)],
     },
     {
       name: "Successfully copies doubly nested python import",
       file: startingFile("nested", "more", "double.py"),
       expectedText: [
-        "from nested.more import double",
+        "from nested.more.double import ",
       ],
       userInteractions: [
         cmd("groog.copyImport"),
         cmd("groog.paste"),
       ],
-      expectedSelections: [selection(0, 30)],
+      expectedSelections: [selection(0, 31)],
     },
     {
       name: "copyImport fails on python file outside workspace",

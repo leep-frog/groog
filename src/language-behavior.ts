@@ -51,8 +51,8 @@ class PythonSpec implements LanguageSpec {
   async copyImport(document: vscode.TextDocument): Promise<any> {
     return importFromRelativePath(document, (relativePath: string) => {
       const importParts = relativePath.split(/[\/\\]/);
-      const from = importParts.length > 1 ? `from ${importParts.slice(undefined, -1).join(".")} ` : ``;
-      return `${from}import ${path.parse(importParts.at(-1)!).name}`;
+      const parent = importParts.length > 1 ? `${importParts.slice(undefined, -1).join(".")}.` : ``;
+      return `from ${parent}${path.parse(importParts.at(-1)!).name} import `;
     });
   }
 
