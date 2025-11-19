@@ -56,6 +56,9 @@ export class Settings implements Registerable {
       new GroogSetting("editor", "insertSpaces", true),
       new GroogSetting("editor", "rulers", [80, 200]),
       new GroogSetting("editor", "tabSize", 2),
+      new GroogSetting("editor", "tokenColorCustomizations", {
+        keywords: "#d389d3"
+      }),
       new GroogSetting("files", "eol", "\n"),
       new GroogSetting("files", "insertFinalNewline", true),
       new GroogSetting("files", "trimFinalNewlines", true),

@@ -7872,7 +7872,7 @@ function testCases(): TestCase[] {
         cmd("groog.copyImport"),
         cmd("groog.paste"),
       ],
-      expectedSelections: [selection(0, 13)],
+      expectedSelections: [selection(0, 18)],
     },
     {
       name: "Successfully copies singly nested python import",
@@ -8405,6 +8405,9 @@ function testCases(): TestCase[] {
                   200,
                 ]],
                 ['tabSize', 2],
+                ["tokenColorCustomizations", {
+                  keywords: "#d389d3"
+                }],
               ])],
               ["files", new Map<string, any>([
                 ['eol', '\n'],
@@ -8588,6 +8591,9 @@ function testCases(): TestCase[] {
                 ]],
                 ['wordSeparators', ' .?_'],
                 ['tabSize', 2],
+                ["tokenColorCustomizations", {
+                  keywords: "#d389d3"
+                }],
               ])],
               ["files", new Map<string, any>([
                 ['eol', '\n'],
@@ -8771,6 +8777,9 @@ function testCases(): TestCase[] {
                 ]],
                 ['wordSeparators', ' ._?'],
                 ['tabSize', 2],
+                ["tokenColorCustomizations", {
+                  keywords: "#d389d3"
+                }],
               ])],
               ["files", new Map<string, any>([
                 ['eol', '\n'],
@@ -8960,6 +8969,9 @@ function testCases(): TestCase[] {
                 ]],
                 ['wordSeparators', ' .?_'],
                 ['tabSize', 2],
+                ["tokenColorCustomizations", {
+                  keywords: "#d389d3"
+                }],
               ])],
               ["files", new Map<string, any>([
                 ['eol', '\n'],
