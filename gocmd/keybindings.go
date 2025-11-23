@@ -758,6 +758,7 @@ var (
 		// ensures we don't change focus to the menu bar (File, Edit, ...).
 		alt("g"):   only("noop"),
 		ctrlX("o"): only("workbench.action.openRecent"),
+		ctrlZ("u"):  only("cSpell.addWordToUserDictionary"),
 
 		alt("l"): {
 			editorFocus.value(): kb("editor.action.selectHighlights"),

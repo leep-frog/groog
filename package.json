@@ -2,7 +2,7 @@
   "name": "groog",
   "displayName": "groog",
   "description": "",
-  "version": "2.7.91",
+  "version": "2.7.92",
   "publisher": "groogle",
   "main": "./bundled-out/extension.js",
   "engines": {
@@ -2288,6 +2288,14 @@
       {
         "key": "ctrl+z ctrl+t",
         "command": "groog.toggleFixedTestFile"
+      },
+      {
+        "key": "ctrl+z u",
+        "command": "cSpell.addWordToUserDictionary"
+      },
+      {
+        "key": "ctrl+z ctrl+u",
+        "command": "cSpell.addWordToUserDictionary"
       },
       {
         "key": "ctrl+z v",
